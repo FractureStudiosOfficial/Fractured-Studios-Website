@@ -31,7 +31,7 @@ html, body {
     transparent 4px
   );
   animation: scanlineMove 1s linear infinite;
-  z-index: 9999; /* on top of all text */
+  z-index: 9999;
 }
 
 @keyframes scanlineMove {
@@ -43,8 +43,8 @@ html, body {
 #bootScreen {
   position: fixed;
   inset: 0;
-  background: #0d0d0d; /* black background */
-  color: #FF9F07; /* orange text */
+  background: #0d0d0d;
+  color: #FF9F07;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -75,7 +75,7 @@ html, body {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  border-radius: 20px; /* curved edges */
+  border-radius: 30px; /* curved edges */
   overflow: hidden;
   transform-style: preserve-3d;
   box-shadow: inset 0 0 60px rgba(255,159,7,0.2);
@@ -88,7 +88,9 @@ html, body {
   position:absolute;
   inset:0;
   pointer-events:none;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%);
+  background:
+    radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%),
+    linear-gradient(to right, rgba(255,159,7,0.05) 0%, rgba(0,0,0,0.1) 100%);
   z-index:2;
 }
 
@@ -122,14 +124,29 @@ html, body {
   width: 80%;
   opacity: 0;
   transform: scale(0.8);
-  filter: drop-shadow(0 0 10px #FF9F07);
+  filter: drop-shadow(0 0 15px #FF9F07);
   animation: logoReveal 1.5s ease forwards;
 }
 
+/* Logo glow + continuous subtle flicker */
 @keyframes logoReveal {
-  0% { opacity: 0; transform: scale(0.7); }
-  60% { opacity: 1; transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% { opacity: 0; transform: scale(0.7); filter: drop-shadow(0 0 0 #FF9F07); }
+  60% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 20px #FF9F07); }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 15px #FF9F07); }
+}
+
+.logo.flicker-glow {
+  animation: logoFlicker 1.5s infinite;
+}
+
+@keyframes logoFlicker {
+  0%, 100% { filter: drop-shadow(0 0 15px #FF9F07); opacity: 1; }
+  10% { filter: drop-shadow(0 0 20px #FF9F07); opacity: 0.97; }
+  20% { filter: drop-shadow(0 0 12px #FF9F07); opacity: 0.98; }
+  35% { filter: drop-shadow(0 0 18px #FF9F07); opacity: 0.96; }
+  50% { filter: drop-shadow(0 0 15px #FF9F07); opacity: 0.99; }
+  70% { filter: drop-shadow(0 0 22px #FF9F07); opacity: 0.95; }
+  85% { filter: drop-shadow(0 0 15px #FF9F07); opacity: 1; }
 }
 
 .content {
@@ -178,7 +195,7 @@ html, body {
 <div id="crtContainer" class="flicker">
   <div id="homepage">
     <section class="hero">
-      <img src="FracturedF-Transparant.png" class="logo">
+      <img src="FracturedF-Transparant.png" class="logo" id="logo">
     </section>
     <section class="content">
       <h1 class="phosphor">Welcome to Fractured Studios</h1>
@@ -205,6 +222,7 @@ const bootText = document.getElementById("bootText");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
 const crtContainer = document.getElementById("crtContainer");
+const logo = document.getElementById("logo");
 
 const enterSound = document.getElementById("enterSound");
 const boot1 = document.getElementById("boot1");
@@ -261,6 +279,8 @@ enterBtn.addEventListener("click", ()=>{
   bootScreen.style.display = "none";
   homepage.style.display = "block";
   document.body.style.overflow = "auto";
+  // Start logo continuous glow flicker
+  logo.classList.add("flicker-glow");
 });
 
 // Terminal commands
@@ -276,12 +296,13 @@ input.addEventListener("keydown", function(e){
   }
 });
 
-// Mouse-driven CRT 3D distortion
+// Mouse-driven CRT 3D distortion with realistic edge curve
 document.addEventListener("mousemove", function(e){
-  const moveX = (e.clientX - window.innerWidth/2)/70;
-  const moveY = (e.clientY - window.innerHeight/2)/70;
+  const moveX = (e.clientX - window.innerWidth/2)/60;
+  const moveY = (e.clientY - window.innerHeight/2)/60;
   crtContainer.style.transform = `perspective(1200px) scale(1.02) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
 });
 </script>
+
 </body>
 </html>
