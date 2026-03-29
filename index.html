@@ -215,41 +215,73 @@ html, body {
 </svg>
 
 <script>
+<script>
 const bootText = document.getElementById("bootText");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
 const bootScreen = document.getElementById("bootScreen");
 const powerFlash = document.getElementById("powerFlash");
 
+/* Normal boot messages */
 const bootMessages = [
 "Booting system...",
 "Loading modules...",
+"Initializing CRT display...",
+"Mounting drives...",
 "Connecting...",
 "Access granted..."
 ];
 
-let text = bootMessages.join("\n") + "\n";
+/* Fake error pool */
+const fakeErrors = [
+"ERROR: Memory leak detected... recovered.",
+"WARNING: Signal instability...",
+"ERROR: GPU handshake timeout...",
+"Re-routing video buffer...",
+"WARNING: Phosphor calibration failed...",
+"ERROR: Display bus interference...",
+"Recovering corrupted sector...",
+"WARNING: Power fluctuation detected...",
+"ERROR: Scanline sync lost... restored.",
+"Reinitializing raster pipeline..."
+];
+
+/* randomly inject errors */
+let finalBoot = [];
+
+bootMessages.forEach(msg => {
+  finalBoot.push(msg);
+
+  if(Math.random() < 0.35){ // 35% chance
+    const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
+    finalBoot.push(err);
+  }
+});
+
+let text = finalBoot.join("\n") + "\n";
 let i = 0;
 
 function typeBoot(){
-if(i < text.length){
-bootText.textContent += text[i];
-i++;
-setTimeout(typeBoot,25);
-}else{
-enterBtn.style.display="block";
+  if(i < text.length){
+    bootText.textContent += text[i];
+    i++;
+    setTimeout(typeBoot, 20 + Math.random()*20);
+  }else{
+    enterBtn.style.display="block";
+  }
 }
-}
+
 typeBoot();
 
 enterBtn.addEventListener("click",()=>{
-bootScreen.style.display="none";
-homepage.style.display="block";
-document.body.style.overflow="auto";
+  bootScreen.style.display="none";
+  homepage.style.display="block";
+  document.body.style.overflow="auto";
 
-/* power on flash */
-powerFlash.classList.add("power-on");
+  /* power-on flash */
+  powerFlash.classList.add("power-on");
 });
+</script>
 
 /* commands */
 const input = document.getElementById("commandInput");
