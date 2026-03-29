@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Iron Frontier</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+  margin:0;
+  height:100%;
+  font-family:'Share Tech Mono', monospace;
+  background:#0d0d0d;
+  color:#FF9F07;
+  overflow:hidden;
+}
+
+/* identical CRT system */
+#crtWrapper{
+position:absolute;
+inset:0;
+overflow:hidden;
+border-radius:40px;
+box-shadow:
+inset 0 0 120px rgba(0,0,0,.9),
+inset 0 0 40px rgba(0,0,0,.6);
+}
+
+#crtDistortLayer{
+position:absolute;
+inset:-5%;
+filter:url(#crtDistortion);
+pointer-events:none;
+}
+
+#crtContent{
+position:relative;
+height:100%;
+overflow:auto;
+}
+
+.scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,159,7,.05) 0px,
+rgba(255,159,7,.05) 1px,
+transparent 2px,
+transparent 4px);
+animation:scanlineMove 1s linear infinite;
+z-index:9999;
+}
+
+@keyframes scanlineMove{
+0%{background-position:0 0;}
+100%{background-position:0 4px;}
+}
+
+.section{
+padding:60px;
+max-width:900px;
+margin:auto;
+}
+
+.phosphor{
+text-shadow:0 0 2px #FF9F07,0 0 6px rgba(255,159,7,.8);
+}
+
+.hero-title{
+font-size:42px;
+margin-bottom:20px;
+}
+
+.info-box{
+border:2px solid #FF9F07;
+padding:25px;
+margin:25px 0;
+}
+
+#commandInput{
+background:none;
+border:none;
+color:#FF9F07;
+font-family:inherit;
+font-size:18px;
+outline:none;
+width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div id="crtWrapper">
+<div id="crtDistortLayer"></div>
+
+<div id="crtContent">
+
+<section class="section">
+<h1 class="hero-title phosphor">The Iron Frontier</h1>
+
+<div class="info-box">
+<h2>Overview</h2>
+<p>Describe your game here.</p>
+</div>
+
+<div class="info-box">
+<h2>Features</h2>
+<ul>
+<li>Feature one</li>
+<li>Feature two</li>
+<li>Feature three</li>
+</ul>
+</div>
+
+<div class="info-box">
+<h2>Status</h2>
+<p>In Development</p>
+</div>
+
+</section>
+
+<section class="section">
+<p>> Type a command:</p>
+<input id="commandInput" placeholder="> enter command...">
+<p>Commands: home, games, about, contact</p>
+</section>
+
+</div>
+</div>
+
+<div class="scanlines"></div>
+
+<svg width="0" height="0">
+<filter id="crtDistortion">
+<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="2" result="noise"/>
+<feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/>
+</filter>
+</svg>
+
+<script>
+const input=document.getElementById("commandInput");
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const cmd=input.value.toLowerCase().trim();
+
+if(cmd==="home") location.href="index.html";
+else if(cmd==="games") location.href="games.html";
+else if(cmd==="about") location.href="about.html";
+else if(cmd==="contact") location.href="contact.html";
+
+input.value="";
+}
+});
+</script>
+
+</body>
+</html>
