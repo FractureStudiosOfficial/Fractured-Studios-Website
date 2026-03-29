@@ -13,10 +13,31 @@ html, body {
   background: #0d0d0d;
   color: #FF9F07;
   overflow: hidden;
-  cursor: default;
 }
 
-/* Scanlines overlay */
+/* ================= POWER ON FLASH ================= */
+#powerFlash{
+  position:fixed;
+  inset:0;
+  background:white;
+  opacity:0;
+  pointer-events:none;
+  z-index:2000;
+}
+
+.power-on{
+  animation: powerOn 0.9s ease-out forwards;
+}
+
+@keyframes powerOn{
+  0%{opacity:0;}
+  5%{opacity:1;}
+  20%{opacity:0.6;}
+  40%{opacity:0.2;}
+  100%{opacity:0;}
+}
+
+/* ================= SCANLINES ================= */
 .scanlines {
   position: fixed;
   inset: 0;
@@ -36,17 +57,15 @@ html, body {
   100%{background-position:0 4px;}
 }
 
-/* Boot screen */
+/* ================= BOOT ================= */
 #bootScreen {
   position: fixed;
   inset: 0;
   background: #0d0d0d;
-  color: #FF9F07;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  font-size: 20px;
   white-space: pre-wrap;
   text-align: center;
   z-index: 1000;
@@ -63,85 +82,67 @@ html, body {
   cursor:pointer;
 }
 
-#enterBtn:hover {
-  background:#FF9F07;
-  color:#0d0d0d;
-}
-
-/* CRT wrapper with curvature */
-#crtWrapper {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index:1;
-
-  border-radius: 40px;
+/* ================= CRT WRAPPER ================= */
+#crtWrapper{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  border-radius:40px;
   box-shadow:
     inset 0 0 120px rgba(0,0,0,0.9),
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 0 60px rgba(0,0,0,0.8);
+    inset 0 0 40px rgba(0,0,0,0.6);
 }
 
-/* CRT content layer */
-#crtContainer {
-  width: 110%;
-  height: 110vh;
-  transform-origin: center;
-  filter: url(#crtDistortion);
-  transform: perspective(1000px) scale(1.05);
+/* distortion layer ONLY */
+#crtDistortLayer{
+  position:absolute;
+  inset:-5%;
+  filter:url(#crtDistortion);
+  pointer-events:none;
 }
 
-/* Logo + homepage */
-#homepage {
-  display: none;
-  overflow: auto;
+/* actual content */
+#crtContent{
+  position:relative;
+  height:100%;
+  overflow:auto;
 }
 
-.hero {
+/* ================= LOGO ================= */
+.hero{
   height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-.logo {
+.logo{
   max-width:300px;
   width:80%;
   opacity:0;
-  transform:scale(0.8);
+  transform:scale(.8);
   filter: drop-shadow(0 0 15px #FF9F07);
-  animation: logoReveal 1.5s ease forwards;
+  animation:logoReveal 1.5s ease forwards;
 }
 
-@keyframes logoReveal {
-  0%{opacity:0;transform:scale(0.7);}
-  60%{opacity:1;transform:scale(1.05);}
-  100%{opacity:1;transform:scale(1);}
+@keyframes logoReveal{
+  to{opacity:1; transform:scale(1);}
 }
 
-.logo.flicker-glow {
-  animation: logoFlicker 1.5s infinite;
-}
-
-@keyframes logoFlicker {
-  0%,100%{opacity:1;}
-  50%{opacity:0.95;}
-}
-
-.content {
+/* ================= CONTENT ================= */
+.content{
   padding:60px;
   max-width:900px;
   margin:auto;
 }
 
-.phosphor {
+.phosphor{
   text-shadow:
     0 0 2px #FF9F07,
-    0 0 4px rgba(255,159,7,0.8),
-    0 0 6px rgba(255,159,7,0.6);
+    0 0 6px rgba(255,159,7,.8);
 }
 
-#commandInput {
+#commandInput{
   background:none;
   border:none;
   color:#FF9F07;
@@ -149,34 +150,44 @@ html, body {
   font-size:18px;
   outline:none;
   width:100%;
-  max-width:500px;
 }
 
-/* CRT flicker */
-.flicker {
-  animation:flicker 0.15s infinite;
+/* ================= FLICKER ================= */
+.flicker{
+  animation:flicker .15s infinite;
 }
 
-@keyframes flicker {
-  0%{opacity:1;}
-  98%{opacity:0.97;}
-  100%{opacity:1;}
+@keyframes flicker{
+  98%{opacity:.98;}
 }
+
+/* allow scrolling */
+#homepage{
+  display:none;
+  min-height:200vh;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- Boot Screen -->
+<div id="powerFlash"></div>
+
 <div id="bootScreen">
   <div id="bootText"></div>
   <button id="enterBtn">ENTER</button>
 </div>
 
-<!-- CRT Wrapper -->
 <div id="crtWrapper" class="flicker">
-  <div id="crtContainer">
+
+  <!-- distortion background -->
+  <div id="crtDistortLayer"></div>
+
+  <!-- actual UI -->
+  <div id="crtContent">
     <div id="homepage">
+
       <section class="hero">
         <img src="FracturedF-Transparant.png" class="logo" id="logo">
       </section>
@@ -185,96 +196,75 @@ html, body {
         <h1 class="phosphor">Welcome to Fractured Studios</h1>
         <p>> Type a command:</p>
         <input id="commandInput" placeholder="> enter command...">
-        <p>Commands: <strong>home</strong>, <strong>games</strong>, <strong>about</strong>, <strong>contact</strong></p>
+        <p>Commands: home, games, about, contact</p>
       </section>
+
     </div>
   </div>
+
 </div>
 
 <div class="scanlines"></div>
 
-<!-- TRUE CRT Fisheye Distortion -->
-<svg width="0" height="0" style="position:absolute">
-  <filter id="crtDistortion">
-    <feTurbulence
-      type="fractalNoise"
-      baseFrequency="0.8"
-      numOctaves="2"
-      seed="2"
-      result="noise"/>
-
-    <feDisplacementMap
-      in="SourceGraphic"
-      in2="noise"
-      scale="20"
-      xChannelSelector="R"
-      yChannelSelector="G"/>
-  </filter>
+<!-- CRT distortion -->
+<svg width="0" height="0">
+<filter id="crtDistortion">
+<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="2" result="noise"/>
+<feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/>
+</filter>
 </svg>
 
 <script>
-// Boot typing
-const bootScreen = document.getElementById("bootScreen");
 const bootText = document.getElementById("bootText");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
-const logo = document.getElementById("logo");
+const bootScreen = document.getElementById("bootScreen");
+const powerFlash = document.getElementById("powerFlash");
 
 const bootMessages = [
-  "Booting system...",
-  "Loading modules...",
-  "Connecting...",
-  "Access granted..."
+"Booting system...",
+"Loading modules...",
+"Connecting...",
+"Access granted..."
 ];
 
-let terminalText = bootMessages.join("\n") + "\n";
-let i=0;
+let text = bootMessages.join("\n") + "\n";
+let i = 0;
 
-function typeBoot() {
-  if(i<terminalText.length){
-    bootText.textContent += terminalText.charAt(i);
-    i++;
-    setTimeout(typeBoot, 25);
-  } else {
-    enterBtn.style.display="block";
-  }
+function typeBoot(){
+if(i < text.length){
+bootText.textContent += text[i];
+i++;
+setTimeout(typeBoot,25);
+}else{
+enterBtn.style.display="block";
+}
 }
 typeBoot();
 
 enterBtn.addEventListener("click",()=>{
-  bootScreen.style.display="none";
-  homepage.style.display="block";
-  logo.classList.add("flicker-glow");
-  document.body.style.overflow="auto";
+bootScreen.style.display="none";
+homepage.style.display="block";
+document.body.style.overflow="auto";
+
+/* power on flash */
+powerFlash.classList.add("power-on");
 });
 
-// Terminal commands
+/* commands */
 const input = document.getElementById("commandInput");
-input.addEventListener("keydown", function(e){
-  if(e.key==="Enter"){
-    const cmd=input.value.toLowerCase().trim();
 
-    if(cmd==="home") window.location.href="index.html";
-    else if(cmd==="games") window.location.href="games.html";
-    else if(cmd==="about") window.location.href="about.html";
-    else if(cmd==="contact") window.location.href="contact.html";
-    else alert("Unknown command: "+cmd);
+input.addEventListener("keydown", e=>{
+if(e.key==="Enter"){
+const cmd=input.value.toLowerCase().trim();
 
-    input.value="";
-  }
-});
+if(cmd==="home") location.href="index.html";
+else if(cmd==="games") location.href="games.html";
+else if(cmd==="about") location.href="about.html";
+else if(cmd==="contact") location.href="contact.html";
 
-// Mouse tilt
-const crtContainer = document.getElementById("crtContainer");
-
-document.addEventListener("mousemove", function(e){
-  const moveX = (e.clientX - window.innerWidth/2)/70;
-  const moveY = (e.clientY - window.innerHeight/2)/70;
-
-  crtContainer.style.transform =
-    `perspective(1200px) scale(1.05)
-     rotateX(${moveY}deg)
-     rotateY(${moveX}deg)`;
+input.value="";
+}
 });
 </script>
 
