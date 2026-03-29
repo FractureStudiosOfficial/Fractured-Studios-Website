@@ -40,18 +40,71 @@
   overflow: hidden;
 }
 
-/* Subtle screen curve illusion */
 .crt::before {
   content: "";
   position: absolute;
   inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
+  /* Stronger edge darkening = more curve illusion */
+  background: radial-gradient(
+    ellipse at center,
+    transparent 45%,
+    rgba(0,0,0,0.35) 75%,
+    rgba(0,0,0,0.6) 100%
+  );
+}
+
+  .crt {
+  position: relative;
+  transform: perspective(800px) scale(1.01);
+}
+
+/* subtle warp illusion */
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
   background: radial-gradient(
     ellipse at center,
     transparent 60%,
-    rgba(0,0,0,0.25) 100%
+    rgba(0,0,0,0.15)
   );
-  pointer-events: none;
-  z-index: 2;
+
+  mix-blend-mode: multiply;
+}
+  body {
+  text-shadow:
+    0 0 2px #FF9F07,
+    0 0 4px rgba(255,159,7,0.8),
+    0 0 6px rgba(255,159,7,0.6);
+}
+
+  .phosphor {
+  position: relative;
+}
+
+.phosphor::before,
+.phosphor::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0.3;
+}
+
+.phosphor::before {
+  color: red;
+  transform: translate(1px, 0);
+}
+
+.phosphor::after {
+  color: lime;
+  transform: translate(-1px, 0);
 }
 
 /* Glow */
@@ -64,17 +117,18 @@
   z-index: 2;
 }
 
-/* Flicker animation */
 @keyframes flicker {
   0% { opacity: 1; }
-  98% { opacity: 1; }
-  99% { opacity: 0.96; }
+  97% { opacity: 1; }
+  98% { opacity: 0.97; }
+  99% { opacity: 0.94; }
   100% { opacity: 1; }
 }
 
 .flicker {
-  animation: flicker 0.12s infinite;
+  animation: flicker 0.15s infinite;
 }
+  
 /* Base */
 body {
   margin: 0;
@@ -184,9 +238,16 @@ h1 {
 <!-- Enter Button -->
 <button id="enterBtn">ENTER</button>
 
-<!-- Homepage -->
-<div id="homepage">
+<div class="content">
+  <p>> type a command:</p>
+  <p>> games</p>
+  <p>> about</p>
+  <p>> home</p>
 
+  <br>
+
+  <input id="commandInput" autofocus placeholder="> enter command..." style="background:none;border:none;color:#FF9F07;font-family:inherit;font-size:18px;outline:none;">
+</div>
   
   <!-- Center Logo -->
   <section class="hero">
@@ -267,7 +328,102 @@ document.body.style.overflow = "hidden";
 
 window.onload = typeEffect;
 
+
+  
 </script>
+
+  
+  
+</body>
+
+  <body>
+
+  <!-- Your content -->
+  <div id="terminal"></div>
+  <button id="enterBtn">ENTER</button>
+  <div id="homepage">
+    <section class="hero">
+      <img src="logo.png" class="logo">
+    </section>
+    <section class="content">
+      <h1 class="phosphor" data-text="Welcome">Welcome</h1>
+      <p>> type a command:</p>
+      <input id="commandInput" placeholder="> enter command...">
+    </section>
+  </div>
+
+  <!-- Scanlines Overlay -->
+  <div class="scanlines"></div>
+
+  <!-- Scripts go here, just before closing body -->
+  <script>
+    // Terminal typing + boot sounds
+    const terminal = document.getElementById("terminal");
+    const enterBtn = document.getElementById("enterBtn");
+    const homepage = document.getElementById("homepage");
+    const enterSound = document.getElementById("enterSound");
+    const boot1 = document.getElementById("boot1");
+    const boot2 = document.getElementById("boot2");
+    const hum = document.getElementById("hum");
+
+    const text = `
+Booting system...
+Initializing modules...
+Loading assets...
+Connecting to server...
+Access granted...
+Lorem ipsum...
+`;
+
+    let i = 0;
+
+    function typeEffect() {
+      if (i === 0) boot1.play();
+      if (i < text.length) {
+        terminal.textContent += text.charAt(i);
+        i++;
+        if (i === 20) boot2.play();
+        setTimeout(typeEffect, 25);
+      } else {
+        hum.play();
+        setTimeout(showEnter, 800);
+      }
+    }
+
+    function showEnter() {
+      terminal.style.transition = "opacity 1s";
+      terminal.style.opacity = 0;
+      setTimeout(() => {
+        terminal.style.display = "none";
+        enterBtn.style.display = "block";
+      }, 1000);
+    }
+
+    enterBtn.addEventListener("click", () => {
+      enterSound.play();
+      enterBtn.style.display = "none";
+      homepage.style.display = "block";
+      document.body.style.overflow = "auto";
+    });
+
+    // Terminal command navigation
+    const input = document.getElementById("commandInput");
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        const cmd = input.value.toLowerCase();
+        if (cmd === "games") window.location.href = "games.html";
+        else if (cmd === "home") window.location.href = "index.html";
+        else if (cmd === "about") alert("About page coming soon...");
+        else alert("Unknown command");
+        input.value = "";
+      }
+    });
+
+    // Prevent scroll during boot
+    document.body.style.overflow = "hidden";
+
+    window.onload = typeEffect;
+  </script>
 
 </body>
 </html>
