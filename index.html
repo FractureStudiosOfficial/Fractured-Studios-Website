@@ -5,101 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Home | Retro Terminal</title>
 <style>
-  /* --- Fonts & Colors --- */
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  body {
-    margin: 0;
-    height: 100vh;
-    background: #111; /* blackish grey background */
-    color: #FF9F07; /* amber text */
-    font-family: 'Share Tech Mono', monospace;
-    overflow: hidden;
-    perspective: 1000px;
-  }
+/* --- Fonts & Colors --- */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-  /* --- CRT & Fisheye --- */
-  #crt-container {
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    transform: rotateX(0deg) rotateY(0deg);
-    animation: fisheye 0.2s ease-out forwards;
-  }
+body {
+  margin: 0;
+  height: 100vh;
+  background: #111; /* dark background */
+  color: #FF9F07;
+  font-family: 'Share Tech Mono', monospace;
+  overflow: hidden;
+  perspective: 1000px;
+}
 
-  @keyframes fisheye {
-    0% { transform: scale(0.95) rotateX(0deg) rotateY(0deg); }
-    100% { transform: scale(1) rotateX(0deg) rotateY(0deg); }
-  }
-
-  /* Phosphorus glow */
-  .crt-text {
-    text-shadow:
-      0 0 4px #FF9F07,
-      0 0 8px #FF9F07,
-      0 0 12px #FF9F07,
-      0 0 16px #FF9F07;
-  }
-
-  /* Scanlines overlay */
-  #scanlines {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10002; /* higher than everything else */
-    background-image: repeating-linear-gradient(
-      rgba(255,255,255,0.05) 0px,
-      rgba(255,255,255,0.05) 4px,
-      transparent 1px,
-      transparent 8px
-    );
-    mix-blend-mode: overlay;
-    animation: flicker 0.1s infinite;
-  }
-
-  @keyframes flicker {
-    0%, 100% { opacity: 0.08; }
-    50% { opacity: 0.02; }
-  }
-
-  /* Logo */
-  #logo {
-    max-width: 250px;
-    width: 50%;
-    height: auto;
-    margin-bottom: 1.5em;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-
-    /* Amber glow / tint */
-    filter: drop-shadow(0 0 8px #FF9F07)
-            drop-shadow(0 0 12px #FF9F07)
-            drop-shadow(0 0 16px #FF9F07)
-            drop-shadow(0 0 20px #FF9F07);
-  }
-
-/* Subtle amber tint over the whole site */
+/* Amber tint overlay */
 #amber-tint {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255,159,7,0.02); /* very subtle amber overlay */
+  background: rgba(255,159,7,0.02);
   pointer-events: none;
   z-index: 1000;
 }
 
-/* Terminal box full width */
+/* CRT container with fisheye + 3D movement */
+#crt-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+/* Logo */
+#logo {
+  max-width: 300px;
+  width: 50%;
+  height: auto;
+  margin-bottom: 1em;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  filter: drop-shadow(0 0 8px #FF9F07)
+          drop-shadow(0 0 12px #FF9F07)
+          drop-shadow(0 0 16px #FF9F07)
+          drop-shadow(0 0 20px #FF9F07);
+}
+
+/* Terminal */
 #terminal {
-  width: 90%;               /* almost full width */
+  width: 90%;
   max-width: 1200px;
   background: rgba(0,0,0,0.25); /* slightly darker than background */
   padding: 1em;
@@ -107,78 +67,95 @@
   box-shadow: 0 0 20px rgba(255,159,7,0.2);
   min-height: 200px;
   overflow-y: auto;
-  text-align: left;          /* left-aligned text */
+  text-align: left;
   margin-bottom: 0.5em;
 }
 
-/* Available commands text below terminal */
+/* Available commands below terminal */
 #available-commands {
   width: 90%;
   max-width: 1200px;
   color: #FF9F07;
-  text-shadow:
-    0 0 2px #FF9F07,
-    0 0 4px #FF9F07;
+  text-shadow: 0 0 2px #FF9F07, 0 0 4px #FF9F07;
   font-size: 0.9em;
-  text-align: left;          /* left-aligned */
+  text-align: left;
   margin: 0 auto 1em auto;
 }
 
-  .line {
-    margin: 0.2em 0;
-  }
+/* Command prompt */
+#prompt {
+  display: none; /* hidden until startup finishes */
+  flex-direction: row;
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+}
+#prompt span {
+  margin-right: 0.5em;
+}
+#command {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FF9F07;
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+}
 
-  #prompt {
-    display: none; /* hidden until startup finishes */
-    flex-direction: row;
-    align-items: center;
-    margin-top: 1em;
-  }
+/* Scanlines overlay */
+#scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10002;
+  background-image: repeating-linear-gradient(
+    rgba(255,255,255,0.06) 0px,
+    rgba(255,255,255,0.06) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+  animation: flicker 0.1s infinite;
+  mix-blend-mode: normal;
+}
+@keyframes flicker {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.02; }
+}
 
-  #prompt span {
-    margin-right: 0.5em;
-  }
+/* Flash effect */
+#flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10003;
+}
 
-  #command {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #FF9F07;
-    flex: 1;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  /* Flash effect */
-  #flash {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10000;
-  }
-
-  /* OS version indicator */
- #os-version {
+/* OS version indicator */
+#os-version {
   position: fixed;
   bottom: 10px;
-  left: 10px;
+  right: 10px;
   font-size: 0.8em;
   color: #FF9F07;
-  text-shadow:
-    0 0 2px #FF9F07,
-    0 0 4px #FF9F07,
-    0 0 6px #FF9F07;
+  text-shadow: 0 0 2px #FF9F07, 0 0 4px #FF9F07, 0 0 6px #FF9F07;
   pointer-events: none;
-  z-index: 10001;
+  z-index: 10004;
   opacity: 0.8;
 }
 </style>
 </head>
 <body>
+
+<!-- Amber tint overlay -->
+<div id="amber-tint"></div>
 
 <!-- OS version -->
 <div id="os-version" class="crt-text">OS v1.03.7</div>
@@ -186,19 +163,16 @@
 <!-- Main CRT container -->
 <div id="crt-container">
   <img id="logo" class="crt-text" src="logo.png" alt="Logo">
+  
   <div id="terminal" class="crt-text"></div>
+  
+  <div id="available-commands">Available terms: About, Games, Contact</div>
+  
   <div id="prompt">
     <span>&gt;</span>
     <input type="text" id="command" autofocus autocomplete="off">
   </div>
 </div>
-
-  <!-- Amber tint overlay -->
-<div id="amber-tint"></div>
-
-<div id="crt-container">
-  <img id="logo" class="crt-text" src="logo.png" alt="Logo">
-  <div id="terminal" class="crt-text"></div>
 
 <!-- Scanlines -->
 <div id="scanlines"></div>
@@ -209,6 +183,7 @@
 const terminal = document.getElementById('terminal');
 const commandInput = document.getElementById('command');
 const flash = document.getElementById('flash');
+const crtContainer = document.getElementById('crt-container');
 
 const startupMessages = [
   'Initializing system...',
@@ -248,7 +223,7 @@ function typeLine(text, delay = 50) {
 
 // Randomly show fake errors
 function maybeError() {
-  if (Math.random() < 0.3) { // 30% chance
+  if (Math.random() < 0.3) {
     const error = errorPool[Math.floor(Math.random() * errorPool.length)];
     terminal.innerHTML += `<span style="color:red;">${error}</span><br>`;
     terminal.scrollTop = terminal.scrollHeight;
@@ -258,9 +233,7 @@ function maybeError() {
 // Flash effect
 function flashScreen() {
   flash.style.opacity = '1';
-  setTimeout(() => {
-    flash.style.opacity = '0';
-  }, 100);
+  setTimeout(() => { flash.style.opacity = '0'; }, 100);
 }
 
 // Startup sequence
@@ -271,22 +244,10 @@ async function startup() {
   }
   await typeLine('System ready. Type a command below.');
   
-  // Show command bar after startup
   document.getElementById('prompt').style.display = 'flex';
   commandInput.focus();
 }
 startup();
-
-  <!-- Available commands -->
-  <div id="available-commands">
-    Available terms: About, Games, Contact
-  </div>
-
-  <div id="prompt">
-    <span>&gt;</span>
-    <input type="text" id="command" autofocus autocomplete="off">
-  </div>
-</div>
 
 // Handle commands
 commandInput.addEventListener('keydown', (e) => {
@@ -303,6 +264,13 @@ commandInput.addEventListener('keydown', (e) => {
       terminal.innerHTML += `<span style="color:#FF4F07;">Unknown command: ${cmd}</span><br>`;
     }
   }
+});
+
+// 3D movement with mouse
+document.addEventListener('mousemove', (e) => {
+  const x = (window.innerWidth/2 - e.clientX) / 50; // adjust divisor to change movement strength
+  const y = (window.innerHeight/2 - e.clientY) / 50;
+  crtContainer.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
 </script>
 </body>
