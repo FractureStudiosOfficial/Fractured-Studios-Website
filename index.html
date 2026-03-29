@@ -62,23 +62,28 @@
       0 0 16px #FF9F07;
   }
 
- #scanlines {
+#scanlines {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+  z-index: 9999; /* on top of everything */
   background-image: repeating-linear-gradient(
     rgba(255,255,255,0.03) 0px,
     rgba(255,255,255,0.03) 1px,
     transparent 1px,
     transparent 3px
   );
-  pointer-events: none;
-  z-index: 9999;
+  mix-blend-mode: overlay; /* ensures it blends with underlying elements */
   animation: flicker 0.15s infinite;
 }
 
+@keyframes flicker {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.02; }
+}
 /* Flicker animation */
 @keyframes flicker {
   0%, 100% { opacity: 0.06; }
