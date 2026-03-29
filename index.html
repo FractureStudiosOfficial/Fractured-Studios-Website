@@ -183,6 +183,109 @@ document.addEventListener("mousemove", function(e){
   crtContainer.style.transform = `perspective(1200px) scale(1.02) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
 });
 </script>
+<!-- Add this just before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
+<script id="vertexShader" type="x-shader/x-vertex">
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+uniform sampler2D uTexture;
+uniform float time;
+varying vec2 vUv;
+
+void main() {
+    vec2 uv = vUv * 2.0 - 1.0;
+
+    // Fisheye distortion
+    float r = length(uv);
+    float theta = atan(uv.y, uv.x);
+    float rDistorted = pow(r, 0.8); // Adjust for intensity
+    vec2 distortedUV = rDistorted * vec2(cos(theta), sin(theta));
+    distortedUV = (distortedUV + 1.0) * 0.5;
+
+    // Scanline effect
+    float scanline = sin(distortedUV.y * 800.0 + time*10.0) * 0.04;
+
+    // Sample original content
+    vec3 color = texture2D(uTexture, distortedUV).rgb;
+    color.r += scanline;
+    color.g += scanline*0.5;
+    color.b += scanline*0.2;
+
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script>
+let renderer, scene, camera, mesh, clock;
+
+function initCRT() {
+    const crtWrapper = document.getElementById("crtWrapper");
+    const crtContainer = document.getElementById("crtContainer");
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // Create Three.js scene
+    scene = new THREE.Scene();
+    camera = new THREE.OrthographicCamera(-1,1,1,-1,0,10);
+    camera.position.z = 1;
+
+    renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(width, height);
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+
+    crtWrapper.appendChild(renderer.domElement);
+
+    clock = new THREE.Clock();
+
+    // Capture existing DOM as texture
+    html2canvas(crtContainer).then(canvas => {
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+
+        const geometry = new THREE.PlaneGeometry(2,2);
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                uTexture: { value: texture },
+                time: { value: 0 }
+            },
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+        animate();
+    });
+
+    window.addEventListener('resize', () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if(mesh) {
+        mesh.material.uniforms.time.value = clock.getElapsedTime();
+    }
+    renderer.render(scene, camera);
+}
+
+// Load html2canvas
+const script = document.createElement('script');
+script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+script.onload = initCRT;
+document.body.appendChild(script);
+</script>
 </body>
 </html>
