@@ -2,303 +2,217 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fractured Studios</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home | Retro Terminal</title>
 <style>
-html, body {
-  margin: 0;
-  height: 100%;
-  font-family: 'Share Tech Mono', monospace;
-  background: #0d0d0d;
-  color: #FF9F07;
-  overflow: hidden;
-}
+  /* --- Fonts & Colors --- */
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #111; /* blackish grey background */
+    color: #FF9F07; /* amber text */
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    perspective: 1000px;
+  }
 
-/* ================= POWER ON FLASH ================= */
-#powerFlash{
-  position:fixed;
-  inset:0;
-  background:white;
-  opacity:0;
-  pointer-events:none;
-  z-index:2000;
-}
+  /* --- CRT & Fisheye --- */
+  #crt-container {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transform: rotateX(0deg) rotateY(0deg);
+    animation: fisheye 0.2s ease-out forwards;
+  }
 
-.power-on{
-  animation: powerOn 0.9s ease-out forwards;
-}
+  @keyframes fisheye {
+    0% { transform: scale(0.95) rotateX(0deg) rotateY(0deg); }
+    100% { transform: scale(1) rotateX(0deg) rotateY(0deg); }
+  }
 
-@keyframes powerOn{
-  0%{opacity:0;}
-  5%{opacity:1;}
-  20%{opacity:0.6;}
-  40%{opacity:0.2;}
-  100%{opacity:0;}
-}
+  /* Phosphorus glow */
+  .crt-text {
+    text-shadow:
+      0 0 4px #FF9F07,
+      0 0 8px #FF9F07,
+      0 0 12px #FF9F07,
+      0 0 16px #FF9F07;
+  }
 
-/* ================= SCANLINES ================= */
-.scanlines {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,159,7,0.05) 0px,
-    rgba(255,159,7,0.05) 1px,
-    transparent 2px,
-    transparent 4px
-  );
-  animation: scanlineMove 1s linear infinite;
-  z-index: 9999;
-}
-@keyframes scanlineMove {
-  0% { background-position:0 0;}
-  100%{background-position:0 4px;}
-}
+  /* Scanlines overlay */
+  #scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
 
-/* ================= BOOT ================= */
-#bootScreen {
-  position: fixed;
-  inset: 0;
-  background: #0d0d0d;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  white-space: pre-wrap;
-  text-align: center;
-  z-index: 1000;
-}
+  /* Logo */
+  #logo {
+    font-size: 3em;
+    margin-bottom: 2em;
+    color: #FF9F07;
+    text-align: center;
+  }
 
-#enterBtn {
-  display:none;
-  margin-top:40px;
-  padding:15px 40px;
-  font-size:22px;
-  border:2px solid #FF9F07;
-  background:transparent;
-  color:#FF9F07;
-  cursor:pointer;
-}
+  /* Terminal */
+  #terminal {
+    width: 80%;
+    max-width: 800px;
+    background: rgba(0,0,0,0.5);
+    padding: 1em;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(255,159,7,0.4);
+    min-height: 200px;
+    overflow-y: auto;
+  }
 
-/* ================= CRT WRAPPER ================= */
-#crtWrapper{
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  border-radius:40px;
-  box-shadow:
-    inset 0 0 120px rgba(0,0,0,0.9),
-    inset 0 0 40px rgba(0,0,0,0.6);
-}
+  .line {
+    margin: 0.2em 0;
+  }
 
-/* distortion layer ONLY */
-#crtDistortLayer{
-  position:absolute;
-  inset:-5%;
-  filter:url(#crtDistortion);
-  pointer-events:none;
-}
+  #prompt {
+    display: flex;
+  }
 
-/* actual content */
-#crtContent{
-  position:relative;
-  height:100%;
-  overflow:auto;
-}
+  #prompt span {
+    margin-right: 0.5em;
+  }
 
-/* ================= LOGO ================= */
-.hero{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+  #command {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #FF9F07;
+    flex: 1;
+    font-family: 'Share Tech Mono', monospace;
+  }
 
-.logo{
-  max-width:300px;
-  width:80%;
-  opacity:0;
-  transform:scale(.8);
-  filter: drop-shadow(0 0 15px #FF9F07);
-  animation:logoReveal 1.5s ease forwards;
-}
-
-@keyframes logoReveal{
-  to{opacity:1; transform:scale(1);}
-}
-
-/* ================= CONTENT ================= */
-.content{
-  padding:60px;
-  max-width:900px;
-  margin:auto;
-}
-
-.phosphor{
-  text-shadow:
-    0 0 2px #FF9F07,
-    0 0 6px rgba(255,159,7,.8);
-}
-
-#commandInput{
-  background:none;
-  border:none;
-  color:#FF9F07;
-  font-family:inherit;
-  font-size:18px;
-  outline:none;
-  width:100%;
-}
-
-/* ================= FLICKER ================= */
-.flicker{
-  animation:flicker .15s infinite;
-}
-
-@keyframes flicker{
-  98%{opacity:.98;}
-}
-
-/* allow scrolling */
-#homepage{
-  display:none;
-  min-height:200vh;
-}
-
+  /* Flash effect */
+  #flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10000;
+  }
 </style>
 </head>
-
 <body>
-
-<div id="powerFlash"></div>
-
-<div id="bootScreen">
-  <div id="bootText"></div>
-  <button id="enterBtn">ENTER</button>
-</div>
-
-<div id="crtWrapper" class="flicker">
-
-  <!-- distortion background -->
-  <div id="crtDistortLayer"></div>
-
-  <!-- actual UI -->
-  <div id="crtContent">
-    <div id="homepage">
-
-      <section class="hero">
-        <img src="FracturedF-Transparant.png" class="logo" id="logo">
-      </section>
-
-      <section class="content">
-        <h1 class="phosphor">Welcome to Fractured Studios</h1>
-        <p>> Type a command:</p>
-        <input id="commandInput" placeholder="> enter command...">
-        <p>Commands: home, games, about, contact</p>
-      </section>
-
-    </div>
+<div id="crt-container">
+  <div id="logo" class="crt-text">MY RETRO SITE</div>
+  <div id="terminal" class="crt-text"></div>
+  <div id="prompt">
+    <span>&gt;</span>
+    <input type="text" id="command" autofocus autocomplete="off">
   </div>
-
 </div>
 
-<div class="scanlines"></div>
-
-<!-- CRT distortion -->
-<svg width="0" height="0">
-<filter id="crtDistortion">
-<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="2" result="noise"/>
-<feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/>
-</filter>
-</svg>
+<div id="scanlines"></div>
+<div id="flash"></div>
 
 <script>
-<script>
-const bootText = document.getElementById("bootText");
-const enterBtn = document.getElementById("enterBtn");
-const homepage = document.getElementById("homepage");
-const bootScreen = document.getElementById("bootScreen");
-const powerFlash = document.getElementById("powerFlash");
+const terminal = document.getElementById('terminal');
+const commandInput = document.getElementById('command');
+const flash = document.getElementById('flash');
 
-/* Normal boot messages */
-const bootMessages = [
-"Booting system...",
-"Loading modules...",
-"Initializing CRT display...",
-"Mounting drives...",
-"Connecting...",
-"Access granted..."
+const startupMessages = [
+  'Initializing system...',
+  'Loading modules...',
+  'Connecting to server...',
+  'Verifying protocols...',
+  'Establishing secure channel...'
 ];
 
-/* Fake error pool */
-const fakeErrors = [
-"ERROR: Memory leak detected... recovered.",
-"WARNING: Signal instability...",
-"ERROR: GPU handshake timeout...",
-"Re-routing video buffer...",
-"WARNING: Phosphor calibration failed...",
-"ERROR: Display bus interference...",
-"Recovering corrupted sector...",
-"WARNING: Power fluctuation detected...",
-"ERROR: Scanline sync lost... restored.",
-"Reinitializing raster pipeline..."
+const errorPool = [
+  'ERROR: Unable to reach node 42',
+  'WARNING: Memory buffer overflow detected',
+  'CRITICAL: Unknown exception occurred',
+  'ALERT: Connection lost temporarily',
+  'NOTICE: Debugger attached'
 ];
 
-/* randomly inject errors */
-let finalBoot = [];
+const visibleCommands = ['games', 'about', 'contact'];
+const hiddenCommands = ['ironfrontier'];
 
-bootMessages.forEach(msg => {
-  finalBoot.push(msg);
+// Typewriter function
+function typeLine(text, delay = 50) {
+  return new Promise(resolve => {
+    let i = 0;
+    const interval = setInterval(() => {
+      terminal.innerHTML += text[i];
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+        terminal.innerHTML += '<br>';
+        terminal.scrollTop = terminal.scrollHeight;
+        resolve();
+      }
+    }, delay);
+  });
+}
 
-  if(Math.random() < 0.35){ // 35% chance
-    const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-    finalBoot.push(err);
-  }
-});
-
-let text = finalBoot.join("\n") + "\n";
-let i = 0;
-
-function typeBoot(){
-  if(i < text.length){
-    bootText.textContent += text[i];
-    i++;
-    setTimeout(typeBoot, 20 + Math.random()*20);
-  }else{
-    enterBtn.style.display="block";
+// Randomly show fake errors
+function maybeError() {
+  if (Math.random() < 0.3) { // 30% chance
+    const error = errorPool[Math.floor(Math.random() * errorPool.length)];
+    terminal.innerHTML += `<span style="color:red;">${error}</span><br>`;
+    terminal.scrollTop = terminal.scrollHeight;
   }
 }
 
-typeBoot();
-
-enterBtn.addEventListener("click",()=>{
-  bootScreen.style.display="none";
-  homepage.style.display="block";
-  document.body.style.overflow="auto";
-
-  /* power-on flash */
-  powerFlash.classList.add("power-on");
-});
-</script>
-
-/* commands */
-const input = document.getElementById("commandInput");
-
-input.addEventListener("keydown", e=>{
-if(e.key==="Enter"){
-const cmd=input.value.toLowerCase().trim();
-
-if(cmd==="home") location.href="index.html";
-else if(cmd==="games") location.href="games.html";
-else if(cmd==="about") location.href="about.html";
-else if(cmd==="contact") location.href="contact.html";
-
-input.value="";
+// Flash effect
+function flashScreen() {
+  flash.style.opacity = '1';
+  setTimeout(() => {
+    flash.style.opacity = '0';
+  }, 100);
 }
+
+// Startup sequence
+async function startup() {
+  for (let msg of startupMessages) {
+    await typeLine(msg);
+    maybeError();
+  }
+  await typeLine('System ready. Type a command below.');
+}
+startup();
+
+// Handle commands
+commandInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    flashScreen();
+    const cmd = commandInput.value.trim().toLowerCase();
+    terminal.innerHTML += `&gt; ${cmd}<br>`;
+    commandInput.value = '';
+    terminal.scrollTop = terminal.scrollHeight;
+
+    if (visibleCommands.includes(cmd) || hiddenCommands.includes(cmd)) {
+      window.location.href = cmd + '.html';
+    } else {
+      terminal.innerHTML += `<span style="color:#FF4F07;">Unknown command: ${cmd}</span><br>`;
+    }
+  }
 });
 </script>
-
 </body>
 </html>
