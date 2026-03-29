@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home | Fractured Studios</title>
+<title>Home | Retro Terminal</title>
 <style>
   /* --- Fonts & Colors --- */
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -17,24 +17,6 @@
     perspective: 1000px;
   }
 
- 
-
-
-  #logo {
-  max-width: 250px;        /* limits size */
-  width: 50%;              /* scales on smaller screens */
-  height: auto;
-  margin-bottom: 1.5em;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-
-  /* Amber glow / tint */
-  filter: drop-shadow(0 0 8px #FF9F07)
-          drop-shadow(0 0 12px #FF9F07)
-          drop-shadow(0 0 16px #FF9F07)
-          drop-shadow(0 0 20px #FF9F07);
-}
   /* --- CRT & Fisheye --- */
   #crt-container {
     width: 100%;
@@ -62,48 +44,46 @@
       0 0 16px #FF9F07;
   }
 
-#scanlines {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999; /* on top of everything */
-  background-image: repeating-linear-gradient(
-    rgba(255,255,255,0.03) 0px,
-    rgba(255,255,255,0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay; /* ensures it blends with underlying elements */
-  animation: flicker 0.15s infinite;
-}
+  /* Scanlines overlay */
+  #scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: repeating-linear-gradient(
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: overlay;
+    animation: flicker 0.15s infinite;
+  }
 
-@keyframes flicker {
-  0%, 100% { opacity: 0.06; }
-  50% { opacity: 0.02; }
-}
-/* Flicker animation */
-@keyframes flicker {
-  0%, 100% { opacity: 0.06; }
-  50% { opacity: 0.02; }
-}
-
+  @keyframes flicker {
+    0%, 100% { opacity: 0.06; }
+    50% { opacity: 0.02; }
+  }
 
   /* Logo */
   #logo {
-    font-size: 3em;
-    margin-bottom: 2em;
-    color: #FF9F07;
-    text-align: center;
-  }
+    max-width: 300px;
+    width: 50%;
+    height: auto;
+    margin-bottom: 1.5em;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 
-  /* hide terminal */
-  #prompt {
-  display: none;
-  ...
-}
+    /* Amber glow / tint */
+    filter: drop-shadow(0 0 8px #FF9F07)
+            drop-shadow(0 0 12px #FF9F07)
+            drop-shadow(0 0 16px #FF9F07)
+            drop-shadow(0 0 20px #FF9F07);
+  }
 
   /* Terminal */
   #terminal {
@@ -122,7 +102,10 @@
   }
 
   #prompt {
-    display: flex;
+    display: none; /* hidden until startup finishes */
+    flex-direction: row;
+    align-items: center;
+    margin-top: 1em;
   }
 
   #prompt span {
@@ -150,11 +133,32 @@
     pointer-events: none;
     z-index: 10000;
   }
+
+  /* OS version indicator */
+  #os-version {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8em;
+    color: #FF9F07;
+    text-shadow:
+      0 0 2px #FF9F07,
+      0 0 4px #FF9F07,
+      0 0 6px #FF9F07;
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0.8;
+  }
 </style>
 </head>
 <body>
+
+<!-- OS version -->
+<div id="os-version" class="crt-text">OS v1.03.7</div>
+
+<!-- Main CRT container -->
 <div id="crt-container">
-  <img id="logo" class="crt-text" src="FracturedF-Transparant.png" alt="Logo">
+  <img id="logo" class="crt-text" src="logo.png" alt="Logo">
   <div id="terminal" class="crt-text"></div>
   <div id="prompt">
     <span>&gt;</span>
@@ -162,7 +166,9 @@
   </div>
 </div>
 
+<!-- Scanlines -->
 <div id="scanlines"></div>
+<!-- Flash -->
 <div id="flash"></div>
 
 <script>
@@ -230,20 +236,12 @@ async function startup() {
     maybeError();
   }
   await typeLine('System ready. Type a command below.');
-}
-startup();
-
-  async function startup() {
-  for (let msg of startupMessages) {
-    await typeLine(msg);
-    maybeError();
-  }
-  await typeLine('System ready. Type a command below.');
   
-  // Show the command bar
+  // Show command bar after startup
   document.getElementById('prompt').style.display = 'flex';
   commandInput.focus();
 }
+startup();
 
 // Handle commands
 commandInput.addEventListener('keydown', (e) => {
