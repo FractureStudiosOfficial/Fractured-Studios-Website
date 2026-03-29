@@ -17,6 +17,27 @@
     perspective: 1000px;
   }
 
+  #logo {
+  background-color: rgba(255,159,7,0.05); /* very subtle amber overlay */
+  border-radius: 5px;
+}
+
+
+  #logo {
+  max-width: 300px;        /* limits size */
+  width: 50%;              /* scales on smaller screens */
+  height: auto;
+  margin-bottom: 1.5em;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  /* Amber glow / tint */
+  filter: drop-shadow(0 0 8px #FF9F07)
+          drop-shadow(0 0 12px #FF9F07)
+          drop-shadow(0 0 16px #FF9F07)
+          drop-shadow(0 0 20px #FF9F07);
+}
   /* --- CRT & Fisheye --- */
   #crt-container {
     width: 100%;
