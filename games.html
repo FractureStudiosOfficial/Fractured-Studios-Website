@@ -2,74 +2,164 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Games - Game Studio</title>
+<title>Games - Fractured Studios</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
 <style>
-body{margin:0;background:#0d0d0d;color:#FF9F07;font-family:'Share Tech Mono', monospace;overflow:hidden;cursor:none;}
-.crt{position:relative;transform:perspective(900px) scale(1.01);animation:flicker 0.15s infinite;}
-.crt::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.6) 100%);}
-.crt::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.15));box-shadow:inset 0 0 60px rgba(255,159,7,0.15);}
-@keyframes flicker{0%{opacity:1;}97%{opacity:1;}98%{opacity:0.97;}99%{opacity:0.94;}100%{opacity:1;}}
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(to bottom, rgba(255,159,7,0.05) 0px, rgba(255,159,7,0.05) 1px, transparent 2px, transparent 4px);animation:scanlineMove 1s linear infinite;}
-@keyframes scanlineMove{0%{background-position:0 0;}100%{background-position:0 4px;}}
-#terminal{padding:40px;white-space:pre-wrap;font-size:18px;position:relative;z-index:1;}
-#enterBtn{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:transparent;border:2px solid #FF9F07;color:#FF9F07;padding:15px 30px;font-size:20px;cursor:pointer;z-index:1;}
-#enterBtn:hover{background:#FF9F07;color:#0d0d0d;}
-#homepage{display:block;position:relative;z-index:1;}
-.hero{height:100vh;display:flex;justify-content:center;align-items:center;}
-.logo{max-width:300px;width:80%;opacity:0;transform:scale(0.8);filter:drop-shadow(0 0 10px #FF9F07);animation:logoReveal 1.5s ease forwards;}
-@keyframes logoReveal{0%{opacity:0;transform:scale(0.7);}60%{opacity:1;transform:scale(1.05);}100%{transform:scale(1);}}
-.content{padding:60px;max-width:900px;margin:auto;}
-.phosphor{position:relative;text-shadow:0 0 2px #FF9F07,0 0 4px rgba(255,159,7,0.8),0 0 6px rgba(255,159,7,0.6);}
-#commandInput{background:none;border:none;color:#FF9F07;font-family:inherit;font-size:18px;outline:none;}
-@keyframes degauss{0%{filter:hue-rotate(0deg) blur(0px);}25%{filter:hue-rotate(180deg) blur(2px);}50%{filter:hue-rotate(360deg) blur(4px);}75%{filter:hue-rotate(180deg) blur(2px);}100%{filter:hue-rotate(0deg) blur(0px);}}
-.degauss{animation:degauss 0.8s ease forwards;}
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Share Tech Mono', monospace;
+  background: #0d0d0d;
+  color: #FF9F07;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* Scanlines overlay */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,159,7,0.05) 0px,
+    rgba(255,159,7,0.05) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  animation: scanlineMove 1s linear infinite;
+  z-index: 9999;
+}
+@keyframes scanlineMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+
+/* CRT Container */
+#crtContainer {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  border-radius: 30px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  box-shadow: inset 0 0 60px rgba(255,159,7,0.2);
+  background: #0d0d0d;
+}
+
+#crtContainer::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%);
+  z-index:2;
+}
+
+/* Flicker effect */
+.flicker {
+  animation: flicker 0.15s infinite;
+}
+@keyframes flicker {
+  0% { opacity:1; }
+  97% { opacity:1; }
+  98% { opacity:0.97; }
+  99% { opacity:0.94; }
+  100% { opacity:1; }
+}
+
+/* Page content */
+#gamesPage {
+  display: block;
+  overflow: auto;
+}
+
+.section {
+  padding: 60px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h1.phosphor {
+  text-shadow: 0 0 2px #FF9F07, 0 0 4px rgba(255,159,7,0.8), 0 0 6px rgba(255,159,7,0.6);
+}
+
+.game-card {
+  border: 2px solid #FF9F07;
+  padding: 30px;
+  margin: 30px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.game-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #FF9F07;
+}
+
+#commandInput {
+  background:none;
+  border:none;
+  color:#FF9F07;
+  font-family:inherit;
+  font-size:18px;
+  outline:none;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+  display: block;
+}
 </style>
 </head>
 <body>
-<div class="crt flicker degauss" id="crtContainer">
-  <div id="homepage">
-    <section class="hero">
-      <img src="logo.png" class="logo">
+
+<div id="crtContainer" class="flicker">
+  <div id="gamesPage">
+    <section class="section">
+      <h1 class="phosphor">Our Games</h1>
+      <div class="game-card" onclick="window.location.href='theironfrontier.html'">
+        <h2>The Iron Frontier</h2>
+        <p>Status: In Production</p>
+        <p>Click to learn more →</p>
+      </div>
     </section>
-    <section class="content">
-      <h1 class="phosphor" data-text="Games">Games</h1>
-      <p>> Our available games:</p>
-      <ul>
-        <li>Game 1 - Lorem ipsum</li>
-        <li>Game 2 - Lorem ipsum</li>
-        <li>Game 3 - Lorem ipsum</li>
-      </ul>
-      <p>> type a command:</p>
+
+    <section class="section">
+      <p>> Type a command:</p>
       <input id="commandInput" placeholder="> enter command...">
-      <p>Navigation commands: <strong>home</strong>, <strong>about</strong>, <strong>contact</strong></p>
+      <p>Commands: <strong>home</strong>, <strong>games</strong>, <strong>about</strong>, <strong>contact</strong></p>
     </section>
   </div>
 </div>
+
 <div class="scanlines"></div>
 
-<!-- Sounds -->
-<audio id="typeChar" src="type.mp3"></audio>
-
 <script>
-const input=document.getElementById("commandInput");
-const crt=document.getElementById("crtContainer");
-input.addEventListener("keydown",function(e){
-if(e.key==="Enter"){
-const cmd=input.value.toLowerCase();
-if(cmd==="games") window.location.href="games.html";
-else if(cmd==="home") window.location.href="index.html";
-else if(cmd==="about") window.location.href="about.html";
-else if(cmd==="contact") window.location.href="contact.html";
-else alert("Unknown command");input.value="";
-}});
+// Terminal commands
+const input = document.getElementById("commandInput");
+input.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    const cmd = input.value.toLowerCase().trim();
+    if(cmd==="home") window.location.href="index.html";
+    else if(cmd==="games") window.location.href="games.html";
+    else if(cmd==="about") window.location.href="about.html";
+    else if(cmd==="contact") window.location.href="contact.html";
+    else alert("Unknown command: " + cmd);
+    input.value="";
+  }
+});
 
-// Mouse distortion
-document.addEventListener("mousemove",function(e){
-const moveX=(e.clientX-window.innerWidth/2)/100;
-const moveY=(e.clientY-window.innerHeight/2)/100;
-crt.style.transform=`perspective(900px) scale(1.01) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
+// Mouse-driven CRT 3D distortion
+const crtContainer = document.getElementById("crtContainer");
+document.addEventListener("mousemove", function(e){
+  const moveX = (e.clientX - window.innerWidth/2)/60;
+  const moveY = (e.clientY - window.innerHeight/2)/60;
+  crtContainer.style.transform = `perspective(1200px) scale(1.02) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
 });
 </script>
+
 </body>
 </html>
