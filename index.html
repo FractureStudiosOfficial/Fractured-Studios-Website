@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Game Studio</title>
+<title>Fractured Studios</title>
+
+<!-- Retro Font -->
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+/* Base */
 body {
   margin: 0;
   background-color: #0d0d0d;
@@ -14,20 +17,29 @@ body {
   font-family: 'Share Tech Mono', monospace;
 }
 
-/* Scanlines */
-body::after {
-  content: "";
+/* Scanline Overlay */
+.scanlines {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 9999;
+
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,0.03),
-    rgba(255,255,255,0.03) 1px,
+    rgba(255, 159, 7, 0.05) 0px,
+    rgba(255, 159, 7, 0.05) 1px,
     transparent 2px,
     transparent 4px
   );
+}
+
+/* Keep content under scanlines */
+#terminal, #enterBtn, #homepage {
+  position: relative;
+  z-index: 1;
 }
 
 /* Terminal */
@@ -37,7 +49,7 @@ body::after {
   font-size: 18px;
 }
 
-/* Enter Button */
+/* ENTER button */
 #enterBtn {
   display: none;
   position: absolute;
@@ -62,7 +74,7 @@ body::after {
   display: none;
 }
 
-/* Hero Logo Section */
+/* Center logo section */
 .hero {
   height: 100vh;
   display: flex;
@@ -70,7 +82,7 @@ body::after {
   align-items: center;
 }
 
-/* Logo image */
+/* Logo */
 .logo {
   max-width: 300px;
   width: 80%;
@@ -87,6 +99,7 @@ body::after {
 h1 {
   font-size: 32px;
 }
+
 </style>
 </head>
 
@@ -94,20 +107,22 @@ h1 {
 
 <!-- Terminal -->
 <div id="terminal"></div>
+
+<!-- Enter Button -->
 <button id="enterBtn">ENTER</button>
 
 <!-- Homepage -->
 <div id="homepage">
 
-  <!-- Centered Logo -->
+  <!-- Center Logo -->
   <section class="hero">
-    <!-- 🔥 PUT YOUR LOGO FILE HERE -->
-    <img src="logo.png" alt="Studio Logo" class="logo">
+    <!-- 🔥 Replace with your own logo file -->
+    <img src="logo.png" class="logo">
   </section>
 
-  <!-- Scrollable Content -->
+  <!-- Scroll Content -->
   <section class="content">
-    <h1>Welcome to Your Game Studio</h1>
+    <h1>Welcome to Fractured Studios</h1>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
 
     <h1>Our Games</h1>
@@ -119,10 +134,14 @@ h1 {
 
 </div>
 
-<!-- 🔊 Sounds -->
+<!-- 🔊 Sound -->
 <audio id="enterSound" src="enter.mp3"></audio>
 
+<!-- Scanlines Overlay -->
+<div class="scanlines"></div>
+
 <script>
+
 const terminal = document.getElementById("terminal");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
@@ -135,7 +154,7 @@ Loading assets...
 Connecting to server...
 Access granted...
 
-Lorem ipsum dolor sit amet...
+Welcome user, enter Fractured Studios...
 `;
 
 let i = 0;
@@ -161,19 +180,17 @@ function showEnter() {
 }
 
 enterBtn.addEventListener("click", () => {
-  // 🔊 Play sound on user interaction (allowed by browser)
   enterSound.play();
-
   enterBtn.style.display = "none";
   homepage.style.display = "block";
-
-  // Enable scrolling now
   document.body.style.overflow = "auto";
 });
 
-// Start
+/* Start locked (no scroll during boot) */
 document.body.style.overflow = "hidden";
+
 window.onload = typeEffect;
+
 </script>
 
 </body>
