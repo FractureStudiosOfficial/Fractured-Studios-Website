@@ -4,20 +4,55 @@
 <meta charset="UTF-8">
 <title>Game Studio</title>
 
-<!-- Retro Font -->
+<!-- Retro Terminal Font -->
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-/* ------------------ CSS ------------------ */
+/* ==================== Base ==================== */
 body {
   margin: 0;
-  background-color: #0d0d0d;
+  background: #0d0d0d;
   color: #FF9F07;
   font-family: 'Share Tech Mono', monospace;
-  overflow: hidden; /* lock scrolling until boot finishes */
+  overflow: hidden;
+  cursor: none; /* for mouse distortion effect */
 }
 
-/* Scanlines overlay */
+/* ==================== CRT + Flicker + Curve + Glow ==================== */
+.crt {
+  position: relative;
+  transform: perspective(900px) scale(1.01);
+  animation: flicker 0.15s infinite;
+}
+
+.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.6) 100%);
+}
+
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.15));
+  box-shadow: inset 0 0 60px rgba(255,159,7,0.15);
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  97% { opacity: 1; }
+  98% { opacity: 0.97; }
+  99% { opacity: 0.94; }
+  100% { opacity: 1; }
+}
+
+/* ==================== Scanlines ==================== */
 .scanlines {
   position: fixed;
   inset: 0;
@@ -30,56 +65,15 @@ body {
     transparent 2px,
     transparent 4px
   );
+  animation: scanlineMove 1s linear infinite;
 }
 
-/* CRT + flicker + curve + glow */
-.crt {
-  position: relative;
-  transform: perspective(800px) scale(1.01);
+@keyframes scanlineMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
 }
 
-.crt::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  /* stronger curve */
-  background: radial-gradient(
-    ellipse at center,
-    transparent 45%,
-    rgba(0,0,0,0.35) 75%,
-    rgba(0,0,0,0.6) 100%
-  );
-}
-
-.crt::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: radial-gradient(
-    ellipse at center,
-    transparent 60%,
-    rgba(0,0,0,0.15)
-  );
-  box-shadow: inset 0 0 60px rgba(255,159,7,0.15);
-}
-
-@keyframes flicker {
-  0% { opacity: 1; }
-  97% { opacity: 1; }
-  98% { opacity: 0.97; }
-  99% { opacity: 0.94; }
-  100% { opacity: 1; }
-}
-
-.flicker {
-  animation: flicker 0.15s infinite;
-}
-
-/* Terminal text */
+/* ==================== Terminal & Button ==================== */
 #terminal {
   padding: 40px;
   white-space: pre-wrap;
@@ -88,7 +82,6 @@ body {
   z-index: 1;
 }
 
-/* ENTER button */
 #enterBtn {
   display: none;
   position: absolute;
@@ -109,7 +102,7 @@ body {
   color: #0d0d0d;
 }
 
-/* Homepage content */
+/* ==================== Homepage ==================== */
 #homepage {
   display: none;
   position: relative;
@@ -151,52 +144,72 @@ body {
     0 0 4px rgba(255,159,7,0.8),
     0 0 6px rgba(255,159,7,0.6);
 }
+
+/* ==================== Typing Input ==================== */
+#commandInput {
+  background:none;
+  border:none;
+  color:#FF9F07;
+  font-family:inherit;
+  font-size:18px;
+  outline:none;
+}
+
+/* ==================== Degauss Effect ==================== */
+@keyframes degauss {
+  0% { filter: hue-rotate(0deg) blur(0px); }
+  25% { filter: hue-rotate(180deg) blur(2px); }
+  50% { filter: hue-rotate(360deg) blur(4px); }
+  75% { filter: hue-rotate(180deg) blur(2px); }
+  100% { filter: hue-rotate(0deg) blur(0px); }
+}
+.degauss {
+  animation: degauss 0.8s ease forwards;
+}
 </style>
 </head>
 
 <body>
 
-<div class="crt flicker">
+<div class="crt flicker degauss" id="crtContainer">
 
-  <!-- Terminal screen -->
+  <!-- Terminal -->
   <div id="terminal"></div>
 
-  <!-- ENTER button -->
+  <!-- Enter Button -->
   <button id="enterBtn">ENTER</button>
 
   <!-- Homepage -->
   <div id="homepage">
 
-    <!-- Centered Logo -->
+    <!-- Logo -->
     <section class="hero">
-      <img src="logo.png" class="logo">
+      <img src="FracturedF-Transparant.png" class="logo">
     </section>
 
     <!-- Scrollable content -->
     <section class="content">
       <h1 class="phosphor" data-text="Welcome">Welcome</h1>
       <p>> type a command:</p>
-      <input id="commandInput" placeholder="> enter command..." style="background:none;border:none;color:#FF9F07;font-family:inherit;font-size:18px;outline:none;">
-
+      <input id="commandInput" placeholder="> enter command...">
       <p>Navigation commands: <strong>games</strong>, <strong>home</strong>, <strong>about</strong></p>
     </section>
 
   </div>
-
 </div>
 
-<!-- Scanlines overlay -->
+<!-- Scanlines -->
 <div class="scanlines"></div>
 
-<!-- 🔊 Sounds -->
+<!-- Sounds -->
 <audio id="enterSound" src="enter.mp3"></audio>
 <audio id="boot1" src="boot1.mp3"></audio>
 <audio id="boot2" src="boot2.mp3"></audio>
 <audio id="hum" src="hum.mp3" loop></audio>
+<audio id="typeChar" src="type.mp3"></audio> <!-- typing sound per character -->
 
-<!-- ------------------ JAVASCRIPT ------------------ -->
-<!-- This is EXACTLY where your JS goes -->
 <script>
+/* ---------------- Terminal Boot & Typing ---------------- */
 const terminal = document.getElementById("terminal");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
@@ -204,26 +217,45 @@ const enterSound = document.getElementById("enterSound");
 const boot1 = document.getElementById("boot1");
 const boot2 = document.getElementById("boot2");
 const hum = document.getElementById("hum");
+const typeChar = document.getElementById("typeChar");
 const input = document.getElementById("commandInput");
 
-const text = `
-Booting system...
-Initializing modules...
-Loading assets...
-Connecting to server...
-Access granted...
-Lorem ipsum...
-`;
+const bootMessages = [
+  "Booting system...",
+  "Initializing modules...",
+  "Loading assets...",
+  "Connecting to server...",
+  "Access granted..."
+];
 
+const errorMessages = [
+  "ERROR: Module X failed to load",
+  "WARNING: Network delay detected",
+  "ERROR: Asset missing, skipping",
+  "WARNING: Low memory"
+];
+
+let terminalText = "";
+bootMessages.forEach(msg => { terminalText += msg + "\n"; });
 let i = 0;
 
-// Typing effect + boot sounds
+// Add random boot errors
+let errorChance = 0.2; // 20% chance per message
+let bootTextArray = terminalText.split("\n").map(line => {
+  if(Math.random() < errorChance) {
+    return line + " " + errorMessages[Math.floor(Math.random()*errorMessages.length)];
+  }
+  return line;
+});
+terminalText = bootTextArray.join("\n");
+
 function typeEffect() {
-  if (i === 0) boot1.play();
-  if (i < text.length) {
-    terminal.textContent += text.charAt(i);
+  if(i === 0) boot1.play();
+  if(i < terminalText.length) {
+    terminal.textContent += terminalText.charAt(i);
+    typeChar.currentTime = 0; typeChar.play(); // typing sound per char
     i++;
-    if (i === 20) boot2.play();
+    if(i === 20) boot2.play();
     setTimeout(typeEffect, 25);
   } else {
     hum.play();
@@ -231,7 +263,6 @@ function typeEffect() {
   }
 }
 
-// Show ENTER button after boot
 function showEnter() {
   terminal.style.transition = "opacity 1s";
   terminal.style.opacity = 0;
@@ -241,7 +272,7 @@ function showEnter() {
   }, 1000);
 }
 
-// Click ENTER → show homepage
+// ENTER click
 enterBtn.addEventListener("click", () => {
   enterSound.play();
   enterBtn.style.display = "none";
@@ -250,18 +281,26 @@ enterBtn.addEventListener("click", () => {
 });
 
 // Fake terminal commands
-input.addEventListener("keydown", function(e) {
-  if (e.key === "Enter") {
+input.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
     const cmd = input.value.toLowerCase();
-    if (cmd === "games") window.location.href = "games.html";
-    else if (cmd === "home") window.location.href = "index.html";
-    else if (cmd === "about") alert("About page coming soon...");
+    if(cmd==="games") window.location.href="games.html";
+    else if(cmd==="home") window.location.href="index.html";
+    else if(cmd==="about") alert("About page coming soon...");
     else alert("Unknown command");
-    input.value = "";
+    input.value="";
   }
 });
 
-// Start typing on load
+// Mouse distortion field
+document.addEventListener("mousemove", function(e){
+  const crt = document.getElementById("crtContainer");
+  const moveX = (e.clientX - window.innerWidth/2)/100;
+  const moveY = (e.clientY - window.innerHeight/2)/100;
+  crt.style.transform = `perspective(900px) scale(1.01) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
+});
+
+// Start typing
 window.onload = typeEffect;
 </script>
 
