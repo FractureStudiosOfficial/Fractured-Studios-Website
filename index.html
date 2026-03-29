@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home | Retro Terminal</title>
+<title>Home | Fractured Studios</title>
 <style>
   /* --- Fonts & Colors --- */
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -69,6 +69,12 @@
     text-align: center;
   }
 
+  /* hide terminal */
+  #prompt {
+  display: none;
+  ...
+}
+
   /* Terminal */
   #terminal {
     width: 80%;
@@ -118,7 +124,7 @@
 </head>
 <body>
 <div id="crt-container">
-  <div id="logo" class="crt-text">MY RETRO SITE</div>
+  <img id="logo" class="crt-text" src="FracturedF-Transparant.png" alt="Logo">
   <div id="terminal" class="crt-text"></div>
   <div id="prompt">
     <span>&gt;</span>
@@ -196,6 +202,18 @@ async function startup() {
   await typeLine('System ready. Type a command below.');
 }
 startup();
+
+  async function startup() {
+  for (let msg of startupMessages) {
+    await typeLine(msg);
+    maybeError();
+  }
+  await typeLine('System ready. Type a command below.');
+  
+  // Show the command bar
+  document.getElementById('prompt').style.display = 'flex';
+  commandInput.focus();
+}
 
 // Handle commands
 commandInput.addEventListener('keydown', (e) => {
