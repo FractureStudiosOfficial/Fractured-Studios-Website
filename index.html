@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Game Studio</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  margin: 0;
+  background-color: #0d0d0d;
+  color: #FF9F07;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Scanlines */
+body::after {
+  content: "";
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03),
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+/* Terminal */
+#terminal {
+  padding: 40px;
+  white-space: pre-wrap;
+  font-size: 18px;
+}
+
+/* Enter Button */
+#enterBtn {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: 2px solid #FF9F07;
+  color: #FF9F07;
+  padding: 15px 30px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#enterBtn:hover {
+  background: #FF9F07;
+  color: #0d0d0d;
+}
+
+/* Homepage */
+#homepage {
+  display: none;
+}
+
+/* Hero Logo Section */
+.hero {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo image */
+.logo {
+  max-width: 300px;
+  width: 80%;
+  filter: drop-shadow(0 0 10px #FF9F07);
+}
+
+/* Scroll content */
+.content {
+  padding: 60px 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  font-size: 32px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Terminal -->
+<div id="terminal"></div>
+<button id="enterBtn">ENTER</button>
+
+<!-- Homepage -->
+<div id="homepage">
+
+  <!-- Centered Logo -->
+  <section class="hero">
+    <!-- 🔥 PUT YOUR LOGO FILE HERE -->
+    <img src="logo.png" alt="Studio Logo" class="logo">
+  </section>
+
+  <!-- Scrollable Content -->
+  <section class="content">
+    <h1>Welcome to Your Game Studio</h1>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+
+    <h1>Our Games</h1>
+    <p>More placeholder content...</p>
+
+    <h1>About</h1>
+    <p>Even more placeholder text...</p>
+  </section>
+
+</div>
+
+<!-- 🔊 Sounds -->
+<audio id="enterSound" src="enter.mp3"></audio>
+
+<script>
+const terminal = document.getElementById("terminal");
+const enterBtn = document.getElementById("enterBtn");
+const homepage = document.getElementById("homepage");
+const enterSound = document.getElementById("enterSound");
+
+const text = `
+Booting system...
+Initializing modules...
+Loading assets...
+Connecting to server...
+Access granted...
+
+Lorem ipsum dolor sit amet...
+`;
+
+let i = 0;
+
+function typeEffect() {
+  if (i < text.length) {
+    terminal.textContent += text.charAt(i);
+    i++;
+    setTimeout(typeEffect, 25);
+  } else {
+    setTimeout(showEnter, 800);
+  }
+}
+
+function showEnter() {
+  terminal.style.transition = "opacity 1s";
+  terminal.style.opacity = 0;
+
+  setTimeout(() => {
+    terminal.style.display = "none";
+    enterBtn.style.display = "block";
+  }, 1000);
+}
+
+enterBtn.addEventListener("click", () => {
+  // 🔊 Play sound on user interaction (allowed by browser)
+  enterSound.play();
+
+  enterBtn.style.display = "none";
+  homepage.style.display = "block";
+
+  // Enable scrolling now
+  document.body.style.overflow = "auto";
+});
+
+// Start
+document.body.style.overflow = "hidden";
+window.onload = typeEffect;
+</script>
+
+</body>
+</html>
