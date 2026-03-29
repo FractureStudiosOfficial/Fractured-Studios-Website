@@ -31,7 +31,10 @@ html, body {
   animation: scanlineMove 1s linear infinite;
   z-index: 9999;
 }
-@keyframes scanlineMove { 0% { background-position:0 0;} 100%{background-position:0 4px;} }
+@keyframes scanlineMove {
+  0% { background-position:0 0;}
+  100%{background-position:0 4px;}
+}
 
 /* Boot screen */
 #bootScreen {
@@ -48,6 +51,7 @@ html, body {
   text-align: center;
   z-index: 1000;
 }
+
 #enterBtn {
   display:none;
   margin-top:40px;
@@ -58,44 +62,109 @@ html, body {
   color:#FF9F07;
   cursor:pointer;
 }
-#enterBtn:hover { background:#FF9F07; color:#0d0d0d; }
 
-/* CRT container wrapper */
+#enterBtn:hover {
+  background:#FF9F07;
+  color:#0d0d0d;
+}
+
+/* CRT wrapper with curvature */
 #crtWrapper {
   position: absolute;
   inset: 0;
   overflow: hidden;
   z-index:1;
+
+  border-radius: 40px;
+  box-shadow:
+    inset 0 0 120px rgba(0,0,0,0.9),
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 0 60px rgba(0,0,0,0.8);
 }
 
 /* CRT content layer */
 #crtContainer {
-  width: 100%;
-  min-height: 100vh;
+  width: 110%;
+  height: 110vh;
   transform-origin: center;
   filter: url(#crtDistortion);
+  transform: perspective(1000px) scale(1.05);
 }
 
-/* Logo and homepage styling */
+/* Logo + homepage */
 #homepage {
   display: none;
   overflow: auto;
 }
-.hero { height:100vh; display:flex; justify-content:center; align-items:center; }
-.logo { max-width:300px; width:80%; opacity:0; transform:scale(0.8); filter: drop-shadow(0 0 15px #FF9F07); animation: logoReveal 1.5s ease forwards; }
-@keyframes logoReveal { 0%{opacity:0;transform:scale(0.7);filter:drop-shadow(0 0 0 #FF9F07);}60%{opacity:1;transform:scale(1.05);filter:drop-shadow(0 0 20px #FF9F07);}100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 15px #FF9F07);} }
-.logo.flicker-glow { animation: logoFlicker 1.5s infinite; }
-@keyframes logoFlicker { 0%,100%{filter:drop-shadow(0 0 15px #FF9F07);opacity:1;}10%{filter:drop-shadow(0 0 20px #FF9F07);opacity:0.97;}20%{filter:drop-shadow(0 0 12px #FF9F07);opacity:0.98;}35%{filter:drop-shadow(0 0 18px #FF9F07);opacity:0.96;}50%{filter:drop-shadow(0 0 15px #FF9F07);opacity:0.99;}70%{filter:drop-shadow(0 0 22px #FF9F07);opacity:0.95;}85%{filter:drop-shadow(0 0 15px #FF9F07);opacity:1;} }
 
-.content { padding:60px; max-width:900px; margin:auto; }
-.phosphor { text-shadow:0 0 2px #FF9F07,0 0 4px rgba(255,159,7,0.8),0 0 6px rgba(255,159,7,0.6); }
-#commandInput { background:none;border:none;color:#FF9F07;font-family:inherit;font-size:18px;outline:none;width:100%;max-width:500px; }
+.hero {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-/* Flicker CRT overall */
-.flicker { animation:flicker 0.15s infinite; }
-@keyframes flicker { 0%{opacity:1;}97%{opacity:1;}98%{opacity:0.97;}99%{opacity:0.94;}100%{opacity:1;} }
+.logo {
+  max-width:300px;
+  width:80%;
+  opacity:0;
+  transform:scale(0.8);
+  filter: drop-shadow(0 0 15px #FF9F07);
+  animation: logoReveal 1.5s ease forwards;
+}
+
+@keyframes logoReveal {
+  0%{opacity:0;transform:scale(0.7);}
+  60%{opacity:1;transform:scale(1.05);}
+  100%{opacity:1;transform:scale(1);}
+}
+
+.logo.flicker-glow {
+  animation: logoFlicker 1.5s infinite;
+}
+
+@keyframes logoFlicker {
+  0%,100%{opacity:1;}
+  50%{opacity:0.95;}
+}
+
+.content {
+  padding:60px;
+  max-width:900px;
+  margin:auto;
+}
+
+.phosphor {
+  text-shadow:
+    0 0 2px #FF9F07,
+    0 0 4px rgba(255,159,7,0.8),
+    0 0 6px rgba(255,159,7,0.6);
+}
+
+#commandInput {
+  background:none;
+  border:none;
+  color:#FF9F07;
+  font-family:inherit;
+  font-size:18px;
+  outline:none;
+  width:100%;
+  max-width:500px;
+}
+
+/* CRT flicker */
+.flicker {
+  animation:flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0%{opacity:1;}
+  98%{opacity:0.97;}
+  100%{opacity:1;}
+}
 </style>
 </head>
+
 <body>
 
 <!-- Boot Screen -->
@@ -104,13 +173,14 @@ html, body {
   <button id="enterBtn">ENTER</button>
 </div>
 
-<!-- CRT Wrapper for distortion -->
+<!-- CRT Wrapper -->
 <div id="crtWrapper" class="flicker">
   <div id="crtContainer">
     <div id="homepage">
       <section class="hero">
         <img src="FracturedF-Transparant.png" class="logo" id="logo">
       </section>
+
       <section class="content">
         <h1 class="phosphor">Welcome to Fractured Studios</h1>
         <p>> Type a command:</p>
@@ -123,23 +193,40 @@ html, body {
 
 <div class="scanlines"></div>
 
-<!-- SVG CRT Distortion Filter -->
-<svg style="display:none">
+<!-- TRUE CRT Fisheye Distortion -->
+<svg width="0" height="0" style="position:absolute">
   <filter id="crtDistortion">
-    <feImage xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAAAGc6iTAAAA..."/>
-    <feDisplacementMap in2="SourceGraphic" in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="0.8"
+      numOctaves="2"
+      seed="2"
+      result="noise"/>
+
+    <feDisplacementMap
+      in="SourceGraphic"
+      in2="noise"
+      scale="20"
+      xChannelSelector="R"
+      yChannelSelector="G"/>
   </filter>
 </svg>
 
 <script>
-// Boot screen typing
+// Boot typing
 const bootScreen = document.getElementById("bootScreen");
 const bootText = document.getElementById("bootText");
 const enterBtn = document.getElementById("enterBtn");
 const homepage = document.getElementById("homepage");
 const logo = document.getElementById("logo");
 
-const bootMessages = ["Booting system...", "Loading modules...", "Connecting...", "Access granted..."];
+const bootMessages = [
+  "Booting system...",
+  "Loading modules...",
+  "Connecting...",
+  "Access granted..."
+];
+
 let terminalText = bootMessages.join("\n") + "\n";
 let i=0;
 
@@ -166,24 +253,30 @@ const input = document.getElementById("commandInput");
 input.addEventListener("keydown", function(e){
   if(e.key==="Enter"){
     const cmd=input.value.toLowerCase().trim();
+
     if(cmd==="home") window.location.href="index.html";
     else if(cmd==="games") window.location.href="games.html";
     else if(cmd==="about") window.location.href="about.html";
     else if(cmd==="contact") window.location.href="contact.html";
     else alert("Unknown command: "+cmd);
+
     input.value="";
   }
 });
 
-// Mouse-driven subtle tilt
+// Mouse tilt
 const crtContainer = document.getElementById("crtContainer");
+
 document.addEventListener("mousemove", function(e){
   const moveX = (e.clientX - window.innerWidth/2)/70;
   const moveY = (e.clientY - window.innerHeight/2)/70;
-  crtContainer.style.transform = `perspective(1200px) scale(1.02) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
+
+  crtContainer.style.transform =
+    `perspective(1200px) scale(1.05)
+     rotateX(${moveY}deg)
+     rotateY(${moveX}deg)`;
 });
 </script>
-
 
 </body>
 </html>
