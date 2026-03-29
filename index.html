@@ -85,17 +85,44 @@
             drop-shadow(0 0 20px #FF9F07);
   }
 
-  /* Terminal */
-  #terminal {
-    width: 80%;
-    max-width: 800px;
-    background: rgba(0,0,0,0.5);
-    padding: 1em;
-    border-radius: 5px;
-    box-shadow: 0 0 20px rgba(255,159,7,0.4);
-    min-height: 200px;
-    overflow-y: auto;
-  }
+/* Subtle amber tint over the whole site */
+#amber-tint {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,159,7,0.02); /* very subtle amber overlay */
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Terminal box full width */
+#terminal {
+  width: 90%;               /* almost full width */
+  max-width: 1200px;
+  background: rgba(0,0,0,0.25); /* slightly darker than background */
+  padding: 1em;
+  border-radius: 5px;
+  box-shadow: 0 0 20px rgba(255,159,7,0.2);
+  min-height: 200px;
+  overflow-y: auto;
+  text-align: left;          /* left-aligned text */
+  margin-bottom: 0.5em;
+}
+
+/* Available commands text below terminal */
+#available-commands {
+  width: 90%;
+  max-width: 1200px;
+  color: #FF9F07;
+  text-shadow:
+    0 0 2px #FF9F07,
+    0 0 4px #FF9F07;
+  font-size: 0.9em;
+  text-align: left;          /* left-aligned */
+  margin: 0 auto 1em auto;
+}
 
   .line {
     margin: 0.2em 0;
@@ -165,6 +192,13 @@
     <input type="text" id="command" autofocus autocomplete="off">
   </div>
 </div>
+
+  <!-- Amber tint overlay -->
+<div id="amber-tint"></div>
+
+<div id="crt-container">
+  <img id="logo" class="crt-text" src="logo.png" alt="Logo">
+  <div id="terminal" class="crt-text"></div>
 
 <!-- Scanlines -->
 <div id="scanlines"></div>
@@ -242,6 +276,17 @@ async function startup() {
   commandInput.focus();
 }
 startup();
+
+  <!-- Available commands -->
+  <div id="available-commands">
+    Available terms: About, Games, Contact
+  </div>
+
+  <div id="prompt">
+    <span>&gt;</span>
+    <input type="text" id="command" autofocus autocomplete="off">
+  </div>
+</div>
 
 // Handle commands
 commandInput.addEventListener('keydown', (e) => {
