@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | Terminal</title>
+<title>UIC Terminal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -186,19 +186,23 @@ const fakeErrors = [
   'ERROR: Kernel mismatch'
 ];
 
-// ASYNC BOOT FUNCTION
+// ASYNC BOOT FUNCTION WITH RANDOM SPEEDS
 async function boot() {
   for (let line of bootLines) {
+    // Random delay 40–120ms
+    const delay = 40 + Math.random()*80;
+
     // 30% chance to insert fake error
     if (Math.random() < 0.3) {
       const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
       terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
       terminal.scrollTop = terminal.scrollHeight;
-      await new Promise(r=>setTimeout(r,50));
+      await new Promise(r => setTimeout(r, delay));
     }
+
     terminal.innerHTML += line + "<br>";
     terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r=>setTimeout(r,50));
+    await new Promise(r => setTimeout(r, delay));
   }
 
   terminal.innerHTML += "<br>System Ready.<br>";
