@@ -89,8 +89,8 @@ body {
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
+    transparent 2px,
+    transparent 6px
   );
   animation:flicker .12s infinite;
   z-index:1001;
@@ -127,12 +127,12 @@ body {
     </div>
 
     <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact, Index
+      Available terms: About, Games, Contact
     </p>
   </div>
 
   <div id="logo-area">
-    <img id="logo" src="FracturedF-Transparant.png">
+    <img id="logo" src="logo.png">
   </div>
 
 </div>
@@ -164,7 +164,7 @@ document.addEventListener("mousemove", e => {
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
 
-// BOOT LINES AND FAKE ERRORS
+// CUSTOM STARTUP SEQUENCE
 const bootLines = [
   'U.I.C. Startup sequence...',
   'Initializing kernel modules...',
@@ -172,13 +172,14 @@ const bootLines = [
   'Verifying memory...',
   'Checking system integrity...',
   'Calibrating display output...',
-  'Starting process scheduler...'
-  'Startup succesful'
+  'Starting process scheduler...',
+  'Startup successful',
   '------------------------',
   'Welcome to U.I.C. Systems',
-  '------------------------',
+  '------------------------'
 ];
 
+// FAKE ERRORS
 const fakeErrors = [
   'ERROR: Memory leak detected',
   'WARNING: Clock desync',
@@ -187,13 +188,13 @@ const fakeErrors = [
   'ERROR: Kernel mismatch'
 ];
 
-// ASYNC BOOT FUNCTION WITH RANDOM SPEEDS
+// ASYNC BOOT WITH RANDOM SPEEDS
 async function boot() {
   for (let line of bootLines) {
     // Random delay 40–120ms
     const delay = 40 + Math.random()*80;
 
-    // 30% chance to insert fake error
+    // 30% chance of random error
     if (Math.random() < 0.3) {
       const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
       terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
