@@ -149,9 +149,9 @@ const os = document.getElementById("os");
 
 // COMMAND LOGOS
 const commandLogos = {
-  about: "logo-about.png",
-  games: "logo-games.png",
-  contact: "logo-contact.png"
+  about: "Aboutui.png",
+  games: "Gamesui.png",
+  contact: "Mail-UI.png"
 };
 
 let pendingCommand = null;
@@ -229,7 +229,7 @@ input.addEventListener("keydown", e => {
       window.location = pendingCommand + ".html";
     } else {
       terminal.innerHTML += "Cancelled.<br>";
-      logo.src = "logo.png";
+      logo.src = "FracturedF-Transparant.png";
     }
     pendingCommand = null;
     terminal.scrollTop = terminal.scrollHeight;
