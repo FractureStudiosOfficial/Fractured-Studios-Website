@@ -11,15 +11,6 @@ body {
   font-family:'Share Tech Mono',monospace; overflow:hidden;
   perspective:1000px; display:flex; justify-content:space-between; align-items:center;
 
-  // --- 90's style line-by-line page load ---
-const gamesSection=document.getElementById('games-section');
-const gameLines=[
-  'Loading Terminal...',
-  '------------------------',
-  'U.I.C. Systems',
-  '------------------------'
-];
-}
 #amber-tint {
   position:fixed; top:0; left:0; width:100%; height:100%;
   background:rgba(255,159,7,0.02); pointer-events:none; z-index:1000;
@@ -176,6 +167,37 @@ document.addEventListener('mousemove',(e)=>{
   const y=(window.innerHeight/2 - e.clientY)/1000;
   crtContainer.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
 });
+
+  // --- 90's style line-by-line page load ---
+const terminal = document.getElementById('terminal');
+const commandInput = document.getElementById('command');
+
+const gameLines = [
+  'Loading Terminal...',
+  '------------------------',
+  'U.I.C. Systems',
+  '------------------------'
+];
+
+const typeDelay = 50; // milliseconds per line, adjust for faster/slower
+
+async function loadTerminalLines() {
+  for (let line of gameLines) {
+    const div = document.createElement('div');
+    div.textContent = line;
+    terminal.appendChild(div);
+    terminal.scrollTop = terminal.scrollHeight;
+    await new Promise(r => setTimeout(r, typeDelay));
+  }
+  
+  // Enable the input after loading
+  commandInput.disabled = false;
+  commandInput.focus();
+}
+
+// Start the line-by-line load
+loadTerminalLines();
+  
 </script>
 </body>
 </html>
