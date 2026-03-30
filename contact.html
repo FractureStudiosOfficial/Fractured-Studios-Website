@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fractured Studios | Contact</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+/* CRT container */
+#crt-container {
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:center;
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
+}
+
+/* Content sections */
+#contact-content {
+  width:80%;
+  margin-bottom:150px; /* space for terminal */
+}
+
+.section {
+  background:rgba(0,0,0,.2);
+  border:1px solid rgba(255,159,7,.3);
+  padding:20px;
+  margin:20px 0;
+  border-radius:6px;
+}
+
+.section h2 {
+  margin:0 0 10px 0;
+  color:#FF9F07;
+}
+
+.section p {
+  margin:0 0 10px 0;
+}
+
+.section input, .section textarea, .section button {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:rgba(0,0,0,.15);
+  border:1px solid rgba(255,159,7,.3);
+  color:#FF9F07;
+  font-family:inherit;
+  border-radius:4px;
+}
+
+/* Terminal pinned to bottom */
+#terminal-box {
+  position:fixed;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+}
+
+#terminal {
+  background:rgba(0,0,0,.25);
+  padding:20px;
+  border:1px solid rgba(255,159,7,.2);
+  min-height:150px;
+  max-height:250px;
+  overflow-y:auto;
+}
+
+#prompt {
+  display:flex;
+  margin-top:10px;
+}
+
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* OS version */
+#os {
+  position:fixed;
+  bottom:10px;
+  right:15px;
+  font-size:12px;
+  opacity:.7;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  animation:flicker .12s infinite;
+  z-index:1001;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* Amber tint overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+
+  <div id="contact-content">
+    <div class="section">
+      <h2>Contact Us</h2>
+      <p>Have questions or want to get in touch? Use the form below or reach out via our social channels.</p>
+    </div>
+
+    <div class="section">
+      <h2>Send a Message</h2>
+      <input type="text" placeholder="Your Name">
+      <input type="email" placeholder="Your Email">
+      <textarea rows="5" placeholder="Your Message"></textarea>
+      <button>Send Message</button>
+    </div>
+
+    <div class="section">
+      <h2>Social Links</h2>
+      <p>Add links to your Discord, Twitter, or other platforms here.</p>
+      <p style="opacity:.6">Example: Discord: UIC#1234 | Twitter: @UIC_Systems</p>
+    </div>
+
+    <div class="section">
+      <h2>Additional Info</h2>
+      <p>This section can be used for FAQs, office locations, or anything else you want visitors to see.</p>
+    </div>
+  </div>
+
+  <div id="terminal-box">
+    <div id="terminal"></div>
+    <div id="prompt">
+      <span>></span>
+      <input id="cmd" autocomplete="off">
+    </div>
+    <p style="margin-top:10px;opacity:.6">
+      Available terms: About, Games, Contact
+    </p>
+  </div>
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// ELEMENTS
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("cmd");
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+
+// COMMAND LOGOS
+const commandLogos = {
+  about: "logo-about.png",
+  games: "logo-games.png",
+  contact: "logo-contact.png"
+};
+
+let pendingCommand = null;
+
+// 3D tilt
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/400;
+  const y = (window.innerHeight/2 - e.clientY)/400;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// COMMAND HANDLER
+input.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+
+  const value = input.value.toLowerCase().trim();
+  terminal.innerHTML += `&gt; ${value}<br>`;
+  input.value = "";
+
+  if (pendingCommand) {
+    if (value === "y") {
+      window.location = pendingCommand + ".html";
+    } else {
+      terminal.innerHTML += "Cancelled.<br>";
+    }
+    pendingCommand = null;
+    terminal.scrollTop = terminal.scrollHeight;
+    return;
+  }
+
+  if (commandLogos[value]) {
+    pendingCommand = value;
+    terminal.innerHTML += "Confirm? (Y/N)<br>";
+  } else {
+    terminal.innerHTML += "Unknown command<br>";
+  }
+  terminal.scrollTop = terminal.scrollHeight;
+});
+</script>
+
+</body>
+</html>
