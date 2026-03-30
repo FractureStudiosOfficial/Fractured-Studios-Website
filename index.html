@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | Terminal</title>
+<title>UIC Terminal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body{
+body {
   margin:0;
   background:#111;
   color:#FF9F07;
-  font-family:'Share Tech Mono',monospace;
+  font-family:'Share Tech Mono', monospace;
   overflow:hidden;
   perspective:1000px;
 }
 
 /* CRT container */
-#crt-container{
+#crt-container {
   height:100vh;
   display:flex;
   align-items:center;
@@ -30,24 +30,25 @@ body{
 }
 
 /* Terminal */
-#terminal-box{
+#terminal-box {
   width:50%;
 }
 
-#terminal{
+#terminal {
   background:rgba(0,0,0,.25);
   padding:20px;
   border:1px solid rgba(255,159,7,.2);
   min-height:250px;
+  max-height:400px;
   overflow-y:auto;
 }
 
-#prompt{
+#prompt {
   display:flex;
   margin-top:10px;
 }
 
-#prompt input{
+#prompt input {
   background:transparent;
   border:none;
   outline:none;
@@ -57,21 +58,21 @@ body{
 }
 
 /* Logo */
-#logo-area{
+#logo-area {
   width:40%;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
-#logo{
+#logo {
   width:260px;
   filter:drop-shadow(0 0 10px #FF9F07);
   transition:.25s ease;
 }
 
 /* OS version */
-#os{
+#os {
   position:fixed;
   bottom:10px;
   right:15px;
@@ -79,8 +80,8 @@ body{
   opacity:.7;
 }
 
-/* scanlines */
-#scanlines{
+/* Scanlines */
+#scanlines {
   position:fixed;
   inset:0;
   pointer-events:none;
@@ -94,14 +95,14 @@ body{
   animation:flicker .12s infinite;
   z-index:1001;
 }
-@keyframes flicker{
+@keyframes flicker {
   0%{opacity:.15}
   50%{opacity:.07}
   100%{opacity:.15}
 }
 
-/* amber tint */
-#amber{
+/* Amber tint overlay */
+#amber {
   position:fixed;
   inset:0;
   background:rgba(255,159,7,.04);
@@ -117,54 +118,57 @@ body{
 
 <div id="crt-container">
 
-<div id="terminal-box">
-<div id="terminal"></div>
+  <div id="terminal-box">
+    <div id="terminal"></div>
 
-<div id="prompt">
-<span>></span>
-<input id="cmd" autocomplete="off" disabled>
-</div>
+    <div id="prompt">
+      <span>></span>
+      <input id="cmd" autocomplete="off" disabled>
+    </div>
 
-<p style="margin-top:10px;opacity:.6">
-Available terms: About, Games, Contact
-</p>
-</div>
+    <p style="margin-top:10px;opacity:.6">
+      Available terms: About, Games, Contact
+    </p>
+  </div>
 
-<div id="logo-area">
-<img id="logo" src="logo.png">
-</div>
+  <div id="logo-area">
+    <img id="logo" src="logo.png">
+  </div>
 
 </div>
 
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-const terminal=document.getElementById("terminal")
-const input=document.getElementById("cmd")
-const logo=document.getElementById("logo")
-const container=document.getElementById("crt-container")
-const os=document.getElementById("os")
+// ELEMENTS
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("cmd");
+const logo = document.getElementById("logo");
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
 
-let pendingCommand=null
+// COMMAND LOGOS
+const commandLogos = {
+  about: "logo-about.png",
+  games: "logo-games.png",
+  contact: "logo-contact.png"
+};
 
-/* 3D tilt */
-document.addEventListener("mousemove",(e)=>{
-  const x=(window.innerWidth/2-e.clientX)/400
-  const y=(window.innerHeight/2-e.clientY)/400
-  container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
-  os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
-})
+let pendingCommand = null;
 
-/* logo images */
-const commandLogos={
-  about:"logo-about.png",
-  games:"logo-games.png",
-  contact:"logo-contact.png"
-}
+// 3D tilt
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/400;
+  const y = (window.innerHeight/2 - e.clientY)/400;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
 
-/* Boot lines and fake errors */
-const bootLines=[
-  'U.I.C. System startup...',
+// BOOT LINES AND FAKE ERRORS
+const bootLines = [
+  'Loading Terminal...',
+  '------------------------',
+  'U.I.C. Systems',
   '------------------------',
   'Initializing kernel modules...',
   'Loading device drivers...',
@@ -172,75 +176,69 @@ const bootLines=[
   'Checking system integrity...',
   'Calibrating display output...',
   'Starting process scheduler...'
-  'System startup succesful'
-  '------------------------',
-  'Welcome to U.I.C. Systems',
-  '------------------------',
-]
+];
 
-const fakeErrors=[
+const fakeErrors = [
   'ERROR: Memory leak detected',
   'WARNING: Clock desync',
   'ERROR: Bus timeout',
   'ALERT: Unknown device',
   'ERROR: Kernel mismatch'
-]
+];
 
-/* Async function to type boot sequence line by line */
-async function boot(){
-  for(let line of bootLines){
-    // 30% chance to insert a random error
-    if(Math.random()<0.3){
-      const err=fakeErrors[Math.floor(Math.random()*fakeErrors.length)]
-      terminal.innerHTML+=`<span style="color:#ff6a00">${err}</span><br>`
-      terminal.scrollTop=terminal.scrollHeight
-      await new Promise(r=>setTimeout(r,50))
+// ASYNC BOOT FUNCTION
+async function boot() {
+  for (let line of bootLines) {
+    // 30% chance to insert fake error
+    if (Math.random() < 0.3) {
+      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
+      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
+      terminal.scrollTop = terminal.scrollHeight;
+      await new Promise(r=>setTimeout(r,50));
     }
-
-    terminal.innerHTML+=line+"<br>"
-    terminal.scrollTop=terminal.scrollHeight
-    await new Promise(r=>setTimeout(r,50))
+    terminal.innerHTML += line + "<br>";
+    terminal.scrollTop = terminal.scrollHeight;
+    await new Promise(r=>setTimeout(r,50));
   }
 
-  terminal.innerHTML+="<br>System Ready.<br>"
-  terminal.scrollTop=terminal.scrollHeight
-  input.disabled=false
-  input.focus()
+  terminal.innerHTML += "<br>System Ready.<br>";
+  terminal.scrollTop = terminal.scrollHeight;
+  input.disabled = false;
+  input.focus();
 }
 
-boot()
+// START BOOT
+boot();
 
-/* Command handler */
-input.addEventListener("keydown",e=>{
-  if(e.key!=="Enter") return
-  const value=input.value.toLowerCase().trim()
-  terminal.innerHTML+=`&gt; ${value}<br>`
-  input.value=""
+// COMMAND HANDLER
+input.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
 
-  if(pendingCommand){
-    if(value==="y"){
-      window.location=pendingCommand+".html"
+  const value = input.value.toLowerCase().trim();
+  terminal.innerHTML += `&gt; ${value}<br>`;
+  input.value = "";
+
+  if (pendingCommand) {
+    if (value === "y") {
+      window.location = pendingCommand + ".html";
+    } else {
+      terminal.innerHTML += "Cancelled.<br>";
+      logo.src = "logo.png";
     }
-    else{
-      terminal.innerHTML+="Cancelled.<br>"
-      logo.src="logo.png"
-    }
-    pendingCommand=null
-    terminal.scrollTop=terminal.scrollHeight
-    return
+    pendingCommand = null;
+    terminal.scrollTop = terminal.scrollHeight;
+    return;
   }
 
-  if(commandLogos[value]){
-    pendingCommand=value
-    logo.src=commandLogos[value]
-    terminal.innerHTML+=`Confirm? (Y/N)<br>`
+  if (commandLogos[value]) {
+    pendingCommand = value;
+    logo.src = commandLogos[value];
+    terminal.innerHTML += "Confirm? (Y/N)<br>";
+  } else {
+    terminal.innerHTML += "Unknown command<br>";
   }
-  else{
-    terminal.innerHTML+="Unknown command<br>"
-  }
-
-  terminal.scrollTop=terminal.scrollHeight
-})
+  terminal.scrollTop = terminal.scrollHeight;
+});
 </script>
 
 </body>
