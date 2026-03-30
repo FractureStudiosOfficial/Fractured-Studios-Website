@@ -178,6 +178,21 @@ function loadScreenshotsLineByLine(){
   nextLine();
 }
 loadScreenshotsLineByLine();
+
+  // 3D movement with OS version tilting fully
+const crtContainer = document.getElementById('crt-container');
+const osVersion = document.getElementById('os-version');
+
+document.addEventListener('mousemove', (e) => {
+  const x = (window.innerWidth/2 - e.clientX)/300; // tilt intensity
+  const y = (window.innerHeight/2 - e.clientY)/300;
+  
+  // Tilt the main container
+  crtContainer.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  
+  // Tilt the OS version in sync
+  osVersion.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
 </script>
 
 </body>
