@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Games</title>
+<title>Fractured Studios | Games</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -20,11 +20,12 @@ perspective:1000px;
 /* CRT container */
 #crt-container{
 padding:40px;
+padding-bottom:80px; /* prevent content hiding behind terminal */
 transform-style:preserve-3d;
 transition:transform .08s ease-out;
 }
 
-/* Amber tint */
+/* Amber tint overlay */
 #amber{
 position:fixed;
 inset:0;
@@ -48,7 +49,6 @@ transparent 6px
 animation:flicker .12s infinite;
 z-index:1001;
 }
-
 @keyframes flicker{
 0%{opacity:.15}
 50%{opacity:.08}
@@ -75,7 +75,7 @@ border-bottom:1px solid rgba(255,159,7,.3);
 padding-bottom:10px;
 }
 
-/* Game list */
+/* Games list */
 .games{
 display:flex;
 flex-direction:column;
@@ -126,6 +126,7 @@ padding:10px;
 border-top:1px solid rgba(255,159,7,.3);
 display:flex;
 gap:10px;
+z-index:1002;
 }
 
 #terminal input{
@@ -155,38 +156,31 @@ flex:1;
 
 <!-- GAME ENTRY -->
 <div class="game">
-
 <img src="ironfrontier-thumb.png" alt="The Iron Frontier">
-
 <div>
 <h2>The Iron Frontier</h2>
-
 <p>
 A narrative-driven industrial survival experience set in a dying
 mechanical wilderness. Explore, uncover lost technology, and survive
 in a world built from rust and steel.
 </p>
-
 <p>
 Singleplayer • Atmospheric • Exploration • Narrative
 </p>
-
 <button onclick="window.location='ironfrontier.html'">
 View Project
 </button>
-
+</div>
 </div>
 
-</div>
-
-<!-- FUTURE GAME TEMPLATE (duplicate this) -->
+<!-- FUTURE GAME TEMPLATE (duplicate this block for more games) -->
 <!--
 <div class="game">
-<img src="game2.png">
+<img src="game2-thumb.png">
 <div>
 <h2>Game Title</h2>
 <p>Description</p>
-<button>View Project</button>
+<button onclick="window.location='game2.html'">View Project</button>
 </div>
 </div>
 -->
@@ -208,6 +202,7 @@ View Project
 const container=document.getElementById("crt-container")
 const os=document.getElementById("os")
 
+/* subtle 3D tilt */
 document.addEventListener("mousemove",(e)=>{
 const x=(window.innerWidth/2-e.clientX)/1000
 const y=(window.innerHeight/2-e.clientY)/1000
@@ -215,15 +210,14 @@ container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 })
 
+/* terminal input for navigation (optional) */
 const input=document.getElementById("cmd")
 input.addEventListener("keydown",e=>{
 if(e.key==="Enter"){
 const v=input.value.toLowerCase()
-
 if(v==="home") window.location="index.html"
 if(v==="games") window.location="games.html"
 if(v==="ironfrontier") window.location="ironfrontier.html"
-
 input.value=""
 }
 })
