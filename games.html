@@ -69,7 +69,7 @@ body {
     <div id="prompt"><span>&gt;</span><input type="text" id="command" autofocus autocomplete="off"></div>
   </div>
 
-  <div id="logo-container"><img id="logo" src="logo.png" alt="Logo"></div>
+  <div id="logo-container"><img id="logo" src="FracturedF-Transparant.png" alt="Logo"></div>
 
 </div>
 
@@ -111,7 +111,7 @@ const gameLines=[
   'Loading games...',
   '------------------------',
   'The Iron Frontier',
-  'Click [Play] to launch.',
+  'Coming soon...',
   '------------------------'
 ];
 const typeDelay=30; // milliseconds per line; adjust to make it faster/slower
@@ -125,7 +125,7 @@ async function loadGameLines(){
   }
   // Add Play button for The Iron Frontier
   const playButton=document.createElement('button');
-  playButton.textContent='Play';
+  playButton.textContent='Learn More';
   playButton.onclick=()=>{ window.location.href='ironfrontier.html'; };
   const gameCard=document.createElement('div');
   gameCard.className='game-card';
