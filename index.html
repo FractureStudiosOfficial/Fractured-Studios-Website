@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Terminal</title>
+<title>Fractured Studios | Terminal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -131,7 +131,7 @@ Available terms: About, Games, Contact
 </div>
 
 <div id="logo-area">
-<img id="logo" src="logo.png">
+<img id="logo" src="FracturedF-Transparant.png">
 </div>
 
 </div>
@@ -147,15 +147,77 @@ const os=document.getElementById("os")
 
 let pendingCommand=null
 
+/* disable input until boot finishes */
+input.disabled=true
+
 /* 3D tilt */
 document.addEventListener("mousemove",(e)=>{
-const x=(window.innerWidth/2-e.clientX)/400
-const y=(window.innerHeight/2-e.clientY)/400
+const x=(window.innerWidth/2-e.clientX)/1000
+const y=(window.innerHeight/2-e.clientY)/1000
 container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 })
 
-/* logo images per command */
+/* boot lines */
+const bootLines=[
+'Initializing U.I.C. Systems...',
+  'Loading Terminal...',
+  'Checking memory modules...',
+  'Verifying kernel integrity...',
+  'Mounting virtual drives...',
+  'Scanning for unknown devices...',
+  'Loading system protocols...',
+  'Starting process scheduler...',
+  'Checking bus latency...',
+  'Syncing internal clock...',
+  'Initializing network interfaces...',
+  'Starting virtual console...',
+  'Loading user profiles...',
+  'Performing security check...',
+  'Checking system logs...',
+  'Applying firmware updates...',
+  '------------------------',
+  ' Welcome to U.I.C. Systems',
+  '------------------------'
+]
+
+/* fake errors */
+const fakeErrors=[
+'ERROR: Memory leak detected',
+'WARNING: Clock desync',
+'ERROR: Bus timeout',
+'ALERT: Unknown device',
+'ERROR: Kernel mismatch'
+'WARNING: Fractal Mismatch Detected'
+'ERROR: System disconnect....connection restored'
+]
+
+/* boot sequence */
+async function boot(){
+for(let line of bootLines){
+
+/* random fake error */
+if(Math.random()<0.3){
+const err=fakeErrors[Math.floor(Math.random()*fakeErrors.length)]
+terminal.innerHTML+=`<span style="color:#ff6a00">${err}</span><br>`
+}
+
+terminal.innerHTML+=line+"<br>"
+terminal.scrollTop=terminal.scrollHeight
+
+await new Promise(r=>setTimeout(r,45))
+}
+
+terminal.innerHTML+="<br>System Ready.<br>"
+terminal.scrollTop=terminal.scrollHeight
+
+input.disabled=false
+input.focus()
+}
+
+boot()
+
+/* logo images */
 const commandLogos={
 about:"logo-about.png",
 games:"logo-games.png",
@@ -179,6 +241,7 @@ terminal.innerHTML+="Cancelled.<br>"
 logo.src="logo.png"
 }
 pendingCommand=null
+terminal.scrollTop=terminal.scrollHeight
 return
 }
 
@@ -194,6 +257,8 @@ terminal.innerHTML+="Unknown command<br>"
 
 terminal.scrollTop=terminal.scrollHeight
 })
+
+  await new Promise(r=>setTimeout(r,45))
 </script>
 
 </body>
