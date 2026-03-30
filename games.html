@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | The Iron Frontier</title>
+<title>Games</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -17,7 +17,7 @@ overflow-x:hidden;
 perspective:1000px;
 }
 
-/* Scrollable CRT container */
+/* CRT container */
 #crt-container{
 padding:40px;
 transform-style:preserve-3d;
@@ -42,19 +42,20 @@ background:repeating-linear-gradient(
 to bottom,
 rgba(255,255,255,.05) 0px,
 rgba(255,255,255,.05) 2px,
-transparent 5px,
-transparent 9px
+transparent 2px,
+transparent 6px
 );
 animation:flicker .12s infinite;
 z-index:1001;
 }
+
 @keyframes flicker{
 0%{opacity:.15}
 50%{opacity:.08}
 100%{opacity:.15}
 }
 
-/* OS Version */
+/* OS version */
 #os{
 position:fixed;
 bottom:10px;
@@ -63,73 +64,55 @@ font-size:12px;
 opacity:.7;
 }
 
-/* HERO */
-.hero{
-display:grid;
-grid-template-columns:1.2fr 1fr;
-gap:40px;
-margin-bottom:60px;
+/* Header */
+.header{
+margin-bottom:50px;
 }
 
-.hero img{
-width:100%;
-border:1px solid rgba(255,159,7,.2);
-box-shadow:0 0 20px rgba(255,159,7,.15);
-}
-
-.logo{
-text-align:center;
-}
-
-.logo img{
-width:250px;
-filter:drop-shadow(0 0 10px #FF9F07);
-}
-
-/* SECTION */
-.section{
-margin-bottom:60px;
-}
-
-.section h2{
+.header h1{
+margin:0;
 border-bottom:1px solid rgba(255,159,7,.3);
 padding-bottom:10px;
-margin-bottom:20px;
 }
 
-/* Screenshot row */
-.screens{
+/* Game list */
+.games{
+display:flex;
+flex-direction:column;
+gap:40px;
+}
+
+/* Game card */
+.game{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-gap:20px;
+grid-template-columns:420px 1fr;
+gap:30px;
+padding:20px;
+background:rgba(0,0,0,.25);
+border:1px solid rgba(255,159,7,.2);
 }
 
-.screens img{
+.game img{
 width:100%;
 border:1px solid rgba(255,159,7,.2);
 }
 
-/* Feature grid */
-.features{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
+.game h2{
+margin-top:0;
 }
 
-.feature{
-background:rgba(0,0,0,.25);
-padding:15px;
-border:1px solid rgba(255,159,7,.2);
+.game button{
+background:transparent;
+border:1px solid #FF9F07;
+color:#FF9F07;
+padding:10px 20px;
+cursor:pointer;
+font-family:inherit;
+margin-top:10px;
 }
 
-/* Trailer */
-.trailer{
-height:400px;
-border:1px dashed rgba(255,159,7,.3);
-display:flex;
-align-items:center;
-justify-content:center;
-opacity:.6;
+.game button:hover{
+background:rgba(255,159,7,.15);
 }
 
 /* Bottom terminal */
@@ -163,120 +146,62 @@ flex:1;
 
 <div id="crt-container">
 
-<!-- HERO -->
-<div class="hero">
+<div class="header">
+<h1>Games</h1>
+<p>Available interactive projects and worlds.</p>
+</div>
+
+<div class="games">
+
+<!-- GAME ENTRY -->
+<div class="game">
+
+<img src="ironfrontier-thumb.png" alt="The Iron Frontier">
 
 <div>
-<img src="ironfrontier-banner.png" alt="banner">
-</div>
+<h2>The Iron Frontier</h2>
 
-<div class="logo">
-<img src="ironfrontier-logo.png">
-<p>Industrial Survival Adventure</p>
-<p>Singleplayer • Atmospheric • Narrative Driven</p>
-</div>
-
-</div>
-
-<!-- ABOUT -->
-<div class="section">
-<h2>About The Game</h2>
 <p>
-The Iron Frontier is a narrative-driven industrial survival experience set
-in a dying mechanical wilderness. Build, explore, and uncover the remnants
-of a lost civilization buried beneath steel and ash.
+A narrative-driven industrial survival experience set in a dying
+mechanical wilderness. Explore, uncover lost technology, and survive
+in a world built from rust and steel.
 </p>
 
 <p>
-(Replace this text with your actual Steam-style description)
-</p>
-</div>
-
-<!-- FEATURES -->
-<div class="section">
-<h2>Key Features</h2>
-
-<div class="features">
-
-<div class="feature">
-<h3>Exploration</h3>
-<p>Traverse massive industrial landscapes.</p>
-</div>
-
-<div class="feature">
-<h3>Atmosphere</h3>
-<p>CRT inspired visuals and immersive sound design.</p>
-</div>
-
-<div class="feature">
-<h3>Story</h3>
-<p>Uncover lost technology and forgotten history.</p>
-</div>
-
-<div class="feature">
-<h3>Survival</h3>
-<p>Manage resources in a harsh mechanical world.</p>
-</div>
-
-</div>
-</div>
-
-<!-- SCREENSHOTS -->
-<div class="section">
-<h2>Screenshots</h2>
-
-<div class="screens">
-<img src="screenshot1.png">
-<img src="screenshot2.png">
-<img src="screenshot3.png">
-</div>
-
-</div>
-
-<!-- TRAILER -->
-<div class="section">
-<h2>Trailer</h2>
-
-<div class="trailer">
-Drop YouTube embed here
-</div>
-
-</div>
-
-<!-- STORY -->
-<div class="section">
-<h2>Story</h2>
-<p>
-Long-form story description goes here. This area is intentionally large
-so you can write a full narrative overview similar to Steam.
+Singleplayer • Atmospheric • Exploration • Narrative
 </p>
 
-<p>
-Add multiple paragraphs, lore, worldbuilding, etc.
-</p>
-</div>
-
-<!-- MORE MEDIA -->
-<div class="section">
-<h2>More Media</h2>
-
-<div class="screens">
-<img src="media1.png">
-<img src="media2.png">
-<img src="media3.png">
-<img src="media4.png">
-</div>
+<button onclick="window.location='ironfrontier.html'">
+View Project
+</button>
 
 </div>
 
 </div>
 
-<!-- TERMINAL NAV -->
+<!-- FUTURE GAME TEMPLATE (duplicate this) -->
+<!--
+<div class="game">
+<img src="game2.png">
+<div>
+<h2>Game Title</h2>
+<p>Description</p>
+<button>View Project</button>
+</div>
+</div>
+-->
+
+</div>
+
+</div>
+
+<!-- Bottom terminal -->
 <div id="terminal">
 <span>></span>
 <input id="cmd" placeholder="type command...">
 </div>
 
+<!-- OS version -->
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
@@ -294,8 +219,11 @@ const input=document.getElementById("cmd")
 input.addEventListener("keydown",e=>{
 if(e.key==="Enter"){
 const v=input.value.toLowerCase()
-if(v==="home")window.location="index.html"
-if(v==="games")window.location="games.html"
+
+if(v==="home") window.location="index.html"
+if(v==="games") window.location="games.html"
+if(v==="ironfrontier") window.location="ironfrontier.html"
+
 input.value=""
 }
 })
