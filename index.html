@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Terminal</title>
+<title>Fractured Studios | Terminal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -89,8 +89,8 @@ body {
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
-    transparent 2px,
-    transparent 6px
+    transparent 5px,
+    transparent 9px
   );
   animation:flicker .12s infinite;
   z-index:1001;
@@ -127,12 +127,12 @@ body {
     </div>
 
     <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact
+      Available terms: About, Games, Contact, Index
     </p>
   </div>
 
   <div id="logo-area">
-    <img id="logo" src="logo.png">
+    <img id="logo" src="FracturedF-Transparant.png">
   </div>
 
 </div>
@@ -166,16 +166,17 @@ document.addEventListener("mousemove", e => {
 
 // BOOT LINES AND FAKE ERRORS
 const bootLines = [
-  'Loading Terminal...',
-  '------------------------',
-  'U.I.C. Systems',
-  '------------------------',
+  'U.I.C. Startup sequence...',
   'Initializing kernel modules...',
   'Loading device drivers...',
   'Verifying memory...',
   'Checking system integrity...',
   'Calibrating display output...',
   'Starting process scheduler...'
+  'Startup succesful'
+  '------------------------',
+  'Welcome to U.I.C. Systems',
+  '------------------------',
 ];
 
 const fakeErrors = [
