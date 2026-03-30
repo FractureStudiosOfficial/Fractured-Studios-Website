@@ -127,7 +127,7 @@ body {
     </div>
 
     <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact
+      Available terms: About, Games, Contact, Terminal
     </p>
   </div>
 
@@ -151,8 +151,8 @@ const os = document.getElementById("os");
 const commandLogos = {
   about: "Aboutui.png",
   games: "Gamesui.png",
-  contact: "Mail-UI.png"
-  Terminal: "terminal.png"
+  contact: "Mail-UI.png",
+  terminal: "terminal.png"  // NEW terminal command
 };
 
 let pendingCommand = null;
@@ -192,17 +192,13 @@ const fakeErrors = [
 // ASYNC BOOT WITH RANDOM SPEEDS
 async function boot() {
   for (let line of bootLines) {
-    // Random delay 40–120ms
     const delay = 40 + Math.random()*80;
-
-    // 30% chance of random error
     if (Math.random() < 0.3) {
       const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
       terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
       terminal.scrollTop = terminal.scrollHeight;
       await new Promise(r => setTimeout(r, delay));
     }
-
     terminal.innerHTML += line + "<br>";
     terminal.scrollTop = terminal.scrollHeight;
     await new Promise(r => setTimeout(r, delay));
@@ -227,7 +223,9 @@ input.addEventListener("keydown", e => {
 
   if (pendingCommand) {
     if (value === "y") {
-      window.location = pendingCommand + ".html";
+      // Redirect to page named after command
+      if(pendingCommand === "terminal") window.location = "terminal.html";
+      else window.location = pendingCommand + ".html";
     } else {
       terminal.innerHTML += "Cancelled.<br>";
       logo.src = "FracturedF-Transparant.png";
