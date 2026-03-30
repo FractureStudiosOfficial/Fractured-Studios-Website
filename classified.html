@@ -3,221 +3,392 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Classified Terminal</title>
+<title>U.I.C. Classified Access</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-  perspective:1000px;
+body{
+margin:0;
+background:#0a0a0a;
+color:#ff9f07;
+font-family:'Share Tech Mono', monospace;
+overflow:hidden;
+perspective:1000px;
 }
 
 /* CRT container */
-#crt-container {
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  padding:40px;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+#crt{
+height:100vh;
+padding:30px;
+transform-style:preserve-3d;
+transition:transform .1s;
 }
 
-/* Terminal box */
-#terminal-box {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  overflow-y:auto;
-  flex:1;
-  min-height:400px;
+/* scanlines */
+#scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.04) 0px,
+rgba(255,255,255,.04) 2px,
+transparent 5px,
+transparent 8px
+);
+animation:flicker .12s infinite;
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
+@keyframes flicker{
+0%{opacity:.12}
+50%{opacity:.06}
+100%{opacity:.12}
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+.panel{
+border:1px solid rgba(255,159,7,.25);
+padding:20px;
+margin-bottom:20px;
+background:rgba(0,0,0,.25);
 }
 
-/* Title above terminal */
-#terminal-title {
-  font-size:22px;
-  font-weight:bold;
-  margin-bottom:15px;
+.hidden{
+display:none;
 }
 
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+input{
+background:black;
+border:1px solid #ff9f07;
+color:#ff9f07;
+padding:8px;
+margin:5px 0;
+font-family:inherit;
+width:250px;
 }
 
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+button{
+background:black;
+border:1px solid #ff9f07;
+color:#ff9f07;
+padding:8px 14px;
+cursor:pointer;
+font-family:inherit;
 }
+
+button:hover{
+background:#ff9f07;
+color:black;
+}
+
+h2{
+margin-top:0;
+}
+
+.center{
+text-align:center;
+}
+
+#loadingBar{
+width:100%;
+height:20px;
+border:1px solid #ff9f07;
+}
+
+#loadingFill{
+height:100%;
+width:0%;
+background:#ff9f07;
+}
+
+.process{
+cursor:pointer;
+padding:6px;
+border:1px solid rgba(255,159,7,.3);
+margin:5px 0;
+}
+
+.process.selected{
+background:#ff9f07;
+color:black;
+}
+
+#radio{
+height:60px;
+border:1px solid #ff9f07;
+position:relative;
+}
+
+#radioLine{
+position:absolute;
+top:0;
+bottom:0;
+width:2px;
+background:#ff9f07;
+left:10%;
+transition:left .1s;
+}
+
 </style>
 </head>
+
 <body>
 
-<div id="amber"></div>
 <div id="scanlines"></div>
 
-<div id="crt-container">
-  <div id="terminal-title">U.I.C. Systems Terminal Access Point</div>
+<div id="crt">
 
-  <div id="terminal-box">
-    <div id="terminal"></div>
+<h1>U.I.C. Systems — Classified Access Terminal</h1>
 
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" disabled>
-    </div>
-  </div>
+<!-- SCREEN 1 -->
+<div id="screen1" class="panel">
+<h2>Identity Verification</h2>
+<input id="name" placeholder="Name"><br>
+<input id="id" placeholder="ID"><br>
+<input id="passphrase" placeholder="Passphrase"><br>
+<button onclick="checkCredentials()">Submit</button>
+</div>
+
+<!-- SCREEN 2 -->
+<div id="screen2" class="panel hidden">
+<h2>Keycode Authentication</h2>
+<input id="keycode" placeholder="Keycode"><br>
+<input id="badge" placeholder="Security Badge"><br>
+<button onclick="checkKeycode()">Submit</button>
+</div>
+
+<!-- SCREEN 3 -->
+<div id="screen3" class="panel hidden">
+<h2>AI Behavioral Analysis</h2>
+
+<div>Preferred operational doctrine?</div>
+<input id="q1"><br>
+
+<div>Response to reactor anomaly?</div>
+<input id="q2"><br>
+
+<div>Primary mission directive?</div>
+<input id="q3"><br>
+
+<div>Command chain loyalty?</div>
+<input id="q4"><br>
+
+<div>Station defense priority?</div>
+<input id="q5"><br>
+
+<div>Emergency evacuation stance?</div>
+<input id="q6"><br>
+
+<button onclick="checkAI()">Analyze</button>
+</div>
+
+<!-- SCREEN 4 -->
+<div id="screen4" class="panel hidden">
+<h2>Decrypt Access Layers</h2>
+
+<div>Encrypted: QWxwaGEtNw==</div>
+<input id="d1"><br>
+
+<div>Encrypted: VkVOVVM=</div>
+<input id="d2"><br>
+
+<div>Encrypted: TUFSS09W</div>
+<input id="d3"><br>
+
+<div>Encrypted: UkVBQ1RPUg==</div>
+<input id="d4"><br>
+
+<div>Encrypted: Q0xFQVJBTkNF</div>
+<input id="d5"><br>
+
+<button onclick="checkDecrypt()">Submit</button>
+</div>
+<!-- SCREEN 5 -->
+<div id="screen5" class="panel hidden">
+<h2>Security Clearance</h2>
+<input id="secLevel" placeholder="Security Level"><br>
+<input id="encName" placeholder="Encrypted Access Name"><br>
+<button onclick="checkSecurity()">Submit</button>
+</div>
+
+<!-- SCREEN 6 -->
+<div id="screen6" class="panel hidden">
+<h2>Station Protocol Code</h2>
+<input id="protocol" placeholder="Protocol Code"><br>
+<button onclick="checkProtocol()">Submit</button>
+</div>
+
+<!-- SCREEN 7 -->
+<div id="screen7" class="panel hidden">
+<h2>Temporal Radio Synchronization</h2>
+<div id="radio">
+<div id="radioLine"></div>
+</div>
+<br>
+<button onclick="syncRadio()">Synchronize</button>
+</div>
+
+<!-- SCREEN 8 -->
+<div id="screen8" class="panel hidden">
+<h2>Memory Dump Selection</h2>
+
+<div class="process" onclick="toggleProcess(this)">nav.core</div>
+<div class="process" onclick="toggleProcess(this)">reactor.auth</div>
+<div class="process" onclick="toggleProcess(this)">ai.behavior</div>
+<div class="process" onclick="toggleProcess(this)">comms.buffer</div>
+<div class="process" onclick="toggleProcess(this)">thermal.reg</div>
+
+<br>
+<button onclick="checkMemory()">Confirm</button>
+</div>
+
+<!-- SCREEN 9 -->
+<div id="screen9" class="panel hidden center">
+<h2>Connecting to Central Server</h2>
+<div id="loadingBar">
+<div id="loadingFill"></div>
+</div>
+</div>
+
+<!-- SCREEN 10 -->
+<div id="screen10" class="panel hidden center">
+<h2>ACCESS GRANTED</h2>
+<div>Welcome Dr. Elena Markov</div>
+</div>
+
 </div>
 
 <script>
-// ELEMENTS
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
-const container = document.getElementById("crt-container");
 
-// 3D tilt
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/1500;
-  const y = (window.innerHeight/2 - e.clientY)/1500;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+// 3D movement
+document.addEventListener("mousemove", e=>{
+const x=(window.innerWidth/2-e.clientX)/1500;
+const y=(window.innerHeight/2-e.clientY)/1500;
+document.getElementById("crt").style.transform=
+`rotateX(${y}deg) rotateY(${x}deg)`;
 });
 
-// STARTUP SEQUENCE
-const bootLines = [
-  'U.I.C. Classified Terminal Booting...',
-  'Loading security modules...',
-  'Verifying credentials...',
-  'Initializing encrypted access...',
-  'Startup successful',
-  '------------------------'
-];
-
-const fakeErrors = [
-  'ERROR: Security node offline',
-  'WARNING: Temporal desync detected',
-  'ALERT: Unauthorized access attempt',
-  'ERROR: Memory corruption',
-  'WARNING: AI trust protocol failing'
-];
-
-// ARG CHECKPOINTS SEQUENCE
-const sequences = [
-  {name:"identity", prompt:"Enter identity credentials", pass:"UIC-AGENT-42"},
-  {name:"biometric", prompt:"Perform biometric scan (enter code)", pass:"BIO-0907"},
-  {name:"stationprotocol", prompt:"Input station protocol code", pass:"ZVE-HOR-VEN"},
-  {name:"encryptedcomm", prompt:"Decrypt communication sequence", pass:"ALPHA-DELTA-77"},
-  {name:"temporalaccess", prompt:"Synchronize temporal access lock (HHMM)", pass:"2359"},
-  {name:"securityconfirmation", prompt:"Confirm security level alpha-gamma? (Y/N)", pass:"Y"}
-];
-
-let currentSeq = 0;
-
-// BOOT DISPLAY
-async function boot() {
-  for (let line of bootLines) {
-    const delay = 40 + Math.random()*80;
-    if (Math.random() < 0.3) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-      terminal.scrollTop = terminal.scrollHeight;
-      await new Promise(r => setTimeout(r, delay));
-    }
-    terminal.innerHTML += line + "<br>";
-    terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r => setTimeout(r, delay));
-  }
-  terminal.innerHTML += "<br>System Ready.<br>";
-  terminal.scrollTop = terminal.scrollHeight;
-  input.disabled = false;
-  input.focus();
-  promptNext();
+function show(next){
+document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));
+document.getElementById(next).classList.remove("hidden");
 }
 
-// PROMPT SEQUENCE
-function promptNext() {
-  if (currentSeq >= sequences.length) return;
-  terminal.innerHTML += sequences[currentSeq].prompt + "<br>";
+// SCREEN 1
+function checkCredentials(){
+if(
+document.getElementById("name").value.toLowerCase()=="dr. elena markov" &&
+document.getElementById("id").value=="UIC-4472" &&
+document.getElementById("passphrase").value.toLowerCase()=="helios"
+){
+show("screen2");
+}
 }
 
-// HANDLE INPUT
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-  const val = input.value.trim();
-  terminal.innerHTML += `> ${val}<br>`;
-  input.value = "";
-  if (currentSeq >= sequences.length) return;
+// SCREEN 2
+function checkKeycode(){
+if(
+document.getElementById("keycode").value=="VEN-8821" &&
+document.getElementById("badge").value=="A7-DELTA"
+){
+show("screen3");
+}
+}
 
-  const seq = sequences[currentSeq];
-  if (seq.name === "securityconfirmation") {
-    if (val.toUpperCase() === seq.pass) {
-      terminal.innerHTML += "Access Granted.<br>";
-      terminal.scrollTop = terminal.scrollHeight;
-      setTimeout(()=>window.location="centralclearance.html",500);
-      return;
-    } else {
-      terminal.innerHTML += "Access Denied.<br>";
-      terminal.scrollTop = terminal.scrollHeight;
-      return;
-    }
-  }
+// SCREEN 3
+function checkAI(){
+if(
+q1.value=="efficiency" &&
+q2.value=="stabilize" &&
+q3.value=="preserve mission" &&
+q4.value=="absolute" &&
+q5.value=="crew safety" &&
+q6.value=="last resort"
+){
+setTimeout(()=>show("screen4"),1200);
+}
+}
 
-  if (val === seq.pass) {
-    currentSeq++;
-    if (currentSeq < sequences.length) {
-      promptNext();
-    } else {
-      terminal.innerHTML += "All checkpoints cleared. Confirm security clearance (Y/N)<br>";
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-  } else {
-    // fake error chance
-    if (Math.random() < 0.5) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-    } else {
-      terminal.innerHTML += "Invalid input.<br>";
-    }
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-});
+// SCREEN 4
+function checkDecrypt(){
+if(
+d1.value=="Alpha-7" &&
+d2.value=="VENUS" &&
+d3.value=="MARKOV" &&
+d4.value=="REACTOR" &&
+d5.value=="CLEARANCE"
+){
+show("screen5");
+}
+}
 
-boot();
+// SCREEN 5
+function checkSecurity(){
+if(
+secLevel.value=="ALPHA-7" &&
+encName.value=="TWVya292"
+){
+show("screen6");
+}
+}
+
+// SCREEN 6
+function checkProtocol(){
+if(protocol.value=="VENUS-PLATFORM-03"){
+show("screen7");
+}
+}
+
+// SCREEN 7 radio sync
+let radioPos=10;
+let direction=1;
+
+setInterval(()=>{
+radioPos+=direction*2;
+if(radioPos>90||radioPos<10) direction*=-1;
+radioLine.style.left=radioPos+"%";
+},60);
+
+function syncRadio(){
+if(radioPos>48 && radioPos<52){
+show("screen8");
+}
+}
+
+// SCREEN 8
+function toggleProcess(el){
+el.classList.toggle("selected");
+}
+
+function checkMemory(){
+const selected=[...document.querySelectorAll(".selected")]
+.map(e=>e.textContent);
+
+if(
+selected.includes("nav.core") &&
+selected.includes("reactor.auth") &&
+selected.includes("ai.behavior")
+){
+show("screen9");
+loadServer();
+}
+}
+
+// SCREEN 9 loading
+function loadServer(){
+let fill=0;
+const int=setInterval(()=>{
+fill+=2;
+loadingFill.style.width=fill+"%";
+if(fill>=100){
+clearInterval(int);
+show("screen10");
+setTimeout(()=>{
+window.location="centralclearance.html";
+},2000);
+}
+},50);
+}
+
 </script>
 
 </body>
