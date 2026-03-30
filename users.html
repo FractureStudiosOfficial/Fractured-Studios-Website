@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIC Users</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+/* CRT container */
+#crt-container {
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:center;
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
+}
+
+/* User grid */
+#users-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:20px;
+  width:80%;
+  margin-bottom:150px; /* for terminal space */
+}
+
+.user-card {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.3);
+  padding:15px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:0.2s;
+  text-align:center;
+}
+
+.user-card:hover {
+  background:rgba(0,0,0,.4);
+}
+
+/* User names */
+.user-card h3 {
+  margin:0 0 5px 0;
+}
+
+/* Terminal pinned to bottom */
+#terminal-box {
+  position:fixed;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+}
+
+#terminal {
+  background:rgba(0,0,0,.25);
+  padding:20px;
+  border:1px solid rgba(255,159,7,.2);
+  min-height:150px;
+  max-height:250px;
+  overflow-y:auto;
+}
+
+#prompt {
+  display:flex;
+  margin-top:10px;
+}
+
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* OS version */
+#os {
+  position:fixed;
+  bottom:10px;
+  right:15px;
+  font-size:12px;
+  opacity:.7;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  animation:flicker .12s infinite;
+  z-index:1001;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* Amber tint overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+}
+
+/* Modal popup */
+#user-modal {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+
+#user-modal .modal-content {
+  background:#111;
+  padding:30px;
+  border:1px solid #FF9F07;
+  border-radius:8px;
+  width:400px;
+  max-width:90%;
+  text-align:center;
+  position:relative;
+}
+
+#user-modal .modal-content h2 {
+  margin-top:0;
+}
+
+#user-modal .close-btn {
+  position:absolute;
+  top:10px;
+  right:15px;
+  cursor:pointer;
+  font-size:18px;
+  color:#FF9F07;
+}
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+  <h1 style="margin-bottom:40px;text-align:center;">UIC Users</h1>
+
+  <div id="users-grid">
+    <!-- Users -->
+    <div class="user-card" data-user="James Maniston"><h3>James Maniston</h3></div>
+    <div class="user-card" data-user="[DATA CORRUPTED]"><h3>[DATA CORRUPTED]</h3></div>
+    <div class="user-card" data-user="Aurelia Dane"><h3>Aurelia Dane</h3></div>
+    <div class="user-card" data-user="Victor Kline"><h3>Victor Kline</h3></div>
+    <div class="user-card" data-user="Selene Cross"><h3>Selene Cross</h3></div>
+    <div class="user-card" data-user="Lucius Ward"><h3>Lucius Ward</h3></div>
+    <div class="user-card" data-user="Nova Quinn"><h3>Nova Quinn</h3></div>
+    <div class="user-card" data-user="Orin Vale"><h3>Orin Vale</h3></div>
+    <div class="user-card" data-user="Tara Lin"><h3>Tara Lin</h3></div>
+    <div class="user-card" data-user="Derek Frost"><h3>Derek Frost</h3></div>
+    <div class="user-card" data-user="Kiera Voss"><h3>Kiera Voss</h3></div>
+    <div class="user-card" data-user="Elian Rook"><h3>Elian Rook</h3></div>
+    <div class="user-card" data-user="Sable Nyx"><h3>Sable Nyx</h3></div>
+  </div>
+
+  <!-- Terminal -->
+  <div id="terminal-box">
+    <div id="terminal"></div>
+    <div id="prompt">
+      <span>></span>
+      <input id="cmd" autocomplete="off">
+    </div>
+    <p style="margin-top:10px;opacity:.6">
+      Available terms: About, Games, Contact
+    </p>
+  </div>
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<!-- Modal for user info -->
+<div id="user-modal">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+    <h2 id="modal-name"></h2>
+    <p id="modal-info">User profile information goes here. Customize this text with backstory, stats, or other details.</p>
+  </div>
+</div>
+
+<script>
+// 3D tilt
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/400;
+  const y = (window.innerHeight/2 - e.clientY)/400;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal command handling
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("cmd");
+const commandLogos = {about:"logo-about.png", games:"logo-games.png", contact:"logo-contact.png"};
+let pendingCommand = null;
+
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const val = input.value.trim().toLowerCase();
+  input.value="";
+  terminal.innerHTML += `&gt; ${val}<br>`;
+  if(pendingCommand){
+    if(val==="y") window.location = pendingCommand+".html";
+    else terminal.innerHTML += "Cancelled.<br>";
+    pendingCommand = null;
+    terminal.scrollTop = terminal.scrollHeight;
+    return;
+  }
+  if(commandLogos[val]){
+    pendingCommand = val;
+    terminal.innerHTML += "Confirm? (Y/N)<br>";
+  } else terminal.innerHTML += "Unknown command<br>";
+  terminal.scrollTop = terminal.scrollHeight;
+});
+
+// Modal functionality
+const modal = document.getElementById("user-modal");
+const modalName = document.getElementById("modal-name");
+const modalInfo = document.getElementById("modal-info");
+const closeBtn = document.querySelector(".close-btn");
+
+document.querySelectorAll(".user-card").forEach(card=>{
+  card.addEventListener("click", ()=>{
+    modal.style.display = "flex";
+    const name = card.dataset.user;
+    modalName.textContent = name;
+    
+    // Example info, you can customize per user
+    if(name==="James Maniston") modalInfo.textContent = "Lead engineer in U.I.C. Systems. Specializes in AI research and secure communications.";
+    else if(name==="[DATA CORRUPTED]") modalInfo.textContent = "User data corrupted. Details unavailable.";
+    else modalInfo.textContent = "Profile information for "+name+". Add bio, stats, or other details here.";
+  });
+});
+
+closeBtn.addEventListener("click", ()=>{modal.style.display="none";});
+modal.addEventListener("click", e=>{if(e.target===modal) modal.style.display="none";});
+</script>
+
+</body>
+</html>
