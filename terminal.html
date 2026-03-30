@@ -127,7 +127,7 @@ const input = document.getElementById("cmd");
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 
-// Multiple command sequences
+// Command sequences
 const sequences = {
   users: ["init","access","grant"],
   stations: ["station","alpha","open"],
@@ -137,11 +137,10 @@ const sequences = {
   classified: ["class","secure","enter"],
   systemstatus: ["sys","status","check"],
   communications: ["comm","connect","link"],
-  personalmessenger: ["pm","login","open"],
+  personalmessanger: ["pm","login","open"],
   research: ["res","start","execute"]
 };
 
-// Current sequence tracker
 let currentSequence = null;
 let step = 0;
 
@@ -183,6 +182,7 @@ async function boot() {
   input.focus();
 }
 
+// Boot the terminal
 boot();
 
 // Command input handler
@@ -193,25 +193,30 @@ input.addEventListener("keydown", e => {
   terminal.innerHTML += `&gt; ${value}<br>`;
   input.value = "";
 
-  // If not in a sequence, check if it matches the start of any sequence
   if (!currentSequence) {
+    let found = false;
     for (let key in sequences) {
       if (value === sequences[key][0]) {
-        currentSequence = key;
+        currentSequence = key.toLowerCase();
         step = 1;
         terminal.innerHTML += `Step 1 complete. Enter next command.<br>`;
         terminal.scrollTop = terminal.scrollHeight;
-        return;
+        found = true;
+        break;
       }
     }
-    terminal.innerHTML += "Unknown command.<br>";
+    if (!found) {
+      terminal.innerHTML += "Unknown command.<br>";
+    }
   } else {
-    // Currently in a sequence
     if (value === sequences[currentSequence][step]) {
       step++;
       if (step === sequences[currentSequence].length) {
         terminal.innerHTML += `<br>${currentSequence.toUpperCase()} Access Granted! Redirecting...<br>`;
-        setTimeout(() => { window.location = currentSequence + ".html"; }, 1000);
+        terminal.scrollTop = terminal.scrollHeight;
+        setTimeout(() => {
+          window.location.href = currentSequence + ".html";
+        }, 500);
         currentSequence = null;
         step = 0;
       } else {
@@ -222,9 +227,8 @@ input.addEventListener("keydown", e => {
       currentSequence = null;
       step = 0;
     }
+    terminal.scrollTop = terminal.scrollHeight;
   }
-
-  terminal.scrollTop = terminal.scrollHeight;
 });
 
 // 3D tilt
