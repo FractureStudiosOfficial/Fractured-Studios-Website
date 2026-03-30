@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ships Database | U.I.C. Systems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite; z-index:1001;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+
+h1 { text-align:center; margin-top:0; }
+
+.ship-section { 
+  background: rgba(0,0,0,.25); 
+  border:1px solid rgba(255,159,7,.2);
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.ship-section h2 { margin-top:0; }
+.ship-section p { margin:5px 0; }
+
+#ship-image { display:block; max-width:100%; margin:20px auto; border:1px solid rgba(255,159,7,.3); }
+
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:20px;
+}
+
+#prompt { display:flex; flex:1; }
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+
+.ship-modules {
+  background:rgba(0,0,0,.15);
+  padding:10px;
+  margin:5px 0;
+  border:1px solid rgba(255,159,7,.1);
+}
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+<h1>Spacecraft & Modules Database</h1>
+
+<!-- Example of Ships -->
+<div class="ship-section">
+  <h2>Soyuz</h2>
+  <img id="ship-image" src="soyuz.png" alt="Soyuz Ship Image">
+  <p><strong>Affiliation:</strong> USSR/Russia</p>
+  <p><strong>Launch Year:</strong> 1967</p>
+  <p><strong>Status:</strong> Active</p>
+  <p><strong>Mission Type:</strong> Crew Transport</p>
+
+  <div class="ship-modules"><strong>Module 1:</strong> Orbital Module</div>
+  <div class="ship-modules"><strong>Module 2:</strong> Descent Module</div>
+  <div class="ship-modules"><strong>Module 3:</strong> Service Module</div>
+</div>
+
+<div class="ship-section">
+  <h2>Von Braun US Ship</h2>
+  <img id="ship-image" src="vonbraun.png" alt="Von Braun Ship Image">
+  <p><strong>Affiliation:</strong> USA</p>
+  <p><strong>Launch Year:</strong> 1970</p>
+  <p><strong>Status:</strong> Active</p>
+  <p><strong>Mission Type:</strong> Deep Space Exploration</p>
+
+  <div class="ship-modules"><strong>Module 1:</strong> Command Module</div>
+  <div class="ship-modules"><strong>Module 2:</strong> Habitat Module</div>
+  <div class="ship-modules"><strong>Module 3:</strong> Engine Section</div>
+  <div class="ship-modules"><strong>Module 4:</strong> Orbital Vehicle Bay</div>
+</div>
+
+<!-- Repeat for all 34 ships -->
+<div class="ship-section"><h2>Shenzhou</h2><p>Affiliation: China</p></div>
+<div class="ship-section"><h2>Skylab Transport</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Zarya</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Mir Transport</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Hubble Deployment Shuttle</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>STS Atlantis</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>STS Endeavour</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>STS Discovery</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Progress M</h2><p>Affiliation: USSR/Russia</p></div>
+<div class="ship-section"><h2>Tiangong Transport</h2><p>Affiliation: China</p></div>
+<div class="ship-section"><h2>Space Shuttle Enterprise</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>ISS Crew Transport</h2><p>Affiliation: International</p></div>
+<div class="ship-section"><h2>Bigelow Commercial Module</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Hubble Repair Shuttle</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Tiangong Lab Module</h2><p>Affiliation: China</p></div>
+<div class="ship-section"><h2>SpaceX Crew Dragon</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Starship</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Orion</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Vostok</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Voskhod</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Apollo CSM</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Apollo LM</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Luna Transport</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Mercury</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Gemini</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Voskhod Orbital Vehicle</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Almaz Military Station</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Skylab Orbital Vehicle</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>SpaceX Starlink Launch Module</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Blue Origin Orbital Module</h2><p>Affiliation: USA</p></div>
+<div class="ship-section"><h2>Tianzhou Cargo</h2><p>Affiliation: China</p></div>
+<div class="ship-section"><h2>Voskhod Rescue Module</h2><p>Affiliation: USSR</p></div>
+<div class="ship-section"><h2>Shenzhou Lab Module</h2><p>Affiliation: China</p></div>
+
+<!-- Terminal -->
+<div id="terminal-box">
+  <div id="prompt">
+    <span>></span>
+    <input id="cmd" autocomplete="off">
+  </div>
+</div>
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// 3D tilt effect
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal commands
+const input = document.getElementById("cmd");
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const cmd = input.value.toLowerCase().trim();
+  switch(cmd){
+    case "home": window.location="index.html"; break;
+    case "ships": alert("Already on Ships page"); break;
+    case "stations": window.location="stations.html"; break;
+    case "about": window.location="about.html"; break;
+    case "games": window.location="games.html"; break;
+    case "contact": window.location="contact.html"; break;
+    default: console.log("Unknown command: "+cmd);
+  }
+  input.value="";
+});
+</script>
+
+</body>
+</html>
