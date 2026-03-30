@@ -9,103 +9,103 @@
 
 <style>
 body{
-margin:0;
-background:#111;
-color:#FF9F07;
-font-family:'Share Tech Mono',monospace;
-overflow:hidden;
-perspective:1000px;
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono',monospace;
+  overflow:hidden;
+  perspective:1000px;
 }
 
 /* CRT container */
 #crt-container{
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:60px;
-box-sizing:border-box;
-transform-style:preserve-3d;
-transition:transform .08s ease-out;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
 }
 
 /* Terminal */
 #terminal-box{
-width:50%;
+  width:50%;
 }
 
 #terminal{
-background:rgba(0,0,0,.25);
-padding:20px;
-border:1px solid rgba(255,159,7,.2);
-min-height:250px;
-overflow-y:auto;
+  background:rgba(0,0,0,.25);
+  padding:20px;
+  border:1px solid rgba(255,159,7,.2);
+  min-height:250px;
+  overflow-y:auto;
 }
 
 #prompt{
-display:flex;
-margin-top:10px;
+  display:flex;
+  margin-top:10px;
 }
 
 #prompt input{
-background:transparent;
-border:none;
-outline:none;
-color:#FF9F07;
-font-family:inherit;
-flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
 }
 
 /* Logo */
 #logo-area{
-width:40%;
-display:flex;
-align-items:center;
-justify-content:center;
+  width:40%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 #logo{
-width:260px;
-filter:drop-shadow(0 0 10px #FF9F07);
-transition:.25s ease;
+  width:260px;
+  filter:drop-shadow(0 0 10px #FF9F07);
+  transition:.25s ease;
 }
 
 /* OS version */
 #os{
-position:fixed;
-bottom:10px;
-right:15px;
-font-size:12px;
-opacity:.7;
+  position:fixed;
+  bottom:10px;
+  right:15px;
+  font-size:12px;
+  opacity:.7;
 }
 
 /* scanlines */
 #scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,.05) 0px,
-rgba(255,255,255,.05) 2px,
-transparent 2px,
-transparent 6px
-);
-animation:flicker .12s infinite;
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1001;
 }
-
 @keyframes flicker{
-0%{opacity:.15}
-50%{opacity:.07}
-100%{opacity:.15}
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
 }
 
 /* amber tint */
 #amber{
-position:fixed;
-inset:0;
-background:rgba(255,159,7,.04);
-pointer-events:none;
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
 }
 </style>
 </head>
@@ -122,11 +122,11 @@ pointer-events:none;
 
 <div id="prompt">
 <span>></span>
-<input id="cmd" autocomplete="off">
+<input id="cmd" autocomplete="off" disabled>
 </div>
 
 <p style="margin-top:10px;opacity:.6">
-Available terms: About, Games, Contact
+Available terms: About, Games, Contact, Index
 </p>
 </div>
 
@@ -147,118 +147,100 @@ const os=document.getElementById("os")
 
 let pendingCommand=null
 
-/* disable input until boot finishes */
-input.disabled=true
-
 /* 3D tilt */
 document.addEventListener("mousemove",(e)=>{
-const x=(window.innerWidth/2-e.clientX)/1000
-const y=(window.innerHeight/2-e.clientY)/1000
-container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
-os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
+  const x=(window.innerWidth/2-e.clientX)/1000
+  const y=(window.innerHeight/2-e.clientY)/1000
+  container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
+  os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 })
+
+/* logo images per command */
+const commandLogos={
+  about:"logo-about.png",
+  games:"logo-games.png",
+  contact:"logo-contact.png"
+}
 
 /* boot lines */
 const bootLines=[
-'Initializing U.I.C. Systems...',
-  'Loading Terminal...',
-  'Checking memory modules...',
-  'Verifying kernel integrity...',
-  'Mounting virtual drives...',
-  'Scanning for unknown devices...',
-  'Loading system protocols...',
-  'Starting process scheduler...',
-  'Checking bus latency...',
-  'Syncing internal clock...',
-  'Initializing network interfaces...',
-  'Starting virtual console...',
-  'Loading user profiles...',
-  'Performing security check...',
-  'Checking system logs...',
-  'Applying firmware updates...',
+  'U.I.C. Terminal startup...',
+  'Initializing kernel modules...',
+  'Loading device drivers...',
+  'Verifying memory...',
+  'Checking system integrity...',
+  'Calibrating display output...',
+  'Starting process scheduler...'
+  'System startup successful'
   '------------------------',
-  ' Welcome to U.I.C. Systems',
-  '------------------------'
+  'Welcome to U.I.C. Systems',
+  '------------------------',
 ]
 
 /* fake errors */
 const fakeErrors=[
-'ERROR: Memory leak detected',
-'WARNING: Clock desync',
-'ERROR: Bus timeout',
-'ALERT: Unknown device',
-'ERROR: Kernel mismatch'
-'WARNING: Fractal Mismatch Detected'
-'ERROR: System disconnect....connection restored'
+  'ERROR: Memory leak detected',
+  'WARNING: Clock desync',
+  'ERROR: Bus timeout',
+  'ALERT: Unknown device',
+  'ERROR: Kernel mismatch'
 ]
 
 /* boot sequence */
 async function boot(){
-for(let line of bootLines){
+  for(let line of bootLines){
+    // 30% chance to insert a random error
+    if(Math.random()<0.3){
+      const err=fakeErrors[Math.floor(Math.random()*fakeErrors.length)]
+      terminal.innerHTML+=`<span style="color:#ff6a00">${err}</span><br>`
+    }
 
-/* random fake error */
-if(Math.random()<0.3){
-const err=fakeErrors[Math.floor(Math.random()*fakeErrors.length)]
-terminal.innerHTML+=`<span style="color:#ff6a00">${err}</span><br>`
-}
+    terminal.innerHTML+=line+"<br>"
+    terminal.scrollTop=terminal.scrollHeight
+    await new Promise(r=>setTimeout(r,45)) // adjust speed here
+  }
 
-terminal.innerHTML+=line+"<br>"
-terminal.scrollTop=terminal.scrollHeight
+  terminal.innerHTML+="<br>System Ready.<br>"
+  terminal.scrollTop=terminal.scrollHeight
 
-await new Promise(r=>setTimeout(r,45))
-}
-
-terminal.innerHTML+="<br>System Ready.<br>"
-terminal.scrollTop=terminal.scrollHeight
-
-input.disabled=false
-input.focus()
+  input.disabled=false
+  input.focus()
 }
 
 boot()
 
-/* logo images */
-const commandLogos={
-about:"logo-about.png",
-games:"logo-games.png",
-contact:"logo-contact.png"
-}
-
 /* command handler */
 input.addEventListener("keydown",e=>{
-if(e.key!=="Enter") return
+  if(e.key!=="Enter") return
 
-const value=input.value.toLowerCase().trim()
-terminal.innerHTML+=`&gt; ${value}<br>`
-input.value=""
+  const value=input.value.toLowerCase().trim()
+  terminal.innerHTML+=`&gt; ${value}<br>`
+  input.value=""
 
-if(pendingCommand){
-if(value==="y"){
-window.location=pendingCommand+".html"
-}
-else{
-terminal.innerHTML+="Cancelled.<br>"
-logo.src="logo.png"
-}
-pendingCommand=null
-terminal.scrollTop=terminal.scrollHeight
-return
-}
+  if(pendingCommand){
+    if(value==="y"){
+      window.location=pendingCommand+".html"
+    }
+    else{
+      terminal.innerHTML+="Cancelled.<br>"
+      logo.src="FracturedF-Transparant.png"
+    }
+    pendingCommand=null
+    terminal.scrollTop=terminal.scrollHeight
+    return
+  }
 
-/* new command */
-if(commandLogos[value]){
-pendingCommand=value
-logo.src=commandLogos[value]
-terminal.innerHTML+=`Confirm? (Y/N)<br>`
-}
-else{
-terminal.innerHTML+="Unknown command<br>"
-}
+  if(commandLogos[value]){
+    pendingCommand=value
+    logo.src=commandLogos[value]
+    terminal.innerHTML+=`Confirm? (Y/N)<br>`
+  }
+  else{
+    terminal.innerHTML+="Unknown command<br>"
+  }
 
-terminal.scrollTop=terminal.scrollHeight
+  terminal.scrollTop=terminal.scrollHeight
 })
-
-  await new Promise(r=>setTimeout(r,45))
 </script>
 
 </body>
