@@ -19,74 +19,42 @@ body {
 
 /* CRT container */
 #crt-container {
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  align-items:center;
-  padding:60px;
+  padding:40px;
   box-sizing:border-box;
   transform-style:preserve-3d;
   transition:transform .08s ease-out;
 }
 
-/* User grid */
-#users-grid {
+/* User list */
+.user-list {
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:20px;
-  width:80%;
-  margin-bottom:150px; /* for terminal space */
+  margin-bottom:30px;
 }
 
 .user-card {
   background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.3);
   padding:15px;
-  border-radius:6px;
+  border:1px solid rgba(255,159,7,.2);
   cursor:pointer;
-  transition:0.2s;
-  text-align:center;
+  transition:.2s ease;
 }
-
 .user-card:hover {
-  background:rgba(0,0,0,.4);
+  filter:drop-shadow(0 0 15px #FF9F07);
 }
 
-/* User names */
-.user-card h3 {
-  margin:0 0 5px 0;
-}
-
-/* Terminal pinned to bottom */
-#terminal-box {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
-}
-
-#terminal {
+/* User detail */
+#user-detail {
+  display:none;
   background:rgba(0,0,0,.25);
   padding:20px;
   border:1px solid rgba(255,159,7,.2);
-  min-height:150px;
-  max-height:250px;
-  overflow-y:auto;
+  margin-top:20px;
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
-}
-
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+#user-detail h2 {
+  margin-top:0;
 }
 
 /* OS version */
@@ -107,8 +75,8 @@ body {
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
-    transparent 2px,
-    transparent 6px
+    transparent 5px,
+    transparent 9px
   );
   animation:flicker .12s infinite;
   z-index:1001;
@@ -126,149 +94,175 @@ body {
   background:rgba(255,159,7,.04);
   pointer-events:none;
 }
-
-/* Modal popup */
-#user-modal {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.85);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:2000;
-}
-
-#user-modal .modal-content {
-  background:#111;
-  padding:30px;
-  border:1px solid #FF9F07;
-  border-radius:8px;
-  width:400px;
-  max-width:90%;
-  text-align:center;
-  position:relative;
-}
-
-#user-modal .modal-content h2 {
-  margin-top:0;
-}
-
-#user-modal .close-btn {
-  position:absolute;
-  top:10px;
-  right:15px;
-  cursor:pointer;
-  font-size:18px;
-  color:#FF9F07;
-}
 </style>
 </head>
+
 <body>
 
 <div id="amber"></div>
 <div id="scanlines"></div>
-
 <div id="crt-container">
-  <h1 style="margin-bottom:40px;text-align:center;">UIC Users</h1>
 
-  <div id="users-grid">
-    <!-- Users -->
-    <div class="user-card" data-user="James Maniston"><h3>James Maniston</h3></div>
-    <div class="user-card" data-user="[DATA CORRUPTED]"><h3>[DATA CORRUPTED]</h3></div>
-    <div class="user-card" data-user="Aurelia Dane"><h3>Aurelia Dane</h3></div>
-    <div class="user-card" data-user="Victor Kline"><h3>Victor Kline</h3></div>
-    <div class="user-card" data-user="Selene Cross"><h3>Selene Cross</h3></div>
-    <div class="user-card" data-user="Lucius Ward"><h3>Lucius Ward</h3></div>
-    <div class="user-card" data-user="Nova Quinn"><h3>Nova Quinn</h3></div>
-    <div class="user-card" data-user="Orin Vale"><h3>Orin Vale</h3></div>
-    <div class="user-card" data-user="Tara Lin"><h3>Tara Lin</h3></div>
-    <div class="user-card" data-user="Derek Frost"><h3>Derek Frost</h3></div>
-    <div class="user-card" data-user="Kiera Voss"><h3>Kiera Voss</h3></div>
-    <div class="user-card" data-user="Elian Rook"><h3>Elian Rook</h3></div>
-    <div class="user-card" data-user="Sable Nyx"><h3>Sable Nyx</h3></div>
+  <h1>UIC Registered Users</h1>
+
+  <div class="user-list" id="user-list">
+    <!-- User cards populated via JS -->
   </div>
 
-  <!-- Terminal -->
-  <div id="terminal-box">
-    <div id="terminal"></div>
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off">
-    </div>
-    <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact
-    </p>
-  </div>
+  <div id="user-detail"></div>
+
+  <p id="end-msg" style="opacity:.6;margin-top:20px;">Unable to load more users</p>
+
 </div>
 
 <div id="os">UIC OS v1.0.4</div>
 
-<!-- Modal for user info -->
-<div id="user-modal">
-  <div class="modal-content">
-    <span class="close-btn">&times;</span>
-    <h2 id="modal-name"></h2>
-    <p id="modal-info">User profile information goes here. Customize this text with backstory, stats, or other details.</p>
-  </div>
-</div>
-
 <script>
-// 3D tilt
+// USERS DATA
+const users = [
+  {
+    name:"James Maniston",
+    occupation:"Quantum Biologist",
+    age:42,
+    specialty:"Cellular Regeneration",
+    previous:["MIT Research Lab","Harvard Bioengineering Dept."],
+    bio:"James specializes in regenerative cellular biology, pioneering stem-cell applications."
+  },
+  {
+    name:"[DATA CORRUPTED]",
+    occupation:"Unknown",
+    age:"???",
+    specialty:"???",
+    previous:["???"],
+    bio:"Records are incomplete due to a critical system corruption. Identity unknown."
+  },
+  {
+    name:"Dr. Elara Voss",
+    occupation:"Astrophysicist",
+    age:38,
+    specialty:"Exoplanetary Systems",
+    previous:["NASA JPL","Caltech Observatory"],
+    bio:"Elara researches planetary formation and habitability in distant solar systems."
+  },
+  {
+    name:"Dr. Kai Nakamura",
+    occupation:"Robotics Engineer",
+    age:35,
+    specialty:"Autonomous AI Systems",
+    previous:["Boston Dynamics","Tokyo Tech Robotics Lab"],
+    bio:"Kai develops AI-driven robotic systems for exploration and industrial applications."
+  },
+  {
+    name:"Dr. Liora Singh",
+    occupation:"Geneticist",
+    age:40,
+    specialty:"CRISPR & Gene Editing",
+    previous:["Harvard Medical School","Cambridge BioTech"],
+    bio:"Liora focuses on gene-editing technologies and therapeutic solutions for rare diseases."
+  },
+  {
+    name:"Dr. Theo Alvarez",
+    occupation:"Neuroscientist",
+    age:45,
+    specialty:"Cognitive Mapping",
+    previous:["Stanford Brain Institute","UCB Neuroscience Dept."],
+    bio:"Theo studies human cognition and memory mapping using neural imaging technology."
+  },
+  {
+    name:"Dr. Marina Petrova",
+    occupation:"Environmental Chemist",
+    age:37,
+    specialty:"Carbon Capture",
+    previous:["Moscow State University","GreenTech Labs"],
+    bio:"Marina works on sustainable chemical solutions for reducing atmospheric CO2 levels."
+  },
+  {
+    name:"Dr. Elias Chen",
+    occupation:"Computer Scientist",
+    age:34,
+    specialty:"Cybersecurity",
+    previous:["MIT CSAIL","Google Security Team"],
+    bio:"Elias specializes in advanced security protocols and encryption methods."
+  },
+  {
+    name:"Dr. Sofia Rinaldi",
+    occupation:"Marine Biologist",
+    age:39,
+    specialty:"Coral Ecosystems",
+    previous:["Monterey Bay Aquarium Research","University of Genoa"],
+    bio:"Sofia researches marine biodiversity and coral reef restoration."
+  },
+  {
+    name:"Dr. Henrik Lund",
+    occupation:"Physicist",
+    age:41,
+    specialty:"Quantum Computing",
+    previous:["CERN","Lund University"],
+    bio:"Henrik develops quantum algorithms and investigates high-speed computing systems."
+  },
+  {
+    name:"Dr. Amara Johnson",
+    occupation:"Materials Scientist",
+    age:36,
+    specialty:"Nanotechnology",
+    previous:["MIT Materials Lab","NanoTech Corp."],
+    bio:"Amara focuses on designing advanced nanomaterials for industrial applications."
+  },
+  {
+    name:"Dr. Victor Ramirez",
+    occupation:"Bioinformatics Specialist",
+    age:38,
+    specialty:"Genomic Data Analysis",
+    previous:["UCLA Bioinformatics","GenomeX Labs"],
+    bio:"Victor works on large-scale genomic data processing and pattern discovery."
+  },
+  {
+    name:"Dr. Li Mei",
+    occupation:"Chemical Engineer",
+    age:37,
+    specialty:"Synthetic Polymers",
+    previous:["Tsinghua University","PolyChem Solutions"],
+    bio:"Li researches innovative synthetic polymers and sustainable chemical processes."
+  }
+];
+
+// GENERATE USER CARDS
+const userList = document.getElementById("user-list");
+const userDetail = document.getElementById("user-detail");
+
+users.forEach((user, index) => {
+  const card = document.createElement("div");
+  card.className = "user-card";
+  card.textContent = user.name;
+  card.addEventListener("click", () => {
+    displayUser(user);
+  });
+  userList.appendChild(card);
+});
+
+// DISPLAY USER DETAILS
+function displayUser(user) {
+  userDetail.style.display = "block";
+  userDetail.innerHTML = `
+    <h2>${user.name}</h2>
+    <p><strong>Occupation:</strong> ${user.occupation}</p>
+    <p><strong>Age:</strong> ${user.age}</p>
+    <p><strong>Specialty:</strong> ${user.specialty}</p>
+    <p><strong>Previous Positions:</strong> ${user.previous.join(", ")}</p>
+    <p><strong>Bio:</strong> ${user.bio}</p>
+  `;
+}
+
+// OPTIONAL: 3D tilt effect
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
+
 document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/400;
-  const y = (window.innerHeight/2 - e.clientY)/400;
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
-
-// Terminal command handling
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
-const commandLogos = {about:"logo-about.png", games:"logo-games.png", contact:"logo-contact.png"};
-let pendingCommand = null;
-
-input.addEventListener("keydown", e=>{
-  if(e.key!=="Enter") return;
-  const val = input.value.trim().toLowerCase();
-  input.value="";
-  terminal.innerHTML += `&gt; ${val}<br>`;
-  if(pendingCommand){
-    if(val==="y") window.location = pendingCommand+".html";
-    else terminal.innerHTML += "Cancelled.<br>";
-    pendingCommand = null;
-    terminal.scrollTop = terminal.scrollHeight;
-    return;
-  }
-  if(commandLogos[val]){
-    pendingCommand = val;
-    terminal.innerHTML += "Confirm? (Y/N)<br>";
-  } else terminal.innerHTML += "Unknown command<br>";
-  terminal.scrollTop = terminal.scrollHeight;
-});
-
-// Modal functionality
-const modal = document.getElementById("user-modal");
-const modalName = document.getElementById("modal-name");
-const modalInfo = document.getElementById("modal-info");
-const closeBtn = document.querySelector(".close-btn");
-
-document.querySelectorAll(".user-card").forEach(card=>{
-  card.addEventListener("click", ()=>{
-    modal.style.display = "flex";
-    const name = card.dataset.user;
-    modalName.textContent = name;
-    
-    // Example info, you can customize per user
-    if(name==="James Maniston") modalInfo.textContent = "Lead engineer in U.I.C. Systems. Specializes in AI research and secure communications.";
-    else if(name==="[DATA CORRUPTED]") modalInfo.textContent = "User data corrupted. Details unavailable.";
-    else modalInfo.textContent = "Profile information for "+name+". Add bio, stats, or other details here.";
-  });
-});
-
-closeBtn.addEventListener("click", ()=>{modal.style.display="none";});
-modal.addEventListener("click", e=>{if(e.target===modal) modal.style.display="none";});
 </script>
 
 </body>
