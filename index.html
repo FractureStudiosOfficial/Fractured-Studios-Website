@@ -158,8 +158,8 @@ let pendingCommand = null;
 
 // 3D tilt
 document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/400;
-  const y = (window.innerHeight/2 - e.clientY)/400;
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
