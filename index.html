@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home | Retro Terminal</title>
+<title>Fractured Studios | Terminal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 body {
@@ -153,7 +153,7 @@ commandInput.addEventListener('keydown',async(e)=>{
         typeLine('Command cancelled.');
         // restore original logo
         logo.innerHTML='';
-        logo.src='logo.png';
+        logo.src='FracturedF-Transparant.png';
         logo.style.filter='drop-shadow(0 0 8px #FF9F07) drop-shadow(0 0 12px #FF9F07) drop-shadow(0 0 16px #FF9F07) drop-shadow(0 0 20px #FF9F07)';
       }
       awaitingConfirm=false;
@@ -163,8 +163,8 @@ commandInput.addEventListener('keydown',async(e)=>{
 
 // Subtle 3D movement
 document.addEventListener('mousemove',(e)=>{
-  const x=(window.innerWidth/2 - e.clientX)/150;
-  const y=(window.innerHeight/2 - e.clientY)/150;
+  const x=(window.innerWidth/2 - e.clientX)/1000;
+  const y=(window.innerHeight/2 - e.clientY)/1000;
   crtContainer.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
 });
 </script>
