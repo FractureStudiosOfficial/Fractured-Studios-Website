@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ships | U.I.C. Systems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+/* Amber tint & scanlines */
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite; z-index:1001;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+/* Container */
+#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+
+/* Ships list */
+.ship-entry {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background: rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  margin:10px 0;
+  padding:10px 15px;
+  cursor:default;
+  transition:.2s;
+}
+.ship-entry:hover { background: rgba(0,0,0,.35); }
+
+.ship-name { font-weight:bold; }
+.ship-type { opacity:.7; margin-left:5px; }
+
+/* Details button */
+.details-button {
+  background:#111;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  padding:5px 12px;
+  cursor:pointer;
+  font-family:'Share Tech Mono', monospace;
+  transition:.2s;
+}
+.details-button:hover { background:rgba(255,159,7,.1); }
+
+/* Terminal */
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:20px;
+}
+#prompt { display:flex; flex:1; }
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* OS version */
+#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+
+<h1>Active Ships</h1>
+
+<!-- Ships list -->
+<div class="ship-entry"><div><span class="ship-name">Soyuz</span> <span class="ship-type">(Russia)</span></div><button class="details-button" onclick="window.location='soyuz.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Von Braun</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='vonbraun.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Shenzhou</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='shenzhou.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Discovery One</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='discoveryone.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Zarya</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='zarya.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Tiangong-1</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='tiangong1.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Apollo 11</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='apollo11.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Salyut 7</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='salyut7.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Mir</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='mir.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">ISS</span> <span class="ship-type">(International)</span></div><button class="details-button" onclick="window.location='iss.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Soyuz MS-10</span> <span class="ship-type">(Russia)</span></div><button class="details-button" onclick="window.location='soyuzms10.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Shenzhou 12</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='shenzhou12.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Tiangong-2</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='tiangong2.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Orion</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='orion.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Crew Dragon</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='crewdragon.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Starliner</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='starliner.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Progress MS-17</span> <span class="ship-type">(Russia)</span></div><button class="details-button" onclick="window.location='progressms17.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Soyuz TMA-19M</span> <span class="ship-type">(Russia)</span></div><button class="details-button" onclick="window.location='soyuztma19m.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Tiangong Station Module</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='tiangongmodule.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Hubble Telescope</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='hubble.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">James Webb Telescope</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='jwst.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Vostok 1</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='vostok1.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Voskhod 2</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='voskhod2.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Skylab</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='skylab.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">X-15 Spaceplane</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='x15.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Tianzhou</span> <span class="ship-type">(China)</span></div><button class="details-button" onclick="window.location='tianzhou.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Buran</span> <span class="ship-type">(USSR)</span></div><button class="details-button" onclick="window.location='buran.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Space Shuttle Atlantis</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='atlantis.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Space Shuttle Endeavour</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='endeavour.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Space Shuttle Discovery</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='discovery.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Space Shuttle Columbia</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='columbia.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Soyuz MS-20</span> <span class="ship-type">(Russia)</span></div><button class="details-button" onclick="window.location='soyuzms20.html'">Details</button></div>
+<div class="ship-entry"><div><span class="ship-name">Starship Prototype</span> <span class="ship-type">(USA)</span></div><button class="details-button" onclick="window.location='starship.html'">Details</button></div>
+
+<p style="opacity:.6; margin-top:15px;">Unable to load more ships</p>
+
+<!-- Terminal -->
+<div id="terminal-box">
+  <div id="prompt">
+    <span>></span>
+    <input id="cmd" autocomplete="off" placeholder="Enter command">
+  </div>
+</div>
+
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// 3D tilt effect
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal commands
+const input = document.getElementById("cmd");
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const cmd = input.value.toLowerCase().trim();
+  switch(cmd){
+    case "home": window.location="index.html"; break;
+    case "ships": window.location="ships.html"; break;
+    case "stations": window.location="stations.html"; break;
+    case "about": window.location="about.html"; break;
+    case "games": window.location="games.html"; break;
+    case "contact": window.location="contact.html"; break;
+    default: console.log("Unknown command: "+cmd);
+  }
+  input.value="";
+});
+</script>
+
+</body>
+</html>
