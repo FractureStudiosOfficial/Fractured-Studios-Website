@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship Template | U.I.C. Systems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+/* Amber tint & scanlines */
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite; z-index:1001;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+/* Container */
+#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+
+/* Ship info */
+h1 { text-align:center; margin-top:0; }
+.ship-info { background: rgba(0,0,0,.25); border:1px solid rgba(255,159,7,.2); padding:20px; margin-bottom:20px; }
+.ship-info img { display:block; max-width:100%; margin:15px auto; border:1px solid rgba(255,159,7,.3); }
+
+.ship-submodule {
+  background: rgba(0,0,0,.15);
+  padding:10px;
+  margin:10px 0;
+  border:1px solid rgba(255,159,7,.1);
+}
+
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:20px;
+}
+#prompt { display:flex; flex:1; }
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+
+/* Password overlay */
+#password-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.95);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+#password-overlay input {
+  background:#111;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  padding:10px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:16px;
+  margin-top:10px;
+}
+#password-overlay button {
+  margin-top:10px;
+  padding:8px 15px;
+  background:#111;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  cursor:pointer;
+}
+
+/* Info labels */
+label { display:block; margin:5px 0 0 0; }
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="password-overlay">
+  <h2>Enter Ship Access Password</h2>
+  <input id="pw-input" type="password" placeholder="Password">
+  <button id="pw-button">Enter</button>
+  <p id="pw-message" style="color:#FF9F07; margin-top:10px;"></p>
+</div>
+
+<div id="crt-container" style="display:none;">
+
+<h1>Ship Name Here</h1>
+
+<div class="ship-info">
+  <img src="ship-image.png" alt="Ship Image">
+  <p><strong>Affiliation:</strong> USA/USSR/China</p>
+  <p><strong>Launch Year:</strong> 19XX</p>
+  <p><strong>Status:</strong> Active/Decommissioned</p>
+  <p><strong>Mission Type:</strong> Crew Transport / Exploration / Research</p>
+  <p><strong>Crew Capacity:</strong> XX</p>
+  <p><strong>Length:</strong> XX meters</p>
+  <p><strong>Mass:</strong> XXX tons</p>
+</div>
+
+<!-- Submodules -->
+<div class="ship-submodule">
+  <h3>Command Module</h3>
+  <img src="command-module.png" alt="Command Module Image">
+  <p>Purpose: Command and control of the ship, navigation systems, and communication arrays.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Habitat Module</h3>
+  <img src="habitat-module.png" alt="Habitat Module Image">
+  <p>Purpose: Crew living quarters, life support, and recreational areas.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Engine Section</h3>
+  <img src="engine-module.png" alt="Engine Module Image">
+  <p>Purpose: Main propulsion and power generation for interplanetary travel.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Cargo Bay</h3>
+  <img src="cargo-bay.png" alt="Cargo Bay Image">
+  <p>Purpose: Storing supplies, equipment, and scientific payloads.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Laboratory Module</h3>
+  <img src="lab-module.png" alt="Lab Module Image">
+  <p>Purpose: Scientific research, experiments, and testing equipment.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Orbital Vehicle Bay</h3>
+  <img src="orbital-vehicle.png" alt="Orbital Vehicle Image">
+  <p>Purpose: Houses shuttles and probes for planetary exploration.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Medical Module</h3>
+  <img src="medical-module.png" alt="Medical Module Image">
+  <p>Purpose: Health care and emergency treatment facilities for crew.</p>
+</div>
+
+<div class="ship-submodule">
+  <h3>Engineering Bay</h3>
+  <img src="engineering-module.png" alt="Engineering Module Image">
+  <p>Purpose: Maintenance of ship systems, repairs, and engineering workspaces.</p>
+</div>
+
+<!-- Terminal -->
+<div id="terminal-box">
+  <div id="prompt">
+    <span>></span>
+    <input id="cmd" autocomplete="off">
+  </div>
+</div>
+
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// 3D tilt effect
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Password overlay logic
+const overlay = document.getElementById("password-overlay");
+const pwInput = document.getElementById("pw-input");
+const pwButton = document.getElementById("pw-button");
+const pwMessage = document.getElementById("pw-message");
+const correctPassword = "UICS123"; // Change as needed
+
+pwButton.addEventListener("click", () => {
+  if (pwInput.value === correctPassword) {
+    overlay.style.display = "none";
+    container.style.display = "block";
+  } else {
+    pwMessage.textContent = "Access Denied";
+    pwInput.value = "";
+  }
+});
+
+// Terminal commands
+const input = document.getElementById("cmd");
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const cmd = input.value.toLowerCase().trim();
+  switch(cmd){
+    case "home": window.location="index.html"; break;
+    case "ships": window.location="ships.html"; break;
+    case "stations": window.location="stations.html"; break;
+    case "about": window.location="about.html"; break;
+    case "games": window.location="games.html"; break;
+    case "contact": window.location="contact.html"; break;
+    default: console.log("Unknown command: "+cmd);
+  }
+  input.value="";
+});
+</script>
+</body>
+</html>
