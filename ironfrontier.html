@@ -2,159 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>The Iron Frontier</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fractured Studios | The Iron Frontier</title>
 <style>
-html, body {
-  margin:0;
-  height:100%;
-  font-family:'Share Tech Mono', monospace;
-  background:#0d0d0d;
-  color:#FF9F07;
-  overflow:hidden;
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  margin:0; height:100vh; background:#111; color:#FF9F07;
+  font-family:'Share Tech Mono',monospace; overflow:hidden;
+  perspective:1000px; display:flex; flex-direction:column; justify-content:flex-start; align-items:center;
 }
 
-/* identical CRT system */
-#crtWrapper{
-position:absolute;
-inset:0;
-overflow:hidden;
-border-radius:40px;
-box-shadow:
-inset 0 0 120px rgba(0,0,0,.9),
-inset 0 0 40px rgba(0,0,0,.6);
+/* Amber tint overlay */
+#amber-tint {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(255,159,7,0.02); pointer-events:none; z-index:1000;
 }
 
-#crtDistortLayer{
-position:absolute;
-inset:-5%;
-filter:url(#crtDistortion);
-pointer-events:none;
+/* Main CRT container */
+#crt-container {
+  width:100%; flex:1; display:flex; flex-direction:column; justify-content:flex-start; align-items:center;
+  transform-style:preserve-3d; transition:transform 0.1s ease-out; padding:2em; box-sizing:border-box;
 }
 
-#crtContent{
-position:relative;
-height:100%;
-overflow:auto;
+/* Hero section */
+#hero {
+  width:90%; max-width:1200px; margin-top:1em; text-align:center;
+}
+#hero h1 { font-size:2.5em; margin:0 0 0.5em 0; text-shadow:0 0 4px #FF9F07,0 0 8px #FF9F07; }
+#hero p { font-size:1.1em; margin-bottom:1em; }
+
+/* Screenshot section */
+#screenshots { display:flex; flex-wrap:wrap; justify-content:center; gap:1em; margin-top:1em; }
+.screenshot {
+  background: rgba(0,0,0,0.25); border-radius:5px; overflow:hidden;
+  box-shadow:0 0 20px rgba(255,159,7,0.2); width:250px; height:140px;
+  display:flex; justify-content:center; align-items:center; color:#FF9F07; font-size:0.9em; text-align:center;
 }
 
-.scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,159,7,.05) 0px,
-rgba(255,159,7,.05) 1px,
-transparent 2px,
-transparent 4px);
-animation:scanlineMove 1s linear infinite;
-z-index:9999;
+/* Description / Info section */
+#info { width:90%; max-width:1200px; margin-top:2em; padding:1em; background: rgba(0,0,0,0.25); border-radius:5px; box-shadow:0 0 20px rgba(255,159,7,0.2); }
+
+/* Buttons */
+button {
+  background: #FF9F07; border:none; padding:0.5em 1em; border-radius:3px;
+  color:#111; font-family:'Share Tech Mono',monospace; cursor:pointer; margin-top:1em;
 }
 
-@keyframes scanlineMove{
-0%{background-position:0 0;}
-100%{background-position:0 4px;}
+/* Terminal at bottom */
+#terminal-container {
+  width:90%; max-width:1200px; margin-top:auto; display:flex; flex-direction:column;
 }
-
-.section{
-padding:60px;
-max-width:900px;
-margin:auto;
+#terminal {
+  background: rgba(0,0,0,0.25); padding:1em; border-radius:5px;
+  box-shadow:0 0 20px rgba(255,159,7,0.2); min-height:80px; overflow-y:auto; text-align:left;
 }
+#prompt { display:flex; flex-direction:row; align-items:center; margin-top:0.5em; }
+#prompt span { margin-right:0.5em; }
+#command { background:transparent; border:none; outline:none; color:#FF9F07; flex:1; font-family:'Share Tech Mono',monospace; }
 
-.phosphor{
-text-shadow:0 0 2px #FF9F07,0 0 6px rgba(255,159,7,.8);
+#logo-container { position:absolute; top:2em; right:2em; width:200px; display:flex; justify-content:center; align-items:center; }
+#logo { max-width:100%; filter: drop-shadow(0 0 8px #FF9F07) drop-shadow(0 0 12px #FF9F07) drop-shadow(0 0 16px #FF9F07) drop-shadow(0 0 20px #FF9F07); }
+
+/* Scanlines overlay */
+#scanlines { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:10002;
+  background-image: repeating-linear-gradient(rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 5px);
+  animation:flicker 0.1s infinite; mix-blend-mode:normal;
 }
+@keyframes flicker { 0%,100%{opacity:0.08;} 50%{opacity:0.02;} }
+#flash { position:fixed; top:0; left:0; width:100%; height:100%; background:white; opacity:0; pointer-events:none; z-index:10003; }
 
-.hero-title{
-font-size:42px;
-margin-bottom:20px;
-}
-
-.info-box{
-border:2px solid #FF9F07;
-padding:25px;
-margin:25px 0;
-}
-
-#commandInput{
-background:none;
-border:none;
-color:#FF9F07;
-font-family:inherit;
-font-size:18px;
-outline:none;
-width:100%;
+/* OS version tilting subtly */
+#os-version { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#FF9F07;
+  text-shadow:0 0 2px #FF9F07,0 0 4px #FF9F07,0 0 6px #FF9F07; pointer-events:none; z-index:10004; opacity:0.8;
 }
 </style>
 </head>
-
 <body>
 
-<div id="crtWrapper">
-<div id="crtDistortLayer"></div>
+<div id="amber-tint"></div>
+<div id="os-version">OS v1.03.7</div>
 
-<div id="crtContent">
+<div id="crt-container">
 
-<section class="section">
-<h1 class="hero-title phosphor">The Iron Frontier</h1>
+  <!-- Hero Section -->
+  <div id="hero">
+    <h1>The Iron Frontier</h1>
+    <p>Explore the post-apocalyptic frontier in this action-adventure open-world game. Fight, survive, and conquer your destiny.</p>
+    <button onclick="window.location.href='games.html'">Back to Games</button>
+  </div>
 
-<div class="info-box">
-<h2>Overview</h2>
-<p>Describe your game here.</p>
+  <!-- Screenshots -->
+  <div id="screenshots">
+    <div class="screenshot">Screenshot 1</div>
+    <div class="screenshot">Screenshot 2</div>
+    <div class="screenshot">Screenshot 3</div>
+  </div>
+
+  <!-- Game Info / Description -->
+  <div id="info">
+    <p><strong>Game Features:</strong></p>
+    <ul>
+      <li>Expansive open world to explore</li>
+      <li>Dynamic combat with advanced AI</li>
+      <li>Upgradeable weapons and armor</li>
+      <li>Immersive hand-painted graphics</li>
+      <li>Story-driven quests with multiple outcomes</li>
+    </ul>
+    <button onclick="window.location.href='ironfrontier.html'">Play The Iron Frontier</button>
+  </div>
+
+  <!-- Terminal at bottom -->
+  <div id="terminal-container">
+    <div id="terminal"></div>
+    <div id="prompt"><span>&gt;</span><input type="text" id="command" autofocus autocomplete="off"></div>
+  </div>
+
+  <!-- Logo top-right -->
+  <div id="logo-container"><img id="logo" src="logo.png" alt="Logo"></div>
+
 </div>
 
-<div class="info-box">
-<h2>Features</h2>
-<ul>
-<li>Feature one</li>
-<li>Feature two</li>
-<li>Feature three</li>
-</ul>
-</div>
-
-<div class="info-box">
-<h2>Status</h2>
-<p>In Development</p>
-</div>
-
-</section>
-
-<section class="section">
-<p>> Type a command:</p>
-<input id="commandInput" placeholder="> enter command...">
-<p>Commands: home, games, about, contact</p>
-</section>
-
-</div>
-</div>
-
-<div class="scanlines"></div>
-
-<svg width="0" height="0">
-<filter id="crtDistortion">
-<feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="2" result="noise"/>
-<feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/>
-</filter>
-</svg>
+<div id="scanlines"></div>
+<div id="flash"></div>
 
 <script>
-const input=document.getElementById("commandInput");
+// 3D movement
+const crtContainer=document.getElementById('crt-container');
+const osVersion=document.getElementById('os-version');
 
-input.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-const cmd=input.value.toLowerCase().trim();
-
-if(cmd==="home") location.href="index.html";
-else if(cmd==="games") location.href="games.html";
-else if(cmd==="about") location.href="about.html";
-else if(cmd==="contact") location.href="contact.html";
-
-input.value="";
-}
+document.addEventListener('mousemove',(e)=>{
+  const x=(window.innerWidth/2 - e.clientX)/300; // subtle tilt
+  const y=(window.innerHeight/2 - e.clientY)/300;
+  crtContainer.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
+  // OS version tilts less subtly
+  osVersion.style.transform=`rotateX(${y*0.5}deg) rotateY(${x*0.5}deg)`;
 });
+
+// Terminal command handling
+const terminal=document.getElementById('terminal');
+const commandInput=document.getElementById('command');
+const visibleCommands=['about','games','contact','home'];
+const hiddenCommands=['secret'];
+
+commandInput.addEventListener('keydown',(e)=>{
+  if(e.key==='Enter'){
+    const cmd=commandInput.value.trim().toLowerCase();
+    terminal.innerHTML+=`&gt; ${cmd}<br>`;
+    commandInput.value='';
+    terminal.scrollTop=terminal.scrollHeight;
+    if(visibleCommands.includes(cmd) || hiddenCommands.includes(cmd)){
+      window.location.href=cmd+'.html';
+    } else {
+      terminal.innerHTML+=`<span style="color:#FF4F07;">Unknown command: ${cmd}</span><br>`;
+    }
+  }
+});
+
+// --- Optional: Load screenshots with typewriter effect ---
+const screenshotsContainer=document.getElementById('screenshots');
+const screenshotText=["Screenshot 1","Screenshot 2","Screenshot 3"];
+let index=0;
+function loadScreenshotsLineByLine(){
+  screenshotsContainer.innerHTML='';
+  function nextLine(){
+    if(index<screenshotText.length){
+      const div=document.createElement('div');
+      div.className='screenshot';
+      div.textContent=screenshotText[index];
+      screenshotsContainer.appendChild(div);
+      index++;
+      setTimeout(nextLine,50);
+    }
+  }
+  nextLine();
+}
+loadScreenshotsLineByLine();
 </script>
 
 </body>
