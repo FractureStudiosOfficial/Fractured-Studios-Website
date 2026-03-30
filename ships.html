@@ -166,8 +166,8 @@ h1 { text-align:center; margin-top:0; }
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
+  const x = (window.innerWidth/2 - e.clientX)/100000;
+  const y = (window.innerHeight/2 - e.clientY)/10000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
