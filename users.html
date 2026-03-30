@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. User Database</title>
+<title>UIC User Database</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -13,18 +13,17 @@ body {
   background:#111;
   color:#FF9F07;
   font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
+  overflow-y:auto;
   perspective:1000px;
 }
 
 #crt-container {
-  height:100vh;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
   padding:40px;
   transform-style:preserve-3d;
   transition:transform .08s ease-out;
+  min-height:100vh;
 }
 
 #scanlines {
@@ -67,41 +66,11 @@ body {
   border:1px solid rgba(255,159,7,.2);
   cursor:pointer;
   transition:0.2s ease;
+  text-align:center;
 }
 .user-card:hover {
   background:rgba(0,0,0,.4);
   transform:scale(1.02);
-}
-
-#user-overlay {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.95);
-  display:none;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:2000;
-  padding:40px;
-  overflow-y:auto;
-}
-
-#user-overlay .content {
-  background:rgba(0,0,0,.3);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  max-width:600px;
-}
-
-#user-overlay h2 {
-  margin-top:0;
-}
-
-#close-overlay {
-  margin-top:20px;
-  cursor:pointer;
-  color:#FF9F07;
-  text-decoration:underline;
 }
 
 #terminal-box {
@@ -109,7 +78,10 @@ body {
   padding:15px;
   border:1px solid rgba(255,159,7,.2);
   display:flex;
-  margin-top:auto;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
 }
 
 #prompt {
@@ -133,6 +105,14 @@ body {
   font-size:12px;
   opacity:.7;
 }
+
+h1 {
+  margin-top:0;
+}
+
+p.note {
+  opacity:0.6;
+}
 </style>
 </head>
 
@@ -146,7 +126,7 @@ body {
   
   <div id="user-list"></div>
   
-  <p style="opacity:.6">Unable to load more users.</p>
+  <p class="note">Unable to load more users.</p>
 
   <div id="terminal-box">
     <div id="prompt">
@@ -159,77 +139,35 @@ body {
 
 <div id="os">UIC OS v1.0.4</div>
 
-<!-- User Profile Overlay -->
-<div id="user-overlay">
-  <div class="content" id="user-content"></div>
-  <div id="close-overlay">Close</div>
-</div>
-
 <script>
-// Users data
+// Users data with file names for dedicated pages
 const users = [
-  {
-    name:"James Maniston",
-    occupation:"Lead Quantum Physicist",
-    age:42,
-    location:"UIC Central Lab",
-    status:"Active",
-    tasks:["Quantum Simulation Research","Particle Acceleration Studies"],
-    previous:["MIT Research Fellow","NASA Consultant"],
-    bio:"James specializes in quantum dynamics and leads the core experimental division."
-  },
-  {
-    name:"[DATA CORRUPTED]",
-    occupation:"Unknown",
-    age:"--",
-    location:"--",
-    status:"Offline",
-    tasks:[],
-    previous:[],
-    bio:"Data corrupted. Cannot retrieve user details."
-  },
-  {name:"Dr. Helena Frost", occupation:"Neurobiologist", age:39, location:"UIC Neuro Lab", status:"Active", tasks:["Neural mapping","Cognitive experiments"], previous:["Harvard Neuro Dept"], bio:"Focused on brain-computer interface research."},
-  {name:"Dr. Elias Vega", occupation:"Astrophysicist", age:45, location:"UIC Space Observatory", status:"Active", tasks:["Exoplanet study","Cosmic radiation analysis"], previous:["ESA Scientist"], bio:"Studying distant star systems."},
-  {name:"Dr. Monica Reyes", occupation:"Geneticist", age:36, location:"UIC Bio Lab", status:"Active", tasks:["CRISPR research","Stem cell trials"], previous:["CalTech Postdoc"], bio:"Developing next-gen gene therapies."},
-  {name:"Dr. Tobias Kane", occupation:"Robotics Engineer", age:41, location:"UIC Robotics Wing", status:"Active", tasks:["Autonomous drones","AI simulations"], previous:["Boston Dynamics"], bio:"Integrates robotics with advanced AI systems."},
-  {name:"Dr. Serena Wu", occupation:"Material Scientist", age:38, location:"UIC Materials Lab", status:"Active", tasks:["Nanomaterials research","Superconductor testing"], previous:["MIT Materials Dept"], bio:"Designing advanced materials for extreme environments."},
-  {name:"Dr. Victor Lang", occupation:"Cybersecurity Specialist", age:44, location:"UIC Security Center", status:"Active", tasks:["Network penetration tests","Encryption protocols"], previous:["NSA Analyst"], bio:"Securing the UIC networks."},
-  {name:"Dr. Farah Nadir", occupation:"Astrobiologist", age:37, location:"UIC Space Observatory", status:"Active", tasks:["Microbial analysis","Planetary biosignatures"], previous:["JPL Researcher"], bio:"Searching for life beyond Earth."},
-  {name:"Dr. Akio Tanaka", occupation:"Nanotechnologist", age:40, location:"UIC Nano Lab", status:"Active", tasks:["Molecular assemblers","Nano-robotics"], previous:["Tokyo Tech"], bio:"Pioneering nanoscale manufacturing."},
-  {name:"Dr. Liora Stein", occupation:"Environmental Scientist", age:35, location:"UIC Climate Dept", status:"Active", tasks:["Carbon capture optimization","Ecosystem modeling"], previous:["Yale Enviro Research"], bio:"Protecting Earth's biosystems."},
-  {name:"Dr. Marco Silva", occupation:"Chemical Engineer", age:43, location:"UIC Chem Lab", status:"Active", tasks:["New polymer synthesis","Catalyst design"], previous:["Dow Chemical"], bio:"Developing advanced chemical processes."},
-  {name:"Dr. Priya Nandakumar", occupation:"AI Researcher", age:32, location:"UIC AI Lab", status:"Active", tasks:["Machine learning","Neural network training"], previous:["Google AI"], bio:"Advancing artificial intelligence systems."}
+  {name:"James Maniston", file:"jamesmaniston.html"},
+  {name:"[DATA CORRUPTED]", file:"datacorrupted.html"},
+  {name:"Dr. Helena Frost", file:"helenafrost.html"},
+  {name:"Dr. Elias Vega", file:"eliasvega.html"},
+  {name:"Dr. Monica Reyes", file:"monicareyes.html"},
+  {name:"Dr. Tobias Kane", file:"tobiaskane.html"},
+  {name:"Dr. Serena Wu", file:"serenawu.html"},
+  {name:"Dr. Victor Lang", file:"victorlang.html"},
+  {name:"Dr. Farah Nadir", file:"farahnadir.html"},
+  {name:"Dr. Akio Tanaka", file:"akiotanaka.html"},
+  {name:"Dr. Liora Stein", file:"liorastein.html"},
+  {name:"Dr. Marco Silva", file:"marcosilva.html"},
+  {name:"Dr. Priya Nandakumar", file:"priyanandakumar.html"}
 ];
 
 // Populate user list
 const userList = document.getElementById("user-list");
-users.forEach((u,i)=>{
+users.forEach(u=>{
   const card = document.createElement("div");
   card.className="user-card";
   card.innerText=u.name;
-  card.onclick = ()=>{
-    const content = document.getElementById("user-content");
-    content.innerHTML = `
-      <h2>${u.name}</h2>
-      <p><strong>Occupation:</strong> ${u.occupation}</p>
-      <p><strong>Age:</strong> ${u.age}</p>
-      <p><strong>Location:</strong> ${u.location}</p>
-      <p><strong>Status:</strong> ${u.status}</p>
-      <p><strong>Assigned Tasks:</strong> ${u.tasks.join(", ") || "None"}</p>
-      <p><strong>Previous Experience:</strong> ${u.previous.join(", ") || "None"}</p>
-      <p><strong>Bio:</strong> ${u.bio}</p>
-    `;
-    document.getElementById("user-overlay").style.display="flex";
-  };
+  card.onclick = ()=> window.location=u.file;
   userList.appendChild(card);
 });
 
-// Close overlay
-document.getElementById("close-overlay").onclick = ()=>{
-  document.getElementById("user-overlay").style.display="none";
-};
-
-// Terminal setup at bottom
+// Terminal functionality
 const input = document.getElementById("cmd");
 input.addEventListener("keydown", e=>{
   if(e.key!=="Enter") return;
@@ -237,11 +175,12 @@ input.addEventListener("keydown", e=>{
   if(cmd==="about") window.location="about.html";
   else if(cmd==="games") window.location="games.html";
   else if(cmd==="contact") window.location="contact.html";
-  else terminal.innerHTML += `> Unknown command<br>`;
+  else if(cmd==="users") window.location="users.html";
+  else console.log("Unknown command: "+cmd);
   input.value="";
 });
 
-// 3D tilt
+// 3D tilt effect
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 document.addEventListener("mousemove", e => {
