@@ -80,8 +80,8 @@ body {
 // 3D movement
 const crtContainer=document.getElementById('crt-container');
 document.addEventListener('mousemove',(e)=>{
-  const x=(window.innerWidth/2 - e.clientX)/300;
-  const y=(window.innerHeight/2 - e.clientY)/300;
+  const x=(window.innerWidth/2 - e.clientX)/1000;
+  const y=(window.innerHeight/2 - e.clientY)/1000;
   crtContainer.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
 });
 
