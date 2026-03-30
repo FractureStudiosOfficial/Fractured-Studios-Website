@@ -88,8 +88,8 @@ body{
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
+    transparent 2px,
+    transparent 6px
   );
   animation:flicker .12s infinite;
   z-index:1001;
@@ -126,12 +126,12 @@ body{
 </div>
 
 <p style="margin-top:10px;opacity:.6">
-Available terms: About, Games, Contact, Index
+Available terms: About, Games, Contact
 </p>
 </div>
 
 <div id="logo-area">
-<img id="logo" src="FracturedF-Transparant.png">
+<img id="logo" src="logo.png">
 </div>
 
 </div>
@@ -149,35 +149,35 @@ let pendingCommand=null
 
 /* 3D tilt */
 document.addEventListener("mousemove",(e)=>{
-  const x=(window.innerWidth/2-e.clientX)/1000
-  const y=(window.innerHeight/2-e.clientY)/1000
+  const x=(window.innerWidth/2-e.clientX)/400
+  const y=(window.innerHeight/2-e.clientY)/400
   container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
   os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 })
 
-/* logo images per command */
+/* logo images */
 const commandLogos={
   about:"logo-about.png",
   games:"logo-games.png",
   contact:"logo-contact.png"
 }
 
-/* boot lines */
+/* Boot lines and fake errors */
 const bootLines=[
-  'U.I.C. Terminal startup...',
+  'U.I.C. System startup...',
+  '------------------------',
   'Initializing kernel modules...',
   'Loading device drivers...',
   'Verifying memory...',
   'Checking system integrity...',
   'Calibrating display output...',
   'Starting process scheduler...'
-  'System startup successful'
+  'System startup succesful'
   '------------------------',
   'Welcome to U.I.C. Systems',
   '------------------------',
 ]
 
-/* fake errors */
 const fakeErrors=[
   'ERROR: Memory leak detected',
   'WARNING: Clock desync',
@@ -186,33 +186,33 @@ const fakeErrors=[
   'ERROR: Kernel mismatch'
 ]
 
-/* boot sequence */
+/* Async function to type boot sequence line by line */
 async function boot(){
   for(let line of bootLines){
     // 30% chance to insert a random error
     if(Math.random()<0.3){
       const err=fakeErrors[Math.floor(Math.random()*fakeErrors.length)]
       terminal.innerHTML+=`<span style="color:#ff6a00">${err}</span><br>`
+      terminal.scrollTop=terminal.scrollHeight
+      await new Promise(r=>setTimeout(r,50))
     }
 
     terminal.innerHTML+=line+"<br>"
     terminal.scrollTop=terminal.scrollHeight
-    await new Promise(r=>setTimeout(r,45)) // adjust speed here
+    await new Promise(r=>setTimeout(r,50))
   }
 
   terminal.innerHTML+="<br>System Ready.<br>"
   terminal.scrollTop=terminal.scrollHeight
-
   input.disabled=false
   input.focus()
 }
 
 boot()
 
-/* command handler */
+/* Command handler */
 input.addEventListener("keydown",e=>{
   if(e.key!=="Enter") return
-
   const value=input.value.toLowerCase().trim()
   terminal.innerHTML+=`&gt; ${value}<br>`
   input.value=""
@@ -223,7 +223,7 @@ input.addEventListener("keydown",e=>{
     }
     else{
       terminal.innerHTML+="Cancelled.<br>"
-      logo.src="FracturedF-Transparant.png"
+      logo.src="logo.png"
     }
     pendingCommand=null
     terminal.scrollTop=terminal.scrollHeight
