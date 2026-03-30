@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Games | Retro Terminal</title>
+<title>Fractured Studios | Games</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 body {
@@ -80,8 +80,8 @@ body {
 // 3D movement
 const crtContainer=document.getElementById('crt-container');
 document.addEventListener('mousemove',(e)=>{
-  const x=(window.innerWidth/2 - e.clientX)/150;
-  const y=(window.innerHeight/2 - e.clientY)/150;
+  const x=(window.innerWidth/2 - e.clientX)/90;
+  const y=(window.innerHeight/2 - e.clientY)/90;
   crtContainer.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`;
 });
 
