@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Station Status</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+background:#111;
+color:#FF9F07;
+font-family:'Share Tech Mono', monospace;
+overflow:auto;
+}
+
+/* CRT overlays */
+#amber{
+position:fixed;
+inset:0;
+background:rgba(255,159,7,.04);
+pointer-events:none;
+z-index:1000;
+}
+
+#scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.05) 0px,
+rgba(255,255,255,.05) 2px,
+transparent 5px,
+transparent 9px
+);
+animation:flicker .12s infinite;
+z-index:1001;
+}
+
+@keyframes flicker{
+0%{opacity:.15}
+50%{opacity:.07}
+100%{opacity:.15}
+}
+
+/* RED ALERT */
+.red-alert{
+animation:redFlash .8s infinite;
+}
+
+@keyframes redFlash{
+0%{box-shadow:0 0 20px red inset}
+50%{box-shadow:0 0 80px red inset}
+100%{box-shadow:0 0 20px red inset}
+}
+
+/* layout */
+.container{
+padding:40px;
+}
+
+h1{
+text-shadow:0 0 10px currentColor;
+}
+
+/* panels */
+.panel{
+border:1px solid rgba(255,159,7,.4);
+padding:15px;
+margin-top:15px;
+background:rgba(0,0,0,.25);
+cursor:pointer;
+transition:.2s;
+}
+
+.panel:hover{
+background:rgba(255,159,7,.05);
+}
+
+/* animated bars */
+.bar{
+width:100%;
+height:18px;
+border:1px solid rgba(255,159,7,.4);
+margin-top:5px;
+}
+
+.fill{
+height:100%;
+background:#FF9F07;
+width:0%;
+transition:width 2s ease;
+}
+
+/* signal meter */
+.signal{
+display:flex;
+gap:4px;
+margin-top:8px;
+}
+
+.signal div{
+width:6px;
+height:12px;
+background:#FF9F07;
+opacity:.2;
+}
+
+/* locked */
+.locked{
+opacity:.4;
+pointer-events:none;
+}
+
+.locked::after{
+content:" [CLASSIFIED]";
+color:red;
+}
+
+/* corruption */
+.corrupt{
+animation:glitch .2s infinite;
+}
+
+@keyframes glitch{
+0%{transform:translate(0)}
+20%{transform:translate(-1px,1px)}
+40%{transform:translate(1px,-1px)}
+60%{transform:translate(-1px,0)}
+80%{transform:translate(1px,1px)}
+100%{transform:translate(0)}
+}
+
+button{
+margin-top:20px;
+padding:8px 12px;
+background:transparent;
+border:1px solid rgba(255,159,7,.5);
+color:#FF9F07;
+font-family:inherit;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div class="container" id="mainContainer">
+
+<h1 id="stationTitle">Station: ZVEZDA ORBITAL</h1>
+<p>Status: OPERATIONAL</p>
+
+<!-- SIGNAL -->
+<h2>Signal Strength</h2>
+<div class="signal" id="signalMeter">
+<div></div><div></div><div></div><div></div><div></div>
+</div>
+
+<!-- LIFE SUPPORT -->
+<div class="panel" onclick="togglePanel(this)">
+<h2>Life Support</h2>
+Oxygen
+<div class="bar"><div class="fill" data-value="96"></div></div>
+
+Water Recycling
+<div class="bar"><div class="fill" data-value="88"></div></div>
+</div>
+
+<!-- POWER -->
+<div class="panel" onclick="togglePanel(this)">
+<h2>Power Systems</h2>
+Reactor Output
+<div class="bar"><div class="fill" data-value="82"></div></div>
+
+Battery Reserve
+<div class="bar"><div class="fill" data-value="64"></div></div>
+</div>
+
+<!-- CLASSIFIED -->
+<div class="panel locked">
+<h2>Experimental Systems</h2>
+<p>Access Restricted</p>
+</div>
+
+<button onclick="window.location='systemstatus.html'">
+Return to Dashboard
+</button>
+
+</div>
+
+<script>
+/* ===== USER TOGGLES ===== */
+const ALERT_MODE = 1;
+const CORRUPTED_MODE = 0;
+
+/* RED ALERT */
+if(ALERT_MODE === 1){
+document.body.classList.add("red-alert");
+}
+
+/* CORRUPTION */
+if(CORRUPTED_MODE === 1){
+document.body.classList.add("corrupt");
+document.getElementById("stationTitle").innerText="STA--TION DATA CORRUPTED";
+}
+
+/* ANIMATED BARS */
+document.querySelectorAll(".fill").forEach(bar=>{
+let val = bar.getAttribute("data-value");
+setTimeout(()=>{ bar.style.width = val + "%"; },300);
+});
+
+/* SIGNAL ANIMATION */
+const signal = document.querySelectorAll("#signalMeter div");
+setInterval(()=>{
+let strength = Math.floor(Math.random()*signal.length);
+signal.forEach((bar,i)=>{
+bar.style.opacity = i <= strength ? "1" : ".2";
+});
+},400);
+
+/* CLICK PANELS */
+function togglePanel(panel){
+panel.classList.toggle("expanded");
+}
+
+/* RANDOM GLITCH TEXT WHEN CORRUPTED */
+if(CORRUPTED_MODE === 1){
+setInterval(()=>{
+let titles = document.querySelectorAll("h2");
+titles.forEach(t=>{
+if(Math.random()>.7){
+t.style.opacity=Math.random();
+}
+});
+},150);
+}
+</script>
+
+</body>
+</html>
