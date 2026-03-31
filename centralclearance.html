@@ -14,6 +14,7 @@ body {
   overflow-y: scroll;
 }
 
+/* Amber overlay */
 #amber {
   position:fixed;
   inset:0;
@@ -22,6 +23,7 @@ body {
   z-index:999;
 }
 
+/* Scanlines */
 #scanlines {
   position:fixed;
   inset:0;
@@ -43,13 +45,15 @@ body {
   100%{opacity:.15}
 }
 
+/* Container */
 .container {
   max-width:1200px;
   margin:0 auto;
-  padding:50px 20px;
+  padding:50px 20px 150px 20px;
   box-sizing:border-box;
 }
 
+/* Headline */
 h1 {
   font-size:2em;
   margin-bottom:20px;
@@ -57,6 +61,7 @@ h1 {
   text-shadow:0 0 5px #FF9F07;
 }
 
+/* Directory styling */
 .directory {
   margin-left:20px;
 }
@@ -81,6 +86,7 @@ h1 {
   margin-left:20px;
 }
 
+/* File viewer */
 #file-viewer {
   margin-top:30px;
   padding:20px;
@@ -88,6 +94,34 @@ h1 {
   background:rgba(0,0,0,.25);
   min-height:200px;
   white-space:pre-wrap;
+}
+
+/* Terminal input */
+#terminal-box {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(0,0,0,.25);
+  border-top:1px solid rgba(255,159,7,.3);
+  padding:10px 20px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+}
+
+#terminal-box span {
+  margin-right:10px;
+}
+
+#terminal-box input {
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  font-size:1em;
 }
 </style>
 </head>
@@ -106,52 +140,71 @@ h1 {
           <li onclick="openFile('Zvezda Station Info')">Zvezda.txt</li>
           <li onclick="openFile('Horizon Station Info')">Horizon.txt</li>
           <li onclick="openFile('Floating Islands of Venus')">VenusBase.txt</li>
-          <li onclick="openFile('Lunar Outpost Alpha')">MoonAlpha.txt</li>
-          <li onclick="openFile('Mars Orbital Station 1')">MarsOrbital1.txt</li>
         </ul>
       </li>
       <li onclick="toggleFolder('ships')">SHIPS
         <ul id="ships" style="display:none">
           <li onclick="openFile('Soyuz Info')">Soyuz.log</li>
           <li onclick="openFile('Von Braun US Ship')">VonBraun-US.txt</li>
-          <li onclick="openFile('Sputnik-4')">Sputnik-4.txt</li>
-          <li onclick="openFile('Hubble Satellite')">Hubble.log</li>
         </ul>
       </li>
       <li onclick="toggleFolder('research')">RESEARCH
         <ul id="research" style="display:none">
           <li onclick="openFile('Project Genesis')">Project-Genesis.doc</li>
-          <li onclick="openFile('Alien Artifact Analysis')">Artifact-Analysis.pdf</li>
-          <li onclick="openFile('Neural Interface Testing')">Neural-Interface.txt</li>
         </ul>
       </li>
       <li onclick="toggleFolder('communications')">COMMUNICATIONS
         <ul id="communications" style="display:none">
           <li onclick="openFile('Encrypted Logs 1982')">Logs-1982.txt</li>
-          <li onclick="openFile('Secure Transmission Protocols')">STP.txt</li>
         </ul>
       </li>
     </ul>
   </div>
 
-  <div id="file-viewer">Select a file to view its contents...</div>
+  <div id="file-viewer">Select a file to view its contents or use the terminal below...</div>
+</div>
+
+<!-- Terminal input -->
+<div id="terminal-box">
+  <span>></span>
+  <input id="cmd" autocomplete="off" placeholder="Type command...">
 </div>
 
 <script>
 function toggleFolder(id){
   const folder = document.getElementById(id);
-  if(folder.style.display === "none"){
-    folder.style.display = "block";
-  } else {
-    folder.style.display = "none";
-  }
+  folder.style.display = folder.style.display === "none" ? "block" : "none";
 }
 
 function openFile(content){
   const viewer = document.getElementById('file-viewer');
-  // For testing, just output the name of the file
   viewer.textContent = `Displaying contents of: ${content}\n\n[CLASSIFIED FILE DATA]\n...additional information goes here...`;
 }
+
+// Terminal commands
+const terminal = document.getElementById('cmd');
+const commandFiles = {
+  "open zvezda": "Zvezda Station Info",
+  "open horizon": "Horizon Station Info",
+  "open venus": "Floating Islands of Venus",
+  "open soyuz": "Soyuz Info",
+  "open vonbraun": "Von Braun US Ship",
+  "open genesis": "Project Genesis",
+  "open logs": "Encrypted Logs 1982"
+};
+
+terminal.addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  const val = terminal.value.toLowerCase().trim();
+  terminal.value = "";
+
+  if(commandFiles[val]){
+    openFile(commandFiles[val]);
+  } else {
+    const viewer = document.getElementById('file-viewer');
+    viewer.textContent = "Unknown command. Try: " + Object.keys(commandFiles).join(", ");
+  }
+});
 </script>
 
 </body>
