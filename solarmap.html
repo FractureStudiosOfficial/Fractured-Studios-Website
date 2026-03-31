@@ -3,69 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Sector Map</title>
+<title>UIC Solar Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 body{
-    margin:0;
-    background:#000;
-    color:#FF9F07;
-    font-family:'Share Tech Mono', monospace;
-    overflow:hidden;
+margin:0;
+background:#000;
+color:#FF9F07;
+font-family:'Share Tech Mono', monospace;
+overflow:hidden;
 }
 
-/* FULLSCREEN MAP */
+/* MAP CONTAINER */
 #map{
-    position:fixed;
-    inset:0;
+position:fixed;
+inset:0;
+overflow:hidden;
 }
 
-/* PLANET LABELS */
+/* GRID */
+#grid{
+position:absolute;
+inset:0;
+background-image:
+linear-gradient(rgba(255,159,7,.08) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,159,7,.08) 1px, transparent 1px);
+background-size:80px 80px;
+}
+
+/* SVG layer */
+#system{
+position:absolute;
+inset:0;
+transition:transform 1.2s ease;
+transform-origin:center center;
+}
+
+/* planet labels */
 .label{
-    position:absolute;
-    color:#FF9F07;
-    cursor:pointer;
-    font-size:14px;
+position:absolute;
+cursor:pointer;
+font-size:14px;
 }
 
 .label:hover{
-    text-shadow:0 0 8px #FF9F07;
-}
-
-/* GRID TEXT */
-.coord{
-    position:absolute;
-    font-size:12px;
-    opacity:.5;
+text-shadow:0 0 8px #FF9F07;
 }
 
 /* CRT */
 #scanlines{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.05) 0px,
-        rgba(255,255,255,.05) 2px,
-        transparent 5px,
-        transparent 9px
-    );
-    animation:flicker .12s infinite;
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.05) 0px,
+rgba(255,255,255,.05) 2px,
+transparent 5px,
+transparent 9px
+);
+animation:flicker .12s infinite;
 }
 
 @keyframes flicker{
-    0%{opacity:.15}
-    50%{opacity:.08}
-    100%{opacity:.15}
+0%{opacity:.15}
+50%{opacity:.08}
+100%{opacity:.15}
 }
 
 #amber{
-    position:fixed;
-    inset:0;
-    background:rgba(255,159,7,.05);
-    pointer-events:none;
+position:fixed;
+inset:0;
+background:rgba(255,159,7,.05);
+pointer-events:none;
 }
 </style>
 </head>
@@ -74,38 +85,31 @@ body{
 
 <div id="map">
 
-<svg width="100%" height="100%">
+<div id="grid"></div>
 
-<!-- CENTER SUN -->
+<svg id="system" width="100%" height="100%">
+
+<!-- SUN -->
 <circle cx="50%" cy="50%" r="6" stroke="#FF9F07" fill="none"/>
 
 <!-- ORBITS -->
-<circle cx="50%" cy="50%" r="120" stroke="#FF9F07" fill="none" opacity=".3"/>
-<circle cx="50%" cy="50%" r="180" stroke="#FF9F07" fill="none" opacity=".3"/>
-<circle cx="50%" cy="50%" r="240" stroke="#FF9F07" fill="none" opacity=".3"/>
+<circle cx="50%" cy="50%" r="140" stroke="#FF9F07" fill="none" opacity=".3"/>
+<circle cx="50%" cy="50%" r="220" stroke="#FF9F07" fill="none" opacity=".3"/>
+<circle cx="50%" cy="50%" r="300" stroke="#FF9F07" fill="none" opacity=".3"/>
 
 <!-- RADAR SWEEP -->
 <line id="radar" x1="50%" y1="50%" x2="50%" y2="0%" stroke="#FF9F07" stroke-width="1"/>
 
+<!-- SCAN PING -->
+<circle id="ping" cx="50%" cy="50%" r="0" stroke="#FF9F07" fill="none" opacity=".6"/>
+
 </svg>
 
-<!-- PLANET LABELS -->
-<div class="label" id="venus" style="top:50%; left:calc(50% + 120px);">[VENUS]</div>
-<div class="label" id="earth" style="top:calc(50% - 180px); left:50%;">[EARTH]</div>
-<div class="label" id="moon"  style="top:calc(50% - 190px); left:calc(50% + 15px);">(MOON)</div>
-<div class="label" id="mars"  style="top:50%; left:calc(50% - 240px);">{MARS}</div>
-
-<!-- SECTOR COORDINATES -->
-<div class="coord" style="top:10px;left:10px;">A1</div>
-<div class="coord" style="top:10px;left:50%;">A5</div>
-<div class="coord" style="top:10px;right:10px;">A9</div>
-
-<div class="coord" style="top:50%;left:10px;">E1</div>
-<div class="coord" style="top:50%;right:10px;">E9</div>
-
-<div class="coord" style="bottom:10px;left:10px;">I1</div>
-<div class="coord" style="bottom:10px;left:50%;">I5</div>
-<div class="coord" style="bottom:10px;right:10px;">I9</div>
+<!-- PLANETS -->
+<div class="label" id="venus" style="top:50%; left:calc(50% + 140px);">[VENUS]</div>
+<div class="label" id="earth" style="top:calc(50% - 220px); left:50%;">[EARTH]</div>
+<div class="label" id="moon"  style="top:calc(50% - 235px); left:calc(50% + 18px);">(MOON)</div>
+<div class="label" id="mars"  style="top:50%; left:calc(50% - 300px);">{MARS}</div>
 
 </div>
 
@@ -114,31 +118,61 @@ body{
 
 <script>
 
-/* CLICK NAVIGATION */
-const links = {
-    earth:"earth.html",
-    moon:"moon.html",
-    mars:"mars.html",
-    venus:"venus.html"
-};
-
-for(const id in links){
-    document.getElementById(id).onclick = () =>{
-        window.location.href = links[id];
-    };
-}
-
 /* RADAR SWEEP */
 let angle = 0;
 const radar = document.getElementById("radar");
 
 setInterval(()=>{
-    angle += 1;
-    radar.setAttribute(
-        "transform",
-        `rotate(${angle} 50% 50%)`
-    );
+angle += .7;
+radar.setAttribute("transform",`rotate(${angle} 50% 50%)`);
 },30);
+
+
+/* SCAN PING */
+const ping = document.getElementById("ping");
+let radius = 0;
+
+setInterval(()=>{
+radius += 2;
+ping.setAttribute("r", radius);
+
+if(radius > 400){
+radius = 0;
+}
+},30);
+
+
+/* ZOOM FUNCTION */
+function zoomTo(x,y,link){
+const system = document.getElementById("system");
+
+system.style.transform = `
+scale(2.2)
+translate(${x}px, ${y}px)
+`;
+
+setTimeout(()=>{
+window.location.href = link;
+},900);
+}
+
+
+/* PLANET CLICK HANDLERS */
+document.getElementById("earth").onclick = () =>{
+zoomTo(0,120,"earth.html");
+};
+
+document.getElementById("moon").onclick = () =>{
+zoomTo(-10,130,"moon.html");
+};
+
+document.getElementById("mars").onclick = () =>{
+zoomTo(180,0,"mars.html");
+};
+
+document.getElementById("venus").onclick = () =>{
+zoomTo(-120,0,"venus.html");
+};
 
 </script>
 
