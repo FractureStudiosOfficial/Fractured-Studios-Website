@@ -8,103 +8,109 @@
 
 <style>
 body{
-margin:0;
-background:#000;
-color:#FF9F07;
-font-family:'Share Tech Mono', monospace;
-overflow:hidden;
+  margin:0;
+  background:#000;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
 }
 
 /* MAP */
 #map{
-position:fixed;
-inset:0;
-overflow:hidden;
+  position:fixed;
+  inset:0;
+  overflow:hidden;
 }
 
 /* GRID */
 #grid{
-position:absolute;
-inset:0;
-background-image:
-linear-gradient(rgba(255,159,7,.06) 1px, transparent 1px),
-linear-gradient(90deg, rgba(255,159,7,.06) 1px, transparent 1px);
-background-size:80px 80px;
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,159,7,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,159,7,.06) 1px, transparent 1px);
+  background-size:80px 80px;
 }
 
 /* SYSTEM */
 #system{
-position:absolute;
-inset:0;
-transition:transform 1s ease;
-transform-origin:center center;
+  position:absolute;
+  inset:0;
+  transition:transform 1s ease;
+  transform-origin:center center;
+  cursor:pointer;
 }
 
 /* PLANETS */
 .planet{
-position:absolute;
-width:6px;
-height:6px;
-border:1px solid #FF9F07;
-border-radius:50%;
-transform:translate(-50%,-50%);
+  position:absolute;
+  width:6px;
+  height:6px;
+  border:1px solid #FF9F07;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
 }
 
-/* LABELS */
+/* LABELS ABOVE/BELOW PLANETS */
 .label{
-position:absolute;
-cursor:pointer;
-font-size:13px;
-transform:translate(-50%,-50%);
+  position:absolute;
+  cursor:pointer;
+  font-size:13px;
+  transform:translate(-50%, -120%);
+  text-align:center;
+}
+
+.label.below{
+  transform:translate(-50%, 120%);
 }
 
 .label:hover{
-text-shadow:0 0 6px #FF9F07;
+  text-shadow:0 0 6px #FF9F07;
 }
 
 /* RETURN BUTTON */
 #returnBtn{
-position:fixed;
-top:20px;
-left:20px;
-border:1px solid #FF9F07;
-padding:6px 12px;
-display:none;
-cursor:pointer;
-background:black;
+  position:fixed;
+  top:20px;
+  left:20px;
+  border:1px solid #FF9F07;
+  padding:6px 12px;
+  display:none;
+  cursor:pointer;
+  background:black;
 }
 
 #returnBtn:hover{
-background:#FF9F07;
-color:black;
+  background:#FF9F07;
+  color:black;
 }
 
-/* CRT */
+/* CRT EFFECT */
 #scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,.05) 0px,
-rgba(255,255,255,.05) 2px,
-transparent 5px,
-transparent 9px
-);
-animation:flicker .12s infinite;
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
 }
 
 @keyframes flicker{
-0%{opacity:.15}
-50%{opacity:.08}
-100%{opacity:.15}
+  0%{opacity:.15}
+  50%{opacity:.08}
+  100%{opacity:.15}
 }
 
 #amber{
-position:fixed;
-inset:0;
-background:rgba(255,159,7,.05);
-pointer-events:none;
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.05);
+  pointer-events:none;
 }
 </style>
 </head>
@@ -112,55 +118,52 @@ pointer-events:none;
 <body>
 
 <div id="map">
-<div id="grid"></div>
+  <div id="grid"></div>
 
-<div id="system">
+  <div id="system">
 
-<!-- ORBITS -->
-<svg width="100%" height="100%" style="position:absolute">
-<circle cx="50%" cy="50%" r="80" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="120" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="160" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="210" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="260" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="320" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="380" stroke="#FF9F07" fill="none" opacity=".25"/>
-<circle cx="50%" cy="50%" r="440" stroke="#FF9F07" fill="none" opacity=".25"/>
-</svg>
+    <!-- ORBITS -->
+    <svg width="100%" height="100%" style="position:absolute">
+      <circle cx="50%" cy="50%" r="80" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="120" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="160" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="210" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="260" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="320" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="380" stroke="#FF9F07" fill="none" opacity=".25"/>
+      <circle cx="50%" cy="50%" r="440" stroke="#FF9F07" fill="none" opacity=".25"/>
+    </svg>
 
-<!-- SUN -->
-<div class="planet" style="top:50%;left:50%;width:8px;height:8px;"></div>
+    <!-- SUN -->
+    <div class="planet" style="top:50%;left:50%;width:8px;height:8px;"></div>
 
-<!-- PLANETS -->
-<div class="planet" id="mercury" style="top:50%;left:calc(50% + 80px)"></div>
-<div class="planet" id="venus" style="top:calc(50% - 120px);left:50%"></div>
-<div class="planet" id="earth" style="top:50%;left:calc(50% - 160px)"></div>
-<div class="planet" id="mars" style="top:calc(50% + 210px);left:50%"></div>
-<div class="planet" id="jupiter" style="top:50%;left:calc(50% + 260px)"></div>
-<div class="planet" id="saturn" style="top:calc(50% - 320px);left:50%"></div>
-<div class="planet" id="uranus" style="top:50%;left:calc(50% - 380px)"></div>
-<div class="planet" id="neptune" style="top:calc(50% + 440px);left:50%"></div>
+    <!-- PLANETS -->
+    <div class="planet" id="mercury" style="top:50%;left:calc(50% + 80px)"></div>
+    <div class="planet" id="venus" style="top:calc(50% - 120px);left:50%"></div>
+    <div class="planet" id="earth" style="top:50%;left:calc(50% - 160px)"></div>
+    <div class="planet" id="moon" style="top:50%;left:calc(50% - 180px);width:4px;height:4px"></div>
+    <div class="planet" id="mars" style="top:calc(50% + 210px);left:50%"></div>
+    <div class="planet" id="jupiter" style="top:50%;left:calc(50% + 260px)"></div>
+    <div class="planet" id="saturn" style="top:calc(50% - 320px);left:50%"></div>
+    <div class="planet" id="uranus" style="top:50%;left:calc(50% - 380px)"></div>
+    <div class="planet" id="neptune" style="top:calc(50% + 440px);left:50%"></div>
 
-<!-- MOON -->
-<div class="planet" id="moon" style="top:50%;left:calc(50% - 180px);width:4px;height:4px"></div>
+    <!-- SCAN PING -->
+    <svg width="100%" height="100%" style="position:absolute">
+      <circle id="ping" cx="50%" cy="50%" r="0" stroke="#FF9F07" fill="none" opacity=".5"/>
+    </svg>
+  </div>
 
-<!-- SCAN -->
-<svg width="100%" height="100%" style="position:absolute">
-<circle id="ping" cx="50%" cy="50%" r="0" stroke="#FF9F07" fill="none" opacity=".5"/>
-</svg>
-
-</div>
-
-<!-- LABELS -->
-<div class="label" data-target="mercury" style="top:50%;left:calc(50% + 95px)">MERCURY</div>
-<div class="label" data-target="venus" style="top:calc(50% - 135px);left:50%">VENUS</div>
-<div class="label" data-target="earth" style="top:50%;left:calc(50% - 185px)">EARTH</div>
-<div class="label" data-target="moon" style="top:50%;left:calc(50% - 205px)">MOON</div>
-<div class="label" data-target="mars" style="top:calc(50% + 225px);left:50%">MARS</div>
-<div class="label" data-target="jupiter" style="top:50%;left:calc(50% + 285px)">JUPITER</div>
-<div class="label" data-target="saturn" style="top:calc(50% - 335px);left:50%">SATURN</div>
-<div class="label" data-target="uranus" style="top:50%;left:calc(50% - 405px)">URANUS</div>
-<div class="label" data-target="neptune" style="top:calc(50% + 455px);left:50%">NEPTUNE</div>
+  <!-- LABELS ABOVE/BELOW PLANETS -->
+  <div class="label above" data-target="mercury" style="top:calc(50% - 10px);left:calc(50% + 80px)">MERCURY</div>
+  <div class="label above" data-target="venus" style="top:calc(50% - 10px);left:50%">VENUS</div>
+  <div class="label below" data-target="earth" style="top:calc(50% + 10px);left:calc(50% - 160px)">EARTH</div>
+  <div class="label below" data-target="moon" style="top:calc(50% + 10px);left:calc(50% - 180px)">MOON</div>
+  <div class="label above" data-target="mars" style="top:calc(50% - 10px);left:50%">MARS</div>
+  <div class="label below" data-target="jupiter" style="top:calc(50% + 10px);left:calc(50% + 260px)">JUPITER</div>
+  <div class="label above" data-target="saturn" style="top:calc(50% - 10px);left:50%">SATURN</div>
+  <div class="label below" data-target="uranus" style="top:calc(50% + 10px);left:calc(50% - 380px)">URANUS</div>
+  <div class="label above" data-target="neptune" style="top:calc(50% - 10px);left:50%">NEPTUNE</div>
 
 </div>
 
@@ -170,48 +173,67 @@ pointer-events:none;
 <div id="scanlines"></div>
 
 <script>
-
 /* SCAN PING */
 let r = 0;
 setInterval(()=>{
-r+=2;
-document.getElementById("ping").setAttribute("r",r);
-if(r>600) r=0;
+  r+=2;
+  document.getElementById("ping").setAttribute("r",r);
+  if(r>600) r=0;
 },30);
 
-/* ZOOM */
 const system = document.getElementById("system");
 const labels = document.querySelectorAll(".label");
 const returnBtn = document.getElementById("returnBtn");
 
+// PLANET REDIRECTS (clickable planets)
+const planetLinks = {
+  mercury: "mercury.html",
+  venus: "venus.html",
+  earth: "earth.html",
+  moon: "moon.html",
+  mars: "mars.html",
+  jupiter: "jupiter.html",
+  saturn: "saturn.html",
+  uranus: "uranus.html",
+  neptune: "neptune.html"
+};
+
 function zoomToPlanet(id){
-const planet = document.getElementById(id);
-const rect = planet.getBoundingClientRect();
-const centerX = window.innerWidth/2;
-const centerY = window.innerHeight/2;
+  const planet = document.getElementById(id);
+  const rect = planet.getBoundingClientRect();
+  const centerX = window.innerWidth/2;
+  const centerY = window.innerHeight/2;
 
-const offsetX = centerX - rect.left;
-const offsetY = centerY - rect.top;
+  const offsetX = centerX - rect.left;
+  const offsetY = centerY - rect.top;
 
-system.style.transform =
-`translate(${offsetX}px, ${offsetY}px) scale(2.5)`;
+  system.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(2.5)`;
 
-labels.forEach(l=>l.style.display="none");
-returnBtn.style.display="block";
+  labels.forEach(l=>{
+    if(l.dataset.target !== id) l.style.display="none";
+  });
+
+  returnBtn.style.display="block";
+
+  // Redirect on click planet
+  planet.onclick = () => {
+    window.location.href = planetLinks[id];
+  };
 }
 
+// LABEL CLICK
 labels.forEach(label=>{
-label.onclick = ()=>{
-zoomToPlanet(label.dataset.target);
-};
+  label.onclick = ()=>{
+    zoomToPlanet(label.dataset.target);
+  };
 });
 
+// RETURN
 returnBtn.onclick = ()=>{
-system.style.transform = "scale(1)";
-labels.forEach(l=>l.style.display="block");
-returnBtn.style.display="none";
+  system.style.transform = "scale(1)";
+  labels.forEach(l=>l.style.display="block");
+  returnBtn.style.display="none";
 };
-
 </script>
 
 </body>
