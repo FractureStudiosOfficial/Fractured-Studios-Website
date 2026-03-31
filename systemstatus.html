@@ -3,51 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | System Status</title>
+<title>UIC System Status Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:auto;
-  perspective:1000px;
+  margin: 0;
+  background: #111;
+  font-family: 'Share Tech Mono', monospace;
+  color: #FF9F07;
+  overflow-x: hidden;
 }
 
-/* CRT container */
-#crt-container {
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
-}
-
-/* Amber overlay */
+/* Amber tint overlay */
 #amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-  z-index:1001;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,159,7,0.04);
+  pointer-events: none;
+  z-index: 1000;
 }
 
 /* Scanlines */
 #scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
     transparent 5px,
     transparent 9px
   );
-  animation:flicker .12s infinite;
-  z-index:1002;
+  animation: flicker 0.12s infinite;
+  z-index: 1001;
 }
 @keyframes flicker {
   0%{opacity:.15}
@@ -55,157 +46,128 @@ body {
   100%{opacity:.15}
 }
 
-/* Headers */
-h1 {
-  text-align:left;
-  margin-bottom:10px;
-  font-size:32px;
-  filter:drop-shadow(0 0 10px #FF9F07);
+/* Dashboard container */
+#dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 40px 20px;
+  gap: 20px;
+  perspective: 1000px;
 }
 
-h2 {
-  margin-top:20px;
-  font-size:24px;
-  filter:drop-shadow(0 0 8px #FF9F07);
+/* Station cards */
+.station-card {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,159,7,0.2);
+  padding: 20px;
+  min-width: 250px;
+  flex: 1 1 250px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
-/* Sections */
-section {
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.2);
-  padding:15px;
-  margin-bottom:15px;
-}
-section img {
-  max-width:100%;
-  display:block;
-  margin-top:10px;
-  border:1px solid rgba(255,159,7,.3);
+.station-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 0 20px rgba(255,159,7,0.4);
 }
 
-/* System bars */
-.bar-container {
-  background: rgba(255,159,7,.1);
-  border:1px solid rgba(255,159,7,.3);
-  height:20px;
-  margin-top:5px;
-  width:100%;
-  position:relative;
-}
-.bar-fill {
-  background: #FF9F07;
-  height:100%;
-  width:0%;
-  transition:width 0.5s;
+.station-name {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-/* Terminal */
-#terminal-box {
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:rgba(0,0,0,.25);
-  padding:10px 20px;
-  border-top:1px solid rgba(255,159,7,.3);
-  display:flex;
-  align-items:center;
-}
-#terminal-box input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+.station-info {
+  font-size: 0.9em;
+  margin-bottom: 10px;
 }
 
-/* Back button */
-#back-btn {
-  display:inline-block;
-  margin-top:20px;
-  padding:8px 12px;
-  background:rgba(0,0,0,.3);
-  border:1px solid rgba(255,159,7,.5);
-  color:#FF9F07;
-  cursor:pointer;
-  transition:0.2s;
+.details-btn {
+  display: inline-block;
+  background: rgba(255,159,7,0.2);
+  border: 1px solid rgba(255,159,7,0.5);
+  padding: 5px 10px;
+  font-family: inherit;
+  color: #FF9F07;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
-#back-btn:hover {
-  background:rgba(0,0,0,.5);
+
+.details-btn:hover {
+  background: rgba(255,159,7,0.4);
+}
+
+/* OS version */
+#os {
+  position: fixed;
+  bottom: 10px;
+  right: 15px;
+  font-size: 12px;
+  opacity: 0.7;
 }
 </style>
 </head>
-
 <body>
+
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<div id="crt-container">
-  <h1>System Status Dashboard</h1>
+<h1 style="text-align:center; margin-top:20px;">UIC System Status Dashboard</h1>
 
-  <h2>Life Support</h2>
-  <section>
-    <p><strong>Oxygen Levels:</strong></p>
-    <div class="bar-container"><div class="bar-fill" style="width:97%"></div></div>
-    <p><strong>Pressure:</strong> 101.3 kPa</p>
-    <p><strong>Temperature:</strong> 22°C</p>
-  </section>
+<div id="dashboard">
+  <div class="station-card">
+    <div class="station-name">Zvezda</div>
+    <div class="station-info">Population: 15</div>
+    <div class="station-info">Operational: Yes</div>
+    <div class="station-info">Alert Level: Green</div>
+    <button class="details-btn" onclick="window.location='zvezda.html'">Details</button>
+  </div>
 
-  <h2>Power Systems</h2>
-  <section>
-    <p><strong>Reactor Output:</strong></p>
-    <div class="bar-container"><div class="bar-fill" style="width:85%"></div></div>
-    <p><strong>Backup Power:</strong> Online</p>
-  </section>
+  <div class="station-card">
+    <div class="station-name">Horizon</div>
+    <div class="station-info">Population: 22</div>
+    <div class="station-info">Operational: Yes</div>
+    <div class="station-info">Alert Level: Yellow</div>
+    <button class="details-btn" onclick="window.location='horizon.html'">Details</button>
+  </div>
 
-  <h2>Communications</h2>
-  <section>
-    <p><strong>Active Channels:</strong> 7/10</p>
-    <p><strong>Last Sync:</strong> 2084-03-28 14:15</p>
-  </section>
+  <div class="station-card">
+    <div class="station-name">Floating Islands of Venus</div>
+    <div class="station-info">Population: 10</div>
+    <div class="station-info">Operational: Partial</div>
+    <div class="station-info">Alert Level: Orange</div>
+    <button class="details-btn" onclick="window.location='venus.html'">Details</button>
+  </div>
 
-  <h2>Security</h2>
-  <section>
-    <p><strong>Access Points:</strong> All Locked</p>
-    <p><strong>Surveillance:</strong> Normal</p>
-    <p><strong>Alerts:</strong> None</p>
-  </section>
+  <div class="station-card">
+    <div class="station-name">Lunar Gateway Alpha</div>
+    <div class="station-info">Population: 8</div>
+    <div class="station-info">Operational: Yes</div>
+    <div class="station-info">Alert Level: Green</div>
+    <button class="details-btn" onclick="window.location='lunaralpha.html'">Details</button>
+  </div>
 
-  <h2>Environmental Systems</h2>
-  <section>
-    <p><strong>CO₂ Scrubbers:</strong> 92% Efficiency</p>
-    <p><strong>Waste Management:</strong> Operational</p>
-  </section>
+  <div class="station-card">
+    <div class="station-name">Mars Outpost 7</div>
+    <div class="station-info">Population: 12</div>
+    <div class="station-info">Operational: Yes</div>
+    <div class="station-info">Alert Level: Yellow</div>
+    <button class="details-btn" onclick="window.location='mars7.html'">Details</button>
+  </div>
 
-  <button id="back-btn" onclick="window.location='index.html'">Back to Home</button>
+  <div class="station-card">
+    <div class="station-name">Titan Research Base</div>
+    <div class="station-info">Population: 5</div>
+    <div class="station-info">Operational: Partial</div>
+    <div class="station-info">Alert Level: Orange</div>
+    <button class="details-btn" onclick="window.location='titan.html'">Details</button>
+  </div>
+
+  <!-- Add more stations as needed -->
 </div>
 
-<div id="terminal-box">
-  <span>&gt;</span>
-  <input id="cmd" autocomplete="off" placeholder="Enter command...">
-</div>
-
-<script>
-// 3D tilt
-const container = document.getElementById('crt-container');
-document.addEventListener('mousemove', e => {
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
-
-// Terminal commands
-const terminalInput = document.getElementById('cmd');
-terminalInput.addEventListener('keydown', e => {
-  if(e.key !== 'Enter') return;
-  const cmd = terminalInput.value.toLowerCase().trim();
-  terminalInput.value = '';
-  if(cmd === 'home') window.location='index.html';
-  else if(cmd === 'back') window.location='index.html';
-  else alert('Unknown command');
-});
-</script>
+<div id="os">UIC OS v1.0.4</div>
 
 </body>
 </html>
