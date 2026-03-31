@@ -1,342 +1,422 @@
-<!-- Section 1: CSS and Screens 1–6 -->
+<!-- Section 1: Full HTML & CSS layout for Screens 1–10 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classified Access | U.I.C. Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-}
-.screen {
-  display:none;
-  padding:20px;
-}
+  body {
+    margin:0;
+    background:#111;
+    color:#FF9F07;
+    font-family:'Share Tech Mono', monospace;
+    overflow:hidden;
+    perspective:1000px;
+  }
 
-/* Dials for Screen 7 */
-#dials-container {
-  display:flex;
-  gap:20px;
-  margin-top:15px;
-}
-.dial {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.dial input {
-  width:50px;
-  font-size:1.2em;
-  text-align:center;
-  margin-top:5px;
-}
+  /* CRT container & terminal */
+  #crt-container {
+    height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px;
+    box-sizing:border-box;
+    transform-style:preserve-3d;
+    transition:transform .08s ease-out;
+    flex-direction:column;
+  }
 
-/* Memory Dump Screen (Screen 8) */
-#memory-dump {
-  display:grid;
-  grid-template-columns:repeat(10, 1fr);
-  gap:5px;
-  margin-top:10px;
-}
-.memory-cell {
-  width:40px;
-  height:40px;
-  background:rgba(255,159,7,.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  border:1px solid rgba(255,159,7,.3);
-  font-size:0.8em;
-}
-.memory-cell.selected {
-  background:rgba(255,159,7,.3);
-}
+  .screen {
+    display:none;
+    width:80%;
+    max-width:900px;
+    padding:20px;
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,159,7,.2);
+    margin-bottom:20px;
+    box-shadow:0 0 20px rgba(255,159,7,.2);
+  }
 
-/* Connecting Screen (Screen 9) */
-.loading-bar {
-  width:100%;
-  height:20px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,159,7,.3);
-  margin-top:10px;
-  position:relative;
-}
-.progress {
-  height:100%;
-  width:0%;
-  background:#FF9F07;
-  transition:width 0.3s ease;
-}
+  h2 { margin-top:0; }
 
-/* Access Granted Screen (Screen 10) */
-#screen-10 h2 {
-  font-size:2em;
-  margin-bottom:10px;
-}
+  input, button {
+    font-family:'Share Tech Mono', monospace;
+    font-size:16px;
+    margin:5px 0;
+    padding:5px 8px;
+    background:transparent;
+    border:1px solid #FF9F07;
+    color:#FF9F07;
+    outline:none;
+  }
+
+  button:hover { background:rgba(255,159,7,0.1); cursor:pointer; }
+
+  /* Screen 7 - 4 dial radio system */
+  #dials-container {
+    display:flex;
+    justify-content:space-between;
+    margin:15px 0;
+  }
+
+  .dial { display:flex; flex-direction:column; align-items:center; }
+
+  #sync-status { margin-top:10px; }
+
+  /* Screen 8 - memory dump */
+  #memory-dump {
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    gap:2px;
+  }
+  .memory-cell {
+    background:#222;
+    border:1px solid #FF9F07;
+    text-align:center;
+    padding:5px;
+    cursor:pointer;
+  }
+  .memory-cell.selected { background:#FF9F07; color:#111; }
+
+  /* Screen 9 - loading */
+  .loading-bar {
+    width:100%;
+    height:20px;
+    background:#222;
+    border:1px solid #FF9F07;
+  }
+  .progress {
+    height:100%;
+    background:#FF9F07;
+    width:0%;
+    transition:width 0.2s;
+  }
+
+  /* Amber CRT overlay & scanlines */
+  #amber {
+    position:fixed;
+    inset:0;
+    background:rgba(255,159,7,.04);
+    pointer-events:none;
+    z-index:999;
+  }
+  #scanlines {
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.05) 0px,
+      rgba(255,255,255,.05) 2px,
+      transparent 5px,
+      transparent 9px
+    );
+    animation:flicker .12s infinite;
+    z-index:1000;
+  }
+  @keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
 </style>
+</head>
+<body>
+<div id="amber"></div>
+<div id="scanlines"></div>
 
-<!-- Screens 1–6 -->
-<div class="screen" id="screen-1">
-  <h2>Input Credentials</h2>
-  <p>Enter Name, ID, and Passphrase:</p>
-  <input id="cred-name" placeholder="Name">
-  <input id="cred-id" placeholder="ID">
-  <input id="cred-pass" placeholder="Passphrase" type="password">
-  <button id="cred-submit">Submit</button>
-  <p id="cred-status"></p>
-</div>
+<div id="crt-container">
 
-<div class="screen" id="screen-2">
-  <h2>Keycode & Security Badge</h2>
-  <input id="keycode" placeholder="Keycode">
-  <input id="badge" placeholder="Badge Number">
-  <button id="key-submit">Submit</button>
-  <p id="key-status"></p>
-</div>
-
-<div class="screen" id="screen-3">
-  <h2>AI Behavioral Analysis</h2>
-  <p>Answer the following questions:</p>
-  <div id="ai-questions"></div>
-  <button id="ai-submit">Submit</button>
-  <p id="ai-status"></p>
-</div>
-
-<div class="screen" id="screen-4">
-  <h2>Decrypt 5 Passwords</h2>
-  <div id="decrypt-passwords"></div>
-  <button id="decrypt-submit">Submit</button>
-  <p id="decrypt-status"></p>
-</div>
-
-<div class="screen" id="screen-5">
-  <h2>Security Level & Encrypted Name</h2>
-  <input id="sec-level" placeholder="Security Level">
-  <input id="enc-name" placeholder="Encrypted Name">
-  <button id="sec-submit">Submit</button>
-  <p id="sec-status"></p>
-</div>
-
-<div class="screen" id="screen-6">
-  <h2>Station Protocol Code</h2>
-  <input id="protocol-code" placeholder="Station Protocol Code">
-  <button id="protocol-submit">Submit</button>
-  <p id="protocol-status"></p>
-</div>
-
-<!-- Section 2: Screens 7–10 and JS logic -->
-<div class="screen" id="screen-7">
-  <h2>Temporal Access Lock – Manual Radio Synchronization</h2>
-  <p>Set the frequency using the 4 dials to synchronize the radio wave:</p>
-  <div id="dials-container">
-    <div class="dial">
-      <label>Dial 1</label>
-      <input type="number" min="0" max="9" value="0" id="dial1">
-    </div>
-    <div class="dial">
-      <label>Dial 2</label>
-      <input type="number" min="0" max="9" value="0" id="dial2">
-    </div>
-    <div class="dial">
-      <label>Dial 3</label>
-      <input type="number" min="0" max="9" value="0" id="dial3">
-    </div>
-    <div class="dial">
-      <label>Dial 4</label>
-      <input type="number" min="0" max="9" value="0" id="dial4">
-    </div>
+  <!-- Screen 1 -->
+  <div class="screen" id="screen-1">
+    <h2>Identity Verification</h2>
+    <input type="text" id="cred-name" placeholder="Name">
+    <input type="text" id="cred-id" placeholder="ID">
+    <input type="password" id="cred-pass" placeholder="Passphrase">
+    <button id="cred-submit">Submit</button>
+    <p id="cred-status"></p>
   </div>
-  <button id="sync-submit">Synchronize</button>
-  <p id="sync-status"></p>
+
+  <!-- Screen 2 -->
+  <div class="screen" id="screen-2">
+    <h2>Keycode & Security Badge</h2>
+    <input type="text" id="keycode" placeholder="Keycode">
+    <input type="text" id="badge" placeholder="Badge Number">
+    <button id="key-submit">Submit</button>
+    <p id="key-status"></p>
+  </div>
+
+  <!-- Screen 3 -->
+  <div class="screen" id="screen-3">
+    <h2>AI Behavioral Analysis</h2>
+    <div id="ai-questions"></div>
+    <button id="ai-submit">Submit</button>
+    <p id="ai-status"></p>
+  </div>
+
+  <!-- Screen 4 -->
+  <div class="screen" id="screen-4">
+    <h2>Decrypt Passwords</h2>
+    <div id="decrypt-passwords"></div>
+    <button id="decrypt-submit">Submit</button>
+    <p id="decrypt-status"></p>
+  </div>
+
+  <!-- Screen 5 -->
+  <div class="screen" id="screen-5">
+    <h2>Security Level & Encrypted Name</h2>
+    <input type="text" id="sec-level" placeholder="Security Level">
+    <input type="text" id="enc-name" placeholder="Encrypted Access Name">
+    <button id="sec-submit">Submit</button>
+    <p id="sec-status"></p>
+  </div>
+
+  <!-- Screen 6 -->
+  <div class="screen" id="screen-6">
+    <h2>Station Protocol Code</h2>
+    <input type="text" id="protocol-code" placeholder="Protocol Code">
+    <button id="protocol-submit">Submit</button>
+    <p id="protocol-status"></p>
+  </div>
+
+  <!-- Screen 7 – NEW Manual 4-Dial Radio System -->
+  <div class="screen" id="screen-7">
+    <h2>Temporal Access Lock – Manual Radio Synchronization</h2>
+    <p>Set the frequency using the 4 dials to synchronize the radio wave:</p>
+    <div id="dials-container">
+      <div class="dial">
+        <label>Dial 1</label>
+        <input type="number" min="0" max="9" value="0" id="dial1">
+      </div>
+      <div class="dial">
+        <label>Dial 2</label>
+        <input type="number" min="0" max="9" value="0" id="dial2">
+      </div>
+      <div class="dial">
+        <label>Dial 3</label>
+        <input type="number" min="0" max="9" value="0" id="dial3">
+      </div>
+      <div class="dial">
+        <label>Dial 4</label>
+        <input type="number" min="0" max="9" value="0" id="dial4">
+      </div>
+    </div>
+    <button id="sync-submit">Synchronize</button>
+    <p id="sync-status"></p>
+  </div>
+
+  <!-- Screen 8 -->
+  <div class="screen" id="screen-8">
+    <h2>Memory Dump Check</h2>
+    <p>Select the correct processes to gain access:</p>
+    <div id="memory-dump"></div>
+    <button id="memory-submit">Submit</button>
+    <p id="memory-status"></p>
+  </div>
+
+  <!-- Screen 9 -->
+  <div class="screen" id="screen-9">
+    <h2>Connecting to Server...</h2>
+    <div class="loading-bar"><div class="progress" id="loading-progress"></div></div>
+  </div>
+
+  <!-- Screen 10 -->
+  <div class="screen" id="screen-10">
+    <h2>Access Granted</h2>
+    <p>Welcome, <span id="user-name-display"></span></p>
+  </div>
 </div>
 
-<div class="screen" id="screen-8">
-  <h2>Memory Dump Check</h2>
-  <p>Select the correct processes to gain access:</p>
-  <div id="memory-dump"></div>
-  <button id="memory-submit">Submit</button>
-  <p id="memory-status"></p>
-</div>
+  <script>
+// ====================
+// ELEMENTS
+// ====================
+const screens = Array.from(document.querySelectorAll('.screen'));
+let currentScreen = 0;
 
-<div class="screen" id="screen-9">
-  <h2>Connecting to Server...</h2>
-  <div class="loading-bar"><div class="progress" id="loading-progress"></div></div>
-</div>
-
-<div class="screen" id="screen-10">
-  <h2>Access Granted</h2>
-  <p>Welcome, <span id="user-name-display"></span></p>
-</div>
-
-<script>
-let currentScreen = 1;
-const totalScreens = 10;
-
-// Show only the current screen
-function showScreen(num) {
-  for (let i=1; i<=totalScreens; i++) {
-    const screen = document.getElementById("screen-" + i);
-    if (screen) screen.style.display = (i === num) ? "block" : "none";
-  }
+function showScreen(index) {
+  screens.forEach(s => s.style.display = 'none');
+  screens[index].style.display = 'block';
+  currentScreen = index;
 }
-showScreen(currentScreen);
 
-// Example: Character info for testing
-const characterName = "Elena Petrov";
-
-// Screen 1 – Credentials
-document.getElementById("cred-submit").addEventListener("click", () => {
-  const name = document.getElementById("cred-name").value.trim();
-  const id = document.getElementById("cred-id").value.trim();
-  const pass = document.getElementById("cred-pass").value.trim();
-  if (name && id && pass) {
-    document.getElementById("cred-status").textContent = "Credentials Accepted.";
-    currentScreen++;
-    showScreen(currentScreen);
+// ====================
+// SCREEN 1 - Credentials
+// ====================
+const credSubmit = document.getElementById('cred-submit');
+credSubmit.addEventListener('click', () => {
+  const name = document.getElementById('cred-name').value.trim();
+  const id = document.getElementById('cred-id').value.trim();
+  const pass = document.getElementById('cred-pass').value.trim();
+  if(name && id && pass) {
+    document.getElementById('cred-status').textContent = 'Credentials Accepted.';
+    showScreen(1); // move to Screen 2
   } else {
-    document.getElementById("cred-status").textContent = "All fields required.";
+    document.getElementById('cred-status').textContent = 'Invalid input, try again.';
   }
 });
 
-// Screen 2 – Keycode & Badge
-document.getElementById("key-submit").addEventListener("click", () => {
-  const key = document.getElementById("keycode").value.trim();
-  const badge = document.getElementById("badge").value.trim();
-  if (key && badge) {
-    document.getElementById("key-status").textContent = "Access Granted.";
-    currentScreen++;
-    showScreen(currentScreen);
+// ====================
+// SCREEN 2 - Keycode & Badge
+// ====================
+document.getElementById('key-submit').addEventListener('click', () => {
+  const key = document.getElementById('keycode').value.trim();
+  const badge = document.getElementById('badge').value.trim();
+  if(key && badge) {
+    document.getElementById('key-status').textContent = 'Keycode verified.';
+    showScreen(2); // move to Screen 3
   } else {
-    document.getElementById("key-status").textContent = "Enter both keycode and badge.";
+    document.getElementById('key-status').textContent = 'Invalid input, try again.';
   }
 });
 
-// Screen 3 – AI Behavioral Analysis (simplified for testing)
-const questions = [
-  "What is your primary role?",
-  "What is your current assignment?",
-  "Favorite tool on station?",
-  "Security level?",
-  "Most recent task completed?",
-  "Emergency protocol?"
+// ====================
+// SCREEN 3 - AI Behavioral Analysis
+// ====================
+const aiQuestions = [
+  "Favorite planetary research subject?",
+  "Preferred station assignment?",
+  "Primary scientific field?",
+  "Last mission success?",
+  "Security philosophy?",
+  "Ethical concerns?"
 ];
-const aiContainer = document.getElementById("ai-questions");
-questions.forEach((q,i) => {
-  const p = document.createElement("p");
-  p.textContent = q;
-  const input = document.createElement("input");
-  input.id = "ai-answer-" + i;
-  aiContainer.appendChild(p);
-  aiContainer.appendChild(input);
+
+const aiContainer = document.getElementById('ai-questions');
+aiQuestions.forEach((q,i) => {
+  const div = document.createElement('div');
+  div.innerHTML = `<label>${q}</label><input type="text" id="ai-q${i}">`;
+  aiContainer.appendChild(div);
 });
 
-document.getElementById("ai-submit").addEventListener("click", () => {
+document.getElementById('ai-submit').addEventListener('click', () => {
   let allFilled = true;
-  for (let i=0;i<questions.length;i++) {
-    const val = document.getElementById("ai-answer-" + i).value.trim();
-    if (!val) { allFilled=false; break; }
-  }
-  if (allFilled) {
-    document.getElementById("ai-status").textContent = "Behavior Verified.";
-    currentScreen++;
-    showScreen(currentScreen);
-  } else {
-    document.getElementById("ai-status").textContent = "All questions must be answered.";
-  }
-});
-
-// Screen 4 – Decrypt Passwords (simplified)
-const passwords = ["alpha123","bravo456","charlie789","delta321","echo654"];
-const decryptDiv = document.getElementById("decrypt-passwords");
-passwords.forEach((p,i)=>{
-  const input = document.createElement("input");
-  input.placeholder = "Password " + (i+1);
-  input.id = "pwd-"+i;
-  decryptDiv.appendChild(input);
-});
-document.getElementById("decrypt-submit").addEventListener("click", () => {
-  let allCorrect=true;
-  for (let i=0;i<passwords.length;i++){
-    const val=document.getElementById("pwd-"+i).value.trim();
-    if(val!==passwords[i]){allCorrect=false; break;}
-  }
-  if(allCorrect){document.getElementById("decrypt-status").textContent="Passwords correct."; currentScreen++; showScreen(currentScreen);}
-  else{document.getElementById("decrypt-status").textContent="Incorrect passwords.";}
-});
-
-// Screen 5 – Security Level & Encrypted Name
-document.getElementById("sec-submit").addEventListener("click", ()=>{
-  const lvl=document.getElementById("sec-level").value.trim();
-  const enc=document.getElementById("enc-name").value.trim();
-  if(lvl && enc){
-    document.getElementById("sec-status").textContent="Verified.";
-    currentScreen++;
-    showScreen(currentScreen);
-  }else{
-    document.getElementById("sec-status").textContent="Both fields required.";
-  }
-});
-
-// Screen 6 – Protocol Code
-document.getElementById("protocol-submit").addEventListener("click", ()=>{
-  const code=document.getElementById("protocol-code").value.trim();
-  if(code){
-    document.getElementById("protocol-status").textContent="Protocol Verified.";
-    currentScreen++;
-    showScreen(currentScreen);
-  }else{
-    document.getElementById("protocol-status").textContent="Enter protocol code.";
-  }
-});
-
-// Screen 7 – Manual 4 Dial Radio System
-const targetFreq = [3,1,7,4]; // example frequency
-document.getElementById("sync-submit").addEventListener("click", ()=>{
-  const d1 = parseInt(document.getElementById("dial1").value);
-  const d2 = parseInt(document.getElementById("dial2").value);
-  const d3 = parseInt(document.getElementById("dial3").value);
-  const d4 = parseInt(document.getElementById("dial4").value);
-  if(d1===targetFreq[0] && d2===targetFreq[1] && d3===targetFreq[2] && d4===targetFreq[3]){
-    document.getElementById("sync-status").textContent="Synchronization successful.";
-    currentScreen++;
-    showScreen(currentScreen);
-  }else{
-    document.getElementById("sync-status").textContent="Frequency mismatch. Try again.";
-  }
-});
-
-// Screen 8 – Memory Dump
-const memContainer=document.getElementById("memory-dump");
-const correctCells=[5,12,23,34,45]; // example
-for(let i=0;i<100;i++){
-  const div=document.createElement("div");
-  div.className="memory-cell";
-  div.textContent=i;
-  div.addEventListener("click",()=>{
-    div.classList.toggle("selected");
+  aiQuestions.forEach((q,i) => {
+    const val = document.getElementById(`ai-q${i}`).value.trim();
+    if(!val) allFilled = false;
   });
-  memContainer.appendChild(div);
-}
-document.getElementById("memory-submit").addEventListener("click",()=>{
-  const selected=[...document.querySelectorAll("#memory-dump .memory-cell.selected")].map(e=>parseInt(e.textContent));
-  const correct = correctCells.every(c=>selected.includes(c)) && selected.length===correctCells.length;
-  if(correct){document.getElementById("memory-status").textContent="Memory verified."; currentScreen++; showScreen(currentScreen);}
-  else{document.getElementById("memory-status").textContent="Incorrect processes selected.";}
+  if(allFilled) {
+    document.getElementById('ai-status').textContent = 'Behavioral analysis complete.';
+    showScreen(3); // move to Screen 4
+  } else {
+    document.getElementById('ai-status').textContent = 'Please answer all questions.';
+  }
 });
 
-// Screen 9 – Loading bar
-let progressElem = document.getElementById("loading-progress");
-function loadScreen9(){
-  let width=0;
-  const interval=setInterval(()=>{
-    width+=5;
-    if(width>100){width=100; clearInterval(interval); currentScreen++; showScreen(currentScreen); document.getElementById("user-name-display").textContent=characterName;}
-    progressElem.style.width=width+"%";
-  },100);
+// ====================
+// SCREEN 4 - Decrypt Passwords
+// ====================
+const decryptPasswords = ['AB12', 'C3D4', 'EF56', 'GH78', 'IJ90'];
+const decryptContainer = document.getElementById('decrypt-passwords');
+decryptPasswords.forEach((pw,i) => {
+  const div = document.createElement('div');
+  div.innerHTML = `<label>Password ${i+1}</label><input type="text" id="pw${i}">`;
+  decryptContainer.appendChild(div);
+});
+
+document.getElementById('decrypt-submit').addEventListener('click', () => {
+  let allCorrect = true;
+  decryptPasswords.forEach((pw,i) => {
+    const val = document.getElementById(`pw${i}`).value.trim();
+    if(val !== pw) allCorrect = false;
+  });
+  if(allCorrect) {
+    document.getElementById('decrypt-status').textContent = 'All passwords decrypted.';
+    showScreen(4); // move to Screen 5
+  } else {
+    document.getElementById('decrypt-status').textContent = 'Incorrect, try again.';
+  }
+});
+
+// ====================
+// SCREEN 5 - Security Level & Encrypted Name
+// ====================
+document.getElementById('sec-submit').addEventListener('click', () => {
+  const level = document.getElementById('sec-level').value.trim();
+  const enc = document.getElementById('enc-name').value.trim();
+  if(level && enc) {
+    document.getElementById('sec-status').textContent = 'Access level confirmed.';
+    showScreen(5); // move to Screen 6
+  } else {
+    document.getElementById('sec-status').textContent = 'Invalid input.';
+  }
+});
+
+// ====================
+// SCREEN 6 - Station Protocol Code
+// ====================
+const correctProtocol = 'HORIZON-42'; // example
+document.getElementById('protocol-submit').addEventListener('click', () => {
+  const val = document.getElementById('protocol-code').value.trim();
+  if(val === correctProtocol) {
+    document.getElementById('protocol-status').textContent = 'Protocol verified.';
+    showScreen(6); // move to Screen 7
+  } else {
+    document.getElementById('protocol-status').textContent = 'Incorrect code.';
+  }
+});
+
+// ====================
+// SCREEN 7 - Manual 4-Dial Radio System
+// ====================
+const targetFreq = [4, 7, 2, 9]; // example correct frequency
+document.getElementById('sync-submit').addEventListener('click', () => {
+  const dials = [
+    parseInt(document.getElementById('dial1').value),
+    parseInt(document.getElementById('dial2').value),
+    parseInt(document.getElementById('dial3').value),
+    parseInt(document.getElementById('dial4').value)
+  ];
+  let correct = true;
+  for(let i=0;i<4;i++) if(dials[i] !== targetFreq[i]) correct = false;
+
+  if(correct) {
+    document.getElementById('sync-status').textContent = 'Frequency synchronized.';
+    showScreen(7); // move to Screen 8
+  } else {
+    document.getElementById('sync-status').textContent = 'Synchronization failed.';
+  }
+});
+
+// ====================
+// SCREEN 8 - Memory Dump
+// ====================
+const memDump = document.getElementById('memory-dump');
+for(let i=0;i<100;i++){
+  const cell = document.createElement('div');
+  cell.className = 'memory-cell';
+  cell.textContent = i;
+  cell.addEventListener('click', () => cell.classList.toggle('selected'));
+  memDump.appendChild(cell);
+}
+document.getElementById('memory-submit').addEventListener('click', () => {
+  const selected = Array.from(memDump.children).filter(c => c.classList.contains('selected'));
+  if(selected.length >= 5) { // arbitrary requirement
+    document.getElementById('memory-status').textContent = 'Memory verified.';
+    showScreen(8); // move to Screen 9
+  } else {
+    document.getElementById('memory-status').textContent = 'Select more processes.';
+  }
+});
+
+// ====================
+// SCREEN 9 - Loading
+// ====================
+const progress = document.getElementById('loading-progress');
+let pct = 0;
+function loadProgress() {
+  if(pct < 100) {
+    pct += Math.floor(Math.random()*10);
+    if(pct>100) pct=100;
+    progress.style.width = pct+'%';
+    setTimeout(loadProgress, 200);
+  } else {
+    showScreen(9); // move to Screen 10
+    document.getElementById('user-name-display').textContent = document.getElementById('cred-name').value;
+  }
 }
 
-// Trigger loading after Screen 8 completion
-document.getElementById("screen-8").querySelector("#memory-submit").addEventListener("click",()=>{
-  if(currentScreen===9) loadScreen9();
-});
+// ====================
+// INITIALIZE
+// ====================
+showScreen(0);
 </script>
