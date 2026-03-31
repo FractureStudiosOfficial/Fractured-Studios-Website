@@ -3,84 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Classified Access</title>
+<title>U.I.C. Systems Terminal Access</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
 <style>
+/* BASIC CRT STYLING */
 body {
   margin:0;
+  font-family:'Share Tech Mono', monospace;
   background:#111;
   color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
   overflow:hidden;
   perspective:1000px;
 }
 
-/* CRT container */
-#crt-container {
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
-  flex-direction: column;
-}
-
-/* Terminal */
-#terminal-box {
-  width:80%;
-  max-width:900px;
-}
-
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:350px;
-  max-height:500px;
-  overflow-y:auto;
-}
-
-#prompt {
-  display:flex;
-  margin-top:10px;
-}
-
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
-}
-
-/* Terminal title */
-#terminal-title {
-  font-size:24px;
-  font-weight:bold;
-  color:#FF9F07;
-  margin-bottom:15px;
-  text-align:left;
-  width:80%;
-}
-
-/* OS version */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
-}
-
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
+/* CRT overlay */
+#amber {
+  position:fixed; inset:0;
+  background:rgba(255,159,7,.04);
   pointer-events:none;
+}
+
+#scanlines {
+  position:fixed; inset:0;
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
@@ -89,7 +35,7 @@ body {
     transparent 9px
   );
   animation:flicker .12s infinite;
-  z-index:1001;
+  pointer-events:none;
 }
 @keyframes flicker {
   0%{opacity:.15}
@@ -97,335 +43,415 @@ body {
   100%{opacity:.15}
 }
 
-/* Amber overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-}
-
-/* 4-dial radio system (screen7) */
-.dial-container {
-  display:flex;
-  gap:10px;
-  margin:10px 0;
-}
-.dial {
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.2);
-  width:40px;
-  height:40px;
+/* CONTAINER */
+#crt-container {
+  width:100%;
+  height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
+  flex-direction:column;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+/* HEADER TITLE */
+#terminal-title {
+  font-size:24px;
+  margin-bottom:20px;
+  color:#FF9F07;
+  text-shadow:0 0 5px #FF9F07;
+}
+
+/* TERMINAL SCREEN */
+#terminal-screen {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  width:90%;
+  max-width:1000px;
+  height:70vh;
+  padding:20px;
+  overflow:auto;
+  box-sizing:border-box;
+  position:relative;
+}
+
+/* INPUT FIELDS */
+.terminal-input {
+  width:100%;
+  background:transparent;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  padding:5px;
+  font-family:'Share Tech Mono', monospace;
+  margin-top:10px;
+  box-sizing:border-box;
+}
+
+/* DIALS */
+.dial-container {
+  display:flex;
+  justify-content:space-between;
+  width:300px;
+  margin:20px 0;
+}
+
+.dial {
+  width:50px;
+  height:50px;
+  border:2px solid #FF9F07;
+  color:#FF9F07;
+  text-align:center;
   font-size:20px;
+  line-height:50px;
   cursor:pointer;
   user-select:none;
 }
-.dial:hover {
-  background:rgba(255,159,7,.1);
-}
 
-/* Memory dump (screen8) */
-.memory-dump {
-  display:flex;
-  flex-wrap:wrap;
-  gap:3px;
-  max-height:200px;
-  overflow-y:auto;
-}
+/* MEMORY DUMP */
 .memory-process {
-  width:30px;
-  height:20px;
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.2);
   display:flex;
   align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:12px;
+  margin:5px 0;
 }
-.memory-process.selected {
+
+.memory-process input {
+  margin-right:10px;
+}
+
+/* LOADING BAR */
+#loading-bar-container {
+  width:80%;
+  height:20px;
+  background:rgba(255,255,255,.1);
+  margin-top:20px;
+}
+
+#loading-bar {
+  width:0%;
+  height:100%;
   background:#FF9F07;
-  color:#000;
+  transition:width 0.1s linear;
+}
+
+/* BUTTONS */
+.button {
+  background:transparent;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  padding:5px 10px;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.button:hover {
+  background:rgba(255,159,7,.1);
 }
 </style>
 </head>
+
 <body>
+
 <div id="amber"></div>
 <div id="scanlines"></div>
 
 <div id="crt-container">
-  <div id="terminal-title">U.I.C. Classified Access</div>
-
-  <div id="terminal-box">
-    <div id="terminal"></div>
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" disabled>
-    </div>
-  </div>
+  <div id="terminal-title">U.I.C. Systems Terminal Access Point</div>
+  <div id="terminal-screen"></div>
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
+<script>
+const terminal = document.getElementById('terminal-screen');
 
-  <script>
-// ELEMENTS
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
-const os = document.getElementById("os");
+// HARD-CODED ANSWERS FOR TESTING
+const correctCredentials = {
+  name:'Elena Krylov',
+  id:'EK-0821',
+  passphrase:'SolarisX'
+};
+const correctKeycode = '9472';
+const correctBadge = 'B-431';
+const aiAnswers = [
+  'calm', 'alert', 'neutral', 'analytical', 'steady', 'cooperative'
+];
+const decryptedPasswords = ['ALPHA','BRAVO','CHARLIE','DELTA','ECHO'];
+const securityLevel = 'Level-5';
+const encryptedName = 'ELKRYLOV82';
+const stationProtocol = 'ZVE-PRT-01';
+const radioCombo = [4,7,2,9];
+const memoryProcesses = [
+  'PROC-00','PROC-01','PROC-02','PROC-03','PROC-04','PROC-05','PROC-06','PROC-07','PROC-08','PROC-09'
+];
+const memorySelection = ['PROC-02','PROC-05','PROC-07','PROC-08','PROC-09'];
 
 let currentScreen = 0;
 
-// --- Screens ---
-const screens = [
-  // Screen 1: Credentials input
-  async function screen1() {
-    terminal.innerHTML = "Enter Name, ID, and Passphrase:<br>";
-    terminal.innerHTML += `<input id="name" placeholder="Name"><br>`;
-    terminal.innerHTML += `<input id="id" placeholder="ID"><br>`;
-    terminal.innerHTML += `<input id="pass" placeholder="Passphrase"><br>`;
-    const nameInput = document.getElementById("name");
-    const idInput = document.getElementById("id");
-    const passInput = document.getElementById("pass");
-    nameInput.focus();
-    input.disabled = true;
+// UTIL FUNCTION TO CLEAR SCREEN
+function clearScreen() {
+  terminal.innerHTML = '';
+}
 
-    const waitForEnter = async () => {
-      return new Promise((resolve) => {
-        [nameInput, idInput, passInput].forEach(el => {
-          el.addEventListener("keydown", e => {
-            if(e.key === "Enter") resolve();
-          });
-        });
-      });
+// UTIL FUNCTION TO APPEND TEXT
+function printLine(line) {
+  terminal.innerHTML += line + '<br>';
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+// SCREEN FUNCTIONS
+function screen1() {
+  clearScreen();
+  printLine('SCREEN 1: INPUT CREDENTIALS');
+  printLine('-----------------------------');
+  
+  const nameInput = document.createElement('input');
+  nameInput.placeholder = 'Name';
+  nameInput.className = 'terminal-input';
+  
+  const idInput = document.createElement('input');
+  idInput.placeholder = 'ID';
+  idInput.className = 'terminal-input';
+  
+  const passInput = document.createElement('input');
+  passInput.placeholder = 'Passphrase';
+  passInput.className = 'terminal-input';
+  
+  const submit = document.createElement('button');
+  submit.innerText = 'Submit';
+  submit.className = 'button';
+  submit.onclick = () => {
+    if(nameInput.value === correctCredentials.name &&
+       idInput.value === correctCredentials.id &&
+       passInput.value === correctCredentials.passphrase) {
+         screen2();
+       } else { printLine('INVALID CREDENTIALS'); }
+  };
+  
+  terminal.appendChild(nameInput);
+  terminal.appendChild(idInput);
+  terminal.appendChild(passInput);
+  terminal.appendChild(submit);
+}
+
+function screen2() {
+  clearScreen();
+  printLine('SCREEN 2: KEYCODE + SECURITY BADGE');
+  printLine('----------------------------------');
+  
+  const keyInput = document.createElement('input');
+  keyInput.placeholder = 'Keycode';
+  keyInput.className = 'terminal-input';
+  
+  const badgeInput = document.createElement('input');
+  badgeInput.placeholder = 'Security Badge';
+  badgeInput.className = 'terminal-input';
+  
+  const submit = document.createElement('button');
+  submit.innerText = 'Submit';
+  submit.className = 'button';
+  submit.onclick = () => {
+    if(keyInput.value === correctKeycode && badgeInput.value === correctBadge) {
+      screen3();
+    } else { printLine('ACCESS DENIED'); }
+  };
+  
+  terminal.appendChild(keyInput);
+  terminal.appendChild(badgeInput);
+  terminal.appendChild(submit);
+}
+
+// SCREEN 3: AI Behavioral Analysis
+function screen3() {
+  clearScreen();
+  printLine('SCREEN 3: AI BEHAVIORAL ANALYSIS');
+  printLine('--------------------------------');
+  
+  let questionIndex = 0;
+  function askQuestion() {
+    if(questionIndex >= aiAnswers.length) { screen4(); return; }
+    printLine(`Question ${questionIndex+1}: Type word answer`);
+    const input = document.createElement('input');
+    input.className = 'terminal-input';
+    const submit = document.createElement('button');
+    submit.className = 'button';
+    submit.innerText = 'Submit';
+    submit.onclick = () => {
+      if(input.value.toLowerCase() === aiAnswers[questionIndex]) {
+        questionIndex++;
+        clearScreen();
+        askQuestion();
+      } else { printLine('INCORRECT'); }
     };
-
-    await waitForEnter();
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 2: Keycode and security badge
-  async function screen2() {
-    terminal.innerHTML = "Enter Keycode and Security Badge:<br>";
-    terminal.innerHTML += `<input id="keycode" placeholder="Keycode"><br>`;
-    terminal.innerHTML += `<input id="badge" placeholder="Security Badge"><br>`;
-    const keycodeInput = document.getElementById("keycode");
-    const badgeInput = document.getElementById("badge");
-    keycodeInput.focus();
-
-    const waitForEnter = async () => {
-      return new Promise((resolve) => {
-        [keycodeInput, badgeInput].forEach(el => {
-          el.addEventListener("keydown", e => {
-            if(e.key === "Enter") resolve();
-          });
-        });
-      });
-    };
-    await waitForEnter();
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 3: AI behavioral analysis
-  async function screen3() {
-    terminal.innerHTML = "AI Behavioral Analysis:<br>";
-    const questions = [
-      "What is your primary task?",
-      "Who is your commanding officer?",
-      "What is your current station?",
-      "Report your last mission.",
-      "Preferred communication protocol?",
-      "State your secondary skill."
-    ];
-    let answers = [];
-    for(let q of questions) {
-      terminal.innerHTML += q + "<br>";
-      terminal.innerHTML += `<input class="ai-answer" placeholder="Answer"><br>`;
-      const answerInput = document.querySelector(".ai-answer:last-of-type");
-      answerInput.focus();
-      await new Promise(resolve => {
-        answerInput.addEventListener("keydown", e => {
-          if(e.key === "Enter") {
-            answers.push(answerInput.value);
-            resolve();
-          }
-        });
-      });
-    }
-    terminal.innerHTML += "Analyzing behavior...<br>";
-    await new Promise(r => setTimeout(r, 1500));
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 4: Decrypt 5 passwords
-  async function screen4() {
-    terminal.innerHTML = "Decrypt the following passwords:<br>";
-    const passwords = ["XJ9!8K", "3P$Q7L", "BZ#45R", "M2&N1V", "T9@K6W"];
-    for(let pw of passwords) {
-      terminal.innerHTML += `<input class="decrypt" placeholder="Decrypted password"><br>`;
-      const decryptInput = document.querySelector(".decrypt:last-of-type");
-      decryptInput.focus();
-      await new Promise(resolve => {
-        decryptInput.addEventListener("keydown", e => {
-          if(e.key === "Enter") {
-            if(decryptInput.value === pw) resolve();
-            else terminal.innerHTML += "Incorrect, try again.<br>";
-          }
-        });
-      });
-    }
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 5: Security level & encrypted access name
-  async function screen5() {
-    terminal.innerHTML = "Input your Security Level and Encrypted Access Name:<br>";
-    terminal.innerHTML += `<input id="sec-level" placeholder="Security Level"><br>`;
-    terminal.innerHTML += `<input id="enc-name" placeholder="Encrypted Access Name"><br>`;
-    const levelInput = document.getElementById("sec-level");
-    const encInput = document.getElementById("enc-name");
-    levelInput.focus();
-
-    const waitForEnter = async () => {
-      return new Promise((resolve) => {
-        [levelInput, encInput].forEach(el => {
-          el.addEventListener("keydown", e => {
-            if(e.key === "Enter") resolve();
-          });
-        });
-      });
-    };
-    await waitForEnter();
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 6: Station protocol code
-  async function screen6() {
-    terminal.innerHTML = "Enter Station Protocol Code:<br>";
-    terminal.innerHTML += `<input id="protocol" placeholder="Protocol Code"><br>`;
-    const protocolInput = document.getElementById("protocol");
-    protocolInput.focus();
-    await new Promise(resolve => {
-      protocolInput.addEventListener("keydown", e => {
-        if(e.key === "Enter") resolve();
-      });
-    });
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 7: Manual 4-dial radio system
-  async function screen7() {
-    terminal.innerHTML = "Manual Radio Synchronization:<br>";
-    terminal.innerHTML += `<div class="dial-container">
-      <div class="dial" data-val="1">1</div>
-      <div class="dial" data-val="2">2</div>
-      <div class="dial" data-val="3">3</div>
-      <div class="dial" data-val="4">4</div>
-    </div>`;
-    terminal.innerHTML += `<button id="sync">Synchronize</button><br>`;
-
-    const dials = document.querySelectorAll(".dial");
-    let selected = [0,0,0,0]; // store dial values
-    dials.forEach((d, i) => {
-      d.addEventListener("click", () => {
-        selected[i] = Number(d.dataset.val);
-        d.style.background = "#FF9F07";
-        setTimeout(()=>{d.style.background="rgba(0,0,0,.25)";},300);
-      });
-    });
-
-    document.getElementById("sync").addEventListener("click", () => {
-      const correct = [1,3,2,4]; // example combination
-      if(selected.join(",") === correct.join(",")) {
-        terminal.innerHTML += "Radio synchronized successfully.<br>";
-        currentScreen++;
-        screens[currentScreen]();
-      } else {
-        terminal.innerHTML += "Incorrect synchronization. Try again.<br>";
-      }
-    });
-  },
-
-  // Screen 8: Memory dump
-  async function screen8() {
-    terminal.innerHTML = "Memory Dump Check: Select the correct processes to dump.<br>";
-    const container = document.createElement("div");
-    container.className = "memory-dump";
-    const processes = [];
-    for(let i=0;i<100;i++){
-      const p = document.createElement("div");
-      p.className="memory-process";
-      p.textContent=i;
-      container.appendChild(p);
-      processes.push(p);
-    }
-    terminal.appendChild(container);
-
-    const correct = [5,12,27,33,68];
-    container.addEventListener("click", e => {
-      if(e.target.classList.contains("memory-process")){
-        e.target.classList.toggle("selected");
-      }
-    });
-
-    const waitDump = async () => {
-      return new Promise(resolve => {
-        const checkInterval = setInterval(()=>{
-          const selected = Array.from(document.querySelectorAll(".memory-process.selected")).map(p=>Number(p.textContent));
-          if(correct.every(v=>selected.includes(v))){
-            clearInterval(checkInterval);
-            resolve();
-          }
-        },100);
-      });
-    };
-    await waitDump();
-    terminal.innerHTML += "Memory dump complete.<br>";
-    currentScreen++;
-    screens[currentScreen]();
-  },
-
-  // Screen 9: Loading
-  async function screen9() {
-    terminal.innerHTML = "Connecting to server:<br>";
-    const bar = document.createElement("div");
-    bar.style.width="0%";
-    bar.style.height="20px";
-    bar.style.background="#FF9F07";
-    terminal.appendChild(bar);
-    let width=0;
-    const interval = setInterval(()=>{
-      width += 2;
-      bar.style.width=width+"%";
-      if(width>=100){
-        clearInterval(interval);
-        currentScreen++;
-        screens[currentScreen]();
-      }
-    },50);
-  },
-
-  // Screen 10: Access granted
-  async function screen10() {
-    terminal.innerHTML = "ACCESS GRANTED<br>";
-    terminal.innerHTML += "Welcome Elena.<br>";
-    await new Promise(r=>setTimeout(r,1500));
-    window.location="centralclearance.html";
+    terminal.appendChild(input);
+    terminal.appendChild(submit);
   }
-];
+  askQuestion();
+}
 
-// START SEQUENCE
-currentScreen=0;
-screens[currentScreen]();
+// SCREEN 4: PASSWORD DECRYPTION
+function screen4() {
+  clearScreen();
+  printLine('SCREEN 4: PASSWORD DECRYPTION');
+  printLine('------------------------------');
+  let passIndex = 0;
+  function decryptPass() {
+    if(passIndex >= decryptedPasswords.length) { screen5(); return; }
+    printLine(`Decrypt password ${passIndex+1}`);
+    const input = document.createElement('input');
+    input.className = 'terminal-input';
+    const submit = document.createElement('button');
+    submit.className = 'button';
+    submit.innerText = 'Submit';
+    submit.onclick = () => {
+      if(input.value.toUpperCase() === decryptedPasswords[passIndex]) {
+        passIndex++;
+        clearScreen();
+        decryptPass();
+      } else { printLine('WRONG PASSWORD'); }
+    };
+    terminal.appendChild(input);
+    terminal.appendChild(submit);
+  }
+  decryptPass();
+}
 
+// SCREEN 5: SECURITY LEVEL + ENCRYPTED NAME
+function screen5() {
+  clearScreen();
+  printLine('SCREEN 5: SECURITY LEVEL CHECK');
+  const levelInput = document.createElement('input');
+  levelInput.className = 'terminal-input';
+  levelInput.placeholder = 'Security Level';
+  
+  const encInput = document.createElement('input');
+  encInput.className = 'terminal-input';
+  encInput.placeholder = 'Encrypted Access Name';
+  
+  const submit = document.createElement('button');
+  submit.className = 'button';
+  submit.innerText = 'Submit';
+  submit.onclick = () => {
+    if(levelInput.value === securityLevel && encInput.value === encryptedName) screen6();
+    else printLine('ACCESS DENIED');
+  };
+  
+  terminal.appendChild(levelInput);
+  terminal.appendChild(encInput);
+  terminal.appendChild(submit);
+}
+
+// SCREEN 6: STATION PROTOCOL
+function screen6() {
+  clearScreen();
+  printLine('SCREEN 6: STATION PROTOCOL CODE');
+  const input = document.createElement('input');
+  input.className = 'terminal-input';
+  input.placeholder = 'Protocol Code';
+  const submit = document.createElement('button');
+  submit.className = 'button';
+  submit.innerText = 'Submit';
+  submit.onclick = () => {
+    if(input.value === stationProtocol) screen7();
+    else printLine('WRONG CODE');
+  };
+  terminal.appendChild(input);
+  terminal.appendChild(submit);
+}
+
+// SCREEN 7: MANUAL 4-DIAL RADIO SYSTEM
+function screen7() {
+  clearScreen();
+  printLine('SCREEN 7: MANUAL 4-DIAL RADIO SYNCHRONIZATION');
+  printLine('Select the correct 4-digit combination');
+  
+  const dialContainer = document.createElement('div');
+  dialContainer.className = 'dial-container';
+  const dials = [];
+  for(let i=0;i<4;i++){
+    const dial = document.createElement('div');
+    dial.className = 'dial';
+    dial.innerText = '0';
+    dial.value = 0;
+    dial.onclick = () => {
+      dial.value = (dial.value +1)%10;
+      dial.innerText = dial.value;
+    };
+    dials.push(dial);
+    dialContainer.appendChild(dial);
+  }
+  const submit = document.createElement('button');
+  submit.className = 'button';
+  submit.innerText = 'Submit';
+  submit.onclick = () => {
+    const values = dials.map(d=>d.value);
+    if(values.join('') === radioCombo.join('')) screen8();
+    else printLine('INCORRECT COMBINATION');
+  };
+  terminal.appendChild(dialContainer);
+  terminal.appendChild(submit);
+}
+
+// SCREEN 8: MEMORY DUMP
+function screen8() {
+  clearScreen();
+  printLine('SCREEN 8: MEMORY DUMP SELECTION');
+  printLine('Select all critical processes');
+  
+  const form = document.createElement('div');
+  memoryProcesses.forEach(proc=>{
+    const div = document.createElement('div');
+    div.className = 'memory-process';
+    const checkbox = document.createElement('input');
+    checkbox.type='checkbox';
+    checkbox.value=proc;
+    div.appendChild(checkbox);
+    div.appendChild(document.createTextNode(proc));
+    form.appendChild(div);
+  });
+  
+  const submit = document.createElement('button');
+  submit.className = 'button';
+  submit.innerText = 'Submit';
+  submit.onclick = () => {
+    const checked = Array.from(form.querySelectorAll('input:checked')).map(i=>i.value);
+    if(memorySelection.every(val=>checked.includes(val))) screen9();
+    else printLine('INCORRECT SELECTION');
+  };
+  
+  terminal.appendChild(form);
+  terminal.appendChild(submit);
+}
+
+// SCREEN 9: LOADING
+function screen9() {
+  clearScreen();
+  printLine('SCREEN 9: CONNECTING TO SERVER');
+  
+  const container = document.createElement('div');
+  container.id='loading-bar-container';
+  const bar = document.createElement('div');
+  bar.id='loading-bar';
+  container.appendChild(bar);
+  terminal.appendChild(container);
+  
+  let width=0;
+  const interval = setInterval(()=>{
+    width+=1;
+    bar.style.width = width+'%';
+    if(width>=100){ clearInterval(interval); screen10(); }
+  },30);
+}
+
+// SCREEN 10: ACCESS GRANTED
+function screen10() {
+  clearScreen();
+  printLine('ACCESS GRANTED');
+  printLine(`Welcome ${correctCredentials.name}`);
+  setTimeout(()=>{window.location='centralclearance.html';},2000);
+}
+
+// START
+screen1();
 </script>
+
 </body>
 </html>
