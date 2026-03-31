@@ -1,319 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classified Access | U.I.C. Systems</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
+<!-- Section 1: CSS and Screens 1–6 -->
 <style>
 body {
   margin:0;
   background:#111;
   color:#FF9F07;
   font-family:'Share Tech Mono', monospace;
-  overflow-x:hidden;
+  overflow:hidden;
 }
-
-/* CRT container */
-#crt-container {
-  max-width:1000px;
-  margin:0 auto;
-  padding:20px;
-  transform-style:preserve-3d;
-  perspective:1000px;
-}
-
-/* Terminal style */
 .screen {
-  background:rgba(0,0,0,.25);
+  display:none;
   padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  margin-bottom:20px;
-  min-height:200px;
-  overflow-y:auto;
 }
 
-input, select {
-  background:#111;
-  color:#FF9F07;
-  border:1px solid #FF9F07;
-  padding:5px;
-  margin:5px 0;
-  font-family:'Share Tech Mono', monospace;
-}
-
-/* Buttons */
-button {
-  background:#111;
-  color:#FF9F07;
-  border:1px solid #FF9F07;
-  padding:5px 10px;
-  cursor:pointer;
-  font-family:'Share Tech Mono', monospace;
-  margin-top:10px;
-}
-button:hover {
-  background:#222;
-}
-
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
-}
-
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-}
-
-/* Big title for terminal page */
-#terminal-title {
-  font-size:28px;
-  font-weight:bold;
-  margin-bottom:20px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="amber"></div>
-<div id="scanlines"></div>
-
-<div id="crt-container">
-  <div id="terminal-title">U.I.C. Systems Terminal Access Point</div>
-
-  <!-- Screen 1: Identity Credentials -->
-  <div class="screen" id="step-1">
-    <h3>Input Identity Credentials</h3>
-    <label>Name:</label><br>
-    <input type="text" id="cred-name"><br>
-    <label>ID:</label><br>
-    <input type="text" id="cred-id"><br>
-    <label>Passphrase:</label><br>
-    <input type="password" id="cred-pass"><br>
-    <button onclick="validateStep1()">Submit</button>
-  </div>
-
-  <!-- Screen 2: Keycode -->
-  <div class="screen" id="step-2" style="display:none;">
-    <h3>Security Check: Keycode & Badge</h3>
-    <label>Keycode:</label><br>
-    <input type="text" id="keycode"><br>
-    <label>Security Badge Number:</label><br>
-    <input type="text" id="badge"><br>
-    <button onclick="validateStep2()">Submit</button>
-  </div>
-
-  <!-- Screen 3: AI Behavioral Analysis -->
-  <div class="screen" id="step-3" style="display:none;">
-    <h3>AI Behavioral Analysis</h3>
-    <p>Answer the following 6 questions:</p>
-    <ol>
-      <li><input type="text" id="q1" placeholder="Answer 1"></li>
-      <li><input type="text" id="q2" placeholder="Answer 2"></li>
-      <li><input type="text" id="q3" placeholder="Answer 3"></li>
-      <li><input type="text" id="q4" placeholder="Answer 4"></li>
-      <li><input type="text" id="q5" placeholder="Answer 5"></li>
-      <li><input type="text" id="q6" placeholder="Answer 6"></li>
-    </ol>
-    <button onclick="validateStep3()">Submit</button>
-  </div>
-
-  <!-- Screen 4: Password Decryption -->
-  <div class="screen" id="step-4" style="display:none;">
-    <h3>Decrypt 5 Passwords</h3>
-    <p>Enter decrypted passwords below:</p>
-    <input type="text" id="pass1" placeholder="Password 1"><br>
-    <input type="text" id="pass2" placeholder="Password 2"><br>
-    <input type="text" id="pass3" placeholder="Password 3"><br>
-    <input type="text" id="pass4" placeholder="Password 4"><br>
-    <input type="text" id="pass5" placeholder="Password 5"><br>
-    <button onclick="validateStep4()">Submit</button>
-  </div>
-
-  <!-- Screen 5: Security Level -->
-  <div class="screen" id="step-5" style="display:none;">
-    <h3>Security Clearance</h3>
-    <label>Security Level:</label><br>
-    <input type="text" id="sec-level"><br>
-    <label>Encrypted Access Name:</label><br>
-    <input type="text" id="enc-name"><br>
-    <button onclick="validateStep5()">Submit</button>
-  </div>
-
-  <!-- Screen 6: Station Protocol Code -->
-  <div class="screen" id="step-6" style="display:none;">
-    <h3>Station Protocol Code</h3>
-    <label>Enter Protocol Code:</label><br>
-    <input type="text" id="protocol"><br>
-    <button onclick="validateStep6()">Submit</button>
-  </div>
-
-  <!-- Screen 7: Temporal Radio Sync will go here in Section 2 -->
-
-</div>
-
-<script>
-// Navigation functions
-function showStep(current, next){
-  document.getElementById(current).style.display='none';
-  document.getElementById(next).style.display='block';
-}
-
-// Placeholder credentials for testing
-const testCredentials = {name:"Elena", id:"U123", pass:"omega"};
-const testKeycode = {key:"4729", badge:"B-908"};
-const testAnswers = ["alpha","bravo","charlie","delta","echo","foxtrot"];
-const testPasswords = ["pass1","pass2","pass3","pass4","pass5"];
-const testSecLevel = {level:"TopSecret", encName:"ElenaEncrypted"};
-const testProtocol = "VENUS-001";
-
-// Validation functions
-function validateStep1(){
-  const name = document.getElementById('cred-name').value;
-  const id = document.getElementById('cred-id').value;
-  const pass = document.getElementById('cred-pass').value;
-  if(name===testCredentials.name && id===testCredentials.id && pass===testCredentials.pass){
-    showStep('step-1','step-2');
-  } else {
-    alert("Invalid credentials");
-  }
-}
-
-function validateStep2(){
-  const key = document.getElementById('keycode').value;
-  const badge = document.getElementById('badge').value;
-  if(key===testKeycode.key && badge===testKeycode.badge){
-    showStep('step-2','step-3');
-  } else {
-    alert("Invalid keycode or badge");
-  }
-}
-
-function validateStep3(){
-  const answers = [];
-  for(let i=1;i<=6;i++){
-    answers.push(document.getElementById('q'+i).value.toLowerCase());
-  }
-  if(JSON.stringify(answers)===JSON.stringify(testAnswers)){
-    alert("AI Analysis Complete");
-    showStep('step-3','step-4');
-  } else {
-    alert("Behavioral analysis failed");
-  }
-}
-
-function validateStep4(){
-  const passes = [];
-  for(let i=1;i<=5;i++){
-    passes.push(document.getElementById('pass'+i).value);
-  }
-  if(JSON.stringify(passes)===JSON.stringify(testPasswords)){
-    showStep('step-4','step-5');
-  } else {
-    alert("Decryption failed");
-  }
-}
-
-function validateStep5(){
-  const level = document.getElementById('sec-level').value;
-  const encName = document.getElementById('enc-name').value;
-  if(level===testSecLevel.level && encName===testSecLevel.encName){
-    showStep('step-5','step-6');
-  } else {
-    alert("Incorrect security info");
-  }
-}
-
-function validateStep6(){
-  const code = document.getElementById('protocol').value;
-  if(code===testProtocol){
-    showStep('step-6','step-7'); // Step 7 is temporal sync, Section 2
-  } else {
-    alert("Incorrect protocol code");
-  }
-}
-</script>
-
-</body>
-</html>
-<!-- SCREEN 7: Temporal Radio Manual Synchronization -->
-<div class="screen" id="screen-7">
-  <h2>Temporal Access Lock</h2>
-  <p>Synchronize the station radio using the four dials:</p>
-  <div id="dials-container">
-    <div class="dial">
-      <label for="dial1">MHz 1:</label>
-      <input type="number" min="0" max="9" value="0" id="dial1">
-    </div>
-    <div class="dial">
-      <label for="dial2">MHz 2:</label>
-      <input type="number" min="0" max="9" value="0" id="dial2">
-    </div>
-    <div class="dial">
-      <label for="dial3">MHz 3:</label>
-      <input type="number" min="0" max="9" value="0" id="dial3">
-    </div>
-    <div class="dial">
-      <label for="dial4">MHz 4:</label>
-      <input type="number" min="0" max="9" value="0" id="dial4">
-    </div>
-  </div>
-  <button id="sync-button">Synchronize</button>
-  <p id="sync-status" style="margin-top:10px;"></p>
-</div>
-
-<!-- SCREEN 8: Memory Dump Check -->
-<div class="screen" id="screen-8">
-  <h2>Memory Dump Check</h2>
-  <p>Select the correct processes to continue:</p>
-  <div id="memory-dump">
-    <!-- processes will be dynamically generated by JS -->
-  </div>
-  <button id="memory-submit">Submit</button>
-  <p id="memory-status"></p>
-</div>
-
-<!-- SCREEN 9: Connecting -->
-<div class="screen" id="screen-9">
-  <h2>Connecting to Server...</h2>
-  <p>Please wait while the system establishes a secure connection.</p>
-  <div class="loading-bar">
-    <div class="progress" id="connect-progress"></div>
-  </div>
-</div>
-
-<!-- SCREEN 10: Access Granted -->
-<div class="screen" id="screen-10">
-  <h2>Access Granted</h2>
-  <p>Welcome, Elena Kovacs</p>
-  <button id="final-continue">Continue</button>
-</div>
-
-<style>
-/* Screen 7 dials styling */
+/* Dials for Screen 7 */
 #dials-container {
   display:flex;
   gap:20px;
@@ -331,7 +30,7 @@ function validateStep6(){
   margin-top:5px;
 }
 
-/* Memory dump screen styling */
+/* Memory Dump Screen (Screen 8) */
 #memory-dump {
   display:grid;
   grid-template-columns:repeat(10, 1fr);
@@ -353,7 +52,7 @@ function validateStep6(){
   background:rgba(255,159,7,.3);
 }
 
-/* Connecting screen */
+/* Connecting Screen (Screen 9) */
 .loading-bar {
   width:100%;
   height:20px;
@@ -368,85 +67,276 @@ function validateStep6(){
   background:#FF9F07;
   transition:width 0.3s ease;
 }
+
+/* Access Granted Screen (Screen 10) */
+#screen-10 h2 {
+  font-size:2em;
+  margin-bottom:10px;
+}
 </style>
 
+<!-- Screens 1–6 -->
+<div class="screen" id="screen-1">
+  <h2>Input Credentials</h2>
+  <p>Enter Name, ID, and Passphrase:</p>
+  <input id="cred-name" placeholder="Name">
+  <input id="cred-id" placeholder="ID">
+  <input id="cred-pass" placeholder="Passphrase" type="password">
+  <button id="cred-submit">Submit</button>
+  <p id="cred-status"></p>
+</div>
+
+<div class="screen" id="screen-2">
+  <h2>Keycode & Security Badge</h2>
+  <input id="keycode" placeholder="Keycode">
+  <input id="badge" placeholder="Badge Number">
+  <button id="key-submit">Submit</button>
+  <p id="key-status"></p>
+</div>
+
+<div class="screen" id="screen-3">
+  <h2>AI Behavioral Analysis</h2>
+  <p>Answer the following questions:</p>
+  <div id="ai-questions"></div>
+  <button id="ai-submit">Submit</button>
+  <p id="ai-status"></p>
+</div>
+
+<div class="screen" id="screen-4">
+  <h2>Decrypt 5 Passwords</h2>
+  <div id="decrypt-passwords"></div>
+  <button id="decrypt-submit">Submit</button>
+  <p id="decrypt-status"></p>
+</div>
+
+<div class="screen" id="screen-5">
+  <h2>Security Level & Encrypted Name</h2>
+  <input id="sec-level" placeholder="Security Level">
+  <input id="enc-name" placeholder="Encrypted Name">
+  <button id="sec-submit">Submit</button>
+  <p id="sec-status"></p>
+</div>
+
+<div class="screen" id="screen-6">
+  <h2>Station Protocol Code</h2>
+  <input id="protocol-code" placeholder="Station Protocol Code">
+  <button id="protocol-submit">Submit</button>
+  <p id="protocol-status"></p>
+</div>
+
+<!-- Section 2: Screens 7–10 and JS logic -->
+<div class="screen" id="screen-7">
+  <h2>Temporal Access Lock – Manual Radio Synchronization</h2>
+  <p>Set the frequency using the 4 dials to synchronize the radio wave:</p>
+  <div id="dials-container">
+    <div class="dial">
+      <label>Dial 1</label>
+      <input type="number" min="0" max="9" value="0" id="dial1">
+    </div>
+    <div class="dial">
+      <label>Dial 2</label>
+      <input type="number" min="0" max="9" value="0" id="dial2">
+    </div>
+    <div class="dial">
+      <label>Dial 3</label>
+      <input type="number" min="0" max="9" value="0" id="dial3">
+    </div>
+    <div class="dial">
+      <label>Dial 4</label>
+      <input type="number" min="0" max="9" value="0" id="dial4">
+    </div>
+  </div>
+  <button id="sync-submit">Synchronize</button>
+  <p id="sync-status"></p>
+</div>
+
+<div class="screen" id="screen-8">
+  <h2>Memory Dump Check</h2>
+  <p>Select the correct processes to gain access:</p>
+  <div id="memory-dump"></div>
+  <button id="memory-submit">Submit</button>
+  <p id="memory-status"></p>
+</div>
+
+<div class="screen" id="screen-9">
+  <h2>Connecting to Server...</h2>
+  <div class="loading-bar"><div class="progress" id="loading-progress"></div></div>
+</div>
+
+<div class="screen" id="screen-10">
+  <h2>Access Granted</h2>
+  <p>Welcome, <span id="user-name-display"></span></p>
+</div>
+
 <script>
-// --- SCREEN 7: Temporal Access Lock ---
-const correctCombo = [3, 7, 1, 4]; // Example correct MHz combination
-const dialInputs = [
-  document.getElementById("dial1"),
-  document.getElementById("dial2"),
-  document.getElementById("dial3"),
-  document.getElementById("dial4")
+let currentScreen = 1;
+const totalScreens = 10;
+
+// Show only the current screen
+function showScreen(num) {
+  for (let i=1; i<=totalScreens; i++) {
+    const screen = document.getElementById("screen-" + i);
+    if (screen) screen.style.display = (i === num) ? "block" : "none";
+  }
+}
+showScreen(currentScreen);
+
+// Example: Character info for testing
+const characterName = "Elena Petrov";
+
+// Screen 1 – Credentials
+document.getElementById("cred-submit").addEventListener("click", () => {
+  const name = document.getElementById("cred-name").value.trim();
+  const id = document.getElementById("cred-id").value.trim();
+  const pass = document.getElementById("cred-pass").value.trim();
+  if (name && id && pass) {
+    document.getElementById("cred-status").textContent = "Credentials Accepted.";
+    currentScreen++;
+    showScreen(currentScreen);
+  } else {
+    document.getElementById("cred-status").textContent = "All fields required.";
+  }
+});
+
+// Screen 2 – Keycode & Badge
+document.getElementById("key-submit").addEventListener("click", () => {
+  const key = document.getElementById("keycode").value.trim();
+  const badge = document.getElementById("badge").value.trim();
+  if (key && badge) {
+    document.getElementById("key-status").textContent = "Access Granted.";
+    currentScreen++;
+    showScreen(currentScreen);
+  } else {
+    document.getElementById("key-status").textContent = "Enter both keycode and badge.";
+  }
+});
+
+// Screen 3 – AI Behavioral Analysis (simplified for testing)
+const questions = [
+  "What is your primary role?",
+  "What is your current assignment?",
+  "Favorite tool on station?",
+  "Security level?",
+  "Most recent task completed?",
+  "Emergency protocol?"
 ];
-const syncButton = document.getElementById("sync-button");
-const syncStatus = document.getElementById("sync-status");
+const aiContainer = document.getElementById("ai-questions");
+questions.forEach((q,i) => {
+  const p = document.createElement("p");
+  p.textContent = q;
+  const input = document.createElement("input");
+  input.id = "ai-answer-" + i;
+  aiContainer.appendChild(p);
+  aiContainer.appendChild(input);
+});
 
-syncButton.addEventListener("click", () => {
-  const enteredCombo = dialInputs.map(d => parseInt(d.value));
-  if(enteredCombo.every((val,i) => val === correctCombo[i])) {
-    syncStatus.textContent = "Synchronization successful!";
-    setTimeout(() => showScreen(8), 1000);
+document.getElementById("ai-submit").addEventListener("click", () => {
+  let allFilled = true;
+  for (let i=0;i<questions.length;i++) {
+    const val = document.getElementById("ai-answer-" + i).value.trim();
+    if (!val) { allFilled=false; break; }
+  }
+  if (allFilled) {
+    document.getElementById("ai-status").textContent = "Behavior Verified.";
+    currentScreen++;
+    showScreen(currentScreen);
   } else {
-    syncStatus.textContent = "Incorrect MHz combination. Try again.";
+    document.getElementById("ai-status").textContent = "All questions must be answered.";
   }
 });
 
-// --- SCREEN 8: Memory Dump ---
-const memoryContainer = document.getElementById("memory-dump");
-const memoryStatus = document.getElementById("memory-status");
-const memorySubmit = document.getElementById("memory-submit");
+// Screen 4 – Decrypt Passwords (simplified)
+const passwords = ["alpha123","bravo456","charlie789","delta321","echo654"];
+const decryptDiv = document.getElementById("decrypt-passwords");
+passwords.forEach((p,i)=>{
+  const input = document.createElement("input");
+  input.placeholder = "Password " + (i+1);
+  input.id = "pwd-"+i;
+  decryptDiv.appendChild(input);
+});
+document.getElementById("decrypt-submit").addEventListener("click", () => {
+  let allCorrect=true;
+  for (let i=0;i<passwords.length;i++){
+    const val=document.getElementById("pwd-"+i).value.trim();
+    if(val!==passwords[i]){allCorrect=false; break;}
+  }
+  if(allCorrect){document.getElementById("decrypt-status").textContent="Passwords correct."; currentScreen++; showScreen(currentScreen);}
+  else{document.getElementById("decrypt-status").textContent="Incorrect passwords.";}
+});
 
-// Generate memory cells
-const correctProcesses = [2,5,12,20,33]; // Example correct
-for(let i=0;i<50;i++){
-  const cell = document.createElement("div");
-  cell.classList.add("memory-cell");
-  cell.textContent = i;
-  cell.dataset.index = i;
-  cell.addEventListener("click", () => cell.classList.toggle("selected"));
-  memoryContainer.appendChild(cell);
-}
-
-memorySubmit.addEventListener("click", ()=>{
-  const selected = Array.from(memoryContainer.querySelectorAll(".selected")).map(c => parseInt(c.dataset.index));
-  const isCorrect = correctProcesses.every(p => selected.includes(p)) && selected.length === correctProcesses.length;
-  if(isCorrect){
-    memoryStatus.textContent = "Processes verified!";
-    setTimeout(()=>showScreen(9), 1000);
-  } else {
-    memoryStatus.textContent = "Incorrect selection. Try again.";
+// Screen 5 – Security Level & Encrypted Name
+document.getElementById("sec-submit").addEventListener("click", ()=>{
+  const lvl=document.getElementById("sec-level").value.trim();
+  const enc=document.getElementById("enc-name").value.trim();
+  if(lvl && enc){
+    document.getElementById("sec-status").textContent="Verified.";
+    currentScreen++;
+    showScreen(currentScreen);
+  }else{
+    document.getElementById("sec-status").textContent="Both fields required.";
   }
 });
 
-// --- SCREEN 9: Connecting ---
-const progressBar = document.getElementById("connect-progress");
-let progress = 0;
-function connectAnimation(){
-  progress += Math.random()*10;
-  if(progress>=100){
-    progress = 100;
-    progressBar.style.width = progress+"%";
-    setTimeout(()=>showScreen(10),500);
-  } else{
-    progressBar.style.width = progress+"%";
-    setTimeout(connectAnimation,200);
+// Screen 6 – Protocol Code
+document.getElementById("protocol-submit").addEventListener("click", ()=>{
+  const code=document.getElementById("protocol-code").value.trim();
+  if(code){
+    document.getElementById("protocol-status").textContent="Protocol Verified.";
+    currentScreen++;
+    showScreen(currentScreen);
+  }else{
+    document.getElementById("protocol-status").textContent="Enter protocol code.";
   }
-}
-
-// --- SCREEN 10: Access Granted ---
-document.getElementById("final-continue").addEventListener("click", ()=>{
-  window.location.href = "centralclearance.html";
 });
 
-// Utility: show screen function
-function showScreen(num){
-  document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
-  const screen = document.getElementById(`screen-${num}`);
-  screen.style.display = "block";
-  if(num===9) connectAnimation();
+// Screen 7 – Manual 4 Dial Radio System
+const targetFreq = [3,1,7,4]; // example frequency
+document.getElementById("sync-submit").addEventListener("click", ()=>{
+  const d1 = parseInt(document.getElementById("dial1").value);
+  const d2 = parseInt(document.getElementById("dial2").value);
+  const d3 = parseInt(document.getElementById("dial3").value);
+  const d4 = parseInt(document.getElementById("dial4").value);
+  if(d1===targetFreq[0] && d2===targetFreq[1] && d3===targetFreq[2] && d4===targetFreq[3]){
+    document.getElementById("sync-status").textContent="Synchronization successful.";
+    currentScreen++;
+    showScreen(currentScreen);
+  }else{
+    document.getElementById("sync-status").textContent="Frequency mismatch. Try again.";
+  }
+});
+
+// Screen 8 – Memory Dump
+const memContainer=document.getElementById("memory-dump");
+const correctCells=[5,12,23,34,45]; // example
+for(let i=0;i<100;i++){
+  const div=document.createElement("div");
+  div.className="memory-cell";
+  div.textContent=i;
+  div.addEventListener("click",()=>{
+    div.classList.toggle("selected");
+  });
+  memContainer.appendChild(div);
+}
+document.getElementById("memory-submit").addEventListener("click",()=>{
+  const selected=[...document.querySelectorAll("#memory-dump .memory-cell.selected")].map(e=>parseInt(e.textContent));
+  const correct = correctCells.every(c=>selected.includes(c)) && selected.length===correctCells.length;
+  if(correct){document.getElementById("memory-status").textContent="Memory verified."; currentScreen++; showScreen(currentScreen);}
+  else{document.getElementById("memory-status").textContent="Incorrect processes selected.";}
+});
+
+// Screen 9 – Loading bar
+let progressElem = document.getElementById("loading-progress");
+function loadScreen9(){
+  let width=0;
+  const interval=setInterval(()=>{
+    width+=5;
+    if(width>100){width=100; clearInterval(interval); currentScreen++; showScreen(currentScreen); document.getElementById("user-name-display").textContent=characterName;}
+    progressElem.style.width=width+"%";
+  },100);
 }
 
-// Initialize first screen
-showScreen(1);
+// Trigger loading after Screen 8 completion
+document.getElementById("screen-8").querySelector("#memory-submit").addEventListener("click",()=>{
+  if(currentScreen===9) loadScreen9();
+});
 </script>
