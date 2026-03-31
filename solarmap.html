@@ -3,112 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Map Sector</title>
+<title>UIC Sector Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
+body{
+    margin:0;
+    background:#000;
+    color:#FF9F07;
+    font-family:'Share Tech Mono', monospace;
+    overflow:hidden;
 }
 
-#ascii-map {
-  position:fixed;
-  inset:0;
-  white-space:pre;
-  font-size:14px;
-  line-height:1.15em;
-  padding:20px;
-  box-sizing:border-box;
+/* FULLSCREEN MAP */
+#map{
+    position:fixed;
+    inset:0;
 }
 
-/* clickable planets */
-.planet {
-  position:absolute;
-  cursor:pointer;
-  color:#FF9F07;
+/* PLANET LABELS */
+.label{
+    position:absolute;
+    color:#FF9F07;
+    cursor:pointer;
+    font-size:14px;
 }
 
-.planet:hover {
-  text-shadow:0 0 8px #FF9F07;
+.label:hover{
+    text-shadow:0 0 8px #FF9F07;
 }
 
-/* positions (tweak if needed) */
-#earth { top:60%; left:20%; }
-#moon  { top:55%; left:16%; }
-#mars  { top:35%; left:70%; }
-#venus { top:70%; left:55%; }
-
-/* CRT overlays */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
+/* GRID TEXT */
+.coord{
+    position:absolute;
+    font-size:12px;
+    opacity:.5;
 }
 
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+/* CRT */
+#scanlines{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 2px,
+        transparent 5px,
+        transparent 9px
+    );
+    animation:flicker .12s infinite;
 }
 
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+@keyframes flicker{
+    0%{opacity:.15}
+    50%{opacity:.08}
+    100%{opacity:.15}
+}
+
+#amber{
+    position:fixed;
+    inset:0;
+    background:rgba(255,159,7,.05);
+    pointer-events:none;
 }
 </style>
 </head>
 
 <body>
 
+<div id="map">
+
+<svg width="100%" height="100%">
+
+<!-- CENTER SUN -->
+<circle cx="50%" cy="50%" r="6" stroke="#FF9F07" fill="none"/>
+
+<!-- ORBITS -->
+<circle cx="50%" cy="50%" r="120" stroke="#FF9F07" fill="none" opacity=".3"/>
+<circle cx="50%" cy="50%" r="180" stroke="#FF9F07" fill="none" opacity=".3"/>
+<circle cx="50%" cy="50%" r="240" stroke="#FF9F07" fill="none" opacity=".3"/>
+
+<!-- RADAR SWEEP -->
+<line id="radar" x1="50%" y1="50%" x2="50%" y2="0%" stroke="#FF9F07" stroke-width="1"/>
+
+</svg>
+
+<!-- PLANET LABELS -->
+<div class="label" id="venus" style="top:50%; left:calc(50% + 120px);">[VENUS]</div>
+<div class="label" id="earth" style="top:calc(50% - 180px); left:50%;">[EARTH]</div>
+<div class="label" id="moon"  style="top:calc(50% - 190px); left:calc(50% + 15px);">(MOON)</div>
+<div class="label" id="mars"  style="top:50%; left:calc(50% - 240px);">{MARS}</div>
+
+<!-- SECTOR COORDINATES -->
+<div class="coord" style="top:10px;left:10px;">A1</div>
+<div class="coord" style="top:10px;left:50%;">A5</div>
+<div class="coord" style="top:10px;right:10px;">A9</div>
+
+<div class="coord" style="top:50%;left:10px;">E1</div>
+<div class="coord" style="top:50%;right:10px;">E9</div>
+
+<div class="coord" style="bottom:10px;left:10px;">I1</div>
+<div class="coord" style="bottom:10px;left:50%;">I5</div>
+<div class="coord" style="bottom:10px;right:10px;">I9</div>
+
+</div>
+
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<div id="ascii-map">
-.      .         *        .       .         .       *        .
-     *        .        .      .      *           .        .
- .        .        *        .         .      .        .
-        .       .         .       *        .       .
-   *         .       .       .        .          *
- .        .       .        *         .        .       .
-       .        .        .        .       *        .
-    .        .       .        .        .       .
-        .        .        .       .        .       .
- .       .       .      *       .       .       .
-</div>
-
-<!-- ASCII planets -->
-<div class="planet" id="earth">[EARTH]</div>
-<div class="planet" id="moon"> (MOON)</div>
-<div class="planet" id="mars"> {MARS}</div>
-<div class="planet" id="venus"> <VENUS></div>
-
 <script>
-const planetLinks = {
-  earth: "earth.html",
-  moon: "moon.html",
-  mars: "mars.html",
-  venus: "venus.html"
+
+/* CLICK NAVIGATION */
+const links = {
+    earth:"earth.html",
+    moon:"moon.html",
+    mars:"mars.html",
+    venus:"venus.html"
 };
 
-for (let id in planetLinks) {
-  document.getElementById(id).onclick = () => {
-    window.location.href = planetLinks[id];
-  };
+for(const id in links){
+    document.getElementById(id).onclick = () =>{
+        window.location.href = links[id];
+    };
 }
+
+/* RADAR SWEEP */
+let angle = 0;
+const radar = document.getElementById("radar");
+
+setInterval(()=>{
+    angle += 1;
+    radar.setAttribute(
+        "transform",
+        `rotate(${angle} 50% 50%)`
+    );
+},30);
+
 </script>
 
 </body>
