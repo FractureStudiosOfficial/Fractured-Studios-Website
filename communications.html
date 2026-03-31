@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | System Status</title>
+<title>U.I.C. Systems | Communications</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -25,7 +25,7 @@ body {
   transition:transform .08s ease-out;
 }
 
-/* Amber overlay */
+/* Amber tint overlay */
 #amber {
   position:fixed;
   inset:0;
@@ -55,7 +55,7 @@ body {
   100%{opacity:.15}
 }
 
-/* Headers */
+/* Header */
 h1 {
   text-align:left;
   margin-bottom:10px;
@@ -63,6 +63,7 @@ h1 {
   filter:drop-shadow(0 0 10px #FF9F07);
 }
 
+/* Subheader */
 h2 {
   margin-top:20px;
   font-size:24px;
@@ -81,22 +82,6 @@ section img {
   display:block;
   margin-top:10px;
   border:1px solid rgba(255,159,7,.3);
-}
-
-/* System bars */
-.bar-container {
-  background: rgba(255,159,7,.1);
-  border:1px solid rgba(255,159,7,.3);
-  height:20px;
-  margin-top:5px;
-  width:100%;
-  position:relative;
-}
-.bar-fill {
-  background: #FF9F07;
-  height:100%;
-  width:0%;
-  transition:width 0.5s;
 }
 
 /* Terminal */
@@ -142,40 +127,35 @@ section img {
 <div id="scanlines"></div>
 
 <div id="crt-container">
-  <h1>System Status Dashboard</h1>
+  <h1>Communications Network</h1>
 
-  <h2>Life Support</h2>
+  <h2>Active Channels</h2>
   <section>
-    <p><strong>Oxygen Levels:</strong></p>
-    <div class="bar-container"><div class="bar-fill" style="width:97%"></div></div>
-    <p><strong>Pressure:</strong> 101.3 kPa</p>
-    <p><strong>Temperature:</strong> 22°C</p>
+    <p><strong>Channel 001:</strong> Mars Terra Colony Internal</p>
+    <p><strong>Status:</strong> Online</p>
+    <p><strong>Last Message:</strong> 14:05 2084-03-28</p>
+  </section>
+  <section>
+    <p><strong>Channel 002:</strong> Lunar Base Delta</p>
+    <p><strong>Status:</strong> Online</p>
+    <p><strong>Last Message:</strong> 13:55 2084-03-28</p>
+  </section>
+  <section>
+    <p><strong>Channel 003:</strong> Venus Research Lab</p>
+    <p><strong>Status:</strong> Offline</p>
+    <p><strong>Last Message:</strong> 2084-03-27 21:12</p>
+  </section>
+  <section>
+    <p><strong>Channel 004:</strong> Orbital Command Ship Soyuz</p>
+    <p><strong>Status:</strong> Online</p>
+    <p><strong>Last Message:</strong> 14:12 2084-03-28</p>
   </section>
 
-  <h2>Power Systems</h2>
+  <h2>Message Log</h2>
   <section>
-    <p><strong>Reactor Output:</strong></p>
-    <div class="bar-container"><div class="bar-fill" style="width:85%"></div></div>
-    <p><strong>Backup Power:</strong> Online</p>
-  </section>
-
-  <h2>Communications</h2>
-  <section>
-    <p><strong>Active Channels:</strong> 7/10</p>
-    <p><strong>Last Sync:</strong> 2084-03-28 14:15</p>
-  </section>
-
-  <h2>Security</h2>
-  <section>
-    <p><strong>Access Points:</strong> All Locked</p>
-    <p><strong>Surveillance:</strong> Normal</p>
-    <p><strong>Alerts:</strong> None</p>
-  </section>
-
-  <h2>Environmental Systems</h2>
-  <section>
-    <p><strong>CO₂ Scrubbers:</strong> 92% Efficiency</p>
-    <p><strong>Waste Management:</strong> Operational</p>
+    <p><strong>[2084-03-28 14:00] Elena Voskova:</strong> All systems nominal. Hydroponics growth at 97% efficiency.</p>
+    <p><strong>[2084-03-28 13:45] Control:</strong> Confirmed telemetry upload received from Mars Terra.</p>
+    <p><strong>[2084-03-28 13:30] Soviet Comm Net:</strong> Venus orbital scan completed.</p>
   </section>
 
   <button id="back-btn" onclick="window.location='index.html'">Back to Home</button>
