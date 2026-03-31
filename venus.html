@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIC Station Status</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:auto;
+}
+
+/* CRT overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1000;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1001;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* layout */
+.container {
+  padding:40px;
+}
+
+h1 {
+  margin-bottom:10px;
+  text-shadow:0 0 10px #FF9F07;
+}
+
+h2 {
+  margin-top:25px;
+  text-shadow:0 0 8px #FF9F07;
+}
+
+section {
+  border:1px solid rgba(255,159,7,.3);
+  padding:15px;
+  margin-top:10px;
+  background:rgba(0,0,0,.25);
+}
+
+/* bars */
+.bar {
+  width:100%;
+  height:18px;
+  border:1px solid rgba(255,159,7,.4);
+  margin-top:5px;
+}
+.fill {
+  height:100%;
+  background:#FF9F07;
+}
+
+/* buttons */
+button {
+  margin-top:25px;
+  padding:8px 14px;
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,159,7,.5);
+  color:#FF9F07;
+  font-family:inherit;
+  cursor:pointer;
+}
+button:hover {
+  background:rgba(255,159,7,.2);
+}
+
+/* terminal */
+#terminal {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:10px;
+  border-top:1px solid rgba(255,159,7,.3);
+  background:rgba(0,0,0,.4);
+}
+
+#terminal input {
+  width:100%;
+  background:transparent;
+  border:none;
+  color:#FF9F07;
+  font-family:inherit;
+  outline:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div class="container">
+
+<h1>Station: ZVEZDA ORBITAL</h1>
+<p>Status: OPERATIONAL</p>
+<p>Alert Level: GREEN</p>
+
+<h2>Population</h2>
+<section>
+<p>Crew: 14</p>
+<p>Scientists: 6</p>
+<p>Civilians: 2</p>
+<p>Total: 22</p>
+</section>
+
+<h2>Life Support</h2>
+<section>
+Oxygen
+<div class="bar"><div class="fill" style="width:96%"></div></div>
+
+Water Recycling
+<div class="bar"><div class="fill" style="width:88%"></div></div>
+
+Temperature Stability
+<div class="bar"><div class="fill" style="width:92%"></div></div>
+</section>
+
+<h2>Power Systems</h2>
+<section>
+Reactor Output
+<div class="bar"><div class="fill" style="width:81%"></div></div>
+
+Solar Array Efficiency
+<div class="bar"><div class="fill" style="width:74%"></div></div>
+
+Battery Reserve
+<div class="bar"><div class="fill" style="width:65%"></div></div>
+</section>
+
+<h2>Communications</h2>
+<section>
+<p>Uplink: ACTIVE</p>
+<p>Deep Space Array: ACTIVE</p>
+<p>Emergency Beacon: STANDBY</p>
+</section>
+
+<h2>Docked Vessels</h2>
+<section>
+<p>• Cargo Transport CY-44</p>
+<p>• Shuttle Aurora</p>
+<p>• Maintenance Drone Cluster</p>
+</section>
+
+<h2>Alerts</h2>
+<section>
+<p>None</p>
+</section>
+
+<button onclick="window.location='systemstatus.html'">
+Return to Dashboard
+</button>
+
+</div>
+
+<div id="terminal">
+> <input id="cmd" placeholder="Enter command...">
+</div>
+
+<script>
+document.getElementById("cmd").addEventListener("keydown", function(e){
+  if(e.key !== "Enter") return;
+
+  let cmd = this.value.toLowerCase().trim();
+  this.value = "";
+
+  if(cmd === "back") window.location = "systemstatus.html";
+  if(cmd === "home") window.location = "index.html";
+});
+</script>
+
+</body>
+</html>
