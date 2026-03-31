@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | Research</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:auto;
+  perspective:1000px;
+}
+
+/* CRT container */
+#crt-container {
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
+}
+
+/* Amber tint overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1001;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1002;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* Header */
+h1 {
+  text-align:left;
+  margin-bottom:20px;
+  font-size:32px;
+  filter:drop-shadow(0 0 10px #FF9F07);
+}
+
+/* Filters */
+#filters {
+  margin-bottom:20px;
+}
+.filter-btn {
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,159,7,.5);
+  color:#FF9F07;
+  padding:5px 10px;
+  margin-right:5px;
+  cursor:pointer;
+  transition:0.2s;
+}
+.filter-btn:hover {
+  background:rgba(0,0,0,.5);
+}
+
+/* Research entries */
+#research-list {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:15px;
+}
+.research-entry {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+  cursor:pointer;
+  transition:0.2s;
+}
+.research-entry:hover {
+  background:rgba(0,0,0,.4);
+  border-color:rgba(255,159,7,.5);
+}
+
+/* Terminal */
+#terminal-box {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(0,0,0,.25);
+  padding:10px 20px;
+  border-top:1px solid rgba(255,159,7,.3);
+  display:flex;
+  align-items:center;
+}
+#terminal-box input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+</style>
+</head>
+
+<body>
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+  <h1>Research Database</h1>
+
+  <div id="filters">
+    <button class="filter-btn" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="station">Station</button>
+    <button class="filter-btn" data-filter="project">Project Type</button>
+    <button class="filter-btn" data-filter="active">Active</button>
+    <button class="filter-btn" data-filter="completed">Completed</button>
+  </div>
+
+  <div id="research-list">
+    <!-- Example entries -->
+    <div class="research-entry" data-type="station" onclick="openResearch('marsterra.html')">
+      <h3>Mars Terra Colony Experiments</h3>
+      <p>Station: Mars Terra</p>
+      <p>Status: Active</p>
+    </div>
+
+    <div class="research-entry" data-type="project" onclick="openResearch('venusatmos.html')">
+      <h3>Venus Atmospheric Analysis</h3>
+      <p>Station: Venus Orbital Lab</p>
+      <p>Status: Completed</p>
+    </div>
+
+    <div class="research-entry" data-type="station" onclick="openResearch('lunarsoil.html')">
+      <h3>Lunar Soil Composition Study</h3>
+      <p>Station: Moon Base Alpha</p>
+      <p>Status: Active</p>
+    </div>
+
+    <!-- Add more entries as needed -->
+  </div>
+</div>
+
+<div id="terminal-box">
+  <span>&gt;</span>
+  <input id="cmd" autocomplete="off" placeholder="Enter command...">
+</div>
+
+<script>
+// 3D tilt effect
+const container = document.getElementById('crt-container');
+document.addEventListener('mousemove', e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Open research entry
+function openResearch(file) {
+  window.location = file;
+}
+
+// Filters
+const filterBtns = document.querySelectorAll('.filter-btn');
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+    const entries = document.querySelectorAll('.research-entry');
+    entries.forEach(e => {
+      if(filter === 'all' || e.dataset.type === filter) e.style.display = 'block';
+      else e.style.display = 'none';
+    });
+  });
+});
+
+// Terminal command handler
+const terminalInput = document.getElementById('cmd');
+terminalInput.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const cmd = terminalInput.value.toLowerCase().trim();
+  terminalInput.value = '';
+  // Example commands
+  if(cmd === 'home') window.location='index.html';
+  else if(cmd === 'help') alert('Available commands: home, list');
+  else if(cmd === 'list') alert('Listing all research entries...');
+  else alert('Unknown command');
+});
+</script>
+
+</body>
+</html>
