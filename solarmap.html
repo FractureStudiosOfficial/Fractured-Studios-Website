@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC OS | Sector Map</title>
+<title>U.I.C. Map Sector</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 body {
@@ -15,26 +15,56 @@ body {
   perspective:1000px;
 }
 
-/* CRT Container */
 #crt-container {
   height:100vh;
   display:flex;
   flex-direction:column;
-  align-items:center;
   justify-content:flex-start;
+  align-items:center;
   padding:40px;
   transform-style:preserve-3d;
   transition:transform .08s ease-out;
 }
 
-/* Amber tint overlay & scanlines */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-  z-index:1000;
+#map-title {
+  font-size:28px;
+  margin-bottom:20px;
+  color:#FF9F07;
+  text-shadow: 0 0 8px #FF9F07;
 }
+
+#solar-system {
+  position:relative;
+  width:800px;
+  height:600px;
+  background:#111 url('solargrid.png') center center no-repeat;
+  background-size:contain;
+  border:1px solid rgba(255,159,7,.2);
+}
+
+.planet {
+  position:absolute;
+  border:2px solid #FF9F07;
+  border-radius:50%;
+  cursor:pointer;
+  text-align:center;
+  color:#FF9F07;
+  font-size:12px;
+  line-height:1;
+  transition: transform 0.2s ease;
+}
+
+.planet:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px #FF9F07;
+}
+
+/* Planet positions */
+#earth { width:40px; height:40px; top:250px; left:100px; }
+#moon { width:15px; height:15px; top:220px; left:60px; }
+#mars { width:35px; height:35px; top:200px; left:500px; }
+#venus { width:38px; height:38px; top:350px; left:400px; }
+
 #scanlines {
   position:fixed;
   inset:0;
@@ -55,71 +85,11 @@ body {
   100%{opacity:.15}
 }
 
-/* Map header */
-#map-header {
-  font-size:1.6rem;
-  margin-bottom:30px;
-  text-align:center;
-}
-
-/* Map area */
-#map {
-  display:grid;
-  grid-template-columns:repeat(5, 120px);
-  grid-auto-rows:120px;
-  gap:30px;
-}
-
-/* Station nodes */
-.station {
-  background:rgba(0,0,0,.25);
-  border:2px solid #FF9F07;
-  border-radius:8px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  transition:all 0.2s ease;
-  text-align:center;
-  font-size:0.9rem;
-  padding:10px;
-  position:relative;
-}
-.station:hover {
-  transform:scale(1.1);
-  box-shadow:0 0 15px #FF9F07;
-}
-.station.usa { border-color:#1E90FF; }
-.station.ussr { border-color:#FF0000; }
-.station.china { border-color:#00FF00; }
-.station.corrupted { border-color:#FF00FF; color:#FF00FF; }
-
-/* Legend */
-#legend {
-  margin-top:30px;
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  font-size:0.9rem;
-}
-.legend-item {
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
-.legend-color {
-  width:15px;
-  height:15px;
-  border:1px solid #FF9F07;
-}
-
-#os {
+#amber {
   position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
 }
 </style>
 </head>
@@ -129,52 +99,36 @@ body {
 <div id="scanlines"></div>
 
 <div id="crt-container">
-
-  <div id="map-header">SOLAR SECTOR MAP</div>
-
-  <div id="map">
-    <div class="station usa" onclick="window.location='zvezda.html'">Zvezda<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='horizon.html'">Horizon<br>USSR Base</div>
-    <div class="station china" onclick="window.location='floatingislands.html'">Floating Islands of Venus<br>China Base</div>
-    <div class="station usa" onclick="window.location='moonoutpost.html'">Moon Outpost<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='marsstation.html'">Mars Station<br>USSR Base</div>
-    <div class="station china corrupted" onclick="alert('Station data corrupted')">Unknown Node</div>
-    <div class="station usa" onclick="window.location='venusstation.html'">Venus Station<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='jupiternode.html'">Jupiter Node<br>USSR Base</div>
-    <div class="station china" onclick="window.location='titanbase.html'">Titan Base<br>China Base</div>
-    <div class="station usa" onclick="window.location='asteroidhub.html'">Asteroid Hub<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='neptunestation.html'">Neptune Station<br>USSR Base</div>
-    <div class="station china" onclick="window.location='plutobase.html'">Pluto Base<br>China Base</div>
-    <div class="station usa" onclick="window.location='mercuryoutpost.html'">Mercury Outpost<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='ganymedestation.html'">Ganymede Station<br>USSR Base</div>
-    <div class="station china corrupted" onclick="alert('Station offline / data corrupted')">Corrupted Node</div>
-    <div class="station usa" onclick="window.location='earthorbit.html'">Earth Orbit Station<br>USA Base</div>
-    <div class="station ussr" onclick="window.location='europanode.html'">Europa Node<br>USSR Base</div>
-    <div class="station china" onclick="window.location='venuslab.html'">Venus Lab<br>China Base</div>
-    <div class="station usa" onclick="window.location='marsresearch.html'">Mars Research<br>USA Base</div>
+  <div id="map-title">U.I.C. Solar System Map</div>
+  <div id="solar-system">
+    <div class="planet" id="earth">Earth</div>
+    <div class="planet" id="moon">Moon</div>
+    <div class="planet" id="mars">Mars</div>
+    <div class="planet" id="venus">Venus</div>
   </div>
-
-  <div id="legend">
-    <div class="legend-item"><div class="legend-color" style="background:#1E90FF"></div> USA</div>
-    <div class="legend-item"><div class="legend-color" style="background:#FF0000"></div> USSR</div>
-    <div class="legend-item"><div class="legend-color" style="background:#00FF00"></div> China</div>
-    <div class="legend-item"><div class="legend-color" style="background:#FF00FF"></div> Corrupted</div>
-  </div>
-
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
-
 <script>
-// 3D tilt
-const container = document.getElementById("crt-container");
-const os = document.getElementById("os");
+const planetLinks = {
+  earth: 'earth.html',
+  moon: 'moon.html',
+  mars: 'mars.html',
+  venus: 'venus.html'
+};
 
+for (let id in planetLinks) {
+  document.getElementById(id).addEventListener('click', () => {
+    window.location.href = planetLinks[id];
+  });
+}
+
+// Optional 3D tilt effect
 document.addEventListener("mousemove", e => {
+  const container = document.getElementById("crt-container");
+  const os = container;
   const x = (window.innerWidth/2 - e.clientX)/1000;
   const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
 </script>
 
