@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | Research Entry</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:auto;
+  perspective:1000px;
+}
+
+/* CRT container */
+#crt-container {
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
+}
+
+/* Amber tint overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1001;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1002;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* Header */
+h1 {
+  text-align:left;
+  margin-bottom:10px;
+  font-size:32px;
+  filter:drop-shadow(0 0 10px #FF9F07);
+}
+
+/* Subheader */
+h2 {
+  margin-top:20px;
+  font-size:24px;
+  filter:drop-shadow(0 0 8px #FF9F07);
+}
+
+/* Sections */
+section {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+  margin-bottom:15px;
+}
+section img {
+  max-width:100%;
+  display:block;
+  margin-top:10px;
+  border:1px solid rgba(255,159,7,.3);
+}
+
+/* Terminal */
+#terminal-box {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(0,0,0,.25);
+  padding:10px 20px;
+  border-top:1px solid rgba(255,159,7,.3);
+  display:flex;
+  align-items:center;
+}
+#terminal-box input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* Back button */
+#back-btn {
+  display:inline-block;
+  margin-top:20px;
+  padding:8px 12px;
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,159,7,.5);
+  color:#FF9F07;
+  cursor:pointer;
+  transition:0.2s;
+}
+#back-btn:hover {
+  background:rgba(0,0,0,.5);
+}
+</style>
+</head>
+
+<body>
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+  <h1>Mars Terra Colony Experiments</h1>
+  <h2>Summary</h2>
+  <section>
+    <p><strong>Project Name:</strong> Mars Terra Colonization Study</p>
+    <p><strong>Station:</strong> Mars Terra</p>
+    <p><strong>Lead Scientist:</strong> Elena Voskova</p>
+    <p><strong>Status:</strong> Active</p>
+    <p><strong>Start Date:</strong> 15 March 2082</p>
+    <p><strong>Objective:</strong> Long-term survival and ecological stabilization on Mars Terra Colony.</p>
+  </section>
+
+  <h2>Details</h2>
+  <section>
+    <p><strong>Research Focus:</strong> Soil composition, atmosphere control, sustainable agriculture, radiation shielding.</p>
+    <p><strong>Population Involved:</strong> 120 Scientists and Engineers</p>
+    <p><strong>Modules:</strong> Habitation Dome, Hydroponics Lab, Atmospheric Control Unit, Solar Array</p>
+  </section>
+
+  <h2>Experiment Logs</h2>
+  <section>
+    <p><strong>Log #1:</strong> Initial soil sample collected and analyzed for mineral content.</p>
+    <p><strong>Log #2:</strong> First hydroponic crop planted; monitoring growth under Martian conditions.</p>
+    <p><strong>Log #3:</strong> Radiation shielding test completed with success rate 87%.</p>
+    <img src="marslab.jpg" alt="Mars Colony Lab">
+  </section>
+
+  <h2>Previous Research</h2>
+  <section>
+    <p><strong>Venus Atmospheric Analysis:</strong> Completed 2080-2081</p>
+    <p><strong>Lunar Soil Composition Study:</strong> Completed 2081-2082</p>
+  </section>
+
+  <h2>Notes & Findings</h2>
+  <section>
+    <p>Continuous monitoring of atmospheric integrity required. Hydroponic yields exceeding expectations. Radiation shielding improvements recommended for extended habitation.</p>
+  </section>
+
+  <button id="back-btn" onclick="window.location='research.html'">Back to Research Database</button>
+</div>
+
+<div id="terminal-box">
+  <span>&gt;</span>
+  <input id="cmd" autocomplete="off" placeholder="Enter command...">
+</div>
+
+<script>
+// 3D tilt
+const container = document.getElementById('crt-container');
+document.addEventListener('mousemove', e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal commands
+const terminalInput = document.getElementById('cmd');
+terminalInput.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const cmd = terminalInput.value.toLowerCase().trim();
+  terminalInput.value = '';
+  if(cmd === 'home') window.location='index.html';
+  else if(cmd === 'back') window.location='research.html';
+  else alert('Unknown command');
+});
+</script>
+
+</body>
+</html>
