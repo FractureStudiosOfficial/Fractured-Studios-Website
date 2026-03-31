@@ -1,1 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | Central Clearance</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y: scroll;
+}
 
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:999;
+}
+
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1000;
+}
+
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+.container {
+  max-width:1200px;
+  margin:0 auto;
+  padding:50px 20px;
+  box-sizing:border-box;
+}
+
+h1 {
+  font-size:2em;
+  margin-bottom:20px;
+  color:#FFB84D;
+  text-shadow:0 0 5px #FF9F07;
+}
+
+.directory {
+  margin-left:20px;
+}
+
+.directory ul {
+  list-style-type:none;
+  padding-left:20px;
+}
+
+.directory li {
+  cursor:pointer;
+  margin:5px 0;
+  transition: all 0.1s ease-in-out;
+}
+
+.directory li:hover {
+  color:#FFD27F;
+  text-shadow:0 0 5px #FF9F07;
+}
+
+.file {
+  margin-left:20px;
+}
+
+#file-viewer {
+  margin-top:30px;
+  padding:20px;
+  border:1px solid rgba(255,159,7,.3);
+  background:rgba(0,0,0,.25);
+  min-height:200px;
+  white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div class="container">
+  <h1>U.I.C. Systems | Central Clearance</h1>
+
+  <div class="directory">
+    <ul>
+      <li onclick="toggleFolder('stations')">STATIONS
+        <ul id="stations" style="display:none">
+          <li onclick="openFile('Zvezda Station Info')">Zvezda.txt</li>
+          <li onclick="openFile('Horizon Station Info')">Horizon.txt</li>
+          <li onclick="openFile('Floating Islands of Venus')">VenusBase.txt</li>
+          <li onclick="openFile('Lunar Outpost Alpha')">MoonAlpha.txt</li>
+          <li onclick="openFile('Mars Orbital Station 1')">MarsOrbital1.txt</li>
+        </ul>
+      </li>
+      <li onclick="toggleFolder('ships')">SHIPS
+        <ul id="ships" style="display:none">
+          <li onclick="openFile('Soyuz Info')">Soyuz.log</li>
+          <li onclick="openFile('Von Braun US Ship')">VonBraun-US.txt</li>
+          <li onclick="openFile('Sputnik-4')">Sputnik-4.txt</li>
+          <li onclick="openFile('Hubble Satellite')">Hubble.log</li>
+        </ul>
+      </li>
+      <li onclick="toggleFolder('research')">RESEARCH
+        <ul id="research" style="display:none">
+          <li onclick="openFile('Project Genesis')">Project-Genesis.doc</li>
+          <li onclick="openFile('Alien Artifact Analysis')">Artifact-Analysis.pdf</li>
+          <li onclick="openFile('Neural Interface Testing')">Neural-Interface.txt</li>
+        </ul>
+      </li>
+      <li onclick="toggleFolder('communications')">COMMUNICATIONS
+        <ul id="communications" style="display:none">
+          <li onclick="openFile('Encrypted Logs 1982')">Logs-1982.txt</li>
+          <li onclick="openFile('Secure Transmission Protocols')">STP.txt</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div id="file-viewer">Select a file to view its contents...</div>
+</div>
+
+<script>
+function toggleFolder(id){
+  const folder = document.getElementById(id);
+  if(folder.style.display === "none"){
+    folder.style.display = "block";
+  } else {
+    folder.style.display = "none";
+  }
+}
+
+function openFile(content){
+  const viewer = document.getElementById('file-viewer');
+  // For testing, just output the name of the file
+  viewer.textContent = `Displaying contents of: ${content}\n\n[CLASSIFIED FILE DATA]\n...additional information goes here...`;
+}
+</script>
+
+</body>
+</html>
