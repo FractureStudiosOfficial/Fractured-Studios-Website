@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | System Status</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:auto;
+  perspective:1000px;
+}
+
+/* CRT container */
+#crt-container {
+  padding:60px;
+  box-sizing:border-box;
+  transform-style:preserve-3d;
+  transition:transform .08s ease-out;
+}
+
+/* Amber overlay */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1001;
+}
+
+/* Scanlines */
+#scanlines {
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1002;
+}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* Headers */
+h1 {
+  text-align:left;
+  margin-bottom:10px;
+  font-size:32px;
+  filter:drop-shadow(0 0 10px #FF9F07);
+}
+
+h2 {
+  margin-top:20px;
+  font-size:24px;
+  filter:drop-shadow(0 0 8px #FF9F07);
+}
+
+/* Sections */
+section {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+  margin-bottom:15px;
+}
+section img {
+  max-width:100%;
+  display:block;
+  margin-top:10px;
+  border:1px solid rgba(255,159,7,.3);
+}
+
+/* System bars */
+.bar-container {
+  background: rgba(255,159,7,.1);
+  border:1px solid rgba(255,159,7,.3);
+  height:20px;
+  margin-top:5px;
+  width:100%;
+  position:relative;
+}
+.bar-fill {
+  background: #FF9F07;
+  height:100%;
+  width:0%;
+  transition:width 0.5s;
+}
+
+/* Terminal */
+#terminal-box {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:rgba(0,0,0,.25);
+  padding:10px 20px;
+  border-top:1px solid rgba(255,159,7,.3);
+  display:flex;
+  align-items:center;
+}
+#terminal-box input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* Back button */
+#back-btn {
+  display:inline-block;
+  margin-top:20px;
+  padding:8px 12px;
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,159,7,.5);
+  color:#FF9F07;
+  cursor:pointer;
+  transition:0.2s;
+}
+#back-btn:hover {
+  background:rgba(0,0,0,.5);
+}
+</style>
+</head>
+
+<body>
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+  <h1>System Status Dashboard</h1>
+
+  <h2>Life Support</h2>
+  <section>
+    <p><strong>Oxygen Levels:</strong></p>
+    <div class="bar-container"><div class="bar-fill" style="width:97%"></div></div>
+    <p><strong>Pressure:</strong> 101.3 kPa</p>
+    <p><strong>Temperature:</strong> 22°C</p>
+  </section>
+
+  <h2>Power Systems</h2>
+  <section>
+    <p><strong>Reactor Output:</strong></p>
+    <div class="bar-container"><div class="bar-fill" style="width:85%"></div></div>
+    <p><strong>Backup Power:</strong> Online</p>
+  </section>
+
+  <h2>Communications</h2>
+  <section>
+    <p><strong>Active Channels:</strong> 7/10</p>
+    <p><strong>Last Sync:</strong> 2084-03-28 14:15</p>
+  </section>
+
+  <h2>Security</h2>
+  <section>
+    <p><strong>Access Points:</strong> All Locked</p>
+    <p><strong>Surveillance:</strong> Normal</p>
+    <p><strong>Alerts:</strong> None</p>
+  </section>
+
+  <h2>Environmental Systems</h2>
+  <section>
+    <p><strong>CO₂ Scrubbers:</strong> 92% Efficiency</p>
+    <p><strong>Waste Management:</strong> Operational</p>
+  </section>
+
+  <button id="back-btn" onclick="window.location='index.html'">Back to Home</button>
+</div>
+
+<div id="terminal-box">
+  <span>&gt;</span>
+  <input id="cmd" autocomplete="off" placeholder="Enter command...">
+</div>
+
+<script>
+// 3D tilt
+const container = document.getElementById('crt-container');
+document.addEventListener('mousemove', e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal commands
+const terminalInput = document.getElementById('cmd');
+terminalInput.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const cmd = terminalInput.value.toLowerCase().trim();
+  terminalInput.value = '';
+  if(cmd === 'home') window.location='index.html';
+  else if(cmd === 'back') window.location='index.html';
+  else alert('Unknown command');
+});
+</script>
+
+</body>
+</html>
