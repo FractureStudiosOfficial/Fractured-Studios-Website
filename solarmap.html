@@ -11,59 +11,45 @@ body {
   background:#111;
   color:#FF9F07;
   font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-  perspective:1000px;
+  overflow:auto;
 }
 
 #crt-container {
-  height:100vh;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
   align-items:center;
-  padding:40px;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+  padding:20px;
 }
 
 #map-title {
   font-size:28px;
   margin-bottom:20px;
-  color:#FF9F07;
   text-shadow: 0 0 8px #FF9F07;
 }
 
-#solar-system {
-  position:relative;
-  width:800px;
-  height:600px;
-  background:#111 url('solargrid.png') center center no-repeat;
-  background-size:contain;
+#ascii-map {
+  white-space: pre;
+  font-size:14px;
+  line-height:1.2em;
+  cursor:default;
+  color:#FF9F07;
   border:1px solid rgba(255,159,7,.2);
+  padding:20px;
+  background:rgba(0,0,0,0.25);
+  position:relative;
 }
 
+/* Clickable planets */
 .planet {
   position:absolute;
-  border:2px solid #FF9F07;
-  border-radius:50%;
   cursor:pointer;
-  text-align:center;
   color:#FF9F07;
-  font-size:12px;
-  line-height:1;
-  transition: transform 0.2s ease;
+  font-weight:bold;
 }
-
-.planet:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 15px #FF9F07;
-}
-
-/* Planet positions */
-#earth { width:40px; height:40px; top:250px; left:100px; }
-#moon { width:15px; height:15px; top:220px; left:60px; }
-#mars { width:35px; height:35px; top:200px; left:500px; }
-#venus { width:38px; height:38px; top:350px; left:400px; }
+#earth { top:120px; left:50px; }
+#moon { top:100px; left:35px; }
+#mars { top:80px; left:300px; }
+#venus { top:150px; left:200px; }
 
 #scanlines {
   position:fixed;
@@ -94,21 +80,34 @@ body {
 </style>
 </head>
 <body>
-
 <div id="amber"></div>
 <div id="scanlines"></div>
 
 <div id="crt-container">
-  <div id="map-title">U.I.C. Solar System Map</div>
-  <div id="solar-system">
-    <div class="planet" id="earth">Earth</div>
-    <div class="planet" id="moon">Moon</div>
-    <div class="planet" id="mars">Mars</div>
-    <div class="planet" id="venus">Venus</div>
+  <div id="map-title">U.I.C. Solar System ASCII Map</div>
+
+  <div id="ascii-map">
+    .       .       *        .       .       *    .   .       .
+      .   *     .       .       .       *       .
+    .         .       *     oEarth    .       .
+       *   .       .     OMoon          .       .
+    .       *         .        .      *        .
+        .      *         *        .       oMars
+     *       .    *        .   *           .
+          .       .     oVenus       *       .
+    *      .       .      *        .       *    .
   </div>
+
+  <!-- Planet clickable overlays -->
+  <div class="planet" id="earth">⊙</div>
+  <div class="planet" id="moon">○</div>
+  <div class="planet" id="mars">⊕</div>
+  <div class="planet" id="venus">⊗</div>
+
 </div>
 
 <script>
+// Planet links
 const planetLinks = {
   earth: 'earth.html',
   moon: 'moon.html',
@@ -121,16 +120,6 @@ for (let id in planetLinks) {
     window.location.href = planetLinks[id];
   });
 }
-
-// Optional 3D tilt effect
-document.addEventListener("mousemove", e => {
-  const container = document.getElementById("crt-container");
-  const os = container;
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
 </script>
-
 </body>
 </html>
