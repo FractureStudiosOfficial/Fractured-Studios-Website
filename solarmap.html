@@ -3,22 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solar System Sector Map</title>
+<title>Solar System Map | U.I.C. Systems</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 body {
   margin:0;
-  overflow:hidden;
-  font-family:'Share Tech Mono', monospace;
-  background:#000;
+  background:#111;
   color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
+  user-select:none;
 }
-
-/* CRT overlay */
+/* Amber tint & scanlines */
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
 #scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
+  position:fixed; inset:0; pointer-events:none;
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
@@ -26,222 +25,237 @@ body {
     transparent 5px,
     transparent 9px
   );
-  animation:flicker .12s infinite;
-  z-index:100;
+  animation:flicker .12s infinite; z-index:1001;
 }
-@keyframes flicker{
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+#crt-container { position:relative; width:100vw; height:100vh; }
+#side-panel {
+  position:absolute; top:0; right:0; width:300px; height:100%; background:rgba(0,0,0,.5);
+  border-left:1px solid #FF9F07; padding:15px; box-sizing:border-box; overflow-y:auto;
 }
-#amber{
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.05);
-  pointer-events:none;
+#controls {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
 }
-
-/* Map container */
-#map {
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+button {
+  background:#111; border:1px solid #FF9F07; color:#FF9F07; margin:0 5px; padding:5px 10px;
+  cursor:pointer; font-family:'Share Tech Mono', monospace;
 }
-
-/* Solar system container */
-#system {
-  position:relative;
-  width:100%;
-  height:100%;
-  transition: transform 1s ease;
-}
-
-/* Orbits */
-.orbit {
-  position:absolute;
-  border:1px dashed rgba(255,159,7,.25);
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  top:50%;
-  left:50%;
-}
-
-/* Sun */
-#sun {
-  position:absolute;
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:#FF9F07;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  z-index:10;
-}
-
-/* Planets */
-.planet {
-  position:absolute;
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  border:1px solid #FF9F07;
-  background:black;
-  cursor:pointer;
-  transform:translate(-50%,-50%);
-}
-
-/* Planet labels */
-.label {
-  position:absolute;
-  font-size:13px;
-  text-align:center;
-  pointer-events:none;
-}
-.label.above { transform:translate(-50%,-150%); }
-.label.below { transform:translate(-50%,150%); }
-
-/* Zoom return button */
-#returnBtn {
-  position:fixed;
-  top:20px;
-  left:20px;
-  padding:6px 12px;
-  border:1px solid #FF9F07;
-  background:black;
-  color:#FF9F07;
-  cursor:pointer;
-  display:none;
-}
-#returnBtn:hover {
-  background:#FF9F07;
-  color:black;
-}
-
-/* Scan radar ping */
-#ping {
-  position:absolute;
-  top:50%;
-  left:50%;
-  border:1px solid #FF9F07;
-  border-radius:50%;
-  width:0;
-  height:0;
-  transform:translate(-50%,-50%);
-  opacity:.5;
-}
+canvas { display:block; width:100%; height:100%; }
 </style>
 </head>
-
 <body>
-
-<div id="map">
-  <div id="system">
-    <!-- Orbits -->
-    <div class="orbit" style="width:80px;height:80px;"></div>
-    <div class="orbit" style="width:120px;height:120px;"></div>
-    <div class="orbit" style="width:160px;height:160px;"></div>
-    <div class="orbit" style="width:210px;height:210px;"></div>
-    <div class="orbit" style="width:260px;height:260px;"></div>
-    <div class="orbit" style="width:320px;height:320px;"></div>
-    <div class="orbit" style="width:380px;height:380px;"></div>
-    <div class="orbit" style="width:440px;height:440px;"></div>
-
-    <!-- Sun -->
-    <div id="sun"></div>
-
-    <!-- Planets -->
-    <div class="planet" id="mercury" style="top:50%;left:calc(50% + 80px)"></div>
-    <div class="planet" id="venus" style="top:calc(50% - 120px);left:50%"></div>
-    <div class="planet" id="earth" style="top:50%;left:calc(50% - 160px)"></div>
-    <div class="planet" id="moon" style="top:50%;left:calc(50% - 180px);width:6px;height:6px"></div>
-    <div class="planet" id="mars" style="top:calc(50% + 210px);left:50%"></div>
-    <div class="planet" id="jupiter" style="top:50%;left:calc(50% + 260px)"></div>
-    <div class="planet" id="saturn" style="top:calc(50% - 320px);left:50%"></div>
-    <div class="planet" id="uranus" style="top:50%;left:calc(50% - 380px)"></div>
-    <div class="planet" id="neptune" style="top:calc(50% + 440px);left:50%"></div>
-
-    <!-- Labels -->
-    <div class="label above" data-target="mercury" style="top:calc(50% - 10px);left:calc(50% + 80px)">MERCURY</div>
-    <div class="label above" data-target="venus" style="top:calc(50% - 10px);left:50%">VENUS</div>
-    <div class="label below" data-target="earth" style="top:calc(50% + 10px);left:calc(50% - 160px)">EARTH</div>
-    <div class="label below" data-target="moon" style="top:calc(50% + 10px);left:calc(50% - 180px)">MOON</div>
-    <div class="label above" data-target="mars" style="top:calc(50% - 10px);left:50%">MARS</div>
-    <div class="label below" data-target="jupiter" style="top:calc(50% + 10px);left:calc(50% + 260px)">JUPITER</div>
-    <div class="label above" data-target="saturn" style="top:calc(50% - 10px);left:50%">SATURN</div>
-    <div class="label below" data-target="uranus" style="top:calc(50% + 10px);left:calc(50% - 380px)">URANUS</div>
-    <div class="label above" data-target="neptune" style="top:calc(50% - 10px);left:50%">NEPTUNE</div>
-
-    <!-- Scan ping -->
-    <div id="ping"></div>
+<div id="amber"></div>
+<div id="scanlines"></div>
+<div id="crt-container">
+  <canvas id="solarCanvas"></canvas>
+  <div id="side-panel">
+    <h2>Selected Body</h2>
+    <div id="body-info">Click a planet or moon</div>
+  </div>
+  <div id="controls">
+    <button onclick="setTimeMultiplier(0)">Pause</button>
+    <button onclick="setTimeMultiplier(5)">5×</button>
+    <button onclick="setTimeMultiplier(10)">10×</button>
+    <button onclick="setTimeMultiplier(100)">100×</button>
+    <button onclick="resetTime()">Reset</button>
   </div>
 </div>
 
-<div id="returnBtn">RETURN TO SYSTEM</div>
-<div id="amber"></div>
-<div id="scanlines"></div>
-
 <script>
-// Scan ping animation
-let r=0;
-setInterval(()=>{
-  r+=4;
-  document.getElementById("ping").style.width = r+"px";
-  document.getElementById("ping").style.height = r+"px";
-  if(r>900) r=0;
-},30);
+// ==== SCALE & CONSTANTS ====
+const AU = 149597870.7; // km
+const SCALE = 1 / 1e9; // 1 AU scaled down to fit screen
+const G = 6.67430e-11; // Not used yet but placeholder for future maneuvers
+let timeMultiplier = 1;
+let lastTime = Date.now();
+let julianStart = 2447891.5; // Jan 1, 1989
+let selectedBody = null;
 
-const system = document.getElementById("system");
-const labels = document.querySelectorAll(".label");
-const returnBtn = document.getElementById("returnBtn");
+// ==== PLANETS & MOONS ====
+const planets = [
+  {name:"Mercury", a:0.387, e:0.2056, M0:174.796, color:"#aaa", moons:[], stations:[]},
+  {name:"Venus", a:0.723, e:0.0067, M0:50.115, color:"#f5c28b", moons:[], stations:[]},
+  {name:"Earth", a:1.0, e:0.0167, M0:358.617, color:"#0a9", moons:[
+    {name:"Moon", a:0.00257, e:0.0549, M0:115, color:"#888", stations:[
+      {name:"ISS", a:0.0000426, e:0, M0:0, color:"#f00"},
+      {name:"Skylab", a:0.0000425, e:0, M0:180, color:"#0f0"}
+    ]}
+  ], stations:[]},
+  {name:"Mars", a:1.524, e:0.0934, M0:19.373, color:"#d42", moons:[
+    {name:"Phobos", a:0.0000627, e:0.0151, M0:0, color:"#999", stations:[]},
+    {name:"Deimos", a:0.000156, e:0.0002, M0:180, color:"#bbb", stations:[]}
+  ], stations:[]},
+  {name:"Jupiter", a:5.203, e:0.0489, M0:20.02, color:"#fa0", moons:[
+    {name:"Europa", a:0.00448, e:0.009, M0:0, color:"#0af", stations:[]}
+  ], stations:[]},
+  {name:"Saturn", a:9.537, e:0.0565, M0:317.02, color:"#fc6", moons:[], stations:[]},
+  {name:"Uranus", a:19.19, e:0.046, M0:142.3, color:"#0ff", moons:[], stations:[]},
+  {name:"Neptune", a:30.06, e:0.009, M0:256.2, color:"#08f", moons:[], stations:[]},
+  {name:"Pluto", a:39.48, e:0.2488, M0:14.5, color:"#888", moons:[
+    {name:"Charon", a:0.00016, e:0, M0:0, color:"#aaa", stations:[]}
+  ], stations:[]}
+];
 
-const planetLinks = {
-  mercury: "mercury.html",
-  venus: "venus.html",
-  earth: "earth.html",
-  moon: "moon.html",
-  mars: "mars.html",
-  jupiter: "jupiter.html",
-  saturn: "saturn.html",
-  uranus: "uranus.html",
-  neptune: "neptune.html"
-};
+// ==== CANVAS SETUP ====
+const canvas = document.getElementById("solarCanvas");
+const ctx = canvas.getContext("2d");
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
-// Zoom function
-function zoomToPlanet(id){
-  const planet = document.getElementById(id);
-  const rect = planet.getBoundingClientRect();
-  const centerX = window.innerWidth/2;
-  const centerY = window.innerHeight/2;
-
-  const offsetX = centerX - rect.left;
-  const offsetY = centerY - rect.top;
-
-  system.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(2.5)`;
-
-  labels.forEach(l=>{
-    if(l.dataset.target !== id) l.style.display="none";
-    else l.style.display="block";
-  });
-
-  returnBtn.style.display="block";
-
-  planet.onclick = ()=> window.location.href = planetLinks[id];
+// ==== KEPLER FUNCTIONS ====
+function deg2rad(d){ return d*Math.PI/180; }
+function rad2deg(r){ return r*180/Math.PI; }
+function solveKepler(M, e, tol=1e-6){
+  M = deg2rad(M);
+  let E = M;
+  for(let i=0;i<10;i++){
+    let f = E - e*Math.sin(E) - M;
+    let f1 = 1 - e*Math.cos(E);
+    let dE = f/f1;
+    E -= dE;
+    if(Math.abs(dE)<tol) break;
+  }
+  return E;
+}
+function getPosition(a, e, M){
+  let E = solveKepler(M,e);
+  let x = a*(Math.cos(E)-e);
+  let y = a*Math.sqrt(1-e*e)*Math.sin(E);
+  return {x,y};
 }
 
-// Labels click
-labels.forEach(label=>{
-  label.onclick = ()=> zoomToPlanet(label.dataset.target);
-});
+// ==== TIME CONTROL ====
+function setTimeMultiplier(m){ timeMultiplier=m; }
+function resetTime(){ julianStart = 2447891.5; }
 
-// Return button
-returnBtn.onclick = ()=>{
-  system.style.transform = "scale(1)";
-  labels.forEach(l=>l.style.display="block");
-  returnBtn.style.display="none";
-};
+// ==== DRAG & ZOOM ====
+let offsetX=0, offsetY=0, zoom=1;
+let isDragging=false, dragStart={x:0,y:0};
+canvas.addEventListener("mousedown", e=>{ isDragging=true; dragStart={x:e.clientX-offsetX, y:e.clientY-offsetY}; });
+canvas.addEventListener("mousemove", e=>{ if(isDragging){ offsetX=e.clientX-dragStart.x; offsetY=e.clientY-dragStart.y; } });
+canvas.addEventListener("mouseup", e=>{ isDragging=false; });
+canvas.addEventListener("wheel", e=>{ zoom *= e.deltaY>0?0.95:1.05; });
+
+// ==== CLICK BODY ====
+canvas.addEventListener("click", e=>{
+  let rect = canvas.getBoundingClientRect();
+  let mouseX = (e.clientX - rect.left - canvas.width/2 - offsetX)/zoom;
+  let mouseY = (e.clientY - rect.top - canvas.height/2 - offsetY)/zoom;
+  let found=null;
+  for(let p of planets){
+    let pos = getBodyPos(p);
+    if(distance(pos.x,pos.y,mouseX,pos.y)<0.05){
+      found=p; break;
+    }
+    for(let m of p.moons){
+      let mpos = getBodyPos(m, pos);
+      if(distance(mpos.x,mpos.y,mouseX,mouseY)<0.02){
+        found=m; break;
+      }
+    }
+  }
+  selectedBody=found;
+  updateSidePanel();
+});
+function distance(x1,y1,x2,y2){ return Math.sqrt((x2-x1)**2+(y2-y1)**2); }
+function updateSidePanel(){
+  const panel=document.getElementById("body-info");
+  if(!selectedBody){ panel.innerHTML="Click a planet or moon"; return; }
+  let html=`<strong>${selectedBody.name}</strong><br>`;
+  if(selectedBody.moons && selectedBody.moons.length>0){
+    html+="Moons:<ul>"+selectedBody.moons.map(m=>`<li>${m.name}</li>`).join("")+"</ul>";
+  }
+  if(selectedBody.stations && selectedBody.stations.length>0){
+    html+="Stations:<ul>"+selectedBody.stations.map(s=>`<li>${s.name}</li>`).join("")+"</ul>";
+  }
+  panel.innerHTML=html;
+}
+
+// ==== POSITION HELPERS ====
+function getBodyPos(body, parent={x:0,y:0}){
+  return {x:parent.x + body.x, y:parent.y + body.y};
+}
+
+// ==== MAIN LOOP ====
+function draw(){
+  let now=Date.now();
+  let deltaT = ((now-lastTime)/1000)*timeMultiplier;
+  lastTime=now;
+
+  ctx.fillStyle="#111"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.save(); ctx.translate(canvas.width/2+offsetX, canvas.height/2+offsetY); ctx.scale(zoom,zoom);
+
+  // Draw Sun
+  ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(0,0,10,0,2*Math.PI); ctx.fill();
+
+  // Update planets
+  for(let p of planets){
+    // Advance mean anomaly
+    let n = 360 / (Math.sqrt(p.a*p.a*p.a)*365.25); // rough degrees/day
+    p.M0 += n*deltaT/86400;
+    let pos = getPosition(p.a,p.e,p.M0);
+    p.x=pos.x; p.y=pos.y;
+
+    // Draw orbit
+    ctx.strokeStyle="rgba(255,159,7,.2)";
+    ctx.beginPath();
+    ctx.ellipse(0,0,p.a,p.a*Math.sqrt(1-p.e*p.e),0,0,2*Math.PI);
+    ctx.stroke();
+
+    // Draw planet
+    ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.arc(pos.x,pos.y,0.02,0,2*Math.PI);
+    ctx.fill();
+
+    // Draw moons
+    for(let m of p.moons){
+      let mpos = getPosition(m.a,m.e,m.M0);
+      m.x=mpos.x; m.y=mpos.y;
+      ctx.fillStyle=m.color;
+      ctx.beginPath();
+      ctx.arc(pos.x+mpos.x,pos.y+mpos.y,0.008,0,2*Math.PI);
+      ctx.fill();
+
+      // Draw stations
+      for(let s of m.stations){
+        let spos = getPosition(s.a,s.e,s.M0);
+        s.x=spos.x; s.y=spos.y;
+        ctx.fillStyle=s.color;
+        ctx.beginPath();
+        ctx.arc(pos.x+mpos.x+spos.x,pos.y+mpos.y+spos.y,0.004,0,2*Math.PI);
+        ctx.fill();
+      }
+    }
+
+    // Draw planet stations
+    for(let s of p.stations){
+      let spos = getPosition(s.a,s.e,s.M0);
+      s.x=spos.x; s.y=spos.y;
+      ctx.fillStyle=s.color;
+      ctx.beginPath();
+      ctx.arc(pos.x+spos.x,pos.y+spos.y,0.004,0,2*Math.PI);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+  requestAnimationFrame(draw);
+}
+draw();
+
+// ==== ADD NEW STATION TEMPLATE ====
+/*
+Example usage:
+planets[3].moons[0].stations.push({
+  name:"New Station",
+  a:0.00005, // AU from parent body
+  e:0,       // eccentricity
+  M0:90,     // starting mean anomaly
+  color:"#0ff"
+});
+*/
+
 </script>
 </body>
 </html>
