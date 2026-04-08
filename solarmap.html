@@ -39,6 +39,38 @@ button {
   <button onclick="resetTime()">Reset</button>
 </div>
 
+  #side-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 250px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #FF9F07;
+    padding: 15px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #FF9F07;
+    z-index: 1000;
+}
+#side-panel h2 {
+    margin-top: 0;
+    font-size: 16px;
+    border-bottom: 1px solid #FF9F07;
+    padding-bottom: 4px;
+}
+#side-panel button, #side-panel select, #side-panel input {
+    background: #111;
+    border: 1px solid #FF9F07;
+    color: #FF9F07;
+    font-family: inherit;
+    font-size: 12px;
+    margin: 2px 0;
+    padding: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+#side-panel input { color:#FF9F07; }
+
 <script>
 // Canvas setup
 const canvas = document.getElementById("canvas");
@@ -66,6 +98,41 @@ canvas.addEventListener('mousemove', e => {
 
 canvas.addEventListener('mouseup', ()=>{ isDragging=false; });
 canvas.addEventListener('wheel', e => { zoom *= e.deltaY<0?1.1:0.9; });
+
+  <!-- Side Panel -->
+<div id="side-panel">
+    <h2>Solar System Map</h2>
+    <div>
+        <label>Current Time:</label>
+        <div id="sim-date">Loading...</div>
+    </div>
+    <div>
+        <label>Speed:</label>
+        <button class="speed-btn" data-speed="1">1x</button>
+        <button class="speed-btn" data-speed="5">5x</button>
+        <button class="speed-btn" data-speed="10">10x</button>
+        <button class="speed-btn" data-speed="100">100x</button>
+        <button class="speed-btn" data-speed="0">Pause</button>
+        <button id="reset-time">Reset</button>
+    </div>
+    <div>
+        <label>Filter:</label>
+        <select id="filter-body">
+            <option value="all">All Bodies</option>
+            <option value="planets">Planets</option>
+            <option value="moons">Moons</option>
+            <option value="stations">Stations</option>
+        </select>
+    </div>
+    <div>
+        <label>Search:</label>
+        <input type="text" id="search-body" placeholder="Enter name...">
+    </div>
+    <div id="body-info">
+        <h3>Selected Body:</h3>
+        <p id="body-details">None</p>
+    </div>
+</div>
 
 // Utilities
 const AU_SCALE = 50; // 1 AU = 50px (scaled)
@@ -173,6 +240,7 @@ function drawStation(planetX, planetY, station){
     drawBody(sx, sy, "#FFAA00", 3, station.name);
 }
 
+  
 // Enhanced draw loop
 function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
