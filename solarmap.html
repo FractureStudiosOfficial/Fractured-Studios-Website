@@ -294,6 +294,32 @@ function updateSidePanel() {
     if (moons.length) html += "<h4>Moons:</h4>" + moons.map(m=>m.name).join("<br>");
     stationsDiv.innerHTML = html;
 }
+    function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1️⃣ Draw orbits (lines) if you have them
+    drawOrbits();
+
+    // 2️⃣ Draw planets and moons
+    drawPlanetsAndMoons(); // your existing planet/moon drawing loop
+
+    // 3️⃣ Draw space stations and maneuver nodes
+    // <-- PUT THE FIXED-SIZE STATION & NODE CODE HERE
+    for (const body of planets) {
+        for (const station of body.stations || []) {
+            ...
+        }
+    }
+
+    for (const node of maneuverNodes) {
+        ...
+    }
+
+    // 4️⃣ Draw other overlays, labels, etc.
+    drawLabels();
+
+    requestAnimationFrame(draw);
+}
 </script>
 </body>
 </html>
