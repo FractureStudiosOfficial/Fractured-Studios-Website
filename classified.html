@@ -2,244 +2,136 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classified Access Terminal</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>CLASSIFIED ACCESS</title>
 <style>
-body {
-  margin:0;
-  background:#000011;
-  color:#00f0ff;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-}
-.screen { display:none; padding:40px; }
-.screen.active { display:block; }
-h2 { color:#0ff; text-shadow:0 0 6px #0ff; }
-p { color:#00f0ff; text-shadow:0 0 2px #00f0ff; }
-button { background:#000022; color:#0ff; border:1px solid #0ff; padding:5px 10px; cursor:pointer; font-family:inherit; text-shadow:0 0 2px #0ff; }
-#puzzle13-grid .bit-tile { width:40px; height:40px; background:#000010; border:1px solid #00f0ff; cursor:pointer; display:inline-block; margin:2px; }
-#puzzle13-grid .bit-tile.active { background:#0ff; }
-#puzzle11-radar { position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000; }
-#radar-sweep { position:absolute; width:2px; height:200px; top:0; left:199px; background:#0ff; transform-origin:bottom center; transition: transform .05s linear; }
-.blip { position:absolute; width:10px; height:10px; background:#f00; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -200%) translateY(200px); pointer-events:none; }
-#puzzle12-tiles .tile { padding:20px; background:#000010; color:#00f0ff; border:1px solid #00f0ff; cursor:pointer; text-align:center; margin:5px; display:inline-block; text-shadow:0 0 4px #00f0ff; }
-#puzzle14-orbit { position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000; }
-#satellite { width:20px; height:20px; background:#0ff; border-radius:50%; position:absolute; top:190px; left:190px; cursor:grab; }
-#satellite.dragging { opacity:0.7; }
-#unzoomBtn { display:none; position:fixed; top:10px; right:10px; z-index:100; }
+  body {
+    background: #000;
+    color: #00ffff;
+    font-family: monospace;
+    padding: 20px;
+  }
+  h1 {
+    color: #ff6600;
+    text-shadow: 0 0 10px #ff6600;
+  }
+  .terminal {
+    background: #000;
+    border: 1px solid #00ffff;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .file {
+    cursor: pointer;
+    margin: 5px 0;
+    color: #00ffff;
+  }
+  .file:hover {
+    color: #ff6600;
+  }
+  .hidden {
+    display: none;
+  }
+  .typewriter {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: .15em solid #ff6600;
+    animation: typing 2s steps(40, end), blink .5s step-end infinite alternate;
+  }
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+  @keyframes blink {
+    50% { border-color: transparent }
+  }
+  .error {
+    color: red;
+  }
 </style>
 </head>
 <body>
 
-<!-- Screens 1–15 -->
-<div id="screen1" class="screen active">
-  <p>Puzzle 1: Input your credentials (name: Elena, ID: 042, Passphrase: SOLAR).</p>
-  <button onclick="nextScreen()">Simulate Correct Credentials</button>
-</div>
-
-<div id="screen2" class="screen">
-  <p>Puzzle 2: Enter Keycode & Security Badge (Keycode: 7331, Badge: 042)</p>
-  <button onclick="nextScreen()">Simulate Correct Badge</button>
-</div>
-
-<div id="screen3" class="screen">
-  <p>Puzzle 3: AI Behavioral Analysis – answer questions correctly to proceed</p>
-  <button onclick="nextScreen()">Simulate AI Approval</button>
-</div>
-
-<div id="screen4" class="screen">
-  <p>Puzzle 4: Decrypt 5 passwords – click “Decrypt” to simulate</p>
-  <button onclick="nextScreen()">Simulate All 5 Decryptions</button>
-</div>
-
-<div id="screen5" class="screen">
-  <p>Puzzle 5: Input Security Level and Encrypted Access Name</p>
-  <button onclick="nextScreen()">Simulate Security Level</button>
-</div>
-
-<div id="screen6" class="screen">
-  <p>Puzzle 6: Station Protocol Code – click to simulate input</p>
-  <button onclick="nextScreen()">Simulate Protocol Entry</button>
-</div>
-
-<div id="screen7" class="screen">
-  <p>Puzzle 7: Manual 4-Dial Radio Synchronization</p>
-  <div style="display:flex; justify-content:center; gap:15px; margin-top:40px;">
-    <input type="range" min="0" max="9" value="0" id="dial1">
-    <input type="range" min="0" max="9" value="0" id="dial2">
-    <input type="range" min="0" max="9" value="0" id="dial3">
-    <input type="range" min="0" max="9" value="0" id="dial4">
-  </div>
-  <button style="margin-top:20px;" onclick="checkDials()">Synchronize</button>
-</div>
-
-<div id="screen8" class="screen">
-  <p>Puzzle 8: Memory Dump – select processes to dump</p>
-  <div id="memory-dump" style="display:flex; flex-wrap:wrap; width:400px; margin:20px auto; gap:5px;">
-    <div class="proc" data-correct="1" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process A</div>
-    <div class="proc" data-correct="0" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process B</div>
-    <div class="proc" data-correct="1" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process C</div>
-    <div class="proc" data-correct="0" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process D</div>
+<h1>CLASSIFIED FILE ACCESS</h1>
+<div class="terminal" id="terminal">
+  <p>> Welcome, Operative. Accessing files...</p>
+  <div id="files">
+    <div class="file" onclick="openFile('file1')">Report_Alpha.txt</div>
+    <div class="file" onclick="openFile('file2')">Report_Bravo.txt</div>
+    <div class="file" onclick="openFile('file3')">System_Logs.dat</div>
   </div>
 </div>
 
-<div id="screen9" class="screen">
-  <p>Puzzle 9: Loading screen – wait for simulated server connect</p>
-  <div style="width:400px; height:20px; border:1px solid #0ff; margin:20px auto;">
-    <div id="loading-bar" style="width:0%; height:100%; background:#0ff;"></div>
-  </div>
+<div id="file1" class="hidden terminal">
+  <p class="typewriter">Level 1 Data: First clue hidden in the system logs...</p>
+  <button onclick="revealClue('clue1')">Check system logs</button>
 </div>
 
-<div id="screen10" class="screen">
-  <p>Puzzle 10: Access Granted – Welcome Elena</p>
-  <button onclick="nextScreen()">Proceed to Next Stage</button>
+<div id="file2" class="hidden terminal">
+  <p class="typewriter">Level 1 Data: Coordinates partially encrypted: [???.???]</p>
+  <button onclick="revealClue('clue2')">Decrypt coordinates</button>
 </div>
 
-<!-- Puzzles 11–15 -->
-<div id="screen11" class="screen">
-  <p>Puzzle 11: Radar Sweep Alignment – click to align the radar sweep with the moving blips.</p>
-  <div id="puzzle11-radar">
-    <div id="radar-sweep"></div>
-    <div class="blip" data-angle="60"></div>
-    <div class="blip" data-angle="180"></div>
-  </div>
+<div id="file3" class="hidden terminal">
+  <p class="typewriter">System Log: Unauthorized access attempts detected...</p>
+  <button onclick="revealClue('clue3')">Reveal hidden log entry</button>
 </div>
 
-<div id="screen12" class="screen">
-  <p>Puzzle 12: Orbital Sequence Tiles – arrange the planets in correct orbital order from the sun.</p>
-  <div id="puzzle12-tiles">
-    <div class="tile" data-correct="2">Mars</div>
-    <div class="tile" data-correct="0">Mercury</div>
-    <div class="tile" data-correct="3">Jupiter</div>
-    <div class="tile" data-correct="1">Venus</div>
-  </div>
+<div id="clue1" class="hidden terminal">
+  <p class="typewriter">Clue Unlocked! Use code <strong>5284</strong> to unlock next layer.</p>
+  <button onclick="unlockNextLayer()">Enter Code</button>
 </div>
 
-<div id="screen13" class="screen">
-  <p>Puzzle 13: Encryption Panel – click tiles to flip bits to match the target pattern.</p>
-  <div id="puzzle13-grid"></div>
+<div id="clue2" class="hidden terminal">
+  <p class="typewriter">Coordinates decrypted! Next file requires code 5284.</p>
 </div>
 
-<div id="screen14" class="screen">
-  <p>Puzzle 14: Satellite Tracking – drag the satellite to match its orbital path.</p>
-  <div id="puzzle14-orbit">
-    <div id="satellite"></div>
-  </div>
+<div id="clue3" class="hidden terminal">
+  <p class="typewriter">Hidden log entry: "The operation moves at midnight." Check Report_Alpha.txt again.</p>
 </div>
 
-<div id="screen15" class="screen">
-  <h2>CLASSIFIED ACCESS GRANTED</h2>
-  <p>Welcome, Elena. All clearance puzzles completed.</p>
+<div id="layer2" class="hidden terminal">
+  <p class="typewriter">LEVEL 2: DEEP FILES UNLOCKED</p>
+  <div class="file" onclick="revealSecret('secret1')">Secret_Project_X.txt</div>
+</div>
+
+<div id="secret1" class="hidden terminal">
+  <p class="typewriter">SECRET DATA: Target coordinates confirmed. Mission parameters classified.</p>
 </div>
 
 <script>
-let currentScreen = 1;
-const totalScreens = 15;
-function nextScreen() {
-  if(currentScreen<totalScreens){
-    document.getElementById('screen'+currentScreen).classList.remove('active');
-    currentScreen++;
-    document.getElementById('screen'+currentScreen).classList.add('active');
+function openFile(id) {
+  document.getElementById(id).classList.remove('hidden');
+  maybeError();
+}
+
+function revealClue(id) {
+  document.getElementById(id).classList.remove('hidden');
+  maybeError();
+}
+
+function unlockNextLayer() {
+  document.getElementById('layer2').classList.remove('hidden');
+  maybeError();
+}
+
+// Random fake errors for flavor
+function maybeError() {
+  if(Math.random() < 0.3) {
+    const term = document.getElementById('terminal');
+    const err = document.createElement('p');
+    err.className = 'error';
+    const messages = [
+      "ERROR: Access timeout",
+      "WARNING: Security breach detected",
+      "ERROR: File corrupted",
+      "ALERT: Intrusion detected",
+      "WARNING: Data integrity compromised"
+    ];
+    err.textContent = messages[Math.floor(Math.random() * messages.length)];
+    term.appendChild(err);
   }
 }
-
-/* ==== Puzzle 7: 4-Dial Synchronization ==== */
-function checkDials(){
-  const d1 = parseInt(document.getElementById('dial1').value);
-  const d2 = parseInt(document.getElementById('dial2').value);
-  const d3 = parseInt(document.getElementById('dial3').value);
-  const d4 = parseInt(document.getElementById('dial4').value);
-  if(d1===4 && d2===2 && d3===7 && d4===9) nextScreen(); // hardcoded solution
-  else alert("Incorrect synchronization!");
-}
-
-/* ==== Puzzle 8: Memory Dump ==== */
-const procs = document.querySelectorAll('#memory-dump .proc');
-procs.forEach(p=>{
-  p.addEventListener('click', ()=>{
-    p.classList.toggle('selected');
-    const selected = document.querySelectorAll('#memory-dump .proc.selected');
-    const correctSelected = Array.from(selected).every(s=>s.dataset.correct==='1') && selected.length===3;
-    if(correctSelected) nextScreen();
-  });
-});
-
-/* ==== Puzzle 9: Loading Bar ==== */
-let width=0;
-let loadInterval;
-function startLoading(){
-  const bar=document.getElementById('loading-bar');
-  loadInterval=setInterval(()=>{
-    if(width>=100){ clearInterval(loadInterval); nextScreen(); }
-    else { width+=2; bar.style.width=width+'%'; }
-  },50);
-}
-if(currentScreen===9) startLoading();
-
-/* ==== Puzzle 11 Radar Sweep ==== */
-const sweep = document.getElementById('radar-sweep');
-let sweepAngle = 0;
-let sweepInterval = setInterval(()=>{
-  sweepAngle = (sweepAngle + 2) % 360;
-  sweep.style.transform = `rotate(${sweepAngle}deg)`;
-},50);
-document.querySelector('#puzzle11-radar').addEventListener('click', ()=>{
-  const blips = document.querySelectorAll('#puzzle11-radar .blip');
-  let success=false;
-  blips.forEach(b=>{ if(Math.abs(parseInt(b.dataset.angle)-sweepAngle)<5) success=true; });
-  if(success){ clearInterval(sweepInterval); nextScreen(); }
-});
-
-/* ==== Puzzle 12 Tile Ordering ==== */
-const tiles = document.querySelectorAll('#puzzle12-tiles .tile');
-let ordered=[];
-tiles.forEach(t=>{
-  t.addEventListener('click',()=>{
-    ordered.push(t);
-    t.style.background='#0f0';
-    if(ordered.length===tiles.length){
-      const correct = Array.from(tiles).every((tile,i)=>parseInt(tile.dataset.correct)===i);
-      if(correct) nextScreen();
-      else { ordered=[]; tiles.forEach(ti=>ti.style.background='#000010'); }
-    }
-  });
-});
-
-/* ==== Puzzle 13 Encryption Grid ==== */
-const grid13 = document.getElementById('puzzle13-grid');
-for(let i=0;i<16;i++){
-  let tile=document.createElement('div');
-  tile.classList.add('bit-tile');
-  tile.dataset.correct=(i%2===0);
-  tile.addEventListener('click', ()=>{
-    tile.classList.toggle('active');
-    checkEncryption();
-  });
-  grid13.appendChild(tile);
-}
-function checkEncryption(){
-  const tiles=Array.from(grid13.children);
-  if(tiles.every(t=>t.classList.contains('active')==(t.dataset.correct==='true'))) nextScreen();
-}
-
-/* ==== Puzzle 14 Satellite Tracking ==== */
-const satellite=document.getElementById('satellite');
-let dragging=false;
-satellite.addEventListener('mousedown',()=>dragging=true);
-document.addEventListener('mouseup',()=>dragging=false);
-document.addEventListener('mousemove',e=>{
-  if(!dragging) return;
-  const rect=document.getElementById('puzzle14-orbit').getBoundingClientRect();
-  const x=e.clientX-rect.left-10;
-  const y=e.clientY-rect.top-10;
-  satellite.style.left=x+'px';
-  satellite.style.top=y+'px';
-  const dx=x-rect.width/2+10;
-  const dy=y-rect.height/2+10;
-  const distance=Math.sqrt(dx*dx+dy*dy);
-  if(distance>140 && distance<160) nextScreen();
-});
 </script>
 
 </body>
