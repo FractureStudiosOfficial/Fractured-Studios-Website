@@ -3,444 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Classified Access</title>
+<title>Classified Access Terminal</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  /* ===== Base CRT & Terminal Style ===== */
-  body {
-    margin: 0;
-    padding: 0;
-    background: #010114;
-    color: #00f0ff;
-    font-family: 'Share Tech Mono', monospace;
-    overflow: hidden;
-  }
-
-  #crt-container {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 20px;
-    position: relative;
-    perspective: 1000px;
-  }
-
-  h1 {
-    color: #00f0ff;
-    text-shadow: 0 0 8px #00f0ff;
-    margin-bottom: 10px;
-    font-size: 28px;
-  }
-
-  .screen {
-    display: none;
-    width: 100%;
-    height: 80%;
-    position: relative;
-  }
-
-  .active {
-    display: block;
-  }
-
-  /* CRT overlay */
-  #scanlines {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      rgba(0,255,255,0.05) 0px,
-      rgba(0,255,255,0.05) 2px,
-      transparent 5px,
-      transparent 9px
-    );
-    animation: flicker 0.12s infinite;
-    z-index: 1001;
-  }
-
-  @keyframes flicker {
-    0% {opacity:.15}
-    50% {opacity:.07}
-    100% {opacity:.15}
-  }
-
-  /* Next button hidden by default */
-  .next-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: #000010;
-    border: 1px solid #00f0ff;
-    padding: 8px 12px;
-    color: #00f0ff;
-    font-family: inherit;
-    cursor: pointer;
-    text-shadow: 0 0 4px #00f0ff;
-    display: none;
-  }
-
-  .planet-btn {
-    cursor: pointer;
-    font-weight: bold;
-    text-shadow: 0 0 4px #00f0ff;
-  }
-
-  .slider {
-    width: 80%;
-    margin: 40px auto;
-  }
-
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
-    padding: 20px;
-  }
-
-  .grid-cell {
-    width: 60px;
-    height: 60px;
-    background: rgba(0,255,255,0.05);
-    border: 1px solid #00f0ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  .grid-cell.selected {
-    background: #00f0ff;
-    color: #000;
-  }
-
+body {
+  margin:0;
+  background:#000011;
+  color:#00f0ff;
+  font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
+}
+.screen { display:none; padding:40px; }
+.screen.active { display:block; }
+h2 { color:#0ff; text-shadow:0 0 6px #0ff; }
+p { color:#00f0ff; text-shadow:0 0 2px #00f0ff; }
+button { background:#000022; color:#0ff; border:1px solid #0ff; padding:5px 10px; cursor:pointer; font-family:inherit; text-shadow:0 0 2px #0ff; }
+#puzzle13-grid .bit-tile { width:40px; height:40px; background:#000010; border:1px solid #00f0ff; cursor:pointer; display:inline-block; margin:2px; }
+#puzzle13-grid .bit-tile.active { background:#0ff; }
+#puzzle11-radar { position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000; }
+#radar-sweep { position:absolute; width:2px; height:200px; top:0; left:199px; background:#0ff; transform-origin:bottom center; transition: transform .05s linear; }
+.blip { position:absolute; width:10px; height:10px; background:#f00; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -200%) translateY(200px); pointer-events:none; }
+#puzzle12-tiles .tile { padding:20px; background:#000010; color:#00f0ff; border:1px solid #00f0ff; cursor:pointer; text-align:center; margin:5px; display:inline-block; text-shadow:0 0 4px #00f0ff; }
+#puzzle14-orbit { position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000; }
+#satellite { width:20px; height:20px; background:#0ff; border-radius:50%; position:absolute; top:190px; left:190px; cursor:grab; }
+#satellite.dragging { opacity:0.7; }
+#unzoomBtn { display:none; position:fixed; top:10px; right:10px; z-index:100; }
 </style>
 </head>
-
 <body>
-<div id="scanlines"></div>
 
-<div id="crt-container">
-  <h1>CLASSIFIED ACCESS</h1>
-
-  <!-- Puzzle Screens -->
-  <div id="screen1" class="screen active">
-    <p>Puzzle 1: Connect the correct nodes to establish a secure circuit.</p>
-    <div class="grid-container" id="puzzle1-grid">
-      <!-- 5x5 grid cells -->
-    </div>
-  </div>
-
-  <div id="screen2" class="screen">
-    <p>Puzzle 2: Rotate the satellites to align the communication channels.</p>
-    <canvas id="puzzle2-canvas" width="600" height="400"></canvas>
-  </div>
-
-  <div id="screen3" class="screen">
-    <p>Puzzle 3: Slide the encryption bars into the correct position.</p>
-    <input type="range" min="0" max="100" value="0" class="slider" id="puzzle3-slider">
-  </div>
-
-  <div id="screen4" class="screen">
-    <p>Puzzle 4: Sequence the planets correctly to establish orbital sync.</p>
-    <div id="puzzle4-planets">
-      <span class="planet-btn" data-order="1">☉ Sun</span>
-      <span class="planet-btn" data-order="2">☿ Mercury</span>
-      <span class="planet-btn" data-order="3">♀ Venus</span>
-      <span class="planet-btn" data-order="4">⊕ Earth</span>
-      <span class="planet-btn" data-order="5">♂ Mars</span>
-    </div>
-  </div>
-
-  <div id="screen5" class="screen">
-    <p>Puzzle 5: Select the corrupted modules in the system grid.</p>
-    <div class="grid-container" id="puzzle5-grid">
-      <!-- 5x5 modules -->
-    </div>
-  </div>
-
+<!-- Screens 1–15 -->
+<div id="screen1" class="screen active">
+  <p>Puzzle 1: Input your credentials (name: Elena, ID: 042, Passphrase: SOLAR).</p>
+  <button onclick="nextScreen()">Simulate Correct Credentials</button>
 </div>
 
-<script>
-/* ==== Global State ==== */
-let currentScreen = 1;
+<div id="screen2" class="screen">
+  <p>Puzzle 2: Enter Keycode & Security Badge (Keycode: 7331, Badge: 042)</p>
+  <button onclick="nextScreen()">Simulate Correct Badge</button>
+</div>
 
-/* ==== Puzzle 1 ==== */
-const grid1 = document.getElementById('puzzle1-grid');
-// create 5x5 grid
-for(let i=0;i<25;i++){
-  let cell = document.createElement('div');
-  cell.classList.add('grid-cell');
-  cell.dataset.correct = (i===2 || i===7 || i===12 || i===17 || i===22); // hardcoded correct path
-  cell.innerText = i;
-  cell.addEventListener('click', () => {
-    if(cell.dataset.correct==='true'){
-      cell.classList.add('selected');
-      // check if all correct selected
-      const selected = Array.from(grid1.children).filter(c=>c.classList.contains('selected') && c.dataset.correct==='true').length;
-      if(selected===5){
-        nextScreen();
-      }
-    }
-  });
-  grid1.appendChild(cell);
-}
+<div id="screen3" class="screen">
+  <p>Puzzle 3: AI Behavioral Analysis – answer questions correctly to proceed</p>
+  <button onclick="nextScreen()">Simulate AI Approval</button>
+</div>
 
-/* ==== Puzzle 2 ==== */
-const canvas2 = document.getElementById('puzzle2-canvas');
-const ctx2 = canvas2.getContext('2d');
-let angle = 0;
-function drawSatellites(){
-  ctx2.clearRect(0,0,canvas2.width,canvas2.height);
-  for(let i=0;i<3;i++){
-    let x = 300 + Math.cos(angle+i)*100;
-    let y = 200 + Math.sin(angle+i)*100;
-    ctx2.beginPath();
-    ctx2.arc(x,y,10,0,Math.PI*2);
-    ctx2.fillStyle = '#00f0ff';
-    ctx2.fill();
-  }
-}
-canvas2.addEventListener('click', () => {
-  angle += Math.PI/6;
-  drawSatellites();
-  if(angle >= Math.PI){ // arbitrary completion
-    nextScreen();
-  }
-});
-drawSatellites();
+<div id="screen4" class="screen">
+  <p>Puzzle 4: Decrypt 5 passwords – click “Decrypt” to simulate</p>
+  <button onclick="nextScreen()">Simulate All 5 Decryptions</button>
+</div>
 
-/* ==== Puzzle 3 ==== */
-const slider3 = document.getElementById('puzzle3-slider');
-slider3.addEventListener('input', ()=>{
-  if(slider3.value >= 100){
-    nextScreen();
-  }
-});
+<div id="screen5" class="screen">
+  <p>Puzzle 5: Input Security Level and Encrypted Access Name</p>
+  <button onclick="nextScreen()">Simulate Security Level</button>
+</div>
 
-/* ==== Puzzle 4 ==== */
-const planets = Array.from(document.querySelectorAll('#puzzle4-planets .planet-btn'));
-planets.forEach(p=>{
-  p.addEventListener('click', ()=>{
-    const order = parseInt(p.dataset.order);
-    if(order === planets.indexOf(p)+1){
-      p.style.color = '#0f0';
-      // check if all correct
-      if(planets.every((pl,i)=>parseInt(pl.dataset.order)===i+1)){
-        nextScreen();
-      }
-    }
-  });
-});
-
-/* ==== Puzzle 5 ==== */
-const grid5 = document.getElementById('puzzle5-grid');
-for(let i=0;i<25;i++){
-  let cell = document.createElement('div');
-  cell.classList.add('grid-cell');
-  cell.dataset.corrupted = (i===1 || i===6 || i===11 || i===16 || i===21);
-  cell.innerText = i;
-  cell.addEventListener('click', ()=>{
-    if(cell.dataset.corrupted==='true'){
-      cell.classList.add('selected');
-      const selected = Array.from(grid5.children).filter(c=>c.classList.contains('selected') && c.dataset.corrupted==='true').length;
-      if(selected===5){
-        nextScreen();
-      }
-    }
-  });
-  grid5.appendChild(cell);
-}
-
-/* ==== Screen Advance ==== */
-function nextScreen(){
-  document.getElementById('screen'+currentScreen).classList.remove('active');
-  currentScreen++;
-  const next = document.getElementById('screen'+currentScreen);
-  if(next) next.classList.add('active');
-  else alert('All puzzles complete!');
-}
-
-</script>
-
-</body>
-</html>
-<!-- Part 2: Puzzles 6–10 -->
 <div id="screen6" class="screen">
-  <p>Puzzle 6: Station Protocol Code – press the buttons in the correct sequence.</p>
-  <div id="puzzle6-buttons">
-    <button class="protocol-btn">A</button>
-    <button class="protocol-btn">B</button>
-    <button class="protocol-btn">C</button>
-    <button class="protocol-btn">D</button>
-  </div>
+  <p>Puzzle 6: Station Protocol Code – click to simulate input</p>
+  <button onclick="nextScreen()">Simulate Protocol Entry</button>
 </div>
 
 <div id="screen7" class="screen">
-  <p>Puzzle 7: Temporal Radio Synchronization – adjust the four dials to match the correct MHz combination.</p>
-  <div id="puzzle7-dials">
-    <input type="range" min="0" max="9" value="0" class="dial" id="dial1">
-    <input type="range" min="0" max="9" value="0" class="dial" id="dial2">
-    <input type="range" min="0" max="9" value="0" class="dial" id="dial3">
-    <input type="range" min="0" max="9" value="0" class="dial" id="dial4">
+  <p>Puzzle 7: Manual 4-Dial Radio Synchronization</p>
+  <div style="display:flex; justify-content:center; gap:15px; margin-top:40px;">
+    <input type="range" min="0" max="9" value="0" id="dial1">
+    <input type="range" min="0" max="9" value="0" id="dial2">
+    <input type="range" min="0" max="9" value="0" id="dial3">
+    <input type="range" min="0" max="9" value="0" id="dial4">
   </div>
+  <button style="margin-top:20px;" onclick="checkDials()">Synchronize</button>
 </div>
 
 <div id="screen8" class="screen">
-  <p>Puzzle 8: Memory Dump – select the correct processes to access the system.</p>
-  <div class="grid-container" id="puzzle8-grid">
-    <!-- 5x5 processes -->
+  <p>Puzzle 8: Memory Dump – select processes to dump</p>
+  <div id="memory-dump" style="display:flex; flex-wrap:wrap; width:400px; margin:20px auto; gap:5px;">
+    <div class="proc" data-correct="1" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process A</div>
+    <div class="proc" data-correct="0" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process B</div>
+    <div class="proc" data-correct="1" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process C</div>
+    <div class="proc" data-correct="0" style="padding:10px; border:1px solid #0ff; cursor:pointer;">Process D</div>
   </div>
 </div>
 
 <div id="screen9" class="screen">
-  <p>Puzzle 9: Connecting to the server – watch the loading bar.</p>
-  <div style="width:80%; background:rgba(0,255,255,0.05); margin:40px auto; height:20px; border:1px solid #00f0ff;">
-    <div id="puzzle9-bar" style="height:100%; width:0%; background:#00f0ff;"></div>
+  <p>Puzzle 9: Loading screen – wait for simulated server connect</p>
+  <div style="width:400px; height:20px; border:1px solid #0ff; margin:20px auto;">
+    <div id="loading-bar" style="width:0%; height:100%; background:#0ff;"></div>
   </div>
 </div>
 
 <div id="screen10" class="screen">
-  <h2>ACCESS GRANTED</h2>
-  <p>Welcome, Elena. Redirecting to central clearance files...</p>
+  <p>Puzzle 10: Access Granted – Welcome Elena</p>
+  <button onclick="nextScreen()">Proceed to Next Stage</button>
 </div>
 
-<style>
-/* Additional Styles for Puzzles 6-10 */
-#puzzle6-buttons {
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  margin-top:40px;
-}
-
-.protocol-btn {
-  padding:20px 30px;
-  background:#000010;
-  border:1px solid #00f0ff;
-  color:#00f0ff;
-  cursor:pointer;
-  font-family:inherit;
-  text-shadow:0 0 4px #00f0ff;
-}
-
-#puzzle7-dials {
-  display:flex;
-  justify-content:space-around;
-  margin-top:60px;
-}
-
-.dial {
-  -webkit-appearance: none;
-  width:80px;
-  height:15px;
-  background:rgba(0,255,255,0.05);
-  border:1px solid #00f0ff;
-}
-
-.dial::-webkit-slider-thumb {
-  -webkit-appearance:none;
-  height:25px;
-  width:25px;
-  background:#00f0ff;
-  cursor:pointer;
-  border-radius:50%;
-}
-
-#puzzle8-grid .grid-cell {
-  width:50px;
-  height:50px;
-}
-
-#puzzle9-bar {
-  transition: width 0.05s linear;
-}
-</style>
-
-<script>
-/* ==== Puzzle 6: Protocol Buttons ==== */
-const protocolBtns = Array.from(document.querySelectorAll('#puzzle6-buttons .protocol-btn'));
-const protocolSequence = ['A','C','B','D']; // hardcoded correct
-let protocolStep = 0;
-protocolBtns.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    if(btn.textContent === protocolSequence[protocolStep]){
-      btn.style.background = '#0f0';
-      protocolStep++;
-      if(protocolStep === protocolSequence.length){
-        nextScreen();
-      }
-    } else {
-      // reset
-      protocolStep = 0;
-      protocolBtns.forEach(b=>b.style.background = '#000010');
-    }
-  });
-});
-
-/* ==== Puzzle 7: Radio Synchronization Dials ==== */
-const dials = [
-  document.getElementById('dial1'),
-  document.getElementById('dial2'),
-  document.getElementById('dial3'),
-  document.getElementById('dial4')
-];
-const correctDials = [3,7,1,9]; // hardcoded correct
-dials.forEach(d=>{
-  d.addEventListener('input', checkDials);
-});
-function checkDials(){
-  if(dials.every((d,i)=>parseInt(d.value) === correctDials[i])){
-    nextScreen();
-  }
-}
-
-/* ==== Puzzle 8: Memory Dump ==== */
-const grid8 = document.getElementById('puzzle8-grid');
-for(let i=0;i<25;i++){
-  let cell = document.createElement('div');
-  cell.classList.add('grid-cell');
-  cell.dataset.correct = (i===1||i===6||i===11||i===16||i===21);
-  cell.innerText = i;
-  cell.addEventListener('click', ()=>{
-    if(cell.dataset.correct==='true'){
-      cell.classList.add('selected');
-      const selected = Array.from(grid8.children).filter(c=>c.classList.contains('selected')).length;
-      if(selected === 5) nextScreen();
-    }
-  });
-  grid8.appendChild(cell);
-}
-
-/* ==== Puzzle 9: Loading Bar ==== */
-let bar = document.getElementById('puzzle9-bar');
-let width = 0;
-let loadingInterval = setInterval(()=>{
-  width += 2; // speed
-  if(width >= 100){
-    width = 100;
-    clearInterval(loadingInterval);
-    nextScreen();
-  }
-  bar.style.width = width + '%';
-}, 50);
-</script>
-<!-- Part 3: Puzzles 11–15 -->
+<!-- Puzzles 11–15 -->
 <div id="screen11" class="screen">
   <p>Puzzle 11: Radar Sweep Alignment – click to align the radar sweep with the moving blips.</p>
-  <div id="puzzle11-radar" style="position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000;">
-    <div id="radar-sweep" style="position:absolute; width:2px; height:200px; top:0; left:199px; background:#0ff; transform-origin:bottom center; transform:rotate(0deg);"></div>
-    <div class="blip" data-angle="60" style="position:absolute; width:10px; height:10px; background:#f00; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -200%) rotate(60deg) translateY(200px);"></div>
-    <div class="blip" data-angle="180" style="position:absolute; width:10px; height:10px; background:#f00; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -200%) rotate(180deg) translateY(200px);"></div>
+  <div id="puzzle11-radar">
+    <div id="radar-sweep"></div>
+    <div class="blip" data-angle="60"></div>
+    <div class="blip" data-angle="180"></div>
   </div>
 </div>
 
 <div id="screen12" class="screen">
   <p>Puzzle 12: Orbital Sequence Tiles – arrange the planets in correct orbital order from the sun.</p>
-  <div id="puzzle12-tiles" style="display:flex; justify-content:center; gap:10px; margin-top:40px;">
+  <div id="puzzle12-tiles">
     <div class="tile" data-correct="2">Mars</div>
     <div class="tile" data-correct="0">Mercury</div>
     <div class="tile" data-correct="3">Jupiter</div>
@@ -450,15 +118,13 @@ let loadingInterval = setInterval(()=>{
 
 <div id="screen13" class="screen">
   <p>Puzzle 13: Encryption Panel – click tiles to flip bits to match the target pattern.</p>
-  <div id="puzzle13-grid" style="display:grid; grid-template-columns: repeat(4, 40px); gap:5px; justify-content:center; margin-top:40px;">
-    <!-- 4x4 bit tiles -->
-  </div>
+  <div id="puzzle13-grid"></div>
 </div>
 
 <div id="screen14" class="screen">
   <p>Puzzle 14: Satellite Tracking – drag the satellite to match its orbital path.</p>
-  <div id="puzzle14-orbit" style="position:relative; width:400px; height:400px; margin:40px auto; border:1px solid #00f0ff; border-radius:50%; background:#000;">
-    <div id="satellite" style="width:20px; height:20px; background:#0ff; border-radius:50%; position:absolute; top:190px; left:190px; cursor:grab;"></div>
+  <div id="puzzle14-orbit">
+    <div id="satellite"></div>
   </div>
 </div>
 
@@ -467,91 +133,85 @@ let loadingInterval = setInterval(()=>{
   <p>Welcome, Elena. All clearance puzzles completed.</p>
 </div>
 
-<style>
-/* Puzzle 11 Radar Sweep */
-#radar-sweep {
-  transition: transform 0.05s linear;
-}
-.blip {
-  pointer-events:none;
-}
-
-/* Puzzle 12 Tiles */
-#puzzle12-tiles .tile {
-  padding:20px;
-  background:#000010;
-  color:#00f0ff;
-  border:1px solid #00f0ff;
-  cursor:pointer;
-  text-align:center;
-  font-family:inherit;
-  text-shadow:0 0 4px #00f0ff;
-}
-
-/* Puzzle 13 Encryption grid tiles */
-#puzzle13-grid .bit-tile {
-  width:40px;
-  height:40px;
-  background:#000010;
-  border:1px solid #00f0ff;
-  cursor:pointer;
-}
-#puzzle13-grid .bit-tile.active {
-  background:#0ff;
-}
-
-/* Puzzle 14 Satellite */
-#satellite.dragging {
-  opacity:0.7;
-}
-</style>
-
 <script>
-/* ==== Puzzle 11: Radar Sweep ==== */
+let currentScreen = 1;
+const totalScreens = 15;
+function nextScreen() {
+  if(currentScreen<totalScreens){
+    document.getElementById('screen'+currentScreen).classList.remove('active');
+    currentScreen++;
+    document.getElementById('screen'+currentScreen).classList.add('active');
+  }
+}
+
+/* ==== Puzzle 7: 4-Dial Synchronization ==== */
+function checkDials(){
+  const d1 = parseInt(document.getElementById('dial1').value);
+  const d2 = parseInt(document.getElementById('dial2').value);
+  const d3 = parseInt(document.getElementById('dial3').value);
+  const d4 = parseInt(document.getElementById('dial4').value);
+  if(d1===4 && d2===2 && d3===7 && d4===9) nextScreen(); // hardcoded solution
+  else alert("Incorrect synchronization!");
+}
+
+/* ==== Puzzle 8: Memory Dump ==== */
+const procs = document.querySelectorAll('#memory-dump .proc');
+procs.forEach(p=>{
+  p.addEventListener('click', ()=>{
+    p.classList.toggle('selected');
+    const selected = document.querySelectorAll('#memory-dump .proc.selected');
+    const correctSelected = Array.from(selected).every(s=>s.dataset.correct==='1') && selected.length===3;
+    if(correctSelected) nextScreen();
+  });
+});
+
+/* ==== Puzzle 9: Loading Bar ==== */
+let width=0;
+let loadInterval;
+function startLoading(){
+  const bar=document.getElementById('loading-bar');
+  loadInterval=setInterval(()=>{
+    if(width>=100){ clearInterval(loadInterval); nextScreen(); }
+    else { width+=2; bar.style.width=width+'%'; }
+  },50);
+}
+if(currentScreen===9) startLoading();
+
+/* ==== Puzzle 11 Radar Sweep ==== */
 const sweep = document.getElementById('radar-sweep');
 let sweepAngle = 0;
 let sweepInterval = setInterval(()=>{
   sweepAngle = (sweepAngle + 2) % 360;
   sweep.style.transform = `rotate(${sweepAngle}deg)`;
-}, 50);
+},50);
 document.querySelector('#puzzle11-radar').addEventListener('click', ()=>{
-  // check if sweep is within range of any blip
   const blips = document.querySelectorAll('#puzzle11-radar .blip');
-  let success = false;
-  blips.forEach(blip=>{
-    const angle = parseInt(blip.dataset.angle);
-    if(Math.abs(angle - sweepAngle) < 5) success = true;
-  });
-  if(success){
-    clearInterval(sweepInterval);
-    nextScreen();
-  }
+  let success=false;
+  blips.forEach(b=>{ if(Math.abs(parseInt(b.dataset.angle)-sweepAngle)<5) success=true; });
+  if(success){ clearInterval(sweepInterval); nextScreen(); }
 });
 
-/* ==== Puzzle 12: Orbital Sequence Tiles ==== */
+/* ==== Puzzle 12 Tile Ordering ==== */
 const tiles = document.querySelectorAll('#puzzle12-tiles .tile');
-let ordered = [];
+let ordered=[];
 tiles.forEach(t=>{
-  t.addEventListener('click', ()=>{
+  t.addEventListener('click',()=>{
     ordered.push(t);
-    t.style.background = '#0f0';
-    if(ordered.length === tiles.length){
-      const correct = Array.from(tiles).every((tile,i)=>parseInt(tile.dataset.correct) === i);
+    t.style.background='#0f0';
+    if(ordered.length===tiles.length){
+      const correct = Array.from(tiles).every((tile,i)=>parseInt(tile.dataset.correct)===i);
       if(correct) nextScreen();
-      else {
-        ordered = [];
-        tiles.forEach(ti=>ti.style.background = '#000010');
-      }
+      else { ordered=[]; tiles.forEach(ti=>ti.style.background='#000010'); }
     }
   });
 });
 
-/* ==== Puzzle 13: Encryption Panel ==== */
+/* ==== Puzzle 13 Encryption Grid ==== */
 const grid13 = document.getElementById('puzzle13-grid');
 for(let i=0;i<16;i++){
-  let tile = document.createElement('div');
+  let tile=document.createElement('div');
   tile.classList.add('bit-tile');
-  tile.dataset.correct = (i%2===0); // example pattern
+  tile.dataset.correct=(i%2===0);
   tile.addEventListener('click', ()=>{
     tile.classList.toggle('active');
     checkEncryption();
@@ -559,32 +219,28 @@ for(let i=0;i<16;i++){
   grid13.appendChild(tile);
 }
 function checkEncryption(){
-  const tiles = Array.from(grid13.children);
-  if(tiles.every(t=>t.classList.contains('active') === (t.dataset.correct==='true'))){
-    nextScreen();
-  }
+  const tiles=Array.from(grid13.children);
+  if(tiles.every(t=>t.classList.contains('active')==(t.dataset.correct==='true'))) nextScreen();
 }
 
-/* ==== Puzzle 14: Satellite Tracking ==== */
-const satellite = document.getElementById('satellite');
-let dragging = false;
-satellite.addEventListener('mousedown', ()=>dragging=true);
-document.addEventListener('mouseup', ()=>dragging=false);
-document.addEventListener('mousemove', e=>{
+/* ==== Puzzle 14 Satellite Tracking ==== */
+const satellite=document.getElementById('satellite');
+let dragging=false;
+satellite.addEventListener('mousedown',()=>dragging=true);
+document.addEventListener('mouseup',()=>dragging=false);
+document.addEventListener('mousemove',e=>{
   if(!dragging) return;
-  const rect = document.getElementById('puzzle14-orbit').getBoundingClientRect();
-  const x = e.clientX - rect.left - 10;
-  const y = e.clientY - rect.top - 10;
-  satellite.style.left = `${x}px`;
-  satellite.style.top = `${y}px`;
-  // check approximate orbit
-  const centerX = rect.width/2 - 10;
-  const centerY = rect.height/2 - 10;
-  const dx = x-centerX;
-  const dy = y-centerY;
-  const distance = Math.sqrt(dx*dx + dy*dy);
-  if(distance > 140 && distance < 160){
-    nextScreen();
-  }
+  const rect=document.getElementById('puzzle14-orbit').getBoundingClientRect();
+  const x=e.clientX-rect.left-10;
+  const y=e.clientY-rect.top-10;
+  satellite.style.left=x+'px';
+  satellite.style.top=y+'px';
+  const dx=x-rect.width/2+10;
+  const dy=y-rect.height/2+10;
+  const distance=Math.sqrt(dx*dx+dy*dy);
+  if(distance>140 && distance<160) nextScreen();
 });
 </script>
+
+</body>
+</html>
