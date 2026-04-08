@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Box / Anomalies | U.I.C. Systems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+/* Amber tint & scanlines */
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite; z-index:1001;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+/* Container */
+#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+
+/* Anomaly entry */
+.anomaly-entry {
+  background: rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  margin:10px 0;
+  padding:10px 15px;
+  cursor:default;
+  transition:.2s;
+}
+.anomaly-entry:hover { background: rgba(0,0,0,.35); }
+
+/* Terminal */
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:20px;
+}
+#prompt { display:flex; flex:1; }
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+/* OS version */
+#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+
+/* ASCII anomaly */
+#ascii-box {
+  font-family: monospace;
+  white-space: pre;
+  background: rgba(0,0,0,.15);
+  padding:15px;
+  border:1px dashed rgba(255,159,7,.3);
+  margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<div id="crt-container">
+
+<h1>Black Box / Anomalies</h1>
+<p>Access to anomaly reports is restricted. Use terminal commands to interact with system.</p>
+
+<div class="anomaly-entry">ANOMALY ID: BX-001 — Strange energy fluctuation detected near sector 12X.</div>
+<div class="anomaly-entry">ANOMALY ID: BX-002 — Unidentified signal patterns originating from deep orbit.</div>
+<div class="anomaly-entry">ANOMALY ID: BX-003 — Temporal distortion reported during test flight Delta-7.</div>
+<div class="anomaly-entry">ANOMALY ID: BX-004 — AI subsystem generated unauthorized logs.</div>
+<div class="anomaly-entry">ANOMALY ID: BX-005 — Unknown spacecraft detected in classified sector.</div>
+
+<div id="ascii-box" style="display:none;">
+      .    .       *       .
+   *       .      /\        *
+        .        /  \      .
+   .          __/____\__   *
+       *     |  *  *  |     .
+             |    *    |
+             |__*__*__|
+</div>
+
+<!-- Terminal -->
+<div id="terminal-box">
+  <div id="prompt">
+    <span>></span>
+    <input id="cmd" autocomplete="off" placeholder="Enter command">
+  </div>
+</div>
+
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// 3D tilt effect
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal functionality
+const input = document.getElementById("cmd");
+let accessLevel = 0;
+let incorrectCommands = 0;
+
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const cmd = input.value.toLowerCase().trim();
+  const asciiBox = document.getElementById("ascii-box");
+  
+  switch(cmd){
+    case "help":
+      alert("Available commands:\nLIST ANOMALIES\nVIEW BX-001\nVIEW BX-002\nVIEW BX-003\nVIEW BX-004\nVIEW BX-005\nDECRYPT BX-003\nASCII BX-003");
+      break;
+    case "list anomalies":
+      alert("ANOMALY LIST:\nBX-001\nBX-002\nBX-003\nBX-004\nBX-005");
+      break;
+    case "view bx-001":
+      alert("BX-001: Strange energy fluctuation detected near sector 12X. Sensor logs pending.");
+      break;
+    case "view bx-002":
+      alert("BX-002: Unidentified signal patterns originating from deep orbit. Analysis ongoing.");
+      break;
+    case "view bx-003":
+      if(accessLevel<1) { alert("Access denied. Use DECRYPT BX-003 to gain clearance."); break; }
+      alert("BX-003: Temporal distortion confirmed during test flight Delta-7. ASCII anomaly data available.");
+      break;
+    case "decrypt bx-003":
+      accessLevel = 1;
+      alert("Decryption complete. Clearance level 1 granted. ASCII anomaly data unlocked.");
+      break;
+    case "ascii bx-003":
+      if(accessLevel<1) { alert("Access denied. Decrypt first."); break; }
+      asciiBox.style.display="block";
+      break;
+    case "view bx-004":
+      alert("BX-004: AI subsystem generated unauthorized logs. Investigation in progress.");
+      break;
+    case "view bx-005":
+      alert("BX-005: Unknown spacecraft detected in classified sector. Tracking ongoing.");
+      break;
+    default:
+      incorrectCommands++;
+      if(incorrectCommands>=11){
+        alert("SYSTEM RESET INITIATED — Too many incorrect commands.");
+        location.reload();
+        break;
+      }
+      alert("Unknown command: "+cmd);
+  }
+  
+  input.value="";
+});
+</script>
+
+</body>
+</html>
