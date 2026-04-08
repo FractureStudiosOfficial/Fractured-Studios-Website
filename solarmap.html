@@ -7,8 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 body {
-  margin:0; background:#111; color:#FF9F07;
-  font-family:'Share Tech Mono', monospace; overflow:hidden;
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
 }
 #canvas { display:block; background:#111; }
 #side-panel {
@@ -16,10 +19,14 @@ body {
   background:rgba(0,0,0,.3); padding:10px;
   border:1px solid #FF9F07; width:220px;
 }
-button { background:#111; border:1px solid #FF9F07; color:#FF9F07; margin:2px; cursor:pointer; }
+button {
+  background:#111; border:1px solid #FF9F07;
+  color:#FF9F07; margin:2px; cursor:pointer;
+}
 </style>
 </head>
 <body>
+
 <canvas id="canvas"></canvas>
 <div id="side-panel">
   <div>Current Date: <span id="current-date"></span></div>
@@ -36,133 +43,303 @@ button { background:#111; border:1px solid #FF9F07; color:#FF9F07; margin:2px; c
 // Canvas setup
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 // Zoom and pan
 let zoom = 1;
 let pan = {x:0, y:0};
 let isDragging = false, lastPos = {x:0, y:0};
-canvas.addEventListener('mousedown', e=>{ isDragging=true; lastPos={x:e.clientX, y:e.clientY}; });
-canvas.addEventListener('mousemove', e=>{ if(isDragging){ pan.x += e.clientX - lastPos.x; pan.y += e.clientY - lastPos.y; lastPos={x:e.clientX, y:e.clientY}; }});
-canvas.addEventListener('mouseup', ()=>{isDragging=false;});
-canvas.addEventListener('wheel', e=>{ zoom *= e.deltaY<0?1.1:0.9; });
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  lastPos = {x:e.clientX, y:e.clientY};
+});
+
+canvas.addEventListener('mousemove', e => {
+  if(isDragging){
+    pan.x += e.clientX - lastPos.x;
+    pan.y += e.clientY - lastPos.y;
+    lastPos = {x:e.clientX, y:e.clientY};
+  }
+});
+
+canvas.addEventListener('mouseup', ()=>{ isDragging=false; });
+canvas.addEventListener('wheel', e => { zoom *= e.deltaY<0?1.1:0.9; });
 
 // Utilities
-const AU_SCALE = 50; // 1 AU = 50px
+const AU_SCALE = 50; // 1 AU = 50px (scaled)
 function AUToCanvas(au){ return au*AU_SCALE*zoom; }
 
-// Planets data (simplified)
+// Planet and moon data
 const planets = [
   {name:'Mercury', AU:0.39, period:88, color:'#aaa', moons:[]},
   {name:'Venus', AU:0.72, period:225, color:'#ffb366', moons:[]},
-  {name:'Earth', AU:1, period:365, color:'#3399ff', moons:[{name:'Moon', AU:0.00257, color:'#ccc'}], stations:[
+  {name:'Earth', AU:1, period:365, color:'#3399ff', moons:[
+    {name:'Moon', AU:0.00257, color:'#ccc'}
+  ], stations:[
     {name:'ISS', orbitAU:0.000042, orbitPeriod:0.07},
     {name:'Skylab', orbitAU:0.00003, orbitPeriod:0.05}
   ]},
-  {name:'Mars', AU:1.52, period:687, color:'#ff6633', moons:[{name:'Phobos', AU:0.00006, color:'#999'}, {name:'Deimos', AU:0.00015, color:'#bbb'}]},
-  {name:'Jupiter', AU:5.2, period:4333, color:'#ff9966', moons:[{name:'Europa', AU:0.0045, color:'#ddd'}]},
+  {name:'Mars', AU:1.52, period:687, color:'#ff6633', moons:[
+    {name:'Phobos', AU:0.00006, color:'#999'},
+    {name:'Deimos', AU:0.00015, color:'#bbb'}
+  ]},
+  {name:'Jupiter', AU:5.2, period:4333, color:'#ff9966', moons:[
+    {name:'Europa', AU:0.0045, color:'#ddd'}
+  ]},
   {name:'Saturn', AU:9.58, period:10759, color:'#ffcc99', moons:[]},
   {name:'Uranus', AU:19.2, period:30687, color:'#99ccff', moons:[]},
   {name:'Neptune', AU:30.05, period:60190, color:'#3366ff', moons:[]},
   {name:'Pluto', AU:39.48, period:90560, color:'#999', moons:[]},
 ];
 
-// Time simulation
+// Simulation time
 let simTime = new Date();
 let timeFactor = 1;
+
 function setTimeFactor(f){ timeFactor=f; }
 function pauseTime(){ timeFactor=0; }
 function resetTime(){ simTime = new Date(); }
 
-// Maneuver nodes
-let maneuverNodes = [];
-
-// Update date display
+// Update side panel
 function updateDateDisplay(){
   document.getElementById('current-date').textContent = simTime.toDateString();
 }
 
-// Main draw loop
+// Placeholder for maneuver nodes
+let maneuverNodes = [];
+
+// Center of canvas
 const center = {x:canvas.width/2, y:canvas.height/2};
+
+// Main draw loop (planets will be drawn here in Part 2)
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Orbits
-  for(const p of planets){
-    const r = AUToCanvas(p.AU);
-    ctx.beginPath();
-    ctx.arc(center.x+pan.x, center.y+pan.y, r, 0, Math.PI*2);
-    ctx.strokeStyle='rgba(255,159,7,0.2)';
-    ctx.stroke();
-  }
-
-  // Planets & moons
-  for(const p of planets){
-    const daysSince = (simTime - new Date(1989, simTime.getMonth(), simTime.getDate()))/86400000;
-    const angle = 2*Math.PI*(daysSince/p.period);
-    const px = center.x+pan.x+AUToCanvas(p.AU)*Math.cos(angle);
-    const py = center.y+pan.y+AUToCanvas(p.AU)*Math.sin(angle);
-
-    const planetRadius = Math.max(6, 4*zoom);
-    ctx.beginPath();
-    ctx.arc(px, py, planetRadius, 0, 2*Math.PI);
-    ctx.fillStyle = p.color;
-    ctx.fill();
-    ctx.strokeStyle = '#FF9F07';
-    ctx.stroke();
-
-    // Moons
-    for(const m of p.moons || []){
-      const mAngle = angle*10;
-      const mx = px+AUToCanvas(m.AU)*Math.cos(mAngle);
-      const my = py+AUToCanvas(m.AU)*Math.sin(mAngle);
-      const moonRadius = Math.max(4,3*zoom);
-      ctx.beginPath();
-      ctx.arc(mx,my,moonRadius,0,Math.PI*2);
-      ctx.fillStyle = m.color;
-      ctx.fill();
-      ctx.strokeStyle='#FF9F07';
-      ctx.stroke();
-    }
-
-    // Stations
-    for(const s of p.stations || []){
-      const sAngle = angle*5;
-      const sx = px+AUToCanvas(s.orbitAU)*Math.cos(sAngle);
-      const sy = py+AUToCanvas(s.orbitAU)*Math.sin(sAngle);
-      const radius = Math.max(4,2*zoom);
-      ctx.beginPath();
-      ctx.arc(sx,sy,radius,0,Math.PI*2);
-      ctx.fillStyle='#00FFFF';
-      ctx.fill();
-      ctx.strokeStyle='#FF9F07';
-      ctx.stroke();
-    }
-  }
-
-  // Maneuver nodes
-  for(const n of maneuverNodes){
-    const radius = Math.max(5,3*zoom);
-    ctx.beginPath();
-    ctx.arc(n.x,n.y,radius,0,Math.PI*2);
-    ctx.fillStyle='#FF00FF';
-    ctx.fill();
-    ctx.strokeStyle='#FF9F07';
-    ctx.stroke();
-  }
-
   updateDateDisplay();
   requestAnimationFrame(draw);
 }
 
-// Simulate time
+draw();
+
+// Time simulation loop
 function stepTime(){
-  simTime = new Date(simTime.getTime()+1000*timeFactor);
-  setTimeout(stepTime, 1000);
+  simTime = new Date(simTime.getTime() + 1000*timeFactor);
+  setTimeout(stepTime,1000);
 }
 stepTime();
-draw();
 
 </script>
 </body>
 </html>
+<script>
+// ---------- Part 2: Orbits & Planet/Moon/Station Rendering ----------
+
+// Compute orbital angle for a planet given current simulation time
+function getPlanetAngle(planet){
+    // Convert planet period from days to milliseconds
+    const periodMS = planet.period * 24*60*60*1000;
+    const startTime = new Date(simTime.getFullYear(), simTime.getMonth(), 1).getTime(); // Jan 1 of current year
+    const elapsed = simTime.getTime() - startTime;
+    return (elapsed/periodMS) * 2 * Math.PI;
+}
+
+// Draw orbits
+function drawOrbit(x, y, radius){
+    ctx.beginPath();
+    ctx.strokeStyle = "rgba(255,159,7,0.2)";
+    ctx.lineWidth = 1;
+    ctx.arc(x, y, radius, 0, 2*Math.PI);
+    ctx.stroke();
+}
+
+// Draw planet or moon
+function drawBody(x, y, color, size, name){
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(x, y, size, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.fillStyle = "#FF9F07";
+    ctx.font = "12px 'Share Tech Mono'";
+    ctx.fillText(name, x+size+2, y);
+}
+
+// Draw stations orbiting a planet
+function drawStation(planetX, planetY, station){
+    const angle = getPlanetAngle(station);
+    const radius = AUToCanvas(station.orbitAU);
+    const sx = planetX + radius * Math.cos(angle) * zoom;
+    const sy = planetY + radius * Math.sin(angle) * zoom;
+    drawBody(sx, sy, "#FFAA00", 3, station.name);
+}
+
+// Enhanced draw loop
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Draw Sun at center
+    drawBody(center.x+pan.x, center.y+pan.y, "#FFD700", 15, "Sun");
+
+    // Draw each planet
+    planets.forEach(planet=>{
+        const orbitRadius = AUToCanvas(planet.AU);
+        drawOrbit(center.x+pan.x, center.y+pan.y, orbitRadius);
+
+        // Planet position
+        const angle = getPlanetAngle(planet);
+        const planetX = center.x + pan.x + orbitRadius * Math.cos(angle);
+        const planetY = center.y + pan.y + orbitRadius * Math.sin(angle);
+
+        drawBody(planetX, planetY, planet.color, 8, planet.name);
+
+        // Draw moons
+        if(planet.moons){
+            planet.moons.forEach(moon=>{
+                const moonRadius = AUToCanvas(moon.AU);
+                const moonAngle = getPlanetAngle(moon);
+                const moonX = planetX + moonRadius * Math.cos(moonAngle);
+                const moonY = planetY + moonRadius * Math.sin(moonAngle);
+                drawBody(moonX, moonY, moon.color, 4, moon.name);
+            });
+        }
+
+        // Draw stations
+        if(planet.stations){
+            planet.stations.forEach(station=>{
+                drawStation(planetX, planetY, station);
+            });
+        }
+    });
+
+    updateDateDisplay();
+    requestAnimationFrame(draw);
+}
+
+// Orbit speed & time integration handled via timeFactor from Part 1
+// Already updating simulation in stepTime()
+
+</script>
+<script>
+// ---------- Part 3: Interaction & Maneuvers ----------
+
+// Track selected body
+let selectedBody = null;
+
+// Get all celestial bodies (planets + moons)
+function getAllBodies(){
+    let bodies = [];
+    planets.forEach(p=>{
+        bodies.push({type:'planet', planet:p, name:p.name});
+        if(p.moons) p.moons.forEach(m=>{
+            bodies.push({type:'moon', planet:p, moon:m, name:m.name});
+        });
+    });
+    return bodies;
+}
+
+// Detect if a click is on a planet or moon
+canvas.addEventListener('click', e=>{
+    const mouseX = (e.clientX - pan.x);
+    const mouseY = (e.clientY - pan.y);
+    const bodies = getAllBodies();
+    let found = null;
+
+    bodies.forEach(b=>{
+        const orbitRadius = AUToCanvas(b.type==='planet'?b.planet.AU:b.planet.AU);
+        const angle = getPlanetAngle(b.type==='planet'?b.planet:b.moon);
+        const px = center.x + orbitRadius * Math.cos(angle);
+        const py = center.y + orbitRadius * Math.sin(angle);
+        let bx=px, by=py;
+        if(b.type==='moon'){
+            const moonRadius = AUToCanvas(b.moon.AU);
+            bx = px + moonRadius * Math.cos(angle);
+            by = py + moonRadius * Math.sin(angle);
+        }
+        if(Math.hypot(mouseX - bx, mouseY - by) < 12){
+            found = b;
+        }
+    });
+
+    if(found){
+        selectedBody = found;
+        console.log("Selected:", found.name);
+        alert("Selected: " + found.name);
+    } else {
+        // Check if click is for maneuver node creation
+        if(selectedBody){
+            const x = (mouseX - center.x - pan.x)/zoom;
+            const y = (mouseY - center.y - pan.y)/zoom;
+            maneuverNodes.push({body:selectedBody, x:x, y:y});
+            console.log("Maneuver node added near", selectedBody.name);
+            alert("Maneuver node created near " + selectedBody.name);
+        }
+    }
+});
+
+// Draw maneuver nodes
+function drawManeuvers(){
+    maneuverNodes.forEach(node=>{
+        const orbitRadius = AUToCanvas(node.body.type==='planet'?node.body.planet.AU:node.body.planet.AU);
+        const angle = getPlanetAngle(node.body.type==='planet'?node.body.planet:node.body.moon);
+        let bx = center.x + pan.x + orbitRadius * Math.cos(angle);
+        let by = center.y + pan.y + orbitRadius * Math.sin(angle);
+        if(node.body.type==='moon'){
+            const moonRadius = AUToCanvas(node.body.moon.AU);
+            bx += moonRadius * Math.cos(angle);
+            by += moonRadius * Math.sin(angle);
+        }
+        const mx = bx + node.x*zoom;
+        const my = by + node.y*zoom;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#FF0000";
+        ctx.lineWidth = 2;
+        ctx.arc(mx, my, 6, 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.fillStyle = "#FF0000";
+        ctx.fillText("M", mx-4, my+4);
+    });
+}
+
+// Integrate into draw loop from Part 2
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Draw Sun at center
+    drawBody(center.x+pan.x, center.y+pan.y, "#FFD700", 15, "Sun");
+
+    planets.forEach(planet=>{
+        const orbitRadius = AUToCanvas(planet.AU);
+        drawOrbit(center.x+pan.x, center.y+pan.y, orbitRadius);
+        const angle = getPlanetAngle(planet);
+        const planetX = center.x + pan.x + orbitRadius * Math.cos(angle);
+        const planetY = center.y + pan.y + orbitRadius * Math.sin(angle);
+        drawBody(planetX, planetY, planet.color, 8, planet.name);
+
+        if(planet.moons){
+            planet.moons.forEach(moon=>{
+                const moonRadius = AUToCanvas(moon.AU);
+                const moonAngle = getPlanetAngle(moon);
+                const moonX = planetX + moonRadius * Math.cos(moonAngle);
+                const moonY = planetY + moonRadius * Math.sin(moonAngle);
+                drawBody(moonX, moonY, moon.color, 4, moon.name);
+            });
+        }
+
+        if(planet.stations){
+            planet.stations.forEach(station=>{
+                drawStation(planetX, planetY, station);
+            });
+        }
+    });
+
+    // Draw maneuver nodes
+    drawManeuvers();
+
+    updateDateDisplay();
+    requestAnimationFrame(draw);
+}
+
+draw();
+
+</script>
