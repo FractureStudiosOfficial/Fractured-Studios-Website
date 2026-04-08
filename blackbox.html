@@ -80,11 +80,14 @@ body {
   padding:15px;
   border:1px solid rgba(255,159,7,.2);
   display:flex;
+  flex-direction:column;
   position:sticky;
   bottom:0;
   width:100%;
   box-sizing:border-box;
   margin-top:20px;
+  max-height:200px;
+  overflow-y:auto;
 }
 #prompt { display:flex; flex:1; }
 #prompt input {
@@ -94,6 +97,12 @@ body {
   color:#FF9F07;
   font-family:inherit;
   flex:1;
+}
+
+/* Terminal messages */
+.terminal-message {
+  margin:2px 0;
+  font-size:14px;
 }
 
 /* OS version */
@@ -127,6 +136,7 @@ body {
 
 <!-- Terminal -->
 <div id="terminal-box">
+  <div id="terminal-output"></div>
   <div id="prompt">
     <span>></span>
     <input id="cmd" autocomplete="off" placeholder="Enter command">
@@ -156,32 +166,11 @@ const reportImage = document.getElementById("report-image");
 const closeBtn = document.getElementById("report-close");
 
 const anomalyData = {
-  bx001: {
-    title: "BX-001 — Energy Fluctuation",
-    text: "Sensors detected unusual energy spikes near sector 12X. Origin unknown. Further investigation is ongoing.",
-    image: "https://i.imgur.com/q5pY6YV.png"
-  },
-  bx002: {
-    title: "BX-002 — Deep Orbit Signal",
-    text: "Unidentified signals intercepted from deep orbit. Patterns do not match known transmissions. Decryption attempts ongoing.",
-    image: "https://i.imgur.com/wLOeUq8.png"
-  },
-  bx003: {
-    title: "BX-003 — Temporal Distortion",
-    text: "Temporal distortion confirmed during test flight Delta-7. Access requires decryption first.",
-    image: "https://i.imgur.com/H7bF6iO.png",
-    encrypted: true
-  },
-  bx004: {
-    title: "BX-004 — Unauthorized AI Logs",
-    text: "AI subsystem generated unauthorized log entries. Investigation in progress.",
-    image: "https://i.imgur.com/P6X7xKx.png"
-  },
-  bx005: {
-    title: "BX-005 — Unknown Spacecraft",
-    text: "Unknown spacecraft detected in classified sector. Tracking and analysis ongoing.",
-    image: "https://i.imgur.com/WJ7yzL9.png"
-  }
+  bx001: {title:"BX-001 — Energy Fluctuation", text:"Sensors detected unusual energy spikes near sector 12X. Origin unknown. Further investigation is ongoing.", image:"https://i.imgur.com/q5pY6YV.png"},
+  bx002: {title:"BX-002 — Deep Orbit Signal", text:"Unidentified signals intercepted from deep orbit. Patterns do not match known transmissions. Decryption attempts ongoing.", image:"https://i.imgur.com/wLOeUq8.png"},
+  bx003: {title:"BX-003 — Temporal Distortion", text:"Temporal distortion confirmed during test flight Delta-7. Access requires decryption first.", image:"https://i.imgur.com/H7bF6iO.png", encrypted:true},
+  bx004: {title:"BX-004 — Unauthorized AI Logs", text:"AI subsystem generated unauthorized log entries. Investigation in progress.", image:"https://i.imgur.com/P6X7xKx.png"},
+  bx005: {title:"BX-005 — Unknown Spacecraft", text:"Unknown spacecraft detected in classified sector. Tracking and analysis ongoing.", image:"https://i.imgur.com/WJ7yzL9.png"}
 };
 
 let accessLevel = 0;
@@ -192,13 +181,14 @@ document.querySelectorAll(".anomaly-entry").forEach(entry => {
     const id = entry.getAttribute("data-id");
     const data = anomalyData[id];
     if(data.encrypted && accessLevel<1){
-      alert("Access denied. Decrypt this anomaly via terminal first.");
+      addTerminalMessage("ACCESS DENIED: Decrypt this anomaly via terminal first.");
       return;
     }
     reportTitle.textContent = data.title;
     reportText.textContent = data.text;
     reportImage.src = data.image;
     modal.style.display = "block";
+    addTerminalMessage(`SUCCESS: ${data.title} opened.`);
   });
 });
 
@@ -208,7 +198,16 @@ closeBtn.addEventListener("click", () => {
 
 // Terminal logic
 const input = document.getElementById("cmd");
+const output = document.getElementById("terminal-output");
 let incorrectCommands = 0;
+
+function addTerminalMessage(text){
+  const msg = document.createElement("div");
+  msg.className = "terminal-message";
+  msg.textContent = text;
+  output.appendChild(msg);
+  output.scrollTop = output.scrollHeight;
+}
 
 input.addEventListener("keydown", e=>{
   if(e.key!=="Enter") return;
@@ -216,14 +215,14 @@ input.addEventListener("keydown", e=>{
 
   switch(cmd){
     case "help":
-      alert("Commands:\nLIST ANOMALIES\nDECRYPT BX-003\nVIEW BX-001 to BX-005");
+      addTerminalMessage("Commands: LIST ANOMALIES, DECRYPT BX-003, VIEW BX-001 to BX-005");
       break;
     case "list anomalies":
-      alert("ANOMALY LIST:\nBX-001\nBX-002\nBX-003\nBX-004\nBX-005");
+      addTerminalMessage("ANOMALY LIST: BX-001, BX-002, BX-003, BX-004, BX-005");
       break;
     case "decrypt bx-003":
       accessLevel = 1;
-      alert("Decryption complete. BX-003 now accessible.");
+      addTerminalMessage("SUCCESS: BX-003 decrypted. You may now view it.");
       break;
     case "view bx-001":
     case "view bx-002":
@@ -232,17 +231,19 @@ input.addEventListener("keydown", e=>{
       document.querySelector(`.anomaly-entry[data-id='${cmd.split(" ")[1]}']`).click();
       break;
     case "view bx-003":
-      if(accessLevel<1){ alert("Access denied. DECRYPT BX-003 first."); break; }
+      if(accessLevel<1){
+        addTerminalMessage("ACCESS DENIED: DECRYPT BX-003 first.");
+        break;
+      }
       document.querySelector(`.anomaly-entry[data-id='bx003']`).click();
       break;
     default:
       incorrectCommands++;
+      addTerminalMessage(`UNKNOWN COMMAND: ${cmd}`);
       if(incorrectCommands>=11){
-        alert("SYSTEM RESET INITIATED — Too many incorrect commands.");
-        location.reload();
-        break;
+        addTerminalMessage("SYSTEM RESET INITIATED — Too many incorrect commands.");
+        setTimeout(()=>{ location.reload(); }, 1500);
       }
-      alert("Unknown command: "+cmd);
   }
 
   input.value="";
