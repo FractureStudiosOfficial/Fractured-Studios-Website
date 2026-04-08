@@ -29,6 +29,7 @@
   .error { color: red; }
   .success { color: #ff6600; }
   .hint { color: #ffaa00; }
+  .ascii { color: #00ff00; }
 </style>
 </head>
 <body>
@@ -44,6 +45,9 @@ const input = document.getElementById('commandInput');
 let accessLevel = 0;
 let foundCode = false;
 let decrypted = false;
+let cipherActive = false;
+let incorrectCount = 0;
+const maxIncorrect = 11;
 
 // Initial welcome message
 addLine("> WELCOME TO PROJECT ORANGE - CLASSIFIED SYSTEM");
@@ -81,6 +85,16 @@ function maybeError() {
   }
 }
 
+function handleIncorrect() {
+  incorrectCount++;
+  addLine("> INVALID COMMAND", "error");
+  maybeError();
+  if(incorrectCount >= maxIncorrect) {
+    addLine("> TOO MANY INCORRECT ATTEMPTS. SYSTEM RESETTING...", "error");
+    setTimeout(() => location.reload(), 3000);
+  }
+}
+
 function handleCommand(cmd) {
   addLine("> " + cmd);
 
@@ -96,31 +110,54 @@ function handleCommand(cmd) {
       addLine("> CODE FRAGMENT FOUND: [??84]");
       foundCode = true;
     } else {
-      addLine("> ACCESS DENIED. INVALID COMMAND.", "error");
-      maybeError();
+      handleIncorrect();
     }
   }
 
-  // Layer 1 commands (requires code)
-  else if(accessLevel === 1) {
-    if(cmd === "DECRYPT FRAGMENT" && foundCode) {
-      addLine("> FRAGMENT DECRYPTED: 5284", "success");
-      decrypted = true;
-    } else if(cmd === "LIST") {
-      addLine("> FILES AVAILABLE: PROJECT_X.TXT, BRIEFING_DOCS.DAT", "success");
-    } else if(cmd === "OPEN PROJECT_X.TXT" && decrypted) {
-      addLine("> PROJECT_X.TXT OPENED");
-      addLine("> LEVEL 2 DATA: TARGET COORDINATES CONFIRMED. MISSION PARAMETERS CLASSIFIED.");
-    } else {
-      addLine("> COMMAND NOT RECOGNIZED.", "error");
-      maybeError();
-    }
-  }
-
-  // Upgrade access level
-  if(foundCode && cmd === "ENTER CODE 5284" && accessLevel === 0) {
+  // Enter code to unlock Layer 1
+  else if(accessLevel === 0 && cmd === "ENTER CODE 5284" && foundCode) {
     accessLevel = 1;
     addLine("> ACCESS LEVEL UPGRADED TO 1", "success");
+  }
+
+  // Layer 1 commands
+  else if(accessLevel === 1) {
+    if(cmd === "LIST") {
+      addLine("> FILES AVAILABLE: PROJECT_X.TXT, BRIEFING_DOCS.DAT", "success");
+    } else if(cmd === "DECRYPT FRAGMENT" && foundCode) {
+      addLine("> FRAGMENT DECRYPTED: 5284", "success");
+      decrypted = true;
+      cipherActive = true;
+      addLine("> MINI-CIPHER ACTIVATED. SOLVE TO UNLOCK PROJECT_X.TXT");
+      addLine("> ENCRYPTED MESSAGE: KHOOR");
+      addLine("> HINT: Use Caesar shift 3");
+    } else if(cmd === "HELLO" && cipherActive) {
+      addLine("> CIPHER CORRECT. PROJECT_X.TXT UNLOCKED", "success");
+      cipherActive = false;
+    } else if(cmd === "OPEN PROJECT_X.TXT" && !cipherActive && decrypted) {
+      addLine("> PROJECT_X.TXT OPENED");
+      addLine("> LEVEL 2 DATA: TARGET COORDINATES CONFIRMED. MISSION PARAMETERS CLASSIFIED.");
+      addLine("> ASCII MAP LOADED:", "ascii");
+      addLine(`
++-----------------+
+|     BASE        |
+|  X          #   |
+|                 |
+|  #         Z    |
++-----------------+
+Legend: X=Target, #=Obstacle, Z=Extraction
+      `, "ascii");
+      addLine("> NEXT STEP: TYPE 'SET PATH X-Z' TO PROCEED", "hint");
+    } else if(cmd === "SET PATH X-Z") {
+      addLine("> PATH CONFIRMED. MISSION STARTING...", "success");
+    } else {
+      handleIncorrect();
+    }
+  }
+
+  // Any other invalid command
+  else {
+    handleIncorrect();
   }
 }
 </script>
