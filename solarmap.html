@@ -237,6 +237,63 @@ canvas.addEventListener("mousemove", e=>{
 });
 canvas.addEventListener("mouseup", e=>isPanning=false);
 canvas.addEventListener("wheel", e=>{zoom*=e.deltaY<0?1.1:0.9;});
+
+    // === Planet & Moon Click Detection ===
+canvas.addEventListener("click", e => {
+    const mouse = getMousePos(e);
+    let found = false;
+
+    // Check planets
+    for (const p of planets) {
+        let daysSince = (simTime - new Date(1989, simTime.getMonth(), simTime.getDate())) / 86400000;
+        let angle = 2 * Math.PI * (daysSince / p.period);
+        let px = center.x + pan.x + AUToCanvas(p.AU) * Math.cos(angle);
+        let py = center.y + pan.y + AUToCanvas(p.AU) * Math.sin(angle);
+        if (Math.hypot(mouse.x - px, mouse.y - py) < 10 * zoom) {
+            selectedBody = p;
+            updateSidePanel();
+            found = true;
+            break;
+        }
+
+        // Check moons
+        for (const m of p.moons || []) {
+            let mAngle = angle * 10 * (p.AU / m.AU || 1); // simplified relative
+            let mx = px + AUToCanvas(m.AU) * Math.cos(mAngle);
+            let my = py + AUToCanvas(m.AU) * Math.sin(mAngle);
+            if (Math.hypot(mouse.x - mx, mouse.y - my) < 6 * zoom) {
+                selectedBody = m;
+                updateSidePanel();
+                found = true;
+                break;
+            }
+        }
+        if (found) break;
+    }
+
+    if (!found) {
+        selectedBody = null;
+        updateSidePanel();
+    }
+});
+
+function updateSidePanel() {
+    const selectedDiv = document.getElementById("selected-body");
+    const stationsDiv = document.getElementById("stations-list");
+    if (!selectedBody) {
+        selectedDiv.innerText = "No body selected";
+        stationsDiv.innerHTML = "<h4>Stations:</h4>";
+        return;
+    }
+
+    selectedDiv.innerText = `Selected: ${selectedBody.name}`;
+    const stations = selectedBody.stations || [];
+    const moons = selectedBody.moons || [];
+    let html = "<h4>Stations:</h4>";
+    stations.forEach(s => { html += `<p>${s.name}</p>`; });
+    if (moons.length) html += "<h4>Moons:</h4>" + moons.map(m=>m.name).join("<br>");
+    stationsDiv.innerHTML = html;
+}
 </script>
 </body>
 </html>
