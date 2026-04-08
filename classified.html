@@ -2,134 +2,125 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CLASSIFIED ACCESS</title>
+<title>PROJECT ORANGE - CLASSIFIED SYSTEM</title>
 <style>
   body {
-    background: #000;
+    background: black;
     color: #00ffff;
     font-family: monospace;
     padding: 20px;
   }
-  h1 {
-    color: #ff6600;
-    text-shadow: 0 0 10px #ff6600;
-  }
   .terminal {
-    background: #000;
     border: 1px solid #00ffff;
     padding: 20px;
-    margin-top: 20px;
+    height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
   }
-  .file {
-    cursor: pointer;
-    margin: 5px 0;
+  input {
+    background: black;
+    border: none;
     color: #00ffff;
+    font-family: monospace;
+    font-size: 16px;
+    width: 100%;
+    outline: none;
   }
-  .file:hover {
-    color: #ff6600;
-  }
-  .hidden {
-    display: none;
-  }
-  .typewriter {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    border-right: .15em solid #ff6600;
-    animation: typing 2s steps(40, end), blink .5s step-end infinite alternate;
-  }
-  @keyframes typing {
-    from { width: 0 }
-    to { width: 100% }
-  }
-  @keyframes blink {
-    50% { border-color: transparent }
-  }
-  .error {
-    color: red;
-  }
+  .error { color: red; }
+  .success { color: #ff6600; }
+  .hint { color: #ffaa00; }
 </style>
 </head>
 <body>
 
-<h1>CLASSIFIED FILE ACCESS</h1>
-<div class="terminal" id="terminal">
-  <p>> Welcome, Operative. Accessing files...</p>
-  <div id="files">
-    <div class="file" onclick="openFile('file1')">Report_Alpha.txt</div>
-    <div class="file" onclick="openFile('file2')">Report_Bravo.txt</div>
-    <div class="file" onclick="openFile('file3')">System_Logs.dat</div>
-  </div>
-</div>
-
-<div id="file1" class="hidden terminal">
-  <p class="typewriter">Level 1 Data: First clue hidden in the system logs...</p>
-  <button onclick="revealClue('clue1')">Check system logs</button>
-</div>
-
-<div id="file2" class="hidden terminal">
-  <p class="typewriter">Level 1 Data: Coordinates partially encrypted: [???.???]</p>
-  <button onclick="revealClue('clue2')">Decrypt coordinates</button>
-</div>
-
-<div id="file3" class="hidden terminal">
-  <p class="typewriter">System Log: Unauthorized access attempts detected...</p>
-  <button onclick="revealClue('clue3')">Reveal hidden log entry</button>
-</div>
-
-<div id="clue1" class="hidden terminal">
-  <p class="typewriter">Clue Unlocked! Use code <strong>5284</strong> to unlock next layer.</p>
-  <button onclick="unlockNextLayer()">Enter Code</button>
-</div>
-
-<div id="clue2" class="hidden terminal">
-  <p class="typewriter">Coordinates decrypted! Next file requires code 5284.</p>
-</div>
-
-<div id="clue3" class="hidden terminal">
-  <p class="typewriter">Hidden log entry: "The operation moves at midnight." Check Report_Alpha.txt again.</p>
-</div>
-
-<div id="layer2" class="hidden terminal">
-  <p class="typewriter">LEVEL 2: DEEP FILES UNLOCKED</p>
-  <div class="file" onclick="revealSecret('secret1')">Secret_Project_X.txt</div>
-</div>
-
-<div id="secret1" class="hidden terminal">
-  <p class="typewriter">SECRET DATA: Target coordinates confirmed. Mission parameters classified.</p>
-</div>
+<h1>PROJECT ORANGE - CLASSIFIED SYSTEM</h1>
+<div class="terminal" id="terminal"></div>
+<input type="text" id="commandInput" placeholder="Enter command here" autocomplete="off">
 
 <script>
-function openFile(id) {
-  document.getElementById(id).classList.remove('hidden');
-  maybeError();
+const terminal = document.getElementById('terminal');
+const input = document.getElementById('commandInput');
+
+let accessLevel = 0;
+let foundCode = false;
+let decrypted = false;
+
+// Initial welcome message
+addLine("> WELCOME TO PROJECT ORANGE - CLASSIFIED SYSTEM");
+addLine("> ACCESS LEVEL: 0");
+addLine("> ENTER COMMAND:");
+
+input.focus();
+
+input.addEventListener('keydown', function(e) {
+  if(e.key === 'Enter') {
+    const cmd = input.value.trim().toUpperCase();
+    input.value = '';
+    handleCommand(cmd);
+  }
+});
+
+function addLine(text, className="") {
+  const line = document.createElement('div');
+  line.textContent = text;
+  if(className) line.className = className;
+  terminal.appendChild(line);
+  terminal.scrollTop = terminal.scrollHeight;
 }
 
-function revealClue(id) {
-  document.getElementById(id).classList.remove('hidden');
-  maybeError();
-}
-
-function unlockNextLayer() {
-  document.getElementById('layer2').classList.remove('hidden');
-  maybeError();
-}
-
-// Random fake errors for flavor
 function maybeError() {
-  if(Math.random() < 0.3) {
-    const term = document.getElementById('terminal');
-    const err = document.createElement('p');
-    err.className = 'error';
-    const messages = [
-      "ERROR: Access timeout",
-      "WARNING: Security breach detected",
-      "ERROR: File corrupted",
-      "ALERT: Intrusion detected",
-      "WARNING: Data integrity compromised"
+  if(Math.random() < 0.2) {
+    const errors = [
+      "ERROR: FILE CORRUPTED",
+      "WARNING: UNAUTHORIZED ACCESS DETECTED",
+      "ALERT: TEMPORARY LOCKOUT",
+      "ERROR: CODE FRAGMENT MISSING",
+      "SYSTEM WARNING: INTEGRITY CHECK FAILED"
     ];
-    err.textContent = messages[Math.floor(Math.random() * messages.length)];
-    term.appendChild(err);
+    addLine("> " + errors[Math.floor(Math.random()*errors.length)], "error");
+  }
+}
+
+function handleCommand(cmd) {
+  addLine("> " + cmd);
+
+  // Layer 0 commands
+  if(accessLevel === 0) {
+    if(cmd === "HELP") {
+      addLine("> AVAILABLE COMMANDS: LIST, OPEN SYSTEM_LOGS", "hint");
+    } else if(cmd === "LIST") {
+      addLine("> FILES AVAILABLE: SYSTEM_LOGS.TXT", "success");
+    } else if(cmd === "OPEN SYSTEM_LOGS") {
+      addLine("> SYSTEM_LOGS.TXT OPENED");
+      addLine("> 03/12/1985 - Initial protocol activated");
+      addLine("> CODE FRAGMENT FOUND: [??84]");
+      foundCode = true;
+    } else {
+      addLine("> ACCESS DENIED. INVALID COMMAND.", "error");
+      maybeError();
+    }
+  }
+
+  // Layer 1 commands (requires code)
+  else if(accessLevel === 1) {
+    if(cmd === "DECRYPT FRAGMENT" && foundCode) {
+      addLine("> FRAGMENT DECRYPTED: 5284", "success");
+      decrypted = true;
+    } else if(cmd === "LIST") {
+      addLine("> FILES AVAILABLE: PROJECT_X.TXT, BRIEFING_DOCS.DAT", "success");
+    } else if(cmd === "OPEN PROJECT_X.TXT" && decrypted) {
+      addLine("> PROJECT_X.TXT OPENED");
+      addLine("> LEVEL 2 DATA: TARGET COORDINATES CONFIRMED. MISSION PARAMETERS CLASSIFIED.");
+    } else {
+      addLine("> COMMAND NOT RECOGNIZED.", "error");
+      maybeError();
+    }
+  }
+
+  // Upgrade access level
+  if(foundCode && cmd === "ENTER CODE 5284" && accessLevel === 0) {
+    accessLevel = 1;
+    addLine("> ACCESS LEVEL UPGRADED TO 1", "success");
   }
 }
 </script>
