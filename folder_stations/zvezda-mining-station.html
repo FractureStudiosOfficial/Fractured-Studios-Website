@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zvezda Lunar Mining Outpost| U.I.C. Systems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow-y:auto;
+  perspective:1000px;
+}
+
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite; z-index:1001;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+
+h1 { text-align:center; margin-top:0; }
+
+.station-section { 
+  background: rgba(0,0,0,.25); 
+  border:1px solid rgba(255,159,7,.2);
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.station-section h2 { margin-top:0; }
+.station-section p { margin:5px 0; }
+
+#station-image { display:block; max-width:100%; margin:20px auto; border:1px solid rgba(255,159,7,.3); }
+
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:15px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
+  position:sticky;
+  bottom:0;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:20px;
+}
+
+#prompt { display:flex; flex:1; }
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+
+#password-screen {
+  position:fixed;
+  inset:0;
+  background:#111;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+#password-screen input {
+  background:transparent;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  padding:10px;
+  font-size:16px;
+  width:200px;
+  margin-top:10px;
+  outline:none;
+}
+
+#password-screen button {
+  margin-top:10px;
+  padding:5px 10px;
+  font-family:'Share Tech Mono', monospace;
+  background:#000;
+  border:1px solid #FF9F07;
+  color:#FF9F07;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<!-- PASSWORD SCREEN -->
+<div id="password-screen">
+  <h1>Enter Password to Access Station</h1>
+  <input type="password" id="station-password" placeholder="Password">
+  <button id="submit-password">Unlock</button>
+  <p id="password-error" style="color:#FF3A00;margin-top:10px;display:none;">Incorrect password</p>
+</div>
+
+<div id="crt-container" style="display:none;">
+
+<h1>Zvezda Lunar Mining Outpost</h1>
+
+<!-- Station Image -->
+<img id="station-image" src="station-placeholder.png" alt="Station Image">
+
+<!-- Main Station Sections -->
+<div class="station-section">
+  <h2>General Information</h2>
+  <p><strong>Affiliation:</strong> USA / USSR</p>
+  <p><strong>Launch Date:</strong> YYYY-MM-DD</p>
+  <p><strong>Station Age:</strong> XX years</p>
+  <p><strong>Location:</strong> Orbit / Planet / Moon</p>
+  <p><strong>Orbit Type:</strong> LEO / Lunar / Venus / Mars / Geosynchronous</p>
+  <p><strong>Mission Type:</strong> Research / Mining / Defense / Exploration</p>
+</div>
+
+<!-- Subsections for smaller disconnected modules -->
+<div class="station-section"><h2>Module 1</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 2</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 3</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 4</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 5</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 6</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 7</h2><p>Description</p></div>
+<div class="station-section"><h2>Module 8</h2><p>Description</p></div>
+
+<div class="station-section">
+  <h2>Current Tasks & Research</h2>
+  <p>Task 1: Description</p>
+  <p>Experiment 1: Description</p>
+  <p>Research Focus: Description</p>
+  <p>Status Alerts: Normal / Warning / Critical</p>
+</div>
+
+<div class="station-section">
+  <h2>History & Notes</h2>
+  <p>Previous Missions: Description</p>
+  <p>Major Events: Description</p>
+  <p>Additional Notes: Description</p>
+</div>
+
+<div id="terminal-box">
+  <div id="prompt">
+    <span>></span>
+    <input id="cmd" autocomplete="off">
+  </div>
+</div>
+
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script>
+// PASSWORD LOGIC
+const passwordScreen = document.getElementById("password-screen");
+const submitPassword = document.getElementById("submit-password");
+const passwordInput = document.getElementById("station-password");
+const passwordError = document.getElementById("password-error");
+const container = document.getElementById("crt-container");
+
+// CHANGE THIS PASSWORD AS NEEDED
+const stationPassword = "solaris80";
+
+submitPassword.addEventListener("click", () => {
+  if(passwordInput.value === stationPassword){
+    passwordScreen.style.display="none";
+    container.style.display="block";
+  } else {
+    passwordError.style.display="block";
+  }
+});
+
+// 3D tilt effect
+const os = document.getElementById("os");
+document.addEventListener("mousemove", e => {
+  const x = (window.innerWidth/2 - e.clientX)/1000;
+  const y = (window.innerHeight/2 - e.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+});
+
+// Terminal commands
+const input = document.getElementById("cmd");
+input.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  const cmd = input.value.toLowerCase().trim();
+  switch(cmd){
+    case "home":
+      window.location="index.html"; break;
+    case "stations":
+      alert("Already on Stations page"); break;
+    case "about":
+      window.location="about.html"; break;
+    case "games":
+      window.location="games.html"; break;
+    case "contact":
+      window.location="contact.html"; break;
+    default:
+      console.log("Unknown command: "+cmd);
+  }
+  input.value="";
+});
+</script>
+
+</body>
+</html>
