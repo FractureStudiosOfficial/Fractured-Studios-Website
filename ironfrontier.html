@@ -282,8 +282,8 @@ const container=document.getElementById("crt-container")
 const os=document.getElementById("os")
 
 document.addEventListener("mousemove",(e)=>{
-const x=(window.innerWidth/2-e.clientX)/400
-const y=(window.innerHeight/2-e.clientY)/400
+const x=(window.innerWidth/2-e.clientX)/1500
+const y=(window.innerHeight/2-e.clientY)/1500
 container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
 })
