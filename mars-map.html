@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mars Tactical Map</title>
+<title>Mars Orbital Map</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -44,31 +44,90 @@ animation:flicker .12s infinite;
 100%{opacity:.15}
 }
 
-#hud{
-position:fixed;
-top:10px;
-left:15px;
-font-size:12px;
-opacity:.7;
-letter-spacing:1px;
+/* SIDE PANEL */
+#panel{
+position:absolute;
+left:0;
+top:0;
+bottom:0;
+width:260px;
+background:rgba(0,0,0,.85);
+border-right:1px solid rgba(255,159,7,.2);
+padding:15px;
+box-sizing:border-box;
+overflow-y:auto;
+}
+
+#planetName{
+font-size:20px;
+margin-bottom:10px;
+}
+
+.section{
+margin-top:15px;
+padding-top:10px;
+border-top:1px solid rgba(255,159,7,.2);
+}
+
+.station{
+cursor:pointer;
+padding:6px 4px;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.station:hover{
+background:rgba(255,159,7,.08);
+}
+
+canvas{
+position:absolute;
+left:260px;
+top:0;
 }
 </style>
 </head>
 <body>
 
+<div id="panel">
+<div id="planetName">MARS</div>
+
+<div class="section">
+<div>Atmosphere: Thin CO₂</div>
+<div>Day Length: 24.6h</div>
+<div>Orbit: 687 days</div>
+<div>Gravity: 0.38g</div>
+</div>
+
+<div class="section">
+<div>STATIONS</div>
+<div id="stationList"></div>
+</div>
+</div>
+
 <div id="amber"></div>
 <div id="scanlines"></div>
-<div id="hud">MARS SURFACE SCAN — DRAG ROTATE — SCROLL ZOOM — CLICK POI</div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
+
+/* CONFIG */
+const TEXTURE = null; // "mars-outline.png" to enable texture
+
+const stations = [
+{ name:"UIC Alpha", lat:12, lon:33, icon:"🛰", link:"uic-alpha.html" },
+{ name:"Olympus Base", lat:18.6, lon:-133.8, icon:"⛰", link:"olympus.html" },
+{ name:"Gale Station", lat:-5.4, lon:137.8, icon:"⚙", link:"gale.html" }
+];
+
 /* scene */
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
 60,
-window.innerWidth/window.innerHeight,
+(window.innerWidth-260)/window.innerHeight,
 0.1,
 1000
 );
@@ -76,164 +135,187 @@ window.innerWidth/window.innerHeight,
 camera.position.z = 3;
 
 const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth-260, window.innerHeight);
 renderer.setClearColor(0x000000,1);
+renderer.domElement.style.left="260px";
 document.body.appendChild(renderer.domElement);
 
-/* wireframe mars */
-const geometry = new THREE.SphereGeometry(1, 32, 32);
-const material = new THREE.MeshBasicMaterial({
+/* planet group */
+const planetGroup = new THREE.Group();
+scene.add(planetGroup);
+
+/* texture sphere */
+if(TEXTURE){
+const tex = new THREE.TextureLoader().load(TEXTURE);
+const mat = new THREE.MeshBasicMaterial({
+map: tex,
+transparent:true,
+color:0xFF9F07
+});
+const geo = new THREE.SphereGeometry(1,64,64);
+const mesh = new THREE.Mesh(geo,mat);
+planetGroup.add(mesh);
+}
+
+/* quad wireframe */
+const grid = new THREE.Group();
+
+const latLines = 18;
+const lonLines = 36;
+
+for(let i=0;i<=latLines;i++){
+const lat = (i/latLines)*Math.PI - Math.PI/2;
+const points=[];
+for(let j=0;j<=64;j++){
+const lon = (j/64)*Math.PI*2;
+points.push(new THREE.Vector3(
+Math.cos(lat)*Math.cos(lon),
+Math.sin(lat),
+Math.cos(lat)*Math.sin(lon)
+));
+}
+const geo = new THREE.BufferGeometry().setFromPoints(points);
+const line = new THREE.Line(geo,new THREE.LineBasicMaterial({
 color:0xFF9F07,
-wireframe:true
-});
+depthTest:false,
+transparent:true,
+opacity:.8
+}));
+grid.add(line);
+}
 
-const mars = new THREE.Mesh(geometry, material);
-scene.add(mars);
+for(let i=0;i<lonLines;i++){
+const lon = (i/lonLines)*Math.PI*2;
+const points=[];
+for(let j=0;j<=64;j++){
+const lat = (j/64)*Math.PI - Math.PI/2;
+points.push(new THREE.Vector3(
+Math.cos(lat)*Math.cos(lon),
+Math.sin(lat),
+Math.cos(lat)*Math.sin(lon)
+));
+}
+const geo = new THREE.BufferGeometry().setFromPoints(points);
+const line = new THREE.Line(geo,new THREE.LineBasicMaterial({
+color:0xFF9F07,
+depthTest:false,
+transparent:true,
+opacity:.8
+}));
+grid.add(line);
+}
 
-/* subtle rotation */
-let autoRotate = true;
+planetGroup.add(grid);
 
-/* controls (simple) */
-let dragging = false;
-let prevX = 0;
-let prevY = 0;
-
-window.addEventListener("mousedown", e=>{
-dragging = true;
-prevX = e.clientX;
-prevY = e.clientY;
-});
-
-window.addEventListener("mouseup", ()=> dragging=false);
-
-window.addEventListener("mousemove", e=>{
-if(!dragging) return;
-
-const dx = (e.clientX - prevX) * 0.005;
-const dy = (e.clientY - prevY) * 0.005;
-
-mars.rotation.y += dx;
-mars.rotation.x += dy;
-
-prevX = e.clientX;
-prevY = e.clientY;
-});
-
-/* zoom */
-window.addEventListener("wheel", e=>{
-camera.position.z += e.deltaY * 0.001;
-camera.position.z = Math.max(1.5, Math.min(6, camera.position.z));
-});
-
-/* POI helper */
-function latLonToVector3(lat, lon, radius){
-const phi = (90 - lat) * (Math.PI/180);
-const theta = (lon + 180) * (Math.PI/180);
+/* helpers */
+function latLonToVec(lat,lon,r=1.01){
+const phi = (90-lat)*(Math.PI/180);
+const theta = (lon+180)*(Math.PI/180);
 
 return new THREE.Vector3(
--(radius * Math.sin(phi) * Math.cos(theta)),
-(radius * Math.cos(phi)),
-(radius * Math.sin(phi) * Math.sin(theta))
+-(r*Math.sin(phi)*Math.cos(theta)),
+(r*Math.cos(phi)),
+(r*Math.sin(phi)*Math.sin(theta))
 );
 }
 
 /* POIs */
-const poiData = [
-{
-name:"Olympus Mons",
-lat:18.65,
-lon:-133.8,
-link:"olympus-mons.html"
-},
-{
-name:"Valles Marineris",
-lat:-14,
-lon:-60,
-link:"valles-marineris.html"
-},
-{
-name:"Gale Crater",
-lat:-5.4,
-lon:137.8,
-link:"gale-crater.html"
-},
-{
-name:"U.I.C Landing Site",
-lat:10,
-lon:40,
-link:"uic-landing.html"
+const poiMeshes=[];
+stations.forEach(s=>{
+const pos = latLonToVec(s.lat,s.lon);
+
+const mesh = new THREE.Mesh(
+new THREE.SphereGeometry(0.02,8,8),
+new THREE.MeshBasicMaterial({color:0xFF9F07})
+);
+
+mesh.position.copy(pos);
+mesh.userData=s;
+
+planetGroup.add(mesh);
+poiMeshes.push(mesh);
+});
+
+/* station list UI */
+const stationList=document.getElementById("stationList");
+
+stations.forEach((s,i)=>{
+const div=document.createElement("div");
+div.className="station";
+div.innerHTML=`<span>${s.icon}</span> <span>${s.name}</span>`;
+div.onclick=()=>focusStation(s);
+stationList.appendChild(div);
+});
+
+/* rotate to station */
+function focusStation(st){
+const target = latLonToVec(st.lat,st.lon);
+
+const q = new THREE.Quaternion().setFromUnitVectors(
+target.clone().normalize(),
+new THREE.Vector3(0,0,1)
+);
+
+planetGroup.quaternion.slerp(q,0.1);
 }
-];
 
-const poiObjects = [];
+/* controls */
+let dragging=false;
+let px=0,py=0;
 
-poiData.forEach(poi=>{
-const pos = latLonToVector3(poi.lat, poi.lon, 1.02);
+window.addEventListener("mousedown",e=>{
+dragging=true;px=e.clientX;py=e.clientY;
+});
+window.addEventListener("mouseup",()=>dragging=false);
 
-const geom = new THREE.SphereGeometry(0.02,8,8);
-const mat = new THREE.MeshBasicMaterial({color:0xFF9F07});
-const marker = new THREE.Mesh(geom, mat);
+window.addEventListener("mousemove",e=>{
+if(!dragging) return;
 
-marker.position.copy(pos);
-marker.userData = poi;
+const dx=(e.clientX-px)*0.005;
+const dy=(e.clientY-py)*0.005;
 
-mars.add(marker);
-poiObjects.push(marker);
+planetGroup.rotation.y+=dx;
+planetGroup.rotation.x+=dy;
+
+px=e.clientX;py=e.clientY;
+});
+
+/* zoom */
+window.addEventListener("wheel",e=>{
+camera.position.z+=e.deltaY*0.001;
+camera.position.z=Math.max(1.5,Math.min(6,camera.position.z));
 });
 
 /* raycaster */
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
 
-window.addEventListener("click", e=>{
-mouse.x = (e.clientX/window.innerWidth)*2-1;
-mouse.y = -(e.clientY/window.innerHeight)*2+1;
+window.addEventListener("click",e=>{
+mouse.x=((e.clientX-260)/(window.innerWidth-260))*2-1;
+mouse.y=-(e.clientY/window.innerHeight)*2+1;
 
-raycaster.setFromCamera(mouse, camera);
+raycaster.setFromCamera(mouse,camera);
+const hit=raycaster.intersectObjects(poiMeshes);
 
-const intersects = raycaster.intersectObjects(poiObjects);
-
-if(intersects.length>0){
-window.location = intersects[0].object.userData.link;
-}
-});
-
-/* hover highlight */
-window.addEventListener("mousemove", e=>{
-mouse.x = (e.clientX/window.innerWidth)*2-1;
-mouse.y = -(e.clientY/window.innerHeight)*2+1;
-
-raycaster.setFromCamera(mouse, camera);
-
-const intersects = raycaster.intersectObjects(poiObjects);
-
-poiObjects.forEach(p=>p.scale.set(1,1,1));
-
-if(intersects.length>0){
-intersects[0].object.scale.set(1.6,1.6,1.6);
+if(hit.length){
+window.location=hit[0].object.userData.link;
 }
 });
 
 /* animate */
 function animate(){
 requestAnimationFrame(animate);
-
-if(autoRotate){
-mars.rotation.y += 0.001;
+renderer.render(scene,camera);
 }
-
-renderer.render(scene, camera);
-}
-
 animate();
 
 /* resize */
-window.addEventListener("resize", ()=>{
-camera.aspect = window.innerWidth/window.innerHeight;
+window.addEventListener("resize",()=>{
+camera.aspect=(window.innerWidth-260)/window.innerHeight;
 camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth-260,window.innerHeight);
 });
-</script>
 
+</script>
 </body>
 </html>
