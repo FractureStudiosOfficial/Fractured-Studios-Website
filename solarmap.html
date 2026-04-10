@@ -4,410 +4,261 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solar System Map | U.I.C. Systems</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
+body{
+margin:0;
+background:#000;
+color:#FF9F07;
+font-family:'Share Tech Mono', monospace;
+overflow:hidden;
 }
-#canvas { display:block; background:#111; }
-#side-panel {
-  position:absolute; top:10px; right:10px;
-  background:rgba(0,0,0,.3); padding:10px;
-  border:1px solid #FF9F07; width:220px;
+
+/* CRT overlay */
+#amber{
+position:fixed;
+inset:0;
+background:rgba(255,159,7,.05);
+pointer-events:none;
 }
-button {
-  background:#111; border:1px solid #FF9F07;
-  color:#FF9F07; margin:2px; cursor:pointer;
+
+#scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.05) 0px,
+rgba(255,255,255,.05) 2px,
+transparent 5px,
+transparent 9px
+);
+animation:flicker .12s infinite;
 }
+
+@keyframes flicker{
+0%{opacity:.15}
+50%{opacity:.07}
+100%{opacity:.15}
+}
+
+/* canvas */
+canvas{
+display:block;
+}
+
+/* phosphor glow */
+.glow{
+filter:blur(6px);
+opacity:.6;
+}
+
+/* HUD */
+#hud{
+position:fixed;
+top:10px;
+left:15px;
+font-size:13px;
+opacity:.7;
+}
+
 </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
-<div id="side-panel">
-  <div>Current Date: <span id="current-date"></span></div>
-  <div>Time Speed:</div>
-  <button onclick="setTimeFactor(1)">1x</button>
-  <button onclick="setTimeFactor(5)">5x</button>
-  <button onclick="setTimeFactor(10)">10x</button>
-  <button onclick="setTimeFactor(100)">100x</button>
-  <button onclick="pauseTime()">Pause</button>
-  <button onclick="resetTime()">Reset</button>
-</div>
+<div id="amber"></div>
+<div id="scanlines"></div>
+<div id="hud">SOLAR NAVIGATION — DRAG TO PAN — SCROLL TO ZOOM</div>
 
-  #side-panel {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 250px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid #FF9F07;
-    padding: 15px;
-    font-family: 'Share Tech Mono', monospace;
-    color: #FF9F07;
-    z-index: 1000;
-}
-#side-panel h2 {
-    margin-top: 0;
-    font-size: 16px;
-    border-bottom: 1px solid #FF9F07;
-    padding-bottom: 4px;
-}
-#side-panel button, #side-panel select, #side-panel input {
-    background: #111;
-    border: 1px solid #FF9F07;
-    color: #FF9F07;
-    font-family: inherit;
-    font-size: 12px;
-    margin: 2px 0;
-    padding: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-#side-panel input { color:#FF9F07; }
+<canvas id="space"></canvas>
 
 <script>
-// Canvas setup
-const canvas = document.getElementById("canvas");
+const canvas = document.getElementById("space");
 const ctx = canvas.getContext("2d");
+
+function resize(){
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
 
-// Zoom and pan
+/* camera */
+let camX = 0;
+let camY = 0;
 let zoom = 1;
-let pan = {x:0, y:0};
-let isDragging = false, lastPos = {x:0, y:0};
 
-canvas.addEventListener('mousedown', e => {
-  isDragging = true;
-  lastPos = {x:e.clientX, y:e.clientY};
+/* drag */
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+canvas.addEventListener("mousedown", e=>{
+dragging = true;
+lastX = e.clientX;
+lastY = e.clientY;
 });
 
-canvas.addEventListener('mousemove', e => {
-  if(isDragging){
-    pan.x += e.clientX - lastPos.x;
-    pan.y += e.clientY - lastPos.y;
-    lastPos = {x:e.clientX, y:e.clientY};
-  }
+window.addEventListener("mouseup", ()=> dragging=false);
+
+window.addEventListener("mousemove", e=>{
+if(!dragging) return;
+camX += (e.clientX - lastX)/zoom;
+camY += (e.clientY - lastY)/zoom;
+lastX = e.clientX;
+lastY = e.clientY;
 });
 
-canvas.addEventListener('mouseup', ()=>{ isDragging=false; });
-canvas.addEventListener('wheel', e => { zoom *= e.deltaY<0?1.1:0.9; });
+/* zoom */
+canvas.addEventListener("wheel", e=>{
+const scale = 1.1;
+if(e.deltaY < 0) zoom *= scale;
+else zoom /= scale;
+});
 
-  <!-- Side Panel -->
-<div id="side-panel">
-    <h2>Solar System Map</h2>
-    <div>
-        <label>Current Time:</label>
-        <div id="sim-date">Loading...</div>
-    </div>
-    <div>
-        <label>Speed:</label>
-        <button class="speed-btn" data-speed="1">1x</button>
-        <button class="speed-btn" data-speed="5">5x</button>
-        <button class="speed-btn" data-speed="10">10x</button>
-        <button class="speed-btn" data-speed="100">100x</button>
-        <button class="speed-btn" data-speed="0">Pause</button>
-        <button id="reset-time">Reset</button>
-    </div>
-    <div>
-        <label>Filter:</label>
-        <select id="filter-body">
-            <option value="all">All Bodies</option>
-            <option value="planets">Planets</option>
-            <option value="moons">Moons</option>
-            <option value="stations">Stations</option>
-        </select>
-    </div>
-    <div>
-        <label>Search:</label>
-        <input type="text" id="search-body" placeholder="Enter name...">
-    </div>
-    <div id="body-info">
-        <h3>Selected Body:</h3>
-        <p id="body-details">None</p>
-    </div>
-</div>
+/* bodies */
+const bodies = {
 
-// Utilities
-const AU_SCALE = 50; // 1 AU = 50px (scaled)
-function AUToCanvas(au){ return au*AU_SCALE*zoom; }
+sun:{ r:12, orbit:0, speed:0, color:"#FF9F07", link:null },
 
-// Planet and moon data
-const planets = [
-  {name:'Mercury', AU:0.39, period:88, color:'#aaa', moons:[]},
-  {name:'Venus', AU:0.72, period:225, color:'#ffb366', moons:[]},
-  {name:'Earth', AU:1, period:365, color:'#3399ff', moons:[
-    {name:'Moon', AU:0.00257, color:'#ccc'}
-  ], stations:[
-    {name:'ISS', orbitAU:0.000042, orbitPeriod:0.07},
-    {name:'Skylab', orbitAU:0.00003, orbitPeriod:0.05}
-  ]},
-  {name:'Mars', AU:1.52, period:687, color:'#ff6633', moons:[
-    {name:'Phobos', AU:0.00006, color:'#999'},
-    {name:'Deimos', AU:0.00015, color:'#bbb'}
-  ]},
-  {name:'Jupiter', AU:5.2, period:4333, color:'#ff9966', moons:[
-    {name:'Europa', AU:0.0045, color:'#ddd'}
-  ]},
-  {name:'Saturn', AU:9.58, period:10759, color:'#ffcc99', moons:[]},
-  {name:'Uranus', AU:19.2, period:30687, color:'#99ccff', moons:[]},
-  {name:'Neptune', AU:30.05, period:60190, color:'#3366ff', moons:[]},
-  {name:'Pluto', AU:39.48, period:90560, color:'#999', moons:[]},
+mercury:{ r:3, orbit:40, speed:4.15, link:"mercury-map.html" },
+venus:{ r:4, orbit:60, speed:1.62, link:"venus-map.html" },
+earth:{ r:5, orbit:80, speed:1, link:"earth-map.html" },
+mars:{ r:4, orbit:105, speed:0.53, link:"mars-map.html" },
+jupiter:{ r:9, orbit:150, speed:0.084, link:"jupiter-map.html" },
+saturn:{ r:8, orbit:190, speed:0.034, link:"saturn-map.html" },
+uranus:{ r:7, orbit:225, speed:0.012, link:"uranus-map.html" },
+neptune:{ r:7, orbit:255, speed:0.006, link:"neptune-map.html" }
+
+};
+
+/* moons */
+const moons = [
+{ parent:"earth", r:2, orbit:10, speed:8, link:"moon-map.html" },
+{ parent:"mars", r:1.5, orbit:6, speed:12, link:"phobos-map.html" },
+{ parent:"mars", r:1.2, orbit:10, speed:7, link:"deimos-map.html" },
+{ parent:"jupiter", r:2, orbit:14, speed:3, link:"europa-map.html" }
 ];
 
-// Simulation time
-let simTime = new Date();
-let timeFactor = 1;
+let time = 0;
 
-function setTimeFactor(f){ timeFactor=f; }
-function pauseTime(){ timeFactor=0; }
-function resetTime(){ simTime = new Date(); }
+/* click detection */
+canvas.addEventListener("click", e=>{
+const mx = (e.clientX - canvas.width/2)/zoom - camX;
+const my = (e.clientY - canvas.height/2)/zoom - camY;
 
-// Update side panel
-function updateDateDisplay(){
-  document.getElementById('current-date').textContent = simTime.toDateString();
+for(const name in bodies){
+const b = bodies[name];
+if(!b.pos) continue;
+const dx = mx - b.pos.x;
+const dy = my - b.pos.y;
+if(Math.hypot(dx,dy) < b.r+3 && b.link){
+window.location = b.link;
+}
 }
 
-// Placeholder for maneuver nodes
-let maneuverNodes = [];
-
-// Center of canvas
-const center = {x:canvas.width/2, y:canvas.height/2};
-
-// Main draw loop (planets will be drawn here in Part 2)
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  updateDateDisplay();
-  requestAnimationFrame(draw);
+moons.forEach(m=>{
+if(!m.pos) return;
+const dx = mx - m.pos.x;
+const dy = my - m.pos.y;
+if(Math.hypot(dx,dy) < m.r+3){
+window.location = m.link;
 }
-
-draw();
-
-// Time simulation loop
-function stepTime(){
-  simTime = new Date(simTime.getTime() + 1000*timeFactor);
-  setTimeout(stepTime,1000);
-}
-stepTime();
-
-</script>
-</body>
-</html>
-<script>
-// ---------- Part 2: Orbits & Planet/Moon/Station Rendering ----------
-
-// Compute orbital angle for a planet given current simulation time
-function getPlanetAngle(planet){
-    // Convert planet period from days to milliseconds
-    const periodMS = planet.period * 24*60*60*1000;
-    const startTime = new Date(simTime.getFullYear(), simTime.getMonth(), 1).getTime(); // Jan 1 of current year
-    const elapsed = simTime.getTime() - startTime;
-    return (elapsed/periodMS) * 2 * Math.PI;
-}
-
-// Draw orbits
-function drawOrbit(x, y, radius){
-    ctx.beginPath();
-    ctx.strokeStyle = "rgba(255,159,7,0.2)";
-    ctx.lineWidth = 1;
-    ctx.arc(x, y, radius, 0, 2*Math.PI);
-    ctx.stroke();
-}
-
-// Draw planet or moon
-function drawBody(x, y, color, size, name){
-    ctx.beginPath();
-    ctx.fillStyle = color;
-    ctx.arc(x, y, size, 0, 2*Math.PI);
-    ctx.fill();
-    ctx.fillStyle = "#FF9F07";
-    ctx.font = "12px 'Share Tech Mono'";
-    ctx.fillText(name, x+size+2, y);
-}
-
-// Draw stations orbiting a planet
-function drawStation(planetX, planetY, station){
-    const angle = getPlanetAngle(station);
-    const radius = AUToCanvas(station.orbitAU);
-    const sx = planetX + radius * Math.cos(angle) * zoom;
-    const sy = planetY + radius * Math.sin(angle) * zoom;
-    drawBody(sx, sy, "#FFAA00", 3, station.name);
-}
-
-  
-// Enhanced draw loop
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // Draw Sun at center
-    drawBody(center.x+pan.x, center.y+pan.y, "#FFD700", 15, "Sun");
-
-    // Draw each planet
-    planets.forEach(planet=>{
-        const orbitRadius = AUToCanvas(planet.AU);
-        drawOrbit(center.x+pan.x, center.y+pan.y, orbitRadius);
-
-        // Planet position
-        const angle = getPlanetAngle(planet);
-        const planetX = center.x + pan.x + orbitRadius * Math.cos(angle);
-        const planetY = center.y + pan.y + orbitRadius * Math.sin(angle);
-
-        drawBody(planetX, planetY, planet.color, 8, planet.name);
-
-        // Draw moons
-        if(planet.moons){
-            planet.moons.forEach(moon=>{
-                const moonRadius = AUToCanvas(moon.AU);
-                const moonAngle = getPlanetAngle(moon);
-                const moonX = planetX + moonRadius * Math.cos(moonAngle);
-                const moonY = planetY + moonRadius * Math.sin(moonAngle);
-                drawBody(moonX, moonY, moon.color, 4, moon.name);
-            });
-        }
-
-        // Draw stations
-        if(planet.stations){
-            planet.stations.forEach(station=>{
-                drawStation(planetX, planetY, station);
-            });
-        }
-    });
-
-    updateDateDisplay();
-    requestAnimationFrame(draw);
-}
-
-// Orbit speed & time integration handled via timeFactor from Part 1
-// Already updating simulation in stepTime()
-
-</script>
-<script>
-// ---------- Part 3: Interaction & Maneuvers ----------
-
-// Track selected body
-let selectedBody = null;
-
-// Get all celestial bodies (planets + moons)
-function getAllBodies(){
-    let bodies = [];
-    planets.forEach(p=>{
-        bodies.push({type:'planet', planet:p, name:p.name});
-        if(p.moons) p.moons.forEach(m=>{
-            bodies.push({type:'moon', planet:p, moon:m, name:m.name});
-        });
-    });
-    return bodies;
-}
-
-// Detect if a click is on a planet or moon
-canvas.addEventListener('click', e=>{
-    const mouseX = (e.clientX - pan.x);
-    const mouseY = (e.clientY - pan.y);
-    const bodies = getAllBodies();
-    let found = null;
-
-    bodies.forEach(b=>{
-        const orbitRadius = AUToCanvas(b.type==='planet'?b.planet.AU:b.planet.AU);
-        const angle = getPlanetAngle(b.type==='planet'?b.planet:b.moon);
-        const px = center.x + orbitRadius * Math.cos(angle);
-        const py = center.y + orbitRadius * Math.sin(angle);
-        let bx=px, by=py;
-        if(b.type==='moon'){
-            const moonRadius = AUToCanvas(b.moon.AU);
-            bx = px + moonRadius * Math.cos(angle);
-            by = py + moonRadius * Math.sin(angle);
-        }
-        if(Math.hypot(mouseX - bx, mouseY - by) < 12){
-            found = b;
-        }
-    });
-
-    if(found){
-        selectedBody = found;
-        console.log("Selected:", found.name);
-        alert("Selected: " + found.name);
-    } else {
-        // Check if click is for maneuver node creation
-        if(selectedBody){
-            const x = (mouseX - center.x - pan.x)/zoom;
-            const y = (mouseY - center.y - pan.y)/zoom;
-            maneuverNodes.push({body:selectedBody, x:x, y:y});
-            console.log("Maneuver node added near", selectedBody.name);
-            alert("Maneuver node created near " + selectedBody.name);
-        }
-    }
+});
 });
 
-// Draw maneuver nodes
-function drawManeuvers(){
-    maneuverNodes.forEach(node=>{
-        const orbitRadius = AUToCanvas(node.body.type==='planet'?node.body.planet.AU:node.body.planet.AU);
-        const angle = getPlanetAngle(node.body.type==='planet'?node.body.planet:node.body.moon);
-        let bx = center.x + pan.x + orbitRadius * Math.cos(angle);
-        let by = center.y + pan.y + orbitRadius * Math.sin(angle);
-        if(node.body.type==='moon'){
-            const moonRadius = AUToCanvas(node.body.moon.AU);
-            bx += moonRadius * Math.cos(angle);
-            by += moonRadius * Math.sin(angle);
-        }
-        const mx = bx + node.x*zoom;
-        const my = by + node.y*zoom;
+function draw(){
 
-        ctx.beginPath();
-        ctx.strokeStyle = "#FF0000";
-        ctx.lineWidth = 2;
-        ctx.arc(mx, my, 6, 0, 2*Math.PI);
-        ctx.stroke();
-        ctx.fillStyle = "#FF0000";
-        ctx.fillText("M", mx-4, my+4);
-    });
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.save();
+
+ctx.translate(canvas.width/2, canvas.height/2);
+ctx.scale(zoom, zoom);
+ctx.translate(camX, camY);
+
+/* orbits */
+ctx.strokeStyle="rgba(255,159,7,.15)";
+ctx.lineWidth=1;
+
+for(const name in bodies){
+const b = bodies[name];
+if(b.orbit === 0) continue;
+ctx.beginPath();
+ctx.arc(0,0,b.orbit,0,Math.PI*2);
+ctx.stroke();
 }
 
-// Integrate into draw loop from Part 2
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+/* planets */
+for(const name in bodies){
 
-    // Draw Sun at center
-    drawBody(center.x+pan.x, center.y+pan.y, "#FFD700", 15, "Sun");
+const b = bodies[name];
 
-    planets.forEach(planet=>{
-        const orbitRadius = AUToCanvas(planet.AU);
-        drawOrbit(center.x+pan.x, center.y+pan.y, orbitRadius);
-        const angle = getPlanetAngle(planet);
-        const planetX = center.x + pan.x + orbitRadius * Math.cos(angle);
-        const planetY = center.y + pan.y + orbitRadius * Math.sin(angle);
-        drawBody(planetX, planetY, planet.color, 8, planet.name);
+let x = 0;
+let y = 0;
 
-        if(planet.moons){
-            planet.moons.forEach(moon=>{
-                const moonRadius = AUToCanvas(moon.AU);
-                const moonAngle = getPlanetAngle(moon);
-                const moonX = planetX + moonRadius * Math.cos(moonAngle);
-                const moonY = planetY + moonRadius * Math.sin(moonAngle);
-                drawBody(moonX, moonY, moon.color, 4, moon.name);
-            });
-        }
+if(b.orbit !== 0){
+const angle = time * b.speed * 0.0001;
+x = Math.cos(angle) * b.orbit;
+y = Math.sin(angle) * b.orbit;
+}
 
-        if(planet.stations){
-            planet.stations.forEach(station=>{
-                drawStation(planetX, planetY, station);
-            });
-        }
-    });
+b.pos = {x,y};
 
-    // Draw maneuver nodes
-    drawManeuvers();
+/* glow */
+ctx.beginPath();
+ctx.fillStyle="rgba(255,159,7,.25)";
+ctx.arc(x,y,b.r*3,0,Math.PI*2);
+ctx.fill();
 
-    updateDateDisplay();
-    requestAnimationFrame(draw);
+/* body */
+ctx.beginPath();
+ctx.fillStyle="#FF9F07";
+ctx.arc(x,y,b.r,0,Math.PI*2);
+ctx.fill();
+
+}
+
+/* moons */
+moons.forEach(m=>{
+const parent = bodies[m.parent];
+const angle = time * m.speed * 0.0001;
+
+const x = parent.pos.x + Math.cos(angle)*m.orbit;
+const y = parent.pos.y + Math.sin(angle)*m.orbit;
+
+m.pos = {x,y};
+
+/* orbit */
+ctx.strokeStyle="rgba(255,159,7,.08)";
+ctx.beginPath();
+ctx.arc(parent.pos.x,parent.pos.y,m.orbit,0,Math.PI*2);
+ctx.stroke();
+
+/* glow */
+ctx.beginPath();
+ctx.fillStyle="rgba(255,159,7,.2)";
+ctx.arc(x,y,m.r*2.5,0,Math.PI*2);
+ctx.fill();
+
+/* moon */
+ctx.beginPath();
+ctx.fillStyle="#FF9F07";
+ctx.arc(x,y,m.r,0,Math.PI*2);
+ctx.fill();
+
+});
+
+ctx.restore();
+
+time += 1;
+requestAnimationFrame(draw);
 }
 
 draw();
-
 </script>
+
+</body>
+</html>
