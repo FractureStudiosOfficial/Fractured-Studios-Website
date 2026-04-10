@@ -150,7 +150,8 @@ const tex = new THREE.TextureLoader().load(TEXTURE);
 const mat = new THREE.MeshBasicMaterial({
 map: tex,
 transparent:true,
-color:0xFF9F07
+color:0xFF9F07,
+side: THREE.FrontSide
 });
 const geo = new THREE.SphereGeometry(1,64,64);
 const mesh = new THREE.Mesh(geo,mat);
