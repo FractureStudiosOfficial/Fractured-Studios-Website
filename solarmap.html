@@ -16,7 +16,6 @@ font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* CRT overlay */
 #amber{
 position:fixed;
 inset:0;
@@ -44,18 +43,10 @@ animation:flicker .12s infinite;
 100%{opacity:.15}
 }
 
-/* canvas */
 canvas{
 display:block;
 }
 
-/* phosphor glow */
-.glow{
-filter:blur(6px);
-opacity:.6;
-}
-
-/* HUD */
 #hud{
 position:fixed;
 top:10px;
@@ -63,7 +54,6 @@ left:15px;
 font-size:13px;
 opacity:.7;
 }
-
 </style>
 </head>
 <body>
@@ -121,25 +111,25 @@ else zoom /= scale;
 /* bodies */
 const bodies = {
 
-sun:{ r:12, orbit:0, speed:0, color:"#FF9F07", link:null },
+sun:{ r:12, orbit:0, speed:0, name:"Sun" },
 
-mercury:{ r:3, orbit:40, speed:4.15, link:"mercury-map.html" },
-venus:{ r:4, orbit:60, speed:1.62, link:"venus-map.html" },
-earth:{ r:5, orbit:80, speed:1, link:"earth-map.html" },
-mars:{ r:4, orbit:105, speed:0.53, link:"mars-map.html" },
-jupiter:{ r:9, orbit:150, speed:0.084, link:"jupiter-map.html" },
-saturn:{ r:8, orbit:190, speed:0.034, link:"saturn-map.html" },
-uranus:{ r:7, orbit:225, speed:0.012, link:"uranus-map.html" },
-neptune:{ r:7, orbit:255, speed:0.006, link:"neptune-map.html" }
+mercury:{ r:3, orbit:40, speed:4.15, name:"Mercury", link:"mercury-map.html" },
+venus:{ r:4, orbit:60, speed:1.62, name:"Venus", link:"venus-map.html" },
+earth:{ r:5, orbit:80, speed:1, name:"Earth", link:"earth-map.html" },
+mars:{ r:4, orbit:105, speed:0.53, name:"Mars", link:"mars-map.html" },
+jupiter:{ r:9, orbit:150, speed:0.084, name:"Jupiter", link:"jupiter-map.html" },
+saturn:{ r:8, orbit:190, speed:0.034, name:"Saturn", link:"saturn-map.html" },
+uranus:{ r:7, orbit:225, speed:0.012, name:"Uranus", link:"uranus-map.html" },
+neptune:{ r:7, orbit:255, speed:0.006, name:"Neptune", link:"neptune-map.html" }
 
 };
 
 /* moons */
 const moons = [
-{ parent:"earth", r:2, orbit:10, speed:8, link:"moon-map.html" },
-{ parent:"mars", r:1.5, orbit:6, speed:12, link:"phobos-map.html" },
-{ parent:"mars", r:1.2, orbit:10, speed:7, link:"deimos-map.html" },
-{ parent:"jupiter", r:2, orbit:14, speed:3, link:"europa-map.html" }
+{ parent:"earth", r:2, orbit:10, speed:8, name:"Moon", link:"moon-map.html" },
+{ parent:"mars", r:1.5, orbit:6, speed:12, name:"Phobos", link:"phobos-map.html" },
+{ parent:"mars", r:1.2, orbit:10, speed:7, name:"Deimos", link:"deimos-map.html" },
+{ parent:"jupiter", r:2, orbit:14, speed:3, name:"Europa", link:"europa-map.html" }
 ];
 
 let time = 0;
@@ -151,10 +141,10 @@ const my = (e.clientY - canvas.height/2)/zoom - camY;
 
 for(const name in bodies){
 const b = bodies[name];
-if(!b.pos) continue;
+if(!b.pos || !b.link) continue;
 const dx = mx - b.pos.x;
 const dy = my - b.pos.y;
-if(Math.hypot(dx,dy) < b.r+3 && b.link){
+if(Math.hypot(dx,dy) < b.r+3){
 window.location = b.link;
 }
 }
@@ -179,7 +169,7 @@ ctx.translate(canvas.width/2, canvas.height/2);
 ctx.scale(zoom, zoom);
 ctx.translate(camX, camY);
 
-/* orbits */
+/* orbit lines */
 ctx.strokeStyle="rgba(255,159,7,.15)";
 ctx.lineWidth=1;
 
@@ -207,18 +197,17 @@ y = Math.sin(angle) * b.orbit;
 
 b.pos = {x,y};
 
-/* glow */
-ctx.beginPath();
-ctx.fillStyle="rgba(255,159,7,.25)";
-ctx.arc(x,y,b.r*3,0,Math.PI*2);
-ctx.fill();
-
 /* body */
 ctx.beginPath();
 ctx.fillStyle="#FF9F07";
 ctx.arc(x,y,b.r,0,Math.PI*2);
 ctx.fill();
 
+/* label */
+ctx.font = "10px Share Tech Mono";
+ctx.fillStyle="rgba(255,159,7,.8)";
+ctx.textAlign="center";
+ctx.fillText(b.name, x, y + b.r + 10);
 }
 
 /* moons */
@@ -237,17 +226,17 @@ ctx.beginPath();
 ctx.arc(parent.pos.x,parent.pos.y,m.orbit,0,Math.PI*2);
 ctx.stroke();
 
-/* glow */
-ctx.beginPath();
-ctx.fillStyle="rgba(255,159,7,.2)";
-ctx.arc(x,y,m.r*2.5,0,Math.PI*2);
-ctx.fill();
-
 /* moon */
 ctx.beginPath();
 ctx.fillStyle="#FF9F07";
 ctx.arc(x,y,m.r,0,Math.PI*2);
 ctx.fill();
+
+/* label */
+ctx.font = "9px Share Tech Mono";
+ctx.fillStyle="rgba(255,159,7,.7)";
+ctx.textAlign="center";
+ctx.fillText(m.name, x, y + m.r + 8);
 
 });
 
