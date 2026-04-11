@@ -2,273 +2,336 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CLASSIFIED CONTROL DECK // SYSTEM FAILURE MODE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | Suit Analysis Node</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body{
-margin:0;
-background:black;
-font-family:monospace;
-color:#FF9F07;
-overflow:hidden;
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
 }
 
-/* scanlines */
-#scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,0.03) 0px,
-rgba(255,255,255,0.03) 2px,
-transparent 4px,
-transparent 7px
-);
-animation:flicker .12s infinite;
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+
+#scanlines {
+  position:fixed; inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+  z-index:1001;
 }
 
-@keyframes flicker{
-0%{opacity:0.15}
-50%{opacity:0.07}
-100%{opacity:0.15}
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
 }
 
-/* layout */
-#grid{
-display:grid;
-grid-template-columns: repeat(4, 1fr);
-grid-template-rows: repeat(3, 1fr);
-height:100vh;
-width:100vw;
-gap:8px;
-padding:10px;
-box-sizing:border-box;
+#crt-container {
+  padding:40px;
+  min-height:100vh;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
-.panel{
-border:1px solid rgba(255,159,7,0.3);
-background:rgba(0,0,0,0.6);
-padding:10px;
-position:relative;
-overflow:hidden;
+/* layout split */
+#main {
+  display:flex;
+  gap:20px;
+  height:70vh;
 }
 
-.title{
-font-size:12px;
-opacity:0.8;
-margin-bottom:8px;
+/* LEFT 3D VIEW */
+#viewer {
+  flex:2;
+  border:1px solid rgba(255,159,7,.2);
+  background:rgba(0,0,0,.25);
+  position:relative;
 }
 
-.value{
-font-size:18px;
-margin-top:5px;
+/* RIGHT INFO PANEL */
+#info {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.slider{
-width:100%;
+.section {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  padding:10px;
 }
 
-/* status colors */
-.ok{ color:#00FF9C; }
-.warn{ color:#FF9F07; }
-.bad{ color:#FF3A3A; }
-
-#center{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-text-align:center;
-pointer-events:none;
-opacity:0.8;
+.section h2 {
+  margin:0 0 5px 0;
+  font-size:14px;
+  border-bottom:1px dashed rgba(255,159,7,.3);
 }
 
-#access{
-margin-top:10px;
-font-size:14px;
+.section p, li {
+  font-size:12px;
+  margin:4px 0;
 }
 
-button{
-background:black;
-color:#FF9F07;
-border:1px solid #FF9F07;
-padding:5px;
-cursor:pointer;
-width:100%;
+/* terminal */
+#terminal-box {
+  background:rgba(0,0,0,.25);
+  padding:10px;
+  border:1px solid rgba(255,159,7,.2);
+  display:flex;
 }
 
+#prompt {
+  display:flex;
+  flex:1;
+}
+
+#prompt input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  flex:1;
+}
+
+#os {
+  position:fixed;
+  bottom:10px;
+  right:15px;
+  font-size:12px;
+  opacity:.7;
+}
 </style>
 </head>
 
 <body>
 
-<div id="center">
-<div>CORE INTEGRITY</div>
-<div id="core">100%</div>
-<div id="access">NO ACCESS VECTOR</div>
-</div>
-
-<div id="grid">
-
-<!-- NAV -->
-<div class="panel">
-<div class="title">NAVIGATION MATRIX</div>
-<input class="slider" type="range" min="0" max="100" value="80" id="nav">
-<div class="value" id="navv">80</div>
-</div>
-
-<!-- COMMS -->
-<div class="panel">
-<div class="title">COMMUNICATIONS ARRAY</div>
-<input class="slider" type="range" min="0" max="100" value="40" id="com">
-<div class="value" id="comv">40</div>
-</div>
-
-<!-- POWER -->
-<div class="panel">
-<div class="title">POWER DISTRIBUTION</div>
-<input class="slider" type="range" min="0" max="100" value="60" id="pow">
-<div class="value" id="powv">60</div>
-</div>
-
-<!-- MEMORY -->
-<div class="panel">
-<div class="title">MEMORY BANKS</div>
-<input class="slider" type="range" min="0" max="100" value="77" id="mem">
-<div class="value" id="memv">77</div>
-</div>
-
-<!-- ORBIT -->
-<div class="panel">
-<div class="title">ORBITAL CONTROL</div>
-<input class="slider" type="range" min="0" max="100" value="55" id="orb">
-<div class="value" id="orbv">55</div>
-</div>
-
-<!-- SIGNAL -->
-<div class="panel">
-<div class="title">SIGNAL FILTER</div>
-<input class="slider" type="range" min="0" max="100" value="30" id="sig">
-<div class="value" id="sigv">30</div>
-</div>
-
-<!-- THERMAL -->
-<div class="panel">
-<div class="title">THERMAL LOAD</div>
-<input class="slider" type="range" min="0" max="100" value="50" id="therm">
-<div class="value" id="thermv">50</div>
-</div>
-
-</div>
-
+<div id="amber"></div>
 <div id="scanlines"></div>
+
+<div id="crt-container">
+
+  <h1>SUIT ANALYSIS NODE // CLASSIFIED DISPLAY</h1>
+
+  <div id="main">
+
+    <!-- 3D VIEW -->
+    <div id="viewer"></div>
+
+    <!-- INFO PANEL -->
+    <div id="info">
+
+      <div class="section">
+        <h2>SUBJECT DESIGNATION</h2>
+        <p>ASTRONAUT FRAME UNIT // EVA-07</p>
+      </div>
+
+      <div class="section">
+        <h2>CLASSIFICATION</h2>
+        <p>ORBITAL / UNKNOWN MODIFICATION LAYER DETECTED</p>
+      </div>
+
+      <div class="section">
+        <h2>ANALYSIS NOTES</h2>
+        <p>• External plating reinforced beyond standard U.I.C. spec</p>
+        <p>• Internal wire network suggests non-standard signal routing</p>
+        <p>• Helmet core shows anomalous geometric interference patterns</p>
+      </div>
+
+      <div class="section">
+        <h2>WARNING</h2>
+        <p>VISUAL FEEDBACK MAY NOT REPRESENT TRUE STRUCTURE</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="terminal-box">
+    <div id="prompt">
+      <span>></span>
+      <input id="cmd" autocomplete="off">
+    </div>
+  </div>
+
+</div>
+
+<div id="os">UIC OS v1.0.4</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
 
 /* =========================
-   SYSTEM STATE
+   THREE SETUP
 ========================= */
 
-const state = {
-nav:80,
-com:40,
-pow:60,
-mem:77,
-orb:55,
-sig:30,
-therm:50
-};
+const scene = new THREE.Scene();
 
-const core = document.getElementById("core");
-const access = document.getElementById("access");
+const camera = new THREE.PerspectiveCamera(
+60,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
+
+camera.position.set(0,1.5,4);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth * 0.65, window.innerHeight * 0.65);
+document.getElementById("viewer").appendChild(renderer.domElement);
+
+/* LIGHT */
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(5,5,5);
+scene.add(light);
 
 /* =========================
-   UPDATE CORE LOGIC
+   MODEL LOAD
 ========================= */
 
-function evaluate(){
+let model, wireframe;
 
-/* hidden ARG solution state (VERY specific) */
-const success =
-state.nav >= 62 && state.nav <= 68 &&
-state.com <= 35 &&
-state.pow >= 55 && state.pow <= 65 &&
-state.mem === 77 &&
-state.orb >= 50 && state.orb <= 60 &&
-state.sig <= 33 &&
-state.therm >= 45 && state.therm <= 55;
+const loader = new THREE.GLTFLoader();
 
-if(success){
-access.innerHTML = "ACCESS VECTOR FOUND → /NODE-07/";
-access.className = "ok";
-core.innerHTML = "STABLE";
+loader.load("suit.glb",(gltf)=>{
+
+model = gltf.scene;
+
+/* SOLID BASE */
+model.traverse((c)=>{
+if(c.isMesh){
+c.material = new THREE.MeshStandardMaterial({
+color:0x1c1c1c,
+metalness:0.4,
+roughness:0.6,
+side:THREE.FrontSide
+});
 }
-else{
+});
 
-/* fake stability deception */
-const avg =
-(state.nav+state.com+state.pow+state.mem+state.orb+state.sig+state.therm)/7;
+/* WIREFRAME OVERLAY */
+wireframe = model.clone();
 
-core.innerHTML = Math.floor(avg) + "%";
-
-if(avg > 70) access.innerHTML = "STABLE (UNCERTIFIED)";
-else if(avg > 40) access.innerHTML = "DEGRADED";
-else access.innerHTML = "CRITICAL";
+wireframe.traverse((c)=>{
+if(c.isMesh){
+c.material = new THREE.MeshBasicMaterial({
+color:0xFF9F07,
+wireframe:true,
+transparent:true,
+opacity:0.35,
+depthTest:true,
+side:THREE.FrontSide
+});
 }
-}
+});
+
+scene.add(model);
+scene.add(wireframe);
+
+});
 
 /* =========================
-   SLIDERS
+   ROTATION CONTROL
 ========================= */
 
-function bind(id){
+let dragging=false;
+let px=0;
 
-const el = document.getElementById(id);
-const val = document.getElementById(id+"v");
+window.addEventListener("mousedown",(e)=>{
+dragging=true;
+px=e.clientX;
+});
 
-el.oninput = () => {
-state[id] = parseInt(el.value);
-val.innerHTML = el.value;
-evaluate();
-};
+window.addEventListener("mouseup",()=>dragging=false);
 
-}
+window.addEventListener("mousemove",(e)=>{
 
-/* bind all */
-["nav","com","pow","mem","orb","sig","therm"].forEach(bind);
+if(!dragging || !model) return;
+
+const dx=(e.clientX-px)*0.01;
+
+model.rotation.y += dx;
+wireframe.rotation.y += dx;
+
+px=e.clientX;
+
+});
 
 /* =========================
-   DEGRADATION ENGINE
+   ANIMATE
 ========================= */
 
-function drift(){
+function animate(){
+requestAnimationFrame(animate);
 
-state.nav += (Math.random()-0.5)*4;
-state.com += (Math.random()-0.5)*3;
-state.pow += (Math.random()-0.5)*2;
-state.mem += (Math.random()-0.5)*1;
-state.orb += (Math.random()-0.5)*3;
-state.sig += (Math.random()-0.5)*2;
-state.therm += (Math.random()-0.5)*3;
-
-/* clamp */
-for(let k in state){
-state[k] = Math.max(0,Math.min(100,state[k]));
-document.getElementById(k).value = state[k];
-document.getElementById(k+"v").innerHTML = Math.floor(state[k]);
+if(model){
+model.rotation.y += 0.002;
+wireframe.rotation.y += 0.002;
 }
 
-evaluate();
+renderer.render(scene,camera);
 }
+
+animate();
 
 /* =========================
-   LOOP
+   RESIZE
 ========================= */
 
-setInterval(drift, 2500);
+window.addEventListener("resize",()=>{
 
-evaluate();
+camera.aspect=window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+
+renderer.setSize(window.innerWidth * 0.65, window.innerHeight * 0.65);
+
+});
+
+/* =========================
+   TERMINAL
+========================= */
+
+const input = document.getElementById("cmd");
+
+input.addEventListener("keydown", e=>{
+if(e.key!=="Enter") return;
+
+const cmd = input.value.toLowerCase().trim();
+
+switch(cmd){
+case "home":
+window.location="index.html";
+break;
+case "users":
+window.location="users.html";
+break;
+case "suit":
+location.reload();
+break;
+default:
+console.log("Unknown command:",cmd);
+}
+
+input.value="";
+});
 
 </script>
 
