@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ΔV MISSION CORE // 3D</title>
+<title>MISSION MAP // GENERATION 1</title>
 
 <style>
 body{
@@ -13,7 +13,30 @@ font-family:monospace;
 color:#FF9F07;
 }
 
-/* CRT overlay */
+#hud{
+position:fixed;
+top:10px;
+left:10px;
+z-index:10;
+width:260px;
+}
+
+.panel{
+border:1px solid rgba(255,159,7,0.3);
+padding:8px;
+margin-bottom:8px;
+background:rgba(0,0,0,0.5);
+}
+
+button{
+width:100%;
+margin-top:4px;
+background:black;
+color:#FF9F07;
+border:1px solid #FF9F07;
+cursor:pointer;
+}
+
 #scanlines{
 position:fixed;
 inset:0;
@@ -26,33 +49,6 @@ transparent 4px,
 transparent 7px
 );
 }
-
-#hud{
-position:fixed;
-top:10px;
-left:10px;
-z-index:10;
-}
-
-.panel{
-margin-top:8px;
-padding:8px;
-border:1px solid rgba(255,159,7,0.3);
-background:rgba(0,0,0,0.4);
-width:260px;
-}
-
-select, button{
-width:100%;
-margin-top:5px;
-background:black;
-color:#FF9F07;
-border:1px solid #FF9F07;
-font-family:monospace;
-}
-
-.status-ok{ color:#00FF9C; }
-.status-bad{ color:#FF3A3A; }
 </style>
 </head>
 
@@ -61,18 +57,16 @@ font-family:monospace;
 <div id="hud">
 
 <div class="panel">
-<div>SHIP</div>
-<select id="shipSelect"></select>
+<div><b>MISSION MAP GEN 1</b></div>
+<div id="focus">FOCUS: SUN</div>
 </div>
 
 <div class="panel">
-<div>BODY</div>
-<select id="bodySelect"></select>
-</div>
-
-<div class="panel">
-<div>MISSION STATUS</div>
-<div id="status">NO DATA</div>
+<button onclick="setFocus('Sun')">Sun</button>
+<button onclick="setFocus('Earth')">Earth</button>
+<button onclick="setFocus('Moon')">Moon</button>
+<button onclick="setFocus('Mars')">Mars</button>
+<button onclick="setFocus('Jupiter')">Jupiter</button>
 </div>
 
 </div>
@@ -84,46 +78,7 @@ font-family:monospace;
 <script>
 
 /* =========================
-   DATA
-========================= */
-
-const ships = [
-{ name:"Orbital Shuttle", dv:1.8 },
-{ name:"Explorer Mk I", dv:3.2 },
-{ name:"Heavy Transport", dv:5.4 },
-{ name:"Deep Space Cruiser", dv:9.2 }
-];
-
-const bodies = {
-Earth:{ mu:398600, radius:6371 },
-Moon:{ mu:4902.8, radius:1737 },
-Mars:{ mu:42828, radius:3389 },
-Europa:{ mu:3202.7, radius:1560 }
-};
-
-/* =========================
-   UI SETUP
-========================= */
-
-const shipSelect = document.getElementById("shipSelect");
-const bodySelect = document.getElementById("bodySelect");
-
-ships.forEach(s=>{
-const opt = document.createElement("option");
-opt.value = s.dv;
-opt.textContent = `${s.name} (${s.dv} km/s)`;
-shipSelect.appendChild(opt);
-});
-
-Object.keys(bodies).forEach(b=>{
-const opt = document.createElement("option");
-opt.value = b;
-opt.textContent = b;
-bodySelect.appendChild(opt);
-});
-
-/* =========================
-   THREE.JS SCENE
+   SCENE
 ========================= */
 
 const scene = new THREE.Scene();
@@ -132,112 +87,746 @@ const camera = new THREE.PerspectiveCamera(
 60, window.innerWidth/window.innerHeight, 0.1, 1000
 );
 
-camera.position.z = 6;
+camera.position.z = 12;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* LIGHT */
 scene.add(new THREE.PointLight(0xffffff,1.2));
 
-/* EARTH */
-const planetGeo = new THREE.SphereGeometry(1,32,32);
-const planetMat = new THREE.MeshStandardMaterial({ color:0x2244ff });
-const planet = new THREE.Mesh(planetGeo, planetMat);
-scene.add(planet);
-
-/* ORBIT */
-const orbitGeo = new THREE.RingGeometry(1.6,1.62,128);
-const orbitMat = new THREE.MeshBasicMaterial({
-color:0xFF9F07,
-side:THREE.DoubleSide
-});
-
-const orbit = new THREE.Mesh(orbitGeo, orbitMat);
-orbit.rotation.x = Math.PI/2;
-scene.add(orbit);
-
-/* SHIP */
-const shipGeo = new THREE.SphereGeometry(0.05,12,12);
-const shipMat = new THREE.MeshBasicMaterial({ color:0x00FF9C });
-const ship = new THREE.Mesh(shipGeo, shipMat);
-scene.add(ship);
-
 /* =========================
-   PHYSICS
+   BODY SYSTEM
 ========================= */
 
-function orbitalVelocity(mu,r){
-return Math.sqrt(mu/r);
+class Body {
+constructor(name, size, color, distance, speed, parent=null){
+this.name = name;
+
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(size,32,32),
+new THREE.MeshStandardMaterial({color})
+);
+
+this.distance = distance;
+this.speed = speed;
+this.parent = parent;
+
+this.angle = Math.random()*Math.PI*2;
+
+scene.add(this.mesh);
+}
+
+update(){
+this.angle += this.speed;
+
+if(this.parent){
+this.mesh.position.x =
+this.parent.mesh.position.x + Math.cos(this.angle)*this.distance;
+
+this.mesh.position.z =
+this.parent.mesh.position.z + Math.sin(this.angle)*this.distance;
+}
+}
 }
 
 /* =========================
-   MISSION CALC
+   SYSTEM SETUP
 ========================= */
 
-function calculate(){
+const sun = new Body("Sun", 2, 0xFFAA00, 0, 0);
 
-const shipDV = parseFloat(shipSelect.value);
-const body = bodies[bodySelect.value];
+const earth = new Body("Earth", 0.8, 0x2244ff, 6, 0.003, sun);
+const moon  = new Body("Moon", 0.25, 0x888888, 1.5, 0.01, earth);
 
-const r = body.radius + 200;
+const mars = new Body("Mars", 0.6, 0xFF5533, 9, 0.002, sun);
+const jupiter = new Body("Jupiter", 1.4, 0xD8B080, 14, 0.001, sun);
 
-const requiredDV = orbitalVelocity(body.mu,r);
+const bodies = { Sun:sun, Earth:earth, Moon:moon, Mars:mars, Jupiter:jupiter };
 
-/* status */
-const status = document.getElementById("status");
+/* =========================
+   CAMERA FOCUS
+========================= */
 
-if(shipDV >= requiredDV){
-status.textContent = `MISSION POSSIBLE (${requiredDV.toFixed(2)} km/s required)`;
-status.className = "status-ok";
-} else {
-status.textContent = `INSUFFICIENT ΔV (${requiredDV.toFixed(2)} km/s required)`;
-status.className = "status-bad";
-}
+let focusTarget = sun;
 
+function setFocus(name){
+focusTarget = bodies[name];
+document.getElementById("focus").innerText = "FOCUS: " + name;
 }
 
 /* =========================
-   EVENTS
+   ANIMATE
 ========================= */
-
-shipSelect.onchange = calculate;
-bodySelect.onchange = calculate;
-
-/* =========================
-   ANIMATION
-========================= */
-
-let t = 0;
 
 function animate(){
 requestAnimationFrame(animate);
 
-t += 0.01;
+Object.values(bodies).forEach(b=>b.update());
 
-/* orbit motion */
-ship.position.x = Math.cos(t) * 1.6;
-ship.position.z = Math.sin(t) * 1.6;
-
-planet.rotation.y += 0.001;
+/* camera follows focus */
+camera.position.x = focusTarget.mesh.position.x;
+camera.position.z = focusTarget.mesh.position.z + 10;
+camera.lookAt(focusTarget.mesh.position);
 
 renderer.render(scene,camera);
 }
 
 animate();
 
-/* resize */
+/* =========================
+   RESIZE
+========================= */
+
 window.addEventListener("resize",()=>{
 camera.aspect = window.innerWidth/window.innerHeight;
 camera.updateProjectionMatrix();
 renderer.setSize(window.innerWidth,window.innerHeight);
 });
 
-/* init */
-calculate();
+<script>
+
+/* =========================
+   SCENE SETUP (same base)
+========================= */
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+60, window.innerWidth/window.innerHeight, 0.1, 1000
+);
+
+camera.position.z = 12;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.PointLight(0xffffff,1.2));
+
+/* =========================
+   BODY SYSTEM (same as Gen 1)
+========================= */
+
+class Body {
+constructor(name, size, color, distance, speed, parent=null){
+this.name = name;
+
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(size,32,32),
+new THREE.MeshStandardMaterial({color})
+);
+
+this.distance = distance;
+this.speed = speed;
+this.parent = parent;
+
+this.angle = Math.random()*Math.PI*2;
+
+scene.add(this.mesh);
+}
+
+update(){
+this.angle += this.speed;
+
+if(this.parent){
+this.mesh.position.x =
+this.parent.mesh.position.x + Math.cos(this.angle)*this.distance;
+
+this.mesh.position.z =
+this.parent.mesh.position.z + Math.sin(this.angle)*this.distance;
+}
+}
+}
+
+/* =========================
+   SYSTEM
+========================= */
+
+const sun = new Body("Sun", 2, 0xFFAA00, 0, 0);
+
+const earth = new Body("Earth", 0.8, 0x2244ff, 6, 0.003, sun);
+const moon  = new Body("Moon", 0.25, 0x888888, 1.5, 0.01, earth);
+const mars  = new Body("Mars", 0.6, 0xFF5533, 9, 0.002, sun);
+
+const bodies = { Sun:sun, Earth:earth, Moon:moon, Mars:mars };
+
+/* =========================
+   CAMERA FOCUS
+========================= */
+
+let focusTarget = earth;
+
+function setFocus(name){
+focusTarget = bodies[name];
+}
+
+/* =========================
+   MANEUVER NODE SYSTEM
+========================= */
+
+let nodes = [];
+
+class ManeuverNode {
+constructor(body){
+this.body = body;
+
+/* position in orbit angle space */
+this.deltaAngle = 0;
+
+/* Δv strength (fake scale) */
+this.dv = 0.5;
+
+/* visual marker */
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(0.12,12,12),
+new THREE.MeshBasicMaterial({color:0x00FF9C})
+);
+
+scene.add(this.mesh);
+}
+}
+
+/* =========================
+   ADD NODE ON CLICK
+========================= */
+
+window.addEventListener("click",(e)=>{
+
+/* simple rule: always add node to focused body */
+const node = new ManeuverNode(focusTarget);
+nodes.push(node);
+
+});
+
+/* =========================
+   APPLY NODE EFFECT (visual only)
+========================= */
+
+function updateNodes(){
+
+nodes.forEach(n=>{
+
+/* fake orbital offset */
+n.deltaAngle += 0.002 * n.dv;
+
+/* place node around body orbit */
+n.mesh.position.x =
+n.body.mesh.position.x + Math.cos(n.deltaAngle)*2;
+
+n.mesh.position.z =
+n.body.mesh.position.z + Math.sin(n.deltaAngle)*2;
+
+});
+
+}
+
+/* =========================
+   ANIMATION LOOP
+========================= */
+
+function animate(){
+requestAnimationFrame(animate);
+
+Object.values(bodies).forEach(b=>b.update());
+
+updateNodes();
+
+/* camera follow */
+camera.position.x = focusTarget.mesh.position.x;
+camera.position.z = focusTarget.mesh.position.z + 10;
+camera.lookAt(focusTarget.mesh.position);
+
+renderer.render(scene,camera);
+}
+
+animate();
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener("resize",()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+<script>
+
+/* =========================
+   SCENE
+========================= */
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+60, window.innerWidth/window.innerHeight, 0.1, 1000
+);
+
+camera.position.z = 12;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.PointLight(0xffffff,1.2));
+
+/* =========================
+   BODY SYSTEM
+========================= */
+
+class Body {
+constructor(name, size, color, distance, speed, parent=null){
+this.name = name;
+
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(size,32,32),
+new THREE.MeshStandardMaterial({color})
+);
+
+this.distance = distance;
+this.speed = speed;
+this.parent = parent;
+
+this.angle = Math.random()*Math.PI*2;
+
+scene.add(this.mesh);
+}
+
+update(){
+this.angle += this.speed;
+
+if(this.parent){
+this.mesh.position.x =
+this.parent.mesh.position.x + Math.cos(this.angle)*this.distance;
+
+this.mesh.position.z =
+this.parent.mesh.position.z + Math.sin(this.angle)*this.distance;
+}
+}
+}
+
+/* =========================
+   SYSTEM
+========================= */
+
+const sun = new Body("Sun", 2, 0xFFAA00, 0, 0);
+
+const earth = new Body("Earth", 0.8, 0x2244ff, 6, 0.003, sun);
+const moon  = new Body("Moon", 0.25, 0x888888, 1.5, 0.01, earth);
+const mars  = new Body("Mars", 0.6, 0xFF5533, 9, 0.002, sun);
+
+const bodies = { Sun:sun, Earth:earth, Moon:moon, Mars:mars };
+
+/* =========================
+   FOCUS
+========================= */
+
+let focusTarget = earth;
+
+function setFocus(name){
+focusTarget = bodies[name];
+}
+
+/* =========================
+   MANEUVER NODES
+========================= */
+
+let nodes = [];
+
+class ManeuverNode {
+constructor(body){
+this.body = body;
+
+this.dv = 0.8;         // strength
+this.phase = 0;        // position along orbit
+
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(0.12,12,12),
+new THREE.MeshBasicMaterial({color:0x00FF9C})
+);
+
+scene.add(this.mesh);
+
+/* trajectory line */
+this.line = new THREE.Line(
+new THREE.BufferGeometry(),
+new THREE.LineBasicMaterial({color:0xFF9F07})
+);
+
+scene.add(this.line);
+}
+}
+
+/* =========================
+   CLICK TO ADD NODE
+========================= */
+
+window.addEventListener("click",()=>{
+
+const node = new ManeuverNode(focusTarget);
+nodes.push(node);
+
+});
+
+/* =========================
+   HOHMANN-STYLE TRANSFER (simplified)
+========================= */
+
+function generateTransferPoints(body, dv){
+
+const points = [];
+
+const baseR = body.distance;
+
+/* fake transfer ellipse */
+for(let i=0;i<=64;i++){
+
+const t = i/64;
+const angle = t * Math.PI * 2;
+
+/* ellipse distortion based on dv */
+const stretch = 1 + dv;
+
+const r = baseR * (1 + Math.sin(angle)*0.4*stretch);
+
+points.push(
+body.mesh.position.clone().add(
+new THREE.Vector3(
+Math.cos(angle)*r,
+0,
+Math.sin(angle)*r
+)
+)
+);
+
+}
+
+return points;
+}
+
+/* =========================
+   UPDATE NODES
+========================= */
+
+function updateNodes(){
+
+nodes.forEach(n=>{
+
+/* move node visually with orbit */
+n.phase += 0.002 * n.dv;
+
+n.mesh.position.x =
+n.body.mesh.position.x + Math.cos(n.phase)*2;
+
+n.mesh.position.z =
+n.body.mesh.position.z + Math.sin(n.phase)*2;
+
+/* generate trajectory */
+const pts = generateTransferPoints(n.body,n.dv);
+
+n.line.geometry.dispose();
+n.line.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+
+});
+
+}
+
+/* =========================
+   ANIMATE
+========================= */
+
+function animate(){
+requestAnimationFrame(animate);
+
+Object.values(bodies).forEach(b=>b.update());
+
+updateNodes();
+
+/* camera follow */
+camera.position.x = focusTarget.mesh.position.x;
+camera.position.z = focusTarget.mesh.position.z + 10;
+camera.lookAt(focusTarget.mesh.position);
+
+renderer.render(scene,camera);
+}
+
+animate();
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener("resize",()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+<script>
+
+/* =========================
+   SCENE
+========================= */
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+60, window.innerWidth/window.innerHeight, 0.1, 1000
+);
+
+camera.position.z = 12;
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.PointLight(0xffffff,1.2));
+
+/* =========================
+   SHIP DATA (with fuel)
+========================= */
+
+const ships = {
+Explorer: { dv: 3.2 },
+Transport: { dv: 5.5 },
+Cruiser: { dv: 9.0 }
+};
+
+/* =========================
+   BODY SYSTEM
+========================= */
+
+class Body {
+constructor(name, size, color, distance, speed, parent=null){
+this.name = name;
+
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(size,32,32),
+new THREE.MeshStandardMaterial({color})
+);
+
+this.distance = distance;
+this.speed = speed;
+this.parent = parent;
+
+this.angle = Math.random()*Math.PI*2;
+
+scene.add(this.mesh);
+}
+
+update(){
+this.angle += this.speed;
+
+if(this.parent){
+this.mesh.position.x =
+this.parent.mesh.position.x + Math.cos(this.angle)*this.distance;
+
+this.mesh.position.z =
+this.parent.mesh.position.z + Math.sin(this.angle)*this.distance;
+}
+}
+}
+
+/* =========================
+   SYSTEM
+========================= */
+
+const sun = new Body("Sun", 2, 0xFFAA00, 0, 0);
+
+const earth = new Body("Earth", 0.8, 0x2244ff, 6, 0.003, sun);
+const moon  = new Body("Moon", 0.25, 0x888888, 1.5, 0.01, earth);
+const mars  = new Body("Mars", 0.6, 0xFF5533, 9, 0.002, sun);
+
+const bodies = { Sun:sun, Earth:earth, Moon:moon, Mars:mars };
+
+/* =========================
+   FOCUS
+========================= */
+
+let focusTarget = earth;
+
+function setFocus(name){
+focusTarget = bodies[name];
+}
+
+/* =========================
+   MISSION STATE
+========================= */
+
+let nodes = [];
+let selectedShip = ships.Explorer;
+
+/* =========================
+   NODE SYSTEM
+========================= */
+
+class ManeuverNode {
+constructor(body){
+
+this.body = body;
+
+/* Δv cost */
+this.dv = 0.5 + Math.random()*0.5;
+
+/* geometry */
+this.mesh = new THREE.Mesh(
+new THREE.SphereGeometry(0.12,12,12),
+new THREE.MeshBasicMaterial({color:0x00FF9C})
+);
+
+scene.add(this.mesh);
+
+/* trajectory */
+this.line = new THREE.Line(
+new THREE.BufferGeometry(),
+new THREE.LineBasicMaterial({color:0xFF9F07})
+);
+
+scene.add(this.line);
+
+}
+}
+
+/* =========================
+   CLICK = ADD NODE
+========================= */
+
+window.addEventListener("click",()=>{
+
+const node = new ManeuverNode(focusTarget);
+nodes.push(node);
+
+recalculateMission();
+
+});
+
+/* =========================
+   ORBIT PATH GENERATOR
+========================= */
+
+function generatePath(body,dv){
+
+const pts = [];
+
+const base = body.distance * (1 + dv*0.2);
+
+for(let i=0;i<=64;i++){
+
+const t = i/64 * Math.PI*2;
+
+const r = base * (1 + Math.sin(t)*0.25);
+
+pts.push(
+body.mesh.position.clone().add(
+new THREE.Vector3(
+Math.cos(t)*r,
+0,
+Math.sin(t)*r
+)
+)
+);
+
+}
+
+return pts;
+}
+
+/* =========================
+   MISSION ENGINE (NEW CORE)
+========================= */
+
+function recalculateMission(){
+
+let totalDV = 0;
+
+/* update each node */
+nodes.forEach(n=>{
+
+totalDV += n.dv;
+
+/* node position */
+n.mesh.position.x =
+n.body.mesh.position.x + Math.cos(n.dv*10 + Date.now()*0.001)*2;
+
+n.mesh.position.z =
+n.body.mesh.position.z + Math.sin(n.dv*10 + Date.now()*0.001)*2;
+
+/* trajectory */
+const pts = generatePath(n.body,n.dv);
+
+n.line.geometry.dispose();
+n.line.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+
+});
+
+/* mission evaluation */
+const available = selectedShip.dv;
+
+const status = document.getElementById("status");
+
+if(!status){
+const div = document.createElement("div");
+div.id = "status";
+div.style.position = "fixed";
+div.style.bottom = "10px";
+div.style.left = "10px";
+div.style.color = "#FF9F07";
+document.body.appendChild(div);
+}
+
+const el = document.getElementById("status");
+
+if(totalDV <= available){
+el.innerHTML =
+`MISSION POSSIBLE<br>
+Δv Used: ${totalDV.toFixed(2)} / ${available}`;
+el.style.color = "#00FF9C";
+}
+else{
+el.innerHTML =
+`INSUFFICIENT ΔV<br>
+Δv Used: ${totalDV.toFixed(2)} / ${available}`;
+el.style.color = "#FF3A3A";
+}
+
+}
+
+/* =========================
+   UPDATE LOOP
+========================= */
+
+function animate(){
+requestAnimationFrame(animate);
+
+Object.values(bodies).forEach(b=>b.update());
+
+recalculateMission();
+
+/* camera follow */
+camera.position.x = focusTarget.mesh.position.x;
+camera.position.z = focusTarget.mesh.position.z + 10;
+camera.lookAt(focusTarget.mesh.position);
+
+renderer.render(scene,camera);
+}
+
+animate();
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener("resize",()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
 
 </script>
 
+   
 </body>
 </html>
