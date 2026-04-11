@@ -1,0 +1,647 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delta-V Mission Console</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body{
+margin:0;
+background:#000;
+color:#FF9F07;
+font-family:'Share Tech Mono', monospace;
+overflow:hidden;
+}
+
+/* CRT overlays */
+#amber{
+position:fixed;
+inset:0;
+background:rgba(255,159,7,.05);
+pointer-events:none;
+}
+
+#scanlines{
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.05) 0px,
+rgba(255,255,255,.05) 2px,
+transparent 5px,
+transparent 9px
+);
+animation:flicker .12s infinite;
+}
+
+@keyframes flicker{
+0%{opacity:.15}
+50%{opacity:.07}
+100%{opacity:.15}
+}
+
+/* layout */
+#container{
+display:flex;
+height:100vh;
+}
+
+#leftPanel{
+width:320px;
+border-right:1px solid rgba(255,159,7,.2);
+padding:15px;
+box-sizing:border-box;
+}
+
+#main{
+flex:1;
+padding:15px;
+box-sizing:border-box;
+}
+
+/* sections */
+.section{
+margin-bottom:18px;
+border-top:1px solid rgba(255,159,7,.2);
+padding-top:10px;
+}
+
+select, button, input{
+background:#000;
+border:1px solid rgba(255,159,7,.4);
+color:#FF9F07;
+font-family:inherit;
+padding:6px;
+width:100%;
+margin-top:5px;
+}
+
+button:hover{
+background:rgba(255,159,7,.08);
+cursor:pointer;
+}
+
+#burnList{
+height:200px;
+overflow:auto;
+border:1px solid rgba(255,159,7,.2);
+padding:5px;
+}
+
+.burn{
+padding:4px;
+border-bottom:1px solid rgba(255,159,7,.15);
+}
+
+#status{
+margin-top:15px;
+font-size:18px;
+}
+
+.green{ color:#00FF9C; }
+.red{ color:#FF3A3A; }
+.cyan{ color:#00E5FF; }
+</style>
+</head>
+<body>
+
+<div id="container">
+
+<div id="leftPanel">
+
+<div class="section">
+<div>SHIP</div>
+<select id="shipSelect"></select>
+</div>
+
+<div class="section">
+<div>CELESTIAL BODY</div>
+<select id="bodySelect"></select>
+</div>
+
+<div class="section">
+<div>MANEUVER</div>
+<select id="maneuverType">
+<option>Hohmann Transfer</option>
+<option>Surface to Orbit</option>
+<option>Escape Burn</option>
+<option>Capture Burn</option>
+</select>
+
+<button id="addBurn">ADD BURN</button>
+</div>
+
+<div class="section">
+<button id="saveMission">SAVE MISSION</button>
+<button id="exportMission">EXPORT PLAN</button>
+</div>
+
+</div>
+
+<div id="main">
+
+<div class="section">
+<div>BURN SEQUENCE</div>
+<div id="burnList"></div>
+</div>
+
+<div class="section">
+<div>TOTAL ΔV: <span id="totalDV">0</span> km/s</div>
+<div>REMAINING: <span id="remainingDV">0</span> km/s</div>
+<div id="status">STATUS: —</div>
+<div id="recommended">RECOMMENDED SHIP: —</div>
+</div>
+
+</div>
+</div>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<script>
+
+/* ships */
+const ships = [
+{ name:"Orbital Shuttle", dv:1.8 },
+{ name:"Explorer Mk I", dv:3.2 },
+{ name:"Heavy Transport", dv:5.4 },
+{ name:"Deep Space Cruiser", dv:9.2 }
+];
+
+/* celestial bodies */
+const bodies = [
+"Mercury","Venus","Earth","Moon",
+"Mars","Phobos","Deimos",
+"Jupiter","Europa",
+"Saturn","Uranus","Neptune"
+];
+
+/* populate ships */
+const shipSelect = document.getElementById("shipSelect");
+ships.forEach(s=>{
+const opt=document.createElement("option");
+opt.textContent=`${s.name} (${s.dv} km/s)`;
+opt.value=s.dv;
+shipSelect.appendChild(opt);
+});
+
+/* populate bodies */
+const bodySelect = document.getElementById("bodySelect");
+bodies.forEach(b=>{
+const opt=document.createElement("option");
+opt.textContent=b;
+bodySelect.appendChild(opt);
+});
+
+/* burn list */
+const burns=[];
+const burnList=document.getElementById("burnList");
+
+document.getElementById("addBurn").onclick=()=>{
+const type=document.getElementById("maneuverType").value;
+
+const burn={
+type,
+dv:0
+};
+
+burns.push(burn);
+renderBurns();
+};
+
+/* render burns */
+function renderBurns(){
+burnList.innerHTML="";
+burns.forEach((b,i)=>{
+const div=document.createElement("div");
+div.className="burn";
+div.textContent=`${i+1}. ${b.type} — calculating...`;
+burnList.appendChild(div);
+});
+updateTotals();
+}
+
+/* totals */
+function updateTotals(){
+
+const total = burns.reduce((a,b)=>a+b.dv,0);
+document.getElementById("totalDV").textContent = total.toFixed(2);
+
+const shipDV = parseFloat(shipSelect.value);
+const remaining = shipDV - total;
+
+document.getElementById("remainingDV").textContent = remaining.toFixed(2);
+
+const status = document.getElementById("status");
+status.className="";
+
+if(remaining > shipDV*0.2){
+status.textContent="STATUS: MISSION POSSIBLE";
+status.classList.add("green");
+}
+else if(remaining > 0){
+status.textContent="STATUS: TIGHT MARGIN";
+status.classList.add("cyan");
+}
+else{
+status.textContent="STATUS: INSUFFICIENT ΔV";
+status.classList.add("red");
+}
+
+/* recommendation */
+const viable = ships.filter(s=>s.dv>=total).sort((a,b)=>a.dv-b.dv)[0];
+
+document.getElementById("recommended").textContent =
+"RECOMMENDED SHIP: " + (viable ? viable.name : "NONE");
+}
+
+shipSelect.addEventListener("change", updateTotals);
+
+
+
+</body>
+</html>
+  
+<script>
+
+/* ships */
+const ships = [
+{ name:"Orbital Shuttle", dv:1.8 },
+{ name:"Explorer Mk I", dv:3.2 },
+{ name:"Heavy Transport", dv:5.4 },
+{ name:"Deep Space Cruiser", dv:9.2 }
+];
+
+/* celestial body data (km, km^3/s^2) */
+const bodyData = {
+Mercury:{ mu:22032, radius:2439 },
+Venus:{ mu:324859, radius:6051 },
+Earth:{ mu:398600, radius:6371 },
+Moon:{ mu:4902.8, radius:1737 },
+Mars:{ mu:42828, radius:3389 },
+Phobos:{ mu:0.000711, radius:11 },
+Deimos:{ mu:0.0000985, radius:6 },
+Jupiter:{ mu:126686534, radius:69911 },
+Europa:{ mu:3202.7, radius:1560 },
+Saturn:{ mu:37931187, radius:58232 },
+Uranus:{ mu:5793939, radius:25362 },
+Neptune:{ mu:6836529, radius:24622 }
+};
+
+/* populate UI */
+const shipSelect = document.getElementById("shipSelect");
+ships.forEach(s=>{
+const opt=document.createElement("option");
+opt.textContent=`${s.name} (${s.dv} km/s)`;
+opt.value=s.dv;
+shipSelect.appendChild(opt);
+});
+
+const bodySelect = document.getElementById("bodySelect");
+Object.keys(bodyData).forEach(b=>{
+const opt=document.createElement("option");
+opt.textContent=b;
+bodySelect.appendChild(opt);
+});
+
+/* burns */
+const burns=[];
+const burnList=document.getElementById("burnList");
+
+/* math helpers */
+function circularVelocity(mu, r){
+return Math.sqrt(mu / r);
+}
+
+function hohmannDV(mu, r1, r2){
+const v1 = Math.sqrt(mu/r1);
+const v2 = Math.sqrt(mu/r2);
+
+const va = Math.sqrt(mu*(2/r1 - 1/((r1+r2)/2)));
+const vb = Math.sqrt(mu*(2/r2 - 1/((r1+r2)/2)));
+
+return Math.abs(va-v1) + Math.abs(v2-vb);
+}
+
+function escapeDV(mu, r){
+return Math.sqrt(2*mu/r) - Math.sqrt(mu/r);
+}
+
+function captureDV(mu, r){
+return Math.sqrt(2*mu/r) - Math.sqrt(mu/r);
+}
+
+/* add burn */
+document.getElementById("addBurn").onclick=()=>{
+const type=document.getElementById("maneuverType").value;
+const body=document.getElementById("bodySelect").value;
+
+const altitude1 = 200; // km default
+const altitude2 = 2000; // km default
+
+const data = bodyData[body];
+
+let dv = 0;
+
+const r1 = data.radius + altitude1;
+const r2 = data.radius + altitude2;
+
+if(type==="Hohmann Transfer"){
+dv = hohmannDV(data.mu, r1, r2);
+}
+else if(type==="Surface to Orbit"){
+dv = circularVelocity(data.mu, r1);
+}
+else if(type==="Escape Burn"){
+dv = escapeDV(data.mu, r1);
+}
+else if(type==="Capture Burn"){
+dv = captureDV(data.mu, r1);
+}
+
+const burn={
+type,
+body,
+dv
+};
+
+burns.push(burn);
+renderBurns();
+};
+
+/* render */
+function renderBurns(){
+burnList.innerHTML="";
+burns.forEach((b,i)=>{
+const div=document.createElement("div");
+div.className="burn";
+div.textContent=
+`${i+1}. ${b.type} @ ${b.body} — ${b.dv.toFixed(2)} km/s`;
+burnList.appendChild(div);
+});
+updateTotals();
+}
+
+/* totals */
+function updateTotals(){
+
+const total = burns.reduce((a,b)=>a+b.dv,0);
+document.getElementById("totalDV").textContent = total.toFixed(2);
+
+const shipDV = parseFloat(shipSelect.value);
+const remaining = shipDV - total;
+
+document.getElementById("remainingDV").textContent = remaining.toFixed(2);
+
+const status = document.getElementById("status");
+status.className="";
+
+if(remaining > shipDV*0.2){
+status.textContent="STATUS: MISSION POSSIBLE";
+status.classList.add("green");
+}
+else if(remaining > 0){
+status.textContent="STATUS: TIGHT MARGIN";
+status.classList.add("cyan");
+}
+else{
+status.textContent="STATUS: INSUFFICIENT ΔV";
+status.classList.add("red");
+}
+
+const viable = ships.filter(s=>s.dv>=total).sort((a,b)=>a.dv-b.dv)[0];
+
+document.getElementById("recommended").textContent =
+"RECOMMENDED SHIP: " + (viable ? viable.name : "NONE");
+}
+
+shipSelect.addEventListener("change", updateTotals);
+
+
+html
+<script>
+
+/* ---------- SHIPS ---------- */
+const ships = [
+{ name:"Orbital Shuttle", dv:1.8 },
+{ name:"Explorer Mk I", dv:3.2 },
+{ name:"Heavy Transport", dv:5.4 },
+{ name:"Deep Space Cruiser", dv:9.2 },
+{ name:"Interplanetary Vessel", dv:12.5 }
+];
+
+/* ---------- BODY DATA ---------- */
+const bodyData = {
+Mercury:{ mu:22032, radius:2439 },
+Venus:{ mu:324859, radius:6051 },
+Earth:{ mu:398600, radius:6371 },
+Moon:{ mu:4902.8, radius:1737 },
+Mars:{ mu:42828, radius:3389 },
+Phobos:{ mu:0.000711, radius:11 },
+Deimos:{ mu:0.0000985, radius:6 },
+Jupiter:{ mu:126686534, radius:69911 },
+Europa:{ mu:3202.7, radius:1560 },
+Saturn:{ mu:37931187, radius:58232 },
+Uranus:{ mu:5793939, radius:25362 },
+Neptune:{ mu:6836529, radius:24622 }
+};
+
+/* ---------- UI POPULATION ---------- */
+const shipSelect = document.getElementById("shipSelect");
+ships.forEach(s=>{
+const opt=document.createElement("option");
+opt.textContent=`${s.name} (${s.dv} km/s)`;
+opt.value=s.dv;
+shipSelect.appendChild(opt);
+});
+
+const bodySelect = document.getElementById("bodySelect");
+Object.keys(bodyData).forEach(b=>{
+const opt=document.createElement("option");
+opt.textContent=b;
+bodySelect.appendChild(opt);
+});
+
+/* ---------- MATH ---------- */
+function circularVelocity(mu,r){
+return Math.sqrt(mu/r);
+}
+
+function hohmannDV(mu,r1,r2){
+const v1=Math.sqrt(mu/r1);
+const v2=Math.sqrt(mu/r2);
+const va=Math.sqrt(mu*(2/r1-1/((r1+r2)/2)));
+const vb=Math.sqrt(mu*(2/r2-1/((r1+r2)/2)));
+return Math.abs(va-v1)+Math.abs(v2-vb);
+}
+
+function escapeDV(mu,r){
+return Math.sqrt(2*mu/r)-Math.sqrt(mu/r);
+}
+
+/* ---------- BURNS ---------- */
+const burns=[];
+const burnList=document.getElementById("burnList");
+
+/* ---------- ADD BURN ---------- */
+document.getElementById("addBurn").onclick=()=>{
+burns.push({
+type:document.getElementById("maneuverType").value,
+body:document.getElementById("bodySelect").value,
+alt1:200,
+alt2:2000,
+dv:0
+});
+renderBurns();
+};
+
+/* ---------- RENDER ---------- */
+function renderBurns(){
+
+burnList.innerHTML="";
+
+burns.forEach((b,i)=>{
+
+const div=document.createElement("div");
+div.className="burn";
+
+div.innerHTML=`
+<div>${i+1}. ${b.type} @ ${b.body}</div>
+<div>
+ALT 1: <input type="number" value="${b.alt1}" data-i="${i}" class="alt1">
+ALT 2: <input type="number" value="${b.alt2}" data-i="${i}" class="alt2">
+<button data-i="${i}" class="remove">X</button>
+</div>
+<div>Δv: ${b.dv.toFixed(2)} km/s</div>
+`;
+
+burnList.appendChild(div);
+});
+
+bindInputs();
+calculateAll();
+}
+
+/* ---------- INPUT BINDING ---------- */
+function bindInputs(){
+
+document.querySelectorAll(".alt1").forEach(el=>{
+el.onchange=e=>{
+const i=e.target.dataset.i;
+burns[i].alt1=parseFloat(e.target.value);
+calculateAll();
+};
+});
+
+document.querySelectorAll(".alt2").forEach(el=>{
+el.onchange=e=>{
+const i=e.target.dataset.i;
+burns[i].alt2=parseFloat(e.target.value);
+calculateAll();
+};
+});
+
+document.querySelectorAll(".remove").forEach(el=>{
+el.onclick=e=>{
+burns.splice(e.target.dataset.i,1);
+renderBurns();
+};
+});
+
+}
+
+/* ---------- CALCULATE ---------- */
+function calculateAll(){
+
+burns.forEach(b=>{
+
+const data=bodyData[b.body];
+const r1=data.radius + b.alt1;
+const r2=data.radius + b.alt2;
+
+if(b.type==="Hohmann Transfer"){
+b.dv = hohmannDV(data.mu,r1,r2);
+}
+else if(b.type==="Surface to Orbit"){
+b.dv = circularVelocity(data.mu,r1);
+}
+else if(b.type==="Escape Burn"){
+b.dv = escapeDV(data.mu,r1);
+}
+else{
+b.dv = circularVelocity(data.mu,r1);
+}
+
+});
+
+renderTotals();
+renderBurns();
+}
+
+/* ---------- TOTALS ---------- */
+function renderTotals(){
+
+const total = burns.reduce((a,b)=>a+b.dv,0);
+document.getElementById("totalDV").textContent=total.toFixed(2);
+
+const shipDV=parseFloat(shipSelect.value);
+const remaining=shipDV-total;
+
+document.getElementById("remainingDV").textContent=remaining.toFixed(2);
+
+const status=document.getElementById("status");
+status.className="";
+
+if(remaining>shipDV*0.2){
+status.textContent="STATUS: MISSION POSSIBLE";
+status.classList.add("green");
+}
+else if(remaining>0){
+status.textContent="STATUS: TIGHT MARGIN";
+status.classList.add("cyan");
+}
+else{
+status.textContent="STATUS: INSUFFICIENT ΔV";
+status.classList.add("red");
+}
+
+const viable = ships.filter(s=>s.dv>=total).sort((a,b)=>a.dv-b.dv)[0];
+
+document.getElementById("recommended").textContent=
+"RECOMMENDED SHIP: " + (viable?viable.name:"NONE");
+}
+
+shipSelect.addEventListener("change",renderTotals);
+
+/* ---------- SAVE ---------- */
+document.getElementById("saveMission").onclick=()=>{
+localStorage.setItem("dvMission",JSON.stringify(burns));
+};
+
+/* ---------- LOAD ---------- */
+window.onload=()=>{
+const saved=localStorage.getItem("dvMission");
+if(saved){
+const data=JSON.parse(saved);
+data.forEach(b=>burns.push(b));
+renderBurns();
+}
+};
+
+/* ---------- EXPORT ---------- */
+document.getElementById("exportMission").onclick=()=>{
+const data = JSON.stringify(burns,null,2);
+const blob = new Blob([data],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="mission.json";
+a.click();
+};
+
+</script>
+
