@@ -2,37 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ORBITAL SIGNAL TRIANGULATION // CLASSIFIED</title>
+<title>CLASSIFIED SYSTEM // LIVE FAULTING NODE</title>
 
 <style>
 body{
 margin:0;
-overflow:hidden;
 background:black;
 font-family:monospace;
 color:#FF9F07;
+overflow:hidden;
 }
 
-#hud{
-position:fixed;
-top:10px;
-left:10px;
-width:280px;
-z-index:10;
-}
-
-.panel{
-border:1px solid rgba(255,159,7,0.3);
-background:rgba(0,0,0,0.6);
-padding:10px;
-margin-bottom:8px;
-}
-
-#status{
-color:#00FF9C;
-margin-top:5px;
-}
-
+/* CRT scanlines */
 #scanlines{
 position:fixed;
 inset:0;
@@ -44,7 +25,55 @@ rgba(255,255,255,0.03) 2px,
 transparent 4px,
 transparent 7px
 );
+animation:flicker 0.12s infinite;
 }
+
+@keyframes flicker{
+0%{opacity:0.15}
+50%{opacity:0.07}
+100%{opacity:0.15}
+}
+
+/* layout */
+#hud{
+position:fixed;
+top:10px;
+left:10px;
+width:320px;
+z-index:10;
+}
+
+.panel{
+border:1px solid rgba(255,159,7,0.3);
+padding:10px;
+margin-bottom:8px;
+background:rgba(0,0,0,0.6);
+}
+
+.module{
+padding:6px;
+margin-top:6px;
+border:1px solid rgba(255,159,7,0.2);
+cursor:pointer;
+transition:0.2s;
+}
+
+.module:hover{
+background:rgba(255,159,7,0.1);
+}
+
+.bad{
+color:#FF3A3A;
+}
+
+.ok{
+color:#00FF9C;
+}
+
+.warn{
+color:#FF9F07;
+}
+
 </style>
 </head>
 
@@ -53,174 +82,142 @@ transparent 7px
 <div id="hud">
 
 <div class="panel">
-<b>ORBITAL SIGNAL MAP</b>
-<div>STATUS: SCANNING...</div>
-<div id="status">NO TRIANGULATION</div>
+<b>LIVE FAULTING SYSTEM</b><br>
+STATUS: <span id="status">STABLE</span><br>
+INTEGRITY: <span id="integrity">100%</span>
 </div>
 
 <div class="panel">
-<div>INSTRUCTIONS:</div>
-<div>• Align signal sources</div>
-<div>• Wait for pulse sync</div>
-<div>• Decode transmission</div>
+<div>SUBSYSTEMS</div>
+
+<div class="module" onclick="stabilize(this,'NAV')">
+NAVIGATION CORE: <span class="state warn">DEGRADED</span>
+</div>
+
+<div class="module" onclick="stabilize(this,'COM')">
+COMMS ARRAY: <span class="state bad">FAULTED</span>
+</div>
+
+<div class="module" onclick="stabilize(this,'ORB')">
+ORBITAL TRACKING: <span class="state warn">DEGRADED</span>
+</div>
+
+<div class="module" onclick="stabilize(this,'MEM')">
+MEMORY BANKS: <span class="state bad">CORRUPT</span>
+</div>
+
 </div>
 
 <div class="panel">
-<div id="message">---</div>
+<div>EVENT LOG</div>
+<div id="log">System initializing...</div>
 </div>
 
 </div>
 
 <div id="scanlines"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-
 <script>
 
 /* =========================
-   SCENE SETUP
+   SYSTEM STATE
 ========================= */
 
-const scene = new THREE.Scene();
+let integrity = 100;
 
-const camera = new THREE.PerspectiveCamera(
-60, window.innerWidth/window.innerHeight, 0.1, 1000
-);
+const logEl = document.getElementById("log");
+const integrityEl = document.getElementById("integrity");
+const statusEl = document.getElementById("status");
 
-camera.position.z = 14;
-
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-/* LIGHT */
-scene.add(new THREE.PointLight(0xffffff,1.2));
-
-/* =========================
-   CENTRAL BODY (Earth)
-========================= */
-
-const earth = new THREE.Mesh(
-new THREE.SphereGeometry(1,32,32),
-new THREE.MeshStandardMaterial({color:0x2244ff})
-);
-
-scene.add(earth);
-
-/* =========================
-   SIGNAL CLASS
-========================= */
-
-class Signal {
-constructor(radius, speed, phaseOffset, color){
-
-this.radius = radius;
-this.speed = speed;
-this.phase = phaseOffset;
-
-this.mesh = new THREE.Mesh(
-new THREE.SphereGeometry(0.12,12,12),
-new THREE.MeshBasicMaterial({color})
-);
-
-scene.add(this.mesh);
-
-/* pulse glow */
-this.baseScale = 1;
-
-}
-
-update(time){
-
-this.phase += this.speed;
-
-/* orbit motion */
-this.mesh.position.x = Math.cos(this.phase) * this.radius;
-this.mesh.position.z = Math.sin(this.phase) * this.radius;
-
-/* pulsing signal */
-const pulse = Math.sin(time*2 + this.radius) * 0.5 + 1;
-
-this.mesh.scale.set(
-this.baseScale * pulse,
-this.baseScale * pulse,
-this.baseScale * pulse
-);
-
-}
+function log(msg){
+logEl.innerHTML = msg;
 }
 
 /* =========================
-   SIGNALS
+   RANDOM FAULT ENGINE
 ========================= */
 
-const signals = [
-new Signal(3, 0.01, 0, 0xFF3A3A),
-new Signal(5, 0.008, 1, 0x00FF9C),
-new Signal(7, 0.006, 2, 0xFF9F07),
-new Signal(9, 0.005, 3, 0x00A8FF)
+const faults = [
+"UNSTABLE SIGNAL DETECTED",
+"MEMORY DESYNC OCCURRED",
+"ORBITAL DRIFT EXCEEDS LIMITS",
+"UNKNOWN PROCESS SPAWNED",
+"DATA FRAGMENTATION IN PROGRESS",
+"NONSTANDARD INPUT STREAM"
 ];
 
-/* =========================
-   TRIANGULATION LOGIC
-========================= */
+function randomFault(){
 
-function checkAlignment(){
+const msg = faults[Math.floor(Math.random()*faults.length)];
+log("⚠ " + msg);
 
-let aligned = true;
-let refAngle = null;
+/* degrade system */
+integrity -= Math.random()*6;
 
-signals.forEach(s=>{
+if(integrity < 0) integrity = 0;
 
-const angle = Math.atan2(s.mesh.position.z, s.mesh.position.x);
+updateUI();
 
-/* normalize */
-const norm = Math.round(angle * 10) / 10;
-
-if(refAngle === null) refAngle = norm;
-else if(Math.abs(refAngle - norm) > 0.2) aligned = false;
-
-});
-
-/* pulse sync check */
-const pulse = Math.sin(Date.now()*0.002) > 0.95;
-
-if(aligned && pulse){
-document.getElementById("status").innerText = "TRIANGULATION LOCKED";
-document.getElementById("message").innerText =
-"TRANSMISSION: // 7A-DELTA-ORBIT // ORIGIN UNKNOWN";
-}
 }
 
 /* =========================
-   ANIMATE
+   STABILIZE MODULE
 ========================= */
 
-function animate(){
-requestAnimationFrame(animate);
+function stabilize(el,type){
 
-const t = Date.now()*0.001;
+let gain = 5 + Math.random()*5;
+integrity += gain;
 
-signals.forEach(s=>s.update(t));
+if(integrity > 100) integrity = 100;
 
-earth.rotation.y += 0.001;
-
-checkAlignment();
-
-renderer.render(scene,camera);
+/* hidden ARG trigger */
+if(type === "MEM" && integrity > 85){
+log(">> ENCRYPTED SECTOR ACCESS GRANTED: /NODE-7X/");
+statusEl.innerHTML = "ACCESS VECTOR FOUND";
+statusEl.className = "ok";
 }
 
-animate();
+updateUI();
+
+el.querySelector(".state").innerHTML = "STABILIZED";
+el.querySelector(".state").className = "state ok";
+
+}
 
 /* =========================
-   RESIZE
+   UI UPDATE
 ========================= */
 
-window.addEventListener("resize",()=>{
-camera.aspect = window.innerWidth/window.innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth,window.innerHeight);
-});
+function updateUI(){
+
+integrityEl.innerHTML = Math.floor(integrity) + "%";
+
+if(integrity > 70){
+statusEl.innerHTML = "STABLE";
+statusEl.className = "ok";
+}
+else if(integrity > 30){
+statusEl.innerHTML = "DEGRADED";
+statusEl.className = "warn";
+}
+else{
+statusEl.innerHTML = "CRITICAL";
+statusEl.className = "bad";
+}
+
+}
+
+/* =========================
+   LOOP
+========================= */
+
+setInterval(()=>{
+randomFault();
+}, 4000);
+
+/* init */
+updateUI();
 
 </script>
 
