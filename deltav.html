@@ -2,155 +2,89 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MISSION CONTROL // ΔV SYSTEM</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<title>ΔV MISSION CORE // 3D</title>
 
 <style>
 body{
 margin:0;
-background:#000;
-color:#FF9F07;
-font-family:'Share Tech Mono', monospace;
 overflow:hidden;
+background:black;
+font-family:monospace;
+color:#FF9F07;
 }
 
-/* CRT EFFECTS */
+/* CRT overlay */
 #scanlines{
 position:fixed;
 inset:0;
 pointer-events:none;
 background:repeating-linear-gradient(
 to bottom,
-rgba(255,255,255,.04) 0px,
-rgba(255,255,255,.04) 2px,
+rgba(255,255,255,0.03) 0px,
+rgba(255,255,255,0.03) 2px,
 transparent 4px,
 transparent 7px
 );
 }
 
-#amber{
+#hud{
 position:fixed;
-inset:0;
-background:rgba(255,159,7,.05);
-pointer-events:none;
+top:10px;
+left:10px;
+z-index:10;
 }
 
-/* LAYOUT */
-#container{
-display:flex;
-height:100vh;
-}
-
-#sidebar{
-width:340px;
-border-right:1px solid rgba(255,159,7,.25);
-padding:12px;
-box-sizing:border-box;
-}
-
-#main{
-flex:1;
-padding:12px;
-box-sizing:border-box;
-}
-
-/* PANEL */
 .panel{
-border:1px solid rgba(255,159,7,.2);
-padding:10px;
-margin-bottom:12px;
-}
-
-/* CUSTOM DROPDOWN */
-.dropdown{
-border:1px solid rgba(255,159,7,.3);
-padding:8px;
-cursor:pointer;
-user-select:none;
-}
-
-.dropdown-title{
-color:#FF9F07;
-}
-
-.dropdown-list{
 margin-top:8px;
-border-top:1px solid rgba(255,159,7,.15);
-display:none;
+padding:8px;
+border:1px solid rgba(255,159,7,0.3);
+background:rgba(0,0,0,0.4);
+width:260px;
 }
 
-.dropdown-item{
-padding:6px;
-cursor:pointer;
+select, button{
+width:100%;
+margin-top:5px;
+background:black;
+color:#FF9F07;
+border:1px solid #FF9F07;
+font-family:monospace;
 }
 
-.dropdown-item:hover{
-background:rgba(255,159,7,.1);
-}
-
-/* STATUS */
-#status{
-margin-top:10px;
-}
+.status-ok{ color:#00FF9C; }
+.status-bad{ color:#FF3A3A; }
 </style>
 </head>
+
 <body>
 
-<div id="container">
-
-<!-- SIDEBAR -->
-<div id="sidebar">
+<div id="hud">
 
 <div class="panel">
-
-<div>SHIP SELECTION</div>
-<div id="shipDropdown" class="dropdown">
-<div class="dropdown-title">SELECT SHIP ▼</div>
-<div class="dropdown-list" id="shipList"></div>
-</div>
-
+<div>SHIP</div>
+<select id="shipSelect"></select>
 </div>
 
 <div class="panel">
-
-<div>CELESTIAL BODY</div>
-<div id="bodyDropdown" class="dropdown">
-<div class="dropdown-title">SELECT BODY ▼</div>
-<div class="dropdown-list" id="bodyList"></div>
+<div>BODY</div>
+<select id="bodySelect"></select>
 </div>
-
-</div>
-
-</div>
-
-<!-- MAIN -->
-<div id="main">
 
 <div class="panel">
 <div>MISSION STATUS</div>
-
-<div id="status">NO MISSION CONFIGURED</div>
-
-</div>
-
-<div class="panel">
-<div>SELECTED DATA</div>
-<div id="debug"></div>
-</div>
-
+<div id="status">NO DATA</div>
 </div>
 
 </div>
 
 <div id="scanlines"></div>
-<div id="amber"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
 
 /* =========================
-   DATA SYSTEM
+   DATA
 ========================= */
 
 const ships = [
@@ -161,839 +95,147 @@ const ships = [
 ];
 
 const bodies = {
-Earth:{},
-Moon:{},
-Mars:{},
-Phobos:{},
-Deimos:{},
-Jupiter:{},
-Europa:{},
-Saturn:{},
-Uranus:{},
-Neptune:{},
-Venus:{},
-Mercury:{}
-};
-
-/* =========================
-   STATE
-========================= */
-
-let selectedShip = null;
-let selectedBody = null;
-
-/* =========================
-   DROPDOWN SYSTEM
-========================= */
-
-const shipDropdown = document.getElementById("shipDropdown");
-const shipList = document.getElementById("shipList");
-
-const bodyDropdown = document.getElementById("bodyDropdown");
-const bodyList = document.getElementById("bodyList");
-
-/* TOGGLE DROPDOWNS */
-shipDropdown.onclick = () => {
-shipList.style.display =
-shipList.style.display === "block" ? "none" : "block";
-};
-
-bodyDropdown.onclick = () => {
-bodyList.style.display =
-bodyList.style.display === "block" ? "none" : "block";
-};
-
-/* =========================
-   POPULATE SHIPS
-========================= */
-
-ships.forEach(ship => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = `${ship.name} (${ship.dv} km/s)`;
-
-div.onclick = () => {
-selectedShip = ship;
-shipDropdown.querySelector(".dropdown-title").textContent =
-ship.name + " ▼";
-
-updateUI();
-};
-
-shipList.appendChild(div);
-});
-
-/* =========================
-   POPULATE BODIES
-========================= */
-
-Object.keys(bodies).forEach(body => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = body;
-
-div.onclick = () => {
-selectedBody = body;
-bodyDropdown.querySelector(".dropdown-title").textContent =
-body + " ▼";
-
-updateUI();
-};
-
-bodyList.appendChild(div);
-});
-
-/* =========================
-   UI STATE UPDATE
-========================= */
-
-function updateUI(){
-
-document.getElementById("debug").innerHTML = `
-Ship: ${selectedShip ? selectedShip.name : "NONE"}<br>
-Δv: ${selectedShip ? selectedShip.dv : 0} km/s<br><br>
-Body: ${selectedBody ? selectedBody : "NONE"}
-`;
-
-if(selectedShip && selectedBody){
-document.getElementById("status").textContent =
-"MISSION CONFIGURED - READY FOR ΔV CALCULATION (PART 2)";
-}
-}
-
-/* =========================
-   CLICK OUTSIDE CLOSE
-========================= */
-
-document.addEventListener("click", (e) => {
-if(!shipDropdown.contains(e.target)){
-shipList.style.display = "none";
-}
-if(!bodyDropdown.contains(e.target)){
-bodyList.style.display = "none";
-}
-});
-
-<script>
-
-/* =========================
-   SHIPS
-========================= */
-
-const ships = [
-{ name:"Orbital Shuttle", dv:1.8 },
-{ name:"Explorer Mk I", dv:3.2 },
-{ name:"Heavy Transport", dv:5.4 },
-{ name:"Deep Space Cruiser", dv:9.2 }
-];
-
-/* =========================
-   CELESTIAL BODY DATA
-   μ in km^3/s^2, radius in km
-========================= */
-
-const bodies = {
-Mercury:{ mu:22032, radius:2439 },
-Venus:{ mu:324859, radius:6051 },
 Earth:{ mu:398600, radius:6371 },
 Moon:{ mu:4902.8, radius:1737 },
 Mars:{ mu:42828, radius:3389 },
-Phobos:{ mu:0.000711, radius:11 },
-Deimos:{ mu:0.0000985, radius:6 },
-Jupiter:{ mu:126686534, radius:69911 },
-Europa:{ mu:3202.7, radius:1560 },
-Saturn:{ mu:37931187, radius:58232 },
-Uranus:{ mu:5793939, radius:25362 },
-Neptune:{ mu:6836529, radius:24622 }
+Europa:{ mu:3202.7, radius:1560 }
 };
 
 /* =========================
-   STATE
+   UI SETUP
 ========================= */
 
-let selectedShip = null;
-let selectedBody = null;
+const shipSelect = document.getElementById("shipSelect");
+const bodySelect = document.getElementById("bodySelect");
 
-/* =========================
-   DOM
-========================= */
-
-const shipDropdown = document.getElementById("shipDropdown");
-const shipList = document.getElementById("shipList");
-
-const bodyDropdown = document.getElementById("bodyDropdown");
-const bodyList = document.getElementById("bodyList");
-
-/* =========================
-   DROPDOWNS (same as Part 1)
-========================= */
-
-ships.forEach(ship => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = `${ship.name} (${ship.dv} km/s)`;
-
-div.onclick = () => {
-selectedShip = ship;
-shipDropdown.querySelector(".dropdown-title").textContent =
-ship.name + " ▼";
-calculateMission();
-};
-
-shipList.appendChild(div);
+ships.forEach(s=>{
+const opt = document.createElement("option");
+opt.value = s.dv;
+opt.textContent = `${s.name} (${s.dv} km/s)`;
+shipSelect.appendChild(opt);
 });
 
-Object.keys(bodies).forEach(body => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = body;
-
-div.onclick = () => {
-selectedBody = body;
-bodyDropdown.querySelector(".dropdown-title").textContent =
-body + " ▼";
-calculateMission();
-};
-
-bodyList.appendChild(div);
+Object.keys(bodies).forEach(b=>{
+const opt = document.createElement("option");
+opt.value = b;
+opt.textContent = b;
+bodySelect.appendChild(opt);
 });
 
 /* =========================
-   ORBITAL MATH
+   THREE.JS SCENE
 ========================= */
 
-function orbitalVelocity(mu, r){
-return Math.sqrt(mu / r);
-}
+const scene = new THREE.Scene();
 
-function escapeVelocity(mu, r){
-return Math.sqrt(2 * mu / r);
-}
+const camera = new THREE.PerspectiveCamera(
+60, window.innerWidth/window.innerHeight, 0.1, 1000
+);
 
-function hohmannTransfer(mu, r1, r2){
+camera.position.z = 6;
 
-const v1 = Math.sqrt(mu / r1);
-const v2 = Math.sqrt(mu / r2);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-const transferA = Math.sqrt(mu * (2/r1 - 1/((r1+r2)/2)));
-const transferB = Math.sqrt(mu * (2/r2 - 1/((r1+r2)/2)));
+/* LIGHT */
+scene.add(new THREE.PointLight(0xffffff,1.2));
 
-return Math.abs(transferA - v1) + Math.abs(v2 - transferB);
-}
+/* EARTH */
+const planetGeo = new THREE.SphereGeometry(1,32,32);
+const planetMat = new THREE.MeshStandardMaterial({ color:0x2244ff });
+const planet = new THREE.Mesh(planetGeo, planetMat);
+scene.add(planet);
 
-/* =========================
-   MISSION ENGINE
-========================= */
-
-function calculateMission(){
-
-if(!selectedShip || !selectedBody) return;
-
-const body = bodies[selectedBody];
-
-const altitude = 200; // default LEO / base orbit (km)
-
-const r = body.radius + altitude;
-
-/* Core calculations */
-const orbitDV = orbitalVelocity(body.mu, r);
-const escapeDV = escapeVelocity(body.mu, r);
-
-/* simple mission model */
-const surfaceToOrbit = orbitDV;
-const escapeBurn = escapeDV - orbitDV;
-
-/* total mission Δv (basic chain) */
-const totalDV = surfaceToOrbit + Math.max(escapeBurn,0);
-
-/* update UI */
-updateUI(totalDV);
-}
-
-/* =========================
-   UI UPDATE
-========================= */
-
-function updateUI(totalDV){
-
-document.getElementById("debug").innerHTML = `
-Ship: ${selectedShip.name} (${selectedShip.dv} km/s)<br>
-Body: ${selectedBody}<br><br>
-
-Required Δv: ${totalDV.toFixed(2)} km/s<br>
-Ship Δv: ${selectedShip.dv} km/s
-`;
-
-const status = document.getElementById("status");
-
-if(selectedShip.dv >= totalDV){
-status.textContent = "MISSION POSSIBLE";
-status.style.color = "#00FF9C";
-} else {
-status.textContent = "INSUFFICIENT ΔV";
-status.style.color = "#FF3A3A";
-}
-
-}
-
-/* =========================
-   CLOSE DROPDOWNS
-========================= */
-
-document.addEventListener("click", (e) => {
-if(!shipDropdown.contains(e.target)) shipList.style.display = "none";
-if(!bodyDropdown.contains(e.target)) bodyList.style.display = "none";
+/* ORBIT */
+const orbitGeo = new THREE.RingGeometry(1.6,1.62,128);
+const orbitMat = new THREE.MeshBasicMaterial({
+color:0xFF9F07,
+side:THREE.DoubleSide
 });
 
-<script>
+const orbit = new THREE.Mesh(orbitGeo, orbitMat);
+orbit.rotation.x = Math.PI/2;
+scene.add(orbit);
 
-/* =========================
-   SHIPS
-========================= */
-
-const ships = [
-{ name:"Orbital Shuttle", dv:1.8 },
-{ name:"Explorer Mk I", dv:3.2 },
-{ name:"Heavy Transport", dv:5.4 },
-{ name:"Deep Space Cruiser", dv:9.2 }
-];
-
-/* =========================
-   CELESTIAL BODIES
-========================= */
-
-const bodies = {
-Mercury:{ mu:22032, radius:2439 },
-Venus:{ mu:324859, radius:6051 },
-Earth:{ mu:398600, radius:6371 },
-Moon:{ mu:4902.8, radius:1737 },
-Mars:{ mu:42828, radius:3389 },
-Phobos:{ mu:0.000711, radius:11 },
-Deimos:{ mu:0.0000985, radius:6 },
-Jupiter:{ mu:126686534, radius:69911 },
-Europa:{ mu:3202.7, radius:1560 },
-Saturn:{ mu:37931187, radius:58232 },
-Uranus:{ mu:5793939, radius:25362 },
-Neptune:{ mu:6836529, radius:24622 }
-};
-
-/* =========================
-   STATE
-========================= */
-
-let selectedShip = null;
-let selectedBody = null;
-
-let burns = [];
-
-/* =========================
-   DOM
-========================= */
-
-const shipDropdown = document.getElementById("shipDropdown");
-const shipList = document.getElementById("shipList");
-
-const bodyDropdown = document.getElementById("bodyDropdown");
-const bodyList = document.getElementById("bodyList");
-
-const burnContainer = document.getElementById("burnContainer");
-
-/* =========================
-   DROPDOWNS
-========================= */
-
-ships.forEach(ship => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = `${ship.name} (${ship.dv} km/s)`;
-
-div.onclick = () => {
-selectedShip = ship;
-shipDropdown.querySelector(".dropdown-title").textContent =
-ship.name + " ▼";
-calculateMission();
-};
-
-shipList.appendChild(div);
-});
-
-Object.keys(bodies).forEach(body => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = body;
-
-div.onclick = () => {
-selectedBody = body;
-bodyDropdown.querySelector(".dropdown-title").textContent =
-body + " ▼";
-calculateMission();
-};
-
-bodyList.appendChild(div);
-});
-
-/* =========================
-   BURN SYSTEM
-========================= */
-
-function addBurn(){
-
-if(!selectedBody) return;
-
-burns.push({
-type:"Orbit Insertion",
-alt:200
-});
-
-renderBurns();
-calculateMission();
-}
-
-function removeBurn(i){
-burns.splice(i,1);
-renderBurns();
-calculateMission();
-}
-
-function renderBurns(){
-
-burnContainer.innerHTML = "";
-
-burns.forEach((b,i)=>{
-
-const div = document.createElement("div");
-div.className = "burn";
-
-div.innerHTML = `
-<div>Burn ${i+1}</div>
-
-<select onchange="updateBurnType(${i},this.value)">
-<option>Orbit Insertion</option>
-<option>Hohmann Transfer</option>
-<option>Escape Burn</option>
-<option>Surface Launch</option>
-</select>
-
-<input type="number" value="${b.alt}" 
-onchange="updateBurnAlt(${i},this.value)" />
-
-<button onclick="removeBurn(${i})">X</button>
-`;
-
-burnContainer.appendChild(div);
-
-});
-
-}
-
-/* =========================
-   BURN UPDATES
-========================= */
-
-window.updateBurnType = (i,val)=>{
-burns[i].type = val;
-calculateMission();
-};
-
-window.updateBurnAlt = (i,val)=>{
-burns[i].alt = parseFloat(val);
-calculateMission();
-};
+/* SHIP */
+const shipGeo = new THREE.SphereGeometry(0.05,12,12);
+const shipMat = new THREE.MeshBasicMaterial({ color:0x00FF9C });
+const ship = new THREE.Mesh(shipGeo, shipMat);
+scene.add(ship);
 
 /* =========================
    PHYSICS
 ========================= */
 
 function orbitalVelocity(mu,r){
-return Math.sqrt(mu / r);
-}
-
-function escapeVelocity(mu,r){
-return Math.sqrt(2 * mu / r);
+return Math.sqrt(mu/r);
 }
 
 /* =========================
-   TOTAL MISSION CALC
+   MISSION CALC
 ========================= */
 
-function calculateMission(){
+function calculate(){
 
-if(!selectedShip || !selectedBody) return;
+const shipDV = parseFloat(shipSelect.value);
+const body = bodies[bodySelect.value];
 
-const body = bodies[selectedBody];
+const r = body.radius + 200;
 
-let totalDV = 0;
+const requiredDV = orbitalVelocity(body.mu,r);
 
-/* evaluate burns */
-burns.forEach(b => {
-
-const r = body.radius + (b.alt || 200);
-
-if(b.type === "Surface Launch"){
-totalDV += orbitalVelocity(body.mu, r);
-}
-
-if(b.type === "Orbit Insertion"){
-totalDV += orbitalVelocity(body.mu, r);
-}
-
-if(b.type === "Escape Burn"){
-totalDV += escapeVelocity(body.mu, r) - orbitalVelocity(body.mu, r);
-}
-
-if(b.type === "Hohmann Transfer"){
-totalDV += orbitalVelocity(body.mu, r) * 1.25;
-}
-
-});
-
-/* UI */
-updateUI(totalDV);
-}
-
-/* =========================
-   UI
-========================= */
-
-function updateUI(totalDV){
-
-document.getElementById("debug").innerHTML = `
-Ship: ${selectedShip.name} (${selectedShip.dv} km/s)<br>
-Body: ${selectedBody}<br><br>
-
-Burns: ${burns.length}<br>
-Total Δv: ${totalDV.toFixed(2)} km/s<br>
-Ship Δv: ${selectedShip.dv} km/s
-`;
-
+/* status */
 const status = document.getElementById("status");
 
-if(selectedShip.dv >= totalDV){
-status.textContent = "MISSION POSSIBLE";
-status.style.color = "#00FF9C";
+if(shipDV >= requiredDV){
+status.textContent = `MISSION POSSIBLE (${requiredDV.toFixed(2)} km/s required)`;
+status.className = "status-ok";
 } else {
-status.textContent = "INSUFFICIENT ΔV";
-status.style.color = "#FF3A3A";
+status.textContent = `INSUFFICIENT ΔV (${requiredDV.toFixed(2)} km/s required)`;
+status.className = "status-bad";
 }
 
 }
 
 /* =========================
-   INIT BUTTON (you must add in HTML)
+   EVENTS
 ========================= */
 
-// call addBurn() from button
-
-<script>
+shipSelect.onchange = calculate;
+bodySelect.onchange = calculate;
 
 /* =========================
-   SHIPS
+   ANIMATION
 ========================= */
 
-const ships = [
-{ name:"Orbital Shuttle", dv:1.8 },
-{ name:"Explorer Mk I", dv:3.2 },
-{ name:"Heavy Transport", dv:5.4 },
-{ name:"Deep Space Cruiser", dv:9.2 },
-{ name:"Interplanetary Vessel", dv:12.5 }
-];
+let t = 0;
 
-/* =========================
-   BODIES
-========================= */
+function animate(){
+requestAnimationFrame(animate);
 
-const bodies = {
-Mercury:{ mu:22032, radius:2439 },
-Venus:{ mu:324859, radius:6051 },
-Earth:{ mu:398600, radius:6371 },
-Moon:{ mu:4902.8, radius:1737 },
-Mars:{ mu:42828, radius:3389 },
-Phobos:{ mu:0.000711, radius:11 },
-Deimos:{ mu:0.0000985, radius:6 },
-Jupiter:{ mu:126686534, radius:69911 },
-Europa:{ mu:3202.7, radius:1560 },
-Saturn:{ mu:37931187, radius:58232 },
-Uranus:{ mu:5793939, radius:25362 },
-Neptune:{ mu:6836529, radius:24622 }
-};
+t += 0.01;
 
-/* =========================
-   STATE
-========================= */
+/* orbit motion */
+ship.position.x = Math.cos(t) * 1.6;
+ship.position.z = Math.sin(t) * 1.6;
 
-let selectedShip = null;
-let selectedBody = null;
-let burns = [];
+planet.rotation.y += 0.001;
 
-/* =========================
-   DOM
-========================= */
+renderer.render(scene,camera);
+}
 
-const shipDropdown = document.getElementById("shipDropdown");
-const shipList = document.getElementById("shipList");
+animate();
 
-const bodyDropdown = document.getElementById("bodyDropdown");
-const bodyList = document.getElementById("bodyList");
-
-const burnContainer = document.getElementById("burnContainer");
-
-/* =========================
-   DROPDOWNS
-========================= */
-
-ships.forEach(ship => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = `${ship.name} (${ship.dv} km/s)`;
-
-div.onclick = () => {
-selectedShip = ship;
-shipDropdown.querySelector(".dropdown-title").textContent =
-ship.name + " ▼";
-calculateMission();
-};
-
-shipList.appendChild(div);
+/* resize */
+window.addEventListener("resize",()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
 });
 
-Object.keys(bodies).forEach(body => {
-const div = document.createElement("div");
-div.className = "dropdown-item";
-div.textContent = body;
-
-div.onclick = () => {
-selectedBody = body;
-bodyDropdown.querySelector(".dropdown-title").textContent =
-body + " ▼";
-calculateMission();
-};
-
-bodyList.appendChild(div);
-});
-
-/* =========================
-   PHYSICS
-========================= */
-
-function orbitalVelocity(mu,r){
-return Math.sqrt(mu / r);
-}
-
-function escapeVelocity(mu,r){
-return Math.sqrt(2 * mu / r);
-}
-
-/* =========================
-   BURNS
-========================= */
-
-function addBurn(){
-if(!selectedBody) return;
-
-burns.push({
-type:"Orbit Insertion",
-alt:200
-});
-
-renderBurns();
-calculateMission();
-}
-
-function removeBurn(i){
-burns.splice(i,1);
-renderBurns();
-calculateMission();
-}
-
-window.updateBurnType = (i,val)=>{
-burns[i].type = val;
-calculateMission();
-};
-
-window.updateBurnAlt = (i,val)=>{
-burns[i].alt = parseFloat(val);
-calculateMission();
-};
-
-/* =========================
-   RENDER BURNS
-========================= */
-
-function renderBurns(){
-
-burnContainer.innerHTML = "";
-
-burns.forEach((b,i)=>{
-
-const div = document.createElement("div");
-div.className = "burn";
-
-div.innerHTML = `
-<div>Burn ${i+1}</div>
-
-<select onchange="updateBurnType(${i},this.value)">
-<option ${b.type==="Orbit Insertion"?"selected":""}>Orbit Insertion</option>
-<option ${b.type==="Surface Launch"?"selected":""}>Surface Launch</option>
-<option ${b.type==="Hohmann Transfer"?"selected":""}>Hohmann Transfer</option>
-<option ${b.type==="Escape Burn"?"selected":""}>Escape Burn</option>
-</select>
-
-<input type="number" value="${b.alt}" min="50" max="5000"
-onchange="updateBurnAlt(${i},this.value)" />
-
-<button onclick="removeBurn(${i})">X</button>
-
-<div id="dv-${i}"></div>
-`;
-
-burnContainer.appendChild(div);
-
-});
-
-}
-
-/* =========================
-   CORE MISSION ENGINE
-========================= */
-
-function calculateMission(){
-
-if(!selectedShip || !selectedBody) return;
-
-const body = bodies[selectedBody];
-
-let totalDV = 0;
-
-/* per-burn calc */
-burns.forEach((b,i)=>{
-
-const r = body.radius + (b.alt || 200);
-let dv = 0;
-
-if(b.type === "Surface Launch"){
-dv = orbitalVelocity(body.mu,r);
-}
-
-if(b.type === "Orbit Insertion"){
-dv = orbitalVelocity(body.mu,r) * 0.9;
-}
-
-if(b.type === "Escape Burn"){
-dv = escapeVelocity(body.mu,r) - orbitalVelocity(body.mu,r);
-}
-
-if(b.type === "Hohmann Transfer"){
-dv = orbitalVelocity(body.mu,r) * 1.3;
-}
-
-totalDV += dv;
-
-/* live burn display */
-const el = document.getElementById(`dv-${i}`);
-if(el) el.textContent = `Δv: ${dv.toFixed(2)} km/s`;
-
-});
-
-/* margin */
-const margin = selectedShip.dv - totalDV;
-
-/* ship recommendation */
-const recommended = ships
-.filter(s => s.dv >= totalDV)
-.sort((a,b)=>a.dv-b.dv)[0];
-
-/* UI */
-updateUI(totalDV, margin, recommended);
-}
-
-/* =========================
-   UI
-========================= */
-
-function updateUI(totalDV, margin, recommended){
-
-document.getElementById("debug").innerHTML = `
-Ship: ${selectedShip.name} (${selectedShip.dv} km/s)<br>
-Body: ${selectedBody}<br><br>
-
-Total Mission Δv: ${totalDV.toFixed(2)} km/s<br>
-Remaining Margin: ${margin.toFixed(2)} km/s<br><br>
-
-Recommended Ship: ${recommended ? recommended.name : "NONE"}
-`;
-
-const status = document.getElementById("status");
-
-if(margin > selectedShip.dv * 0.2){
-status.textContent = "MISSION POSSIBLE";
-status.style.color = "#00FF9C";
-}
-else if(margin > 0){
-status.textContent = "TIGHT MARGIN";
-status.style.color = "#00E5FF";
-}
-else{
-status.textContent = "INSUFFICIENT ΔV";
-status.style.color = "#FF3A3A";
-}
-
-}
-
-/* =========================
-   SAVE / LOAD
-========================= */
-
-function saveMission(){
-localStorage.setItem("missionData", JSON.stringify({
-ship:selectedShip,
-body:selectedBody,
-burns
-}));
-}
-
-function loadMission(){
-const data = JSON.parse(localStorage.getItem("missionData"));
-if(!data) return;
-
-selectedShip = data.ship;
-selectedBody = data.body;
-burns = data.burns;
-
-renderBurns();
-calculateMission();
-}
-
-/* =========================
-   EXPORT REPORT
-========================= */
-
-function exportMission(){
-
-const report = {
-ship:selectedShip,
-body:selectedBody,
-burns,
-timestamp:new Date().toISOString()
-};
-
-const blob = new Blob([JSON.stringify(report,null,2)],{
-type:"application/json"
-});
-
-const a = document.createElement("a");
-a.href = URL.createObjectURL(blob);
-a.download = "mission_report.json";
-a.click();
-}
-
-/* =========================
-   INIT HELPERS (call from HTML buttons)
-========================= */
-
-window.addBurn = addBurn;
-window.saveMission = saveMission;
-window.loadMission = loadMission;
-window.exportMission = exportMission;
+/* init */
+calculate();
 
 </script>
 
