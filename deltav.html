@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CLASSIFIED SYSTEM // LIVE FAULTING NODE</title>
+<title>CLASSIFIED CONTROL DECK // SYSTEM FAILURE MODE</title>
 
 <style>
 body{
@@ -13,7 +13,7 @@ color:#FF9F07;
 overflow:hidden;
 }
 
-/* CRT scanlines */
+/* scanlines */
 #scanlines{
 position:fixed;
 inset:0;
@@ -25,7 +25,7 @@ rgba(255,255,255,0.03) 2px,
 transparent 4px,
 transparent 7px
 );
-animation:flicker 0.12s infinite;
+animation:flicker .12s infinite;
 }
 
 @keyframes flicker{
@@ -35,43 +35,67 @@ animation:flicker 0.12s infinite;
 }
 
 /* layout */
-#hud{
-position:fixed;
-top:10px;
-left:10px;
-width:320px;
-z-index:10;
+#grid{
+display:grid;
+grid-template-columns: repeat(4, 1fr);
+grid-template-rows: repeat(3, 1fr);
+height:100vh;
+width:100vw;
+gap:8px;
+padding:10px;
+box-sizing:border-box;
 }
 
 .panel{
 border:1px solid rgba(255,159,7,0.3);
-padding:10px;
-margin-bottom:8px;
 background:rgba(0,0,0,0.6);
+padding:10px;
+position:relative;
+overflow:hidden;
 }
 
-.module{
-padding:6px;
-margin-top:6px;
-border:1px solid rgba(255,159,7,0.2);
-cursor:pointer;
-transition:0.2s;
+.title{
+font-size:12px;
+opacity:0.8;
+margin-bottom:8px;
 }
 
-.module:hover{
-background:rgba(255,159,7,0.1);
+.value{
+font-size:18px;
+margin-top:5px;
 }
 
-.bad{
-color:#FF3A3A;
+.slider{
+width:100%;
 }
 
-.ok{
-color:#00FF9C;
+/* status colors */
+.ok{ color:#00FF9C; }
+.warn{ color:#FF9F07; }
+.bad{ color:#FF3A3A; }
+
+#center{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+text-align:center;
+pointer-events:none;
+opacity:0.8;
 }
 
-.warn{
+#access{
+margin-top:10px;
+font-size:14px;
+}
+
+button{
+background:black;
 color:#FF9F07;
+border:1px solid #FF9F07;
+padding:5px;
+cursor:pointer;
+width:100%;
 }
 
 </style>
@@ -79,38 +103,61 @@ color:#FF9F07;
 
 <body>
 
-<div id="hud">
+<div id="center">
+<div>CORE INTEGRITY</div>
+<div id="core">100%</div>
+<div id="access">NO ACCESS VECTOR</div>
+</div>
 
+<div id="grid">
+
+<!-- NAV -->
 <div class="panel">
-<b>LIVE FAULTING SYSTEM</b><br>
-STATUS: <span id="status">STABLE</span><br>
-INTEGRITY: <span id="integrity">100%</span>
+<div class="title">NAVIGATION MATRIX</div>
+<input class="slider" type="range" min="0" max="100" value="80" id="nav">
+<div class="value" id="navv">80</div>
 </div>
 
+<!-- COMMS -->
 <div class="panel">
-<div>SUBSYSTEMS</div>
-
-<div class="module" onclick="stabilize(this,'NAV')">
-NAVIGATION CORE: <span class="state warn">DEGRADED</span>
+<div class="title">COMMUNICATIONS ARRAY</div>
+<input class="slider" type="range" min="0" max="100" value="40" id="com">
+<div class="value" id="comv">40</div>
 </div>
 
-<div class="module" onclick="stabilize(this,'COM')">
-COMMS ARRAY: <span class="state bad">FAULTED</span>
-</div>
-
-<div class="module" onclick="stabilize(this,'ORB')">
-ORBITAL TRACKING: <span class="state warn">DEGRADED</span>
-</div>
-
-<div class="module" onclick="stabilize(this,'MEM')">
-MEMORY BANKS: <span class="state bad">CORRUPT</span>
-</div>
-
-</div>
-
+<!-- POWER -->
 <div class="panel">
-<div>EVENT LOG</div>
-<div id="log">System initializing...</div>
+<div class="title">POWER DISTRIBUTION</div>
+<input class="slider" type="range" min="0" max="100" value="60" id="pow">
+<div class="value" id="powv">60</div>
+</div>
+
+<!-- MEMORY -->
+<div class="panel">
+<div class="title">MEMORY BANKS</div>
+<input class="slider" type="range" min="0" max="100" value="77" id="mem">
+<div class="value" id="memv">77</div>
+</div>
+
+<!-- ORBIT -->
+<div class="panel">
+<div class="title">ORBITAL CONTROL</div>
+<input class="slider" type="range" min="0" max="100" value="55" id="orb">
+<div class="value" id="orbv">55</div>
+</div>
+
+<!-- SIGNAL -->
+<div class="panel">
+<div class="title">SIGNAL FILTER</div>
+<input class="slider" type="range" min="0" max="100" value="30" id="sig">
+<div class="value" id="sigv">30</div>
+</div>
+
+<!-- THERMAL -->
+<div class="panel">
+<div class="title">THERMAL LOAD</div>
+<input class="slider" type="range" min="0" max="100" value="50" id="therm">
+<div class="value" id="thermv">50</div>
 </div>
 
 </div>
@@ -123,101 +170,105 @@ MEMORY BANKS: <span class="state bad">CORRUPT</span>
    SYSTEM STATE
 ========================= */
 
-let integrity = 100;
+const state = {
+nav:80,
+com:40,
+pow:60,
+mem:77,
+orb:55,
+sig:30,
+therm:50
+};
 
-const logEl = document.getElementById("log");
-const integrityEl = document.getElementById("integrity");
-const statusEl = document.getElementById("status");
-
-function log(msg){
-logEl.innerHTML = msg;
-}
-
-/* =========================
-   RANDOM FAULT ENGINE
-========================= */
-
-const faults = [
-"UNSTABLE SIGNAL DETECTED",
-"MEMORY DESYNC OCCURRED",
-"ORBITAL DRIFT EXCEEDS LIMITS",
-"UNKNOWN PROCESS SPAWNED",
-"DATA FRAGMENTATION IN PROGRESS",
-"NONSTANDARD INPUT STREAM"
-];
-
-function randomFault(){
-
-const msg = faults[Math.floor(Math.random()*faults.length)];
-log("⚠ " + msg);
-
-/* degrade system */
-integrity -= Math.random()*6;
-
-if(integrity < 0) integrity = 0;
-
-updateUI();
-
-}
+const core = document.getElementById("core");
+const access = document.getElementById("access");
 
 /* =========================
-   STABILIZE MODULE
+   UPDATE CORE LOGIC
 ========================= */
 
-function stabilize(el,type){
+function evaluate(){
 
-let gain = 5 + Math.random()*5;
-integrity += gain;
+/* hidden ARG solution state (VERY specific) */
+const success =
+state.nav >= 62 && state.nav <= 68 &&
+state.com <= 35 &&
+state.pow >= 55 && state.pow <= 65 &&
+state.mem === 77 &&
+state.orb >= 50 && state.orb <= 60 &&
+state.sig <= 33 &&
+state.therm >= 45 && state.therm <= 55;
 
-if(integrity > 100) integrity = 100;
-
-/* hidden ARG trigger */
-if(type === "MEM" && integrity > 85){
-log(">> ENCRYPTED SECTOR ACCESS GRANTED: /NODE-7X/");
-statusEl.innerHTML = "ACCESS VECTOR FOUND";
-statusEl.className = "ok";
-}
-
-updateUI();
-
-el.querySelector(".state").innerHTML = "STABILIZED";
-el.querySelector(".state").className = "state ok";
-
-}
-
-/* =========================
-   UI UPDATE
-========================= */
-
-function updateUI(){
-
-integrityEl.innerHTML = Math.floor(integrity) + "%";
-
-if(integrity > 70){
-statusEl.innerHTML = "STABLE";
-statusEl.className = "ok";
-}
-else if(integrity > 30){
-statusEl.innerHTML = "DEGRADED";
-statusEl.className = "warn";
+if(success){
+access.innerHTML = "ACCESS VECTOR FOUND → /NODE-07/";
+access.className = "ok";
+core.innerHTML = "STABLE";
 }
 else{
-statusEl.innerHTML = "CRITICAL";
-statusEl.className = "bad";
+
+/* fake stability deception */
+const avg =
+(state.nav+state.com+state.pow+state.mem+state.orb+state.sig+state.therm)/7;
+
+core.innerHTML = Math.floor(avg) + "%";
+
+if(avg > 70) access.innerHTML = "STABLE (UNCERTIFIED)";
+else if(avg > 40) access.innerHTML = "DEGRADED";
+else access.innerHTML = "CRITICAL";
+}
 }
 
+/* =========================
+   SLIDERS
+========================= */
+
+function bind(id){
+
+const el = document.getElementById(id);
+const val = document.getElementById(id+"v");
+
+el.oninput = () => {
+state[id] = parseInt(el.value);
+val.innerHTML = el.value;
+evaluate();
+};
+
+}
+
+/* bind all */
+["nav","com","pow","mem","orb","sig","therm"].forEach(bind);
+
+/* =========================
+   DEGRADATION ENGINE
+========================= */
+
+function drift(){
+
+state.nav += (Math.random()-0.5)*4;
+state.com += (Math.random()-0.5)*3;
+state.pow += (Math.random()-0.5)*2;
+state.mem += (Math.random()-0.5)*1;
+state.orb += (Math.random()-0.5)*3;
+state.sig += (Math.random()-0.5)*2;
+state.therm += (Math.random()-0.5)*3;
+
+/* clamp */
+for(let k in state){
+state[k] = Math.max(0,Math.min(100,state[k]));
+document.getElementById(k).value = state[k];
+document.getElementById(k+"v").innerHTML = Math.floor(state[k]);
+}
+
+evaluate();
 }
 
 /* =========================
    LOOP
 ========================= */
 
-setInterval(()=>{
-randomFault();
-}, 4000);
+setInterval(drift, 2500);
 
-/* init */
-updateUI();
+evaluate();
 
 </script>
 
