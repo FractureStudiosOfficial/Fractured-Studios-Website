@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Users | James Maniston</title>
+<title>U.I.C. Systems | James Maniston</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -17,7 +17,12 @@ body {
 }
 
 /* CRT EFFECTS */
-#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+}
 
 #scanlines {
   position:fixed;
@@ -87,7 +92,9 @@ h1 {
   transition:.2s ease;
 }
 
-#back-btn:hover { background:rgba(0,0,0,.4); }
+#back-btn:hover {
+  background:rgba(0,0,0,.4);
+}
 
 /* TERMINAL */
 #terminal-box {
@@ -114,24 +121,23 @@ h1 {
   flex:1;
 }
 
-/* PASSWORD OVERLAY */
+/* 🔒 PASSWORD OVERLAY (FULLY OPAQUE) */
 #password-overlay {
   position:fixed;
   inset:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,0.9);
+  background:#000; /* SOLID BLACK */
   z-index:2000;
 }
 
 #password-panel {
-  background:rgba(0,0,0,0.4);
+  background:#000; /* SOLID BLACK */
   border:1px solid rgba(255,159,7,0.3);
   padding:30px 50px;
   text-align:center;
-  box-shadow:0 0 25px rgba(255,159,7,0.1);
-  backdrop-filter:blur(4px);
+  box-shadow:0 0 25px rgba(255,159,7,0.15);
 }
 
 .lock-title {
@@ -188,7 +194,7 @@ h1 {
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<!-- PASSWORD LOCK -->
+<!-- 🔒 LOCK SCREEN -->
 <div id="password-overlay">
   <div id="password-panel">
     <div class="lock-title">[ ACCESS RESTRICTED ]</div>
@@ -277,23 +283,12 @@ input.addEventListener("keydown", e=>{
   const cmd = input.value.toLowerCase().trim();
 
   switch(cmd){
-    case "users":
-      window.location="users.html";
-      break;
-    case "about":
-      window.location="about.html";
-      break;
-    case "games":
-      window.location="games.html";
-      break;
-    case "contact":
-      window.location="contact.html";
-      break;
-    case "home":
-      window.location="index.html";
-      break;
-    default:
-      console.log("Unknown command: "+cmd);
+    case "users": window.location="users.html"; break;
+    case "about": window.location="about.html"; break;
+    case "games": window.location="games.html"; break;
+    case "contact": window.location="contact.html"; break;
+    case "home": window.location="index.html"; break;
+    default: console.log("Unknown command: "+cmd);
   }
 
   input.value="";
