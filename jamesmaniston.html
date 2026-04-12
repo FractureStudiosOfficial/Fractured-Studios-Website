@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | James Maniston</title>
+<title>U.I.C. Users | James Maniston</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -16,9 +16,13 @@ body {
   overflow-y:auto;
 }
 
+/* CRT EFFECTS */
 #amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+
 #scanlines {
-  position:fixed; inset:0; pointer-events:none;
+  position:fixed;
+  inset:0;
+  pointer-events:none;
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
@@ -26,16 +30,49 @@ body {
     transparent 5px,
     transparent 9px
   );
-  animation:flicker .12s infinite; z-index:1001;
+  animation:flicker .12s infinite;
+  z-index:1001;
 }
-@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
 
-#crt-container { padding:40px; min-height:100vh; box-sizing:border-box; }
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
 
-h1 { margin-top:0; text-align:center; }
-.character-info { display:flex; flex-direction:column; gap:15px; max-width:900px; margin:0 auto; }
-.section { background:rgba(0,0,0,.25); border:1px solid rgba(255,159,7,.2); padding:15px; }
-.section h2 { margin-top:0; font-size:1.2em; border-bottom:1px dashed rgba(255,159,7,.3); padding-bottom:5px; }
+/* MAIN CONTENT */
+#crt-container {
+  padding:40px;
+  min-height:100vh;
+  box-sizing:border-box;
+}
+
+h1 {
+  margin-top:0;
+  text-align:center;
+}
+
+.character-info {
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  max-width:900px;
+  margin:0 auto;
+}
+
+.section {
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+}
+
+.section h2 {
+  margin-top:0;
+  font-size:1.2em;
+  border-bottom:1px dashed rgba(255,159,7,.3);
+  padding-bottom:5px;
+}
+
 .section p { margin:5px 0; }
 
 #back-btn {
@@ -49,20 +86,25 @@ h1 { margin-top:0; text-align:center; }
   width:fit-content;
   transition:.2s ease;
 }
+
 #back-btn:hover { background:rgba(0,0,0,.4); }
 
+/* TERMINAL */
 #terminal-box {
   background:rgba(0,0,0,.25);
   padding:15px;
-  border:1px solid rgba(255,159,7,.2);
-  display:flex;
+  border-top:1px solid rgba(255,159,7,.2);
   position:sticky;
   bottom:0;
   width:100%;
   box-sizing:border-box;
 }
 
-#prompt { display:flex; flex:1; }
+#prompt {
+  display:flex;
+  flex:1;
+}
+
 #prompt input {
   background:transparent;
   border:none;
@@ -72,39 +114,105 @@ h1 { margin-top:0; text-align:center; }
   flex:1;
 }
 
-#os { position:fixed; bottom:10px; right:15px; font-size:12px; opacity:.7; }
+/* PASSWORD OVERLAY */
+#password-overlay {
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.9);
+  z-index:2000;
+}
 
+#password-panel {
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(255,159,7,0.3);
+  padding:30px 50px;
+  text-align:center;
+  box-shadow:0 0 25px rgba(255,159,7,0.1);
+  backdrop-filter:blur(4px);
+}
+
+.lock-title {
+  font-size:1.4em;
+  margin-bottom:10px;
+}
+
+.lock-sub {
+  font-size:0.85em;
+  opacity:0.7;
+  margin-bottom:20px;
+}
+
+.password-input-row {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  border-bottom:1px solid rgba(255,159,7,.3);
+  padding-bottom:5px;
+}
+
+.password-input-row input {
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+  font-size:1em;
+  width:220px;
+}
+
+#password-error {
+  margin-top:15px;
+  font-size:0.8em;
+  color:#ff3b3b;
+  opacity:0;
+  transition:opacity .2s ease;
+}
+
+/* OS TEXT */
+#os {
+  position:fixed;
+  bottom:10px;
+  right:15px;
+  font-size:12px;
+  opacity:.7;
+}
 </style>
 </head>
+
 <body>
 
 <div id="amber"></div>
 <div id="scanlines"></div>
 
+<!-- PASSWORD LOCK -->
+<div id="password-overlay">
+  <div id="password-panel">
+    <div class="lock-title">[ ACCESS RESTRICTED ]</div>
+    <div class="lock-sub">ENTER CLEARANCE CODE</div>
+
+    <div class="password-input-row">
+      <span>></span>
+      <input id="password-input" type="password" autocomplete="off">
+    </div>
+
+    <div id="password-error">INVALID CODE</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
 <div id="crt-container">
 
   <h1>Character Profile</h1>
 
   <div class="character-info">
-    <div class="section">
-      <h2>Name</h2>
-      <p>Dr. James Maniston</p>
-    </div>
-
-    <div class="section">
-      <h2>Occupation / Role</h2>
-      <p>Lead Scientist / Engineer</p>
-    </div>
-
-    <div class="section">
-      <h2>Space Station Assignment</h2>
-      <p>Alpha Lunar Station, Moon Orbit</p>
-    </div>
-
-    <div class="section">
-      <h2>Current Task / Project</h2>
-      <p>Researching solar wind shielding for Mars colonies</p>
-    </div>
+    <div class="section"><h2>Name</h2><p>Dr. James Maniston</p></div>
+    <div class="section"><h2>Occupation / Role</h2><p>Lead Scientist / Engineer</p></div>
+    <div class="section"><h2>Space Station Assignment</h2><p>Alpha Lunar Station, Moon Orbit</p></div>
+    <div class="section"><h2>Current Task / Project</h2><p>Researching solar wind shielding for Mars colonies</p></div>
 
     <div class="section">
       <h2>Previous Missions</h2>
@@ -115,20 +223,9 @@ h1 { margin-top:0; text-align:center; }
       </ul>
     </div>
 
-    <div class="section">
-      <h2>Age</h2>
-      <p>38</p>
-    </div>
-
-    <div class="section">
-      <h2>Nationality / Affiliation</h2>
-      <p>USA / U.I.C. Systems</p>
-    </div>
-
-    <div class="section">
-      <h2>Status</h2>
-      <p>Active / On Duty</p>
-    </div>
+    <div class="section"><h2>Age</h2><p>38</p></div>
+    <div class="section"><h2>Nationality / Affiliation</h2><p>USA / U.I.C. Systems</p></div>
+    <div class="section"><h2>Status</h2><p>Active / On Duty</p></div>
 
     <div class="section">
       <h2>Notes / Logs</h2>
@@ -150,11 +247,35 @@ h1 { margin-top:0; text-align:center; }
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
+/* PASSWORD SYSTEM */
+const overlay = document.getElementById("password-overlay");
+const passInput = document.getElementById("password-input");
+const errorText = document.getElementById("password-error");
+
+const PASSWORD = "uic-742";
+
+passInput.focus();
+
+passInput.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+
+  if (passInput.value.toLowerCase().trim() === PASSWORD) {
+    overlay.style.display = "none";
+  } else {
+    errorText.style.opacity = "1";
+    passInput.value = "";
+    setTimeout(() => errorText.style.opacity = "0", 1000);
+  }
+});
+
+/* TERMINAL COMMANDS */
 const input = document.getElementById("cmd");
+
 input.addEventListener("keydown", e=>{
   if(e.key!=="Enter") return;
+
   const cmd = input.value.toLowerCase().trim();
-  // navigation commands
+
   switch(cmd){
     case "users":
       window.location="users.html";
@@ -168,12 +289,13 @@ input.addEventListener("keydown", e=>{
     case "contact":
       window.location="contact.html";
       break;
-    case "home":       // added home command
+    case "home":
       window.location="index.html";
       break;
     default:
       console.log("Unknown command: "+cmd);
   }
+
   input.value="";
 });
 </script>
