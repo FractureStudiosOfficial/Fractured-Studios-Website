@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Systems | Operations</title>
+<title>UIC Central Command</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin:0;
-  background:#111;
+  background:#050505;
   color:#FF9F07;
   font-family:'Share Tech Mono', monospace;
+  overflow:hidden;
 }
 
-/* CRT EFFECTS (FIXED CLICK ISSUE) */
+/* CRT */
 #amber {
   position:fixed;
   inset:0;
-  background:rgba(255,159,7,.04);
+  background:rgba(255,159,7,.05);
   pointer-events:none;
-  z-index:1;
 }
 
 #scanlines {
@@ -30,127 +30,98 @@ body {
   pointer-events:none;
   background:repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
+    rgba(255,255,255,.04) 0px,
+    transparent 6px
   );
-  animation:flicker .12s infinite;
-  z-index:2;
+  animation:flicker .15s infinite;
 }
 
 @keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+  0%{opacity:.2}
+  50%{opacity:.08}
+  100%{opacity:.2}
 }
 
-/* LOCK SCREEN */
-#lock {
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
+/* CURVED CONSOLE */
+#console {
+  position:absolute;
+  bottom:-100px;
+  left:50%;
+  transform:translateX(-50%) perspective(900px) rotateX(20deg);
+  width:90%;
+  height:80%;
+  border:1px solid rgba(255,159,7,.2);
+  background:rgba(0,0,0,.7);
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  gap:10px;
+  padding:15px;
 }
 
-#lock-box {
-  border:1px solid rgba(255,159,7,.3);
-  padding:30px;
-  text-align:center;
-}
-
-#lock input {
-  background:transparent;
-  border:none;
-  border-bottom:1px solid rgba(255,159,7,.3);
-  color:#FF9F07;
-  outline:none;
-}
-
-/* MAIN LAYOUT */
-#container {
-  position:relative;
-  z-index:5;
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-}
-
-/* TOP BAR */
-#topbar {
-  border-bottom:1px solid rgba(255,159,7,.2);
+/* PANELS */
+.panel {
+  border:1px solid rgba(255,159,7,.2);
   padding:10px;
-  display:flex;
-  justify-content:space-around;
-  font-size:13px;
+  position:relative;
+  overflow:hidden;
 }
 
-/* MAIN SPLIT */
-#main {
-  display:flex;
-  flex:1;
+.panel h3 {
+  margin:0 0 5px 0;
+  font-size:12px;
+  opacity:.7;
 }
 
-/* LEFT PANEL */
-#list {
-  width:280px;
-  border-right:1px solid rgba(255,159,7,.2);
-  overflow-y:auto;
+/* SIGNAL GRID */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:4px;
 }
 
-.project {
-  padding:12px;
-  border-bottom:1px solid rgba(255,159,7,.1);
-  cursor:pointer;
-  transition:.15s;
-}
-
-.project:hover {
+.cell {
+  height:10px;
   background:rgba(255,159,7,.1);
 }
 
-/* RIGHT PANEL */
-#details {
-  flex:1;
-  padding:20px;
+/* ACTIVITY WAVE */
+#wave {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:40px;
 }
 
-/* PROGRESS */
-.progress {
-  height:8px;
-  background:rgba(255,159,7,.2);
-  margin-top:10px;
-}
-
-.fill {
-  height:100%;
-  background:#FF9F07;
-  width:0%;
-  transition:width .5s ease;
-}
-
-/* STATUS COLORS */
-.active { color:#00ff9c; }
-.delayed { color:#ff4444; }
-.experimental { color:#66ccff; }
-
-/* LOGS */
+/* LOG FEED */
 #logs {
-  margin-top:20px;
-  height:130px;
-  overflow:auto;
-  border:1px solid rgba(255,159,7,.2);
-  padding:5px;
-  font-size:12px;
+  font-size:11px;
+  height:100%;
+  overflow:hidden;
+}
+
+.log {
+  opacity:.7;
+}
+
+/* HIDDEN ZONE */
+#ghost {
+  position:absolute;
+  top:20%;
+  left:40%;
+  width:50px;
+  height:50px;
+  opacity:0;
+  cursor:pointer;
 }
 
 /* TERMINAL */
 #terminal {
-  border-top:1px solid rgba(255,159,7,.2);
+  position:absolute;
+  bottom:0;
+  width:100%;
   padding:10px;
+  border-top:1px solid rgba(255,159,7,.2);
   background:#000;
 }
 
@@ -169,176 +140,134 @@ body {
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<!-- LOCK -->
-<div id="lock">
-  <div id="lock-box">
-    [ PROJECT ACCESS ]<br><br>
-    <span>></span>
-    <input id="pass" type="password">
-    <div id="err" style="color:red;opacity:0;">INVALID</div>
-  </div>
+<div id="console">
+
+<!-- NETWORK GRID -->
+<div class="panel">
+<h3>COMMUNICATION GRID</h3>
+<div class="grid" id="grid"></div>
 </div>
 
-<div id="container">
-
-<!-- TOP STATS -->
-<div id="topbar">
-  <div id="stat-active"></div>
-  <div id="stat-delayed"></div>
-  <div id="stat-total"></div>
+<!-- SIGNAL -->
+<div class="panel">
+<h3>SIGNAL ACTIVITY</h3>
+<canvas id="wave"></canvas>
 </div>
 
-<div id="main">
-
-<!-- LEFT PANEL -->
-<div id="list"></div>
-
-<!-- RIGHT PANEL -->
-<div id="details">
-  <h2>Select a project</h2>
-  <p>Click a project on the left to view details.</p>
+<!-- STATUS -->
+<div class="panel">
+<h3>NETWORK STATUS</h3>
+<div id="status"></div>
 </div>
 
+<!-- LOGS -->
+<div class="panel">
+<h3>TRANSMISSIONS</h3>
+<div id="logs"></div>
 </div>
 
-<!-- TERMINAL -->
+<!-- EMPTY (future systems) -->
+<div class="panel"><h3>RESERVED</h3></div>
+<div class="panel"><h3>RESERVED</h3></div>
+
+</div>
+
+<div id="ghost"></div>
+
 <div id="terminal">
-  <input id="cmd" placeholder="Enter command...">
-</div>
-
+<input id="cmd" placeholder=">">
 </div>
 
 <script>
-/* DATA */
-const projects = [
-  {name:"Mars Shield Grid", status:"ACTIVE", progress:72, priority:"HIGH", desc:"Solar radiation defense network."},
-  {name:"Europa Drill", status:"DELAYED", progress:34, priority:"HIGH", desc:"Subsurface ocean drilling."},
-  {name:"Titan Relay", status:"ACTIVE", progress:60, priority:"LOW", desc:"Signal relay expansion."},
-  {name:"Kuiper Scan", status:"EXPERIMENTAL", progress:12, priority:"HIGH", desc:"Deep anomaly detection."},
-  {name:"Lunar Mining", status:"ACTIVE", progress:48, priority:"MEDIUM", desc:"Helium-3 extraction."}
-];
+/* GRID */
+const grid=document.getElementById("grid");
+for(let i=0;i<60;i++){
+  const c=document.createElement("div");
+  c.className="cell";
+  grid.appendChild(c);
+}
 
-/* PASSWORD */
-const pass = document.getElementById("pass");
-const lock = document.getElementById("lock");
-const err = document.getElementById("err");
-
-pass.focus();
-
-pass.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    if(pass.value==="uic-742"){
-      lock.style.display="none";
-    } else {
-      err.style.opacity=1;
-      pass.value="";
-      setTimeout(()=>err.style.opacity=0,1000);
+/* RANDOM SIGNAL BLINK */
+setInterval(()=>{
+  const cells=document.querySelectorAll(".cell");
+  cells.forEach(c=>{
+    if(Math.random()<0.1){
+      c.style.background="#FF9F07";
+      setTimeout(()=>c.style.background="rgba(255,159,7,.1)",200);
     }
-  }
-});
-
-/* ELEMENTS */
-const list = document.getElementById("list");
-const details = document.getElementById("details");
-
-/* RENDER LIST */
-function renderList(){
-  list.innerHTML="";
-
-  projects.forEach((p,i)=>{
-    const div=document.createElement("div");
-    div.className="project";
-
-    div.innerHTML=`
-      <strong>${p.name}</strong><br>
-      <span class="${p.status.toLowerCase()}">${p.status}</span>
-    `;
-
-    div.addEventListener("click", ()=>selectProject(i));
-
-    list.appendChild(div);
   });
+},300);
+
+/* WAVE */
+const canvas=document.getElementById("wave");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
 }
+resize();
+window.onresize=resize;
 
-/* SELECT PROJECT */
-let logInterval;
-
-function selectProject(i){
-  const p=projects[i];
-
-  details.innerHTML=`
-    <h2>${p.name}</h2>
-    Status: <span class="${p.status.toLowerCase()}">${p.status}</span><br>
-    Priority: ${p.priority}<br><br>
-    ${p.desc}
-
-    <div class="progress">
-      <div class="fill" id="bar"></div>
-    </div>
-
-    <div id="logs"></div>
-  `;
-
-  setTimeout(()=>{
-    document.getElementById("bar").style.width=p.progress+"%";
-  },50);
-
-  startLogs(p);
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath();
+  for(let x=0;x<canvas.width;x++){
+    const y=20+Math.sin(x*0.05+Date.now()/300)*10;
+    ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle="#FF9F07";
+  ctx.stroke();
+  requestAnimationFrame(draw);
 }
+draw();
 
-/* STATS */
-function updateStats(){
-  document.getElementById("stat-active").textContent =
-    "ACTIVE: " + projects.filter(p=>p.status==="ACTIVE").length;
+/* STATUS */
+const status=document.getElementById("status");
 
-  document.getElementById("stat-delayed").textContent =
-    "DELAYED: " + projects.filter(p=>p.status==="DELAYED").length;
-
-  document.getElementById("stat-total").textContent =
-    "TOTAL: " + projects.length;
+function updateStatus(){
+  const percent=Math.floor(Math.random()*20)+80;
+  status.textContent="NETWORK INTEGRITY: "+percent+"%";
 }
+setInterval(updateStatus,2000);
+updateStatus();
 
-/* LOG SYSTEM */
-function startLogs(project){
-  clearInterval(logInterval);
+/* LOGS */
+const logs=document.getElementById("logs");
 
-  const logs = document.getElementById("logs");
+function addLog(){
+  const msgs=[
+    "PING ROUTED",
+    "RELAY ACTIVE",
+    "SIGNAL VERIFIED",
+    "DATA RECEIVED",
+    "NOISE DETECTED"
+  ];
 
-  logInterval = setInterval(()=>{
-    if(!logs) return;
+  const div=document.createElement("div");
+  div.className="log";
+  div.textContent="> "+msgs[Math.floor(Math.random()*msgs.length)];
 
-    const messages = [
-      "Data received",
-      "Signal stable",
-      "System recalibrating",
-      "Minor fluctuation detected",
-      "Progress updated"
-    ];
-
-    const line = document.createElement("div");
-    line.textContent = "> " + project.name + ": " + messages[Math.floor(Math.random()*messages.length)];
-
-    logs.prepend(line);
-  },1500);
+  logs.prepend(div);
 }
-
-/* INIT */
-renderList();
-updateStats();
+setInterval(addLog,1200);
 
 /* TERMINAL */
-const cmd = document.getElementById("cmd");
-
-cmd.addEventListener("keydown", e=>{
+cmd.onkeydown=e=>{
   if(e.key!=="Enter") return;
+  const c=cmd.value.toLowerCase();
 
-  const c = cmd.value.toLowerCase();
-
-  if(c==="home") window.location="index.html";
-  if(c==="comms") window.location="communications.html";
+  if(c==="override"){
+    logs.innerHTML="> ACCESS GRANTED<br>> [REDACTED SIGNAL FOUND]";
+  }
 
   cmd.value="";
-});
+};
+
+/* 👁️ ARG HOOK (hidden click) */
+document.getElementById("ghost").onclick=()=>{
+  logs.innerHTML="> ...signal detected...<br>> frequency unlocked";
+};
 </script>
 
 </body>
