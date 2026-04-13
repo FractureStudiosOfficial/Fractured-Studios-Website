@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | Active Projects</title>
+<title>UIC Systems | Operations Command</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -30,88 +30,93 @@ body {
 }
 @keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
 
-#container { padding:30px; }
+#container { padding:25px; }
 
 h1 { text-align:center; }
 
-/* PROJECT GRID */
-#projects {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
-  gap:15px;
-  margin-bottom:20px;
+/* CONTROLS */
+#controls {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:15px;
 }
 
+select, input {
+  background:#000;
+  border:1px solid rgba(255,159,7,.3);
+  color:#FF9F07;
+  padding:5px;
+  font-family:inherit;
+}
+
+/* PROJECT LIST */
+#projects {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* PROJECT CARD */
 .project {
   border:1px solid rgba(255,159,7,.2);
-  padding:15px;
+  padding:10px;
   background:rgba(0,0,0,.3);
   cursor:pointer;
-  transition:.2s;
 }
 
-.project:hover {
-  background:rgba(255,159,7,.1);
+.project:hover { background:rgba(255,159,7,.08); }
+
+.header {
+  display:flex;
+  justify-content:space-between;
 }
 
-.project-title {
-  font-size:1.1em;
-  margin-bottom:5px;
-}
-
-.project-status {
-  font-size:0.8em;
-  opacity:.7;
-}
-
-/* PROGRESS BAR */
-.progress-bar {
-  margin-top:10px;
-  height:6px;
+.progress {
+  height:5px;
   background:rgba(255,159,7,.2);
-  position:relative;
+  margin-top:5px;
 }
 
-.progress-fill {
-  height:100%;
-  background:#FF9F07;
+.fill { height:100%; background:#FF9F07; }
+
+.details {
+  margin-top:10px;
+  display:none;
+  font-size:13px;
+  opacity:.85;
 }
 
-/* INFO PANEL */
-#info {
-  border:1px solid rgba(255,159,7,.2);
-  padding:15px;
-  margin-bottom:20px;
-  min-height:120px;
-}
+/* STATUS COLORS */
+.active { color:#00ff9c; }
+.delayed { color:#ff4444; }
+.experimental { color:#66ccff; }
 
 /* LOGS */
 #logs {
+  margin-top:15px;
   border:1px solid rgba(255,159,7,.2);
-  padding:10px;
-  height:150px;
-  overflow-y:auto;
+  height:120px;
+  overflow:auto;
   font-size:12px;
+  padding:5px;
 }
-
-.log-line { opacity:.8; margin-bottom:3px; }
 
 /* TERMINAL */
 #terminal {
-  border-top:1px solid rgba(255,159,7,.2);
-  padding:10px;
   position:sticky;
   bottom:0;
   background:#000;
+  padding:10px;
+  border-top:1px solid rgba(255,159,7,.2);
 }
 
 #cmd {
   width:100%;
   background:transparent;
   border:none;
-  outline:none;
   color:#FF9F07;
-  font-family:inherit;
+  outline:none;
 }
 
 /* LOCK */
@@ -120,26 +125,10 @@ h1 { text-align:center; }
   inset:0;
   background:#000;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   z-index:9999;
 }
-
-#lock-box {
-  border:1px solid rgba(255,159,7,.3);
-  padding:30px;
-  text-align:center;
-}
-
-#lock input {
-  background:transparent;
-  border:none;
-  border-bottom:1px solid rgba(255,159,7,.3);
-  color:#FF9F07;
-  outline:none;
-}
-
-#error { color:red; font-size:12px; opacity:0; }
 </style>
 </head>
 
@@ -150,21 +139,44 @@ h1 { text-align:center; }
 
 <!-- LOCK -->
 <div id="lock">
-  <div id="lock-box">
-    <div>[ PROJECTS DATABASE ACCESS ]</div><br>
+  <div>
+    <div>[ OPERATIONS ACCESS ]</div>
     <span>></span>
     <input id="pass" type="password">
-    <div id="error">INVALID CODE</div>
+    <div id="err" style="color:red;opacity:0;">INVALID</div>
   </div>
 </div>
 
 <div id="container">
 
-<h1>Active Solar System Projects</h1>
+<h1>Solar System Operations</h1>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <input id="search" placeholder="Search projects...">
+  
+  <select id="statusFilter">
+    <option value="all">All Status</option>
+    <option value="ACTIVE">Active</option>
+    <option value="DELAYED">Delayed</option>
+    <option value="EXPERIMENTAL">Experimental</option>
+  </select>
+
+  <select id="priorityFilter">
+    <option value="all">All Priority</option>
+    <option value="HIGH">High</option>
+    <option value="MEDIUM">Medium</option>
+    <option value="LOW">Low</option>
+  </select>
+
+  <select id="sort">
+    <option value="progress">Sort: Progress</option>
+    <option value="name">Sort: Name</option>
+    <option value="priority">Sort: Priority</option>
+  </select>
+</div>
 
 <div id="projects"></div>
-
-<div id="info">Select a project to view details...</div>
 
 <div id="logs"></div>
 
@@ -175,141 +187,114 @@ h1 { text-align:center; }
 </div>
 
 <script>
-/* 🔧 EDIT PROJECTS HERE */
+/* PROJECT DATA */
 const projects = [
-  {
-    name:"Mars Atmospheric Shield",
-    location:"Mars",
-    status:"ACTIVE",
-    progress:72,
-    priority:"HIGH",
-    station:"Mars Outpost",
-    desc:"Developing solar wind shielding for long-term colonization."
-  },
-  {
-    name:"Lunar Resource Extraction",
-    location:"Moon",
-    status:"ACTIVE",
-    progress:45,
-    priority:"MEDIUM",
-    station:"Alpha Lunar Station",
-    desc:"Mining helium-3 and rare metals for energy production."
-  },
-  {
-    name:"Europa Subsurface Probe",
-    location:"Europa",
-    status:"DELAYED",
-    progress:28,
-    priority:"HIGH",
-    station:"Europa Research Hub",
-    desc:"Drilling through ice crust to detect microbial life."
-  },
-  {
-    name:"Titan Signal Relay Expansion",
-    location:"Titan",
-    status:"ACTIVE",
-    progress:60,
-    priority:"LOW",
-    station:"Titan Relay",
-    desc:"Expanding deep-space communication infrastructure."
-  },
-  {
-    name:"Kuiper Deep Scan Array",
-    location:"Kuiper Belt",
-    status:"EXPERIMENTAL",
-    progress:15,
-    priority:"HIGH",
-    station:"Deep Space Array",
-    desc:"Scanning outer system for unknown signals."
-  }
+  {name:"Mars Shield Grid", status:"ACTIVE", priority:"HIGH", progress:72, desc:"Solar radiation defense"},
+  {name:"Europa Drill", status:"DELAYED", priority:"HIGH", progress:34, desc:"Subsurface ocean access"},
+  {name:"Titan Relay Expansion", status:"ACTIVE", priority:"LOW", progress:60, desc:"Signal amplification"},
+  {name:"Kuiper Scan Array", status:"EXPERIMENTAL", priority:"HIGH", progress:12, desc:"Deep anomaly detection"},
+  {name:"Lunar Mining Ops", status:"ACTIVE", priority:"MEDIUM", progress:48, desc:"Helium-3 extraction"}
 ];
 
 /* PASSWORD */
-const lock = document.getElementById("lock");
-const pass = document.getElementById("pass");
-const err = document.getElementById("error");
-
-pass.focus();
-
-pass.addEventListener("keydown", e=>{
+pass.onkeydown=e=>{
   if(e.key==="Enter"){
-    if(pass.value==="uic-742"){
-      lock.style.display="none";
-    } else {
-      err.style.opacity=1;
-      pass.value="";
-      setTimeout(()=>err.style.opacity=0,1000);
-    }
+    if(pass.value==="uic-742") lock.style.display="none";
+    else { err.style.opacity=1; pass.value=""; setTimeout(()=>err.style.opacity=0,1000); }
   }
-});
+};
 
-/* GENERATE PROJECTS */
-const container = document.getElementById("projects");
-const info = document.getElementById("info");
+/* RENDER SYSTEM */
+const container=document.getElementById("projects");
 
-projects.forEach(p=>{
-  const div = document.createElement("div");
-  div.className="project";
+function render(){
+  container.innerHTML="";
+  let list=[...projects];
 
-  div.innerHTML = `
-    <div class="project-title">${p.name}</div>
-    <div class="project-status">${p.status} | ${p.location}</div>
-    <div class="progress-bar">
-      <div class="progress-fill" style="width:${p.progress}%"></div>
-    </div>
-  `;
+  const search=document.getElementById("search").value.toLowerCase();
+  const status=document.getElementById("statusFilter").value;
+  const priority=document.getElementById("priorityFilter").value;
+  const sort=document.getElementById("sort").value;
 
-  div.onclick = ()=>{
-    info.innerHTML = `
-      <b>${p.name}</b><br>
-      Location: ${p.location}<br>
-      Status: ${p.status}<br>
-      Priority: ${p.priority}<br>
-      Assigned Station: ${p.station}<br>
-      Progress: ${p.progress}%<br><br>
-      ${p.desc}
+  list=list.filter(p=>
+    (status==="all"||p.status===status) &&
+    (priority==="all"||p.priority===priority) &&
+    p.name.toLowerCase().includes(search)
+  );
+
+  if(sort==="progress") list.sort((a,b)=>b.progress-a.progress);
+  if(sort==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+
+  list.forEach(p=>{
+    const div=document.createElement("div");
+    div.className="project";
+
+    div.innerHTML=`
+      <div class="header">
+        <div>${p.name}</div>
+        <div class="${p.status.toLowerCase()}">${p.status}</div>
+      </div>
+      <div class="progress"><div class="fill" style="width:${p.progress}%"></div></div>
+      <div class="details">
+        Priority: ${p.priority}<br>
+        ${p.desc}
+      </div>
     `;
-  };
 
-  container.appendChild(div);
-});
+    div.onclick=()=>{
+      const d=div.querySelector(".details");
+      d.style.display=d.style.display==="block"?"none":"block";
+    };
 
-/* LOGS */
-const logs = document.getElementById("logs");
-
-function addLog(){
-  const msgs = [
-    "PROJECT UPDATE RECEIVED",
-    "PROGRESS INCREASED",
-    "RESOURCE TRANSFER COMPLETE",
-    "ANOMALY DETECTED",
-    "DATA SYNC COMPLETE"
-  ];
-
-  const div = document.createElement("div");
-  div.className="log-line";
-  div.textContent = "> " + msgs[Math.floor(Math.random()*msgs.length)];
-  logs.prepend(div);
+    container.appendChild(div);
+  });
 }
 
-setInterval(addLog,1500);
+/* CONTROLS */
+document.querySelectorAll("#controls input, #controls select")
+.forEach(el=>el.oninput=render);
+
+render();
+
+/* LIVE SYSTEM */
+const logs=document.getElementById("logs");
+
+function log(msg){
+  const d=document.createElement("div");
+  d.textContent="> "+msg;
+  logs.prepend(d);
+}
+
+/* PROGRESS DRIFT */
+setInterval(()=>{
+  const p=projects[Math.floor(Math.random()*projects.length)];
+  if(p.progress<100){
+    p.progress+=Math.random()*2;
+    log(p.name+" progress updated");
+    render();
+  }
+},3000);
+
+/* ANOMALY EVENT */
+setInterval(()=>{
+  if(Math.random()<0.2){
+    const p=projects[Math.floor(Math.random()*projects.length)];
+    p.status="DELAYED";
+    log("ANOMALY DETECTED IN "+p.name.toUpperCase());
+    render();
+  }
+},7000);
 
 /* TERMINAL */
-const cmd = document.getElementById("cmd");
-
-cmd.addEventListener("keydown", e=>{
+cmd.onkeydown=e=>{
   if(e.key!=="Enter") return;
+  const c=cmd.value.toLowerCase();
 
-  const c = cmd.value.toLowerCase();
-
-  switch(c){
-    case "home": window.location="index.html"; break;
-    case "comms": window.location="communications.html"; break;
-    case "users": window.location="users.html"; break;
-  }
+  if(c==="home") window.location="index.html";
+  if(c==="comms") window.location="communications.html";
 
   cmd.value="";
-});
+};
 </script>
 
 </body>
