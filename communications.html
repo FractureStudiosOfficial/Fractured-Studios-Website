@@ -30,36 +30,38 @@ body {
 }
 @keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
 
-#container {
-  padding:30px;
-}
+#container { padding:30px; }
 
-/* NETWORK MAP */
-#network {
-  position:relative;
-  height:400px;
-  border:1px solid rgba(255,159,7,.2);
+h1 { text-align:center; }
+
+/* STATION LIST */
+#stations {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(250px,1fr));
+  gap:15px;
   margin-bottom:20px;
 }
 
-.node {
-  position:absolute;
-  padding:5px 10px;
-  border:1px solid rgba(255,159,7,.4);
-  background:#000;
+.station {
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
   cursor:pointer;
-  font-size:12px;
+  background:rgba(0,0,0,.3);
+  transition:.2s;
 }
 
-.node:hover { background:rgba(255,159,7,.1); }
+.station:hover {
+  background:rgba(255,159,7,.1);
+}
 
-/* CONNECTION LINES */
-svg {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
+.station-title {
+  font-size:1.1em;
+  margin-bottom:5px;
+}
+
+.status {
+  font-size:0.8em;
+  opacity:.7;
 }
 
 /* INFO PANEL */
@@ -67,6 +69,7 @@ svg {
   border:1px solid rgba(255,159,7,.2);
   padding:15px;
   margin-bottom:20px;
+  min-height:100px;
 }
 
 /* LOGS */
@@ -78,10 +81,7 @@ svg {
   font-size:12px;
 }
 
-.log-line {
-  opacity:.8;
-  margin-bottom:3px;
-}
+.log-line { opacity:.8; margin-bottom:3px; }
 
 /* TERMINAL */
 #terminal {
@@ -101,7 +101,7 @@ svg {
   font-family:inherit;
 }
 
-/* PASSWORD LOCK */
+/* LOCK */
 #lock {
   position:fixed;
   inset:0;
@@ -126,8 +126,11 @@ svg {
   outline:none;
 }
 
-#error { color:red; font-size:12px; opacity:0; }
-
+#error {
+  color:red;
+  font-size:12px;
+  opacity:0;
+}
 </style>
 </head>
 
@@ -139,11 +142,10 @@ svg {
 <!-- LOCK -->
 <div id="lock">
   <div id="lock-box">
-    <div>[ COMMUNICATIONS ACCESS ]</div>
-    <br>
+    <div>[ COMMUNICATIONS ACCESS ]</div><br>
     <span>></span>
     <input id="pass" type="password">
-    <div id="error">INVALID</div>
+    <div id="error">INVALID CODE</div>
   </div>
 </div>
 
@@ -151,17 +153,9 @@ svg {
 
 <h1>Communications Network</h1>
 
-<div id="network">
-<svg id="lines"></svg>
+<div id="stations"></div>
 
-<div class="node" style="top:50px; left:100px;" data-name="Earth Command">EARTH CMD</div>
-<div class="node" style="top:150px; left:300px;" data-name="Alpha Lunar Station">LUNAR A</div>
-<div class="node" style="top:250px; left:500px;" data-name="Mars Outpost">MARS OP</div>
-<div class="node" style="top:80px; left:600px;" data-name="Titan Relay">TITAN RL</div>
-
-</div>
-
-<div id="info">Select a station...</div>
+<div id="info">Select a station to view transmission data...</div>
 
 <div id="logs"></div>
 
@@ -172,6 +166,16 @@ svg {
 </div>
 
 <script>
+/* 🔧 EASY EDIT STATIONS HERE */
+const stations = [
+  { name:"Earth Command", location:"Earth Orbit", status:"ONLINE" },
+  { name:"Alpha Lunar Station", location:"Moon Orbit", status:"ONLINE" },
+  { name:"Mars Outpost", location:"Mars Surface", status:"DELAYED" },
+  { name:"Titan Relay", location:"Saturn - Titan", status:"ONLINE" },
+  { name:"Europa Research Hub", location:"Jupiter - Europa", status:"INTERFERENCE" },
+  { name:"Deep Space Array", location:"Kuiper Belt", status:"WEAK SIGNAL" }
+];
+
 /* PASSWORD */
 const lock = document.getElementById("lock");
 const pass = document.getElementById("pass");
@@ -191,61 +195,56 @@ pass.addEventListener("keydown", e=>{
   }
 });
 
-/* NODES */
-const nodes = document.querySelectorAll(".node");
+/* GENERATE STATIONS */
+const container = document.getElementById("stations");
 const info = document.getElementById("info");
 
-nodes.forEach(n=>{
-  n.onclick=()=>{
-    const strength = Math.floor(Math.random()*40)+60;
+stations.forEach(station=>{
+  const div = document.createElement("div");
+  div.className="station";
+
+  div.innerHTML = `
+    <div class="station-title">${station.name}</div>
+    <div class="status">${station.status}</div>
+  `;
+
+  div.onclick = ()=>{
+    const signal = Math.floor(Math.random()*40)+60;
+    const delay = Math.floor(Math.random()*10);
+
     info.innerHTML = `
-      <b>${n.dataset.name}</b><br>
-      Status: ONLINE<br>
-      Signal Strength: ${strength}%<br>
-      Last Ping: ${Math.floor(Math.random()*5)}s ago
+      <b>${station.name}</b><br>
+      Location: ${station.location}<br>
+      Status: ${station.status}<br>
+      Signal Strength: ${signal}%<br>
+      Transmission Delay: ${delay}s<br>
+      Last Contact: ${Math.floor(Math.random()*5)}m ago
     `;
   };
+
+  container.appendChild(div);
 });
 
-/* DRAW LINES */
-const svg = document.getElementById("lines");
-
-function connect(a,b){
-  const r1=a.getBoundingClientRect();
-  const r2=b.getBoundingClientRect();
-  const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-  line.setAttribute("x1",r1.left+r1.width/2);
-  line.setAttribute("y1",r1.top+r1.height/2);
-  line.setAttribute("x2",r2.left+r2.width/2);
-  line.setAttribute("y2",r2.top+r2.height/2);
-  line.setAttribute("stroke","#FF9F07");
-  svg.appendChild(line);
-}
-
-setTimeout(()=>{
-  connect(nodes[0],nodes[1]);
-  connect(nodes[1],nodes[2]);
-  connect(nodes[2],nodes[3]);
-},100);
-
-/* LOG FEED */
+/* LOG SYSTEM */
 const logs = document.getElementById("logs");
 
 function addLog(){
-  const messages=[
+  const msgs = [
     "PING SENT",
+    "DATA RECEIVED",
     "SIGNAL STABLE",
-    "DATA PACKET RECEIVED",
-    "RELAY ADJUSTED",
-    "MINOR INTERFERENCE DETECTED"
+    "TRANSMISSION ROUTED",
+    "INTERFERENCE DETECTED",
+    "RELAY ONLINE"
   ];
-  const div=document.createElement("div");
+
+  const div = document.createElement("div");
   div.className="log-line";
-  div.textContent="> "+messages[Math.floor(Math.random()*messages.length)];
+  div.textContent = "> " + msgs[Math.floor(Math.random()*msgs.length)];
   logs.prepend(div);
 }
 
-setInterval(addLog,1500);
+setInterval(addLog, 1500);
 
 /* TERMINAL */
 const cmd = document.getElementById("cmd");
