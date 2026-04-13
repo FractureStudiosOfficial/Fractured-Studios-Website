@@ -16,12 +16,13 @@ body {
   overflow:hidden;
 }
 
-/* CRT */
+/* CRT EFFECTS (NON-BLOCKING) */
 #amber {
   position:fixed;
   inset:0;
   background:rgba(255,159,7,.05);
   pointer-events:none;
+  z-index:1;
 }
 
 #scanlines {
@@ -34,6 +35,7 @@ body {
     transparent 6px
   );
   animation:flicker .15s infinite;
+  z-index:2;
 }
 
 @keyframes flicker {
@@ -42,21 +44,23 @@ body {
   100%{opacity:.2}
 }
 
-/* CURVED CONSOLE */
+/* DASHBOARD (FIXED VISIBILITY) */
 #console {
   position:absolute;
-  bottom:-100px;
+  top:50%;
   left:50%;
-  transform:translateX(-50%) perspective(900px) rotateX(20deg);
-  width:90%;
-  height:80%;
-  border:1px solid rgba(255,159,7,.2);
-  background:rgba(0,0,0,.7);
+  transform:translate(-50%, -50%) perspective(1000px) rotateX(10deg);
+  width:92%;
+  height:75%;
+  border:1px solid rgba(255,159,7,.25);
+  background:rgba(0,0,0,.85);
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   grid-template-rows:1fr 1fr;
-  gap:10px;
+  gap:12px;
   padding:15px;
+  box-shadow:0 0 40px rgba(255,159,7,.15);
+  z-index:5;
 }
 
 /* PANELS */
@@ -65,15 +69,16 @@ body {
   padding:10px;
   position:relative;
   overflow:hidden;
+  background:rgba(0,0,0,.6);
 }
 
 .panel h3 {
-  margin:0 0 5px 0;
+  margin:0 0 6px 0;
   font-size:12px;
   opacity:.7;
 }
 
-/* SIGNAL GRID */
+/* GRID */
 .grid {
   display:grid;
   grid-template-columns:repeat(6,1fr);
@@ -81,19 +86,17 @@ body {
 }
 
 .cell {
-  height:10px;
+  height:12px;
   background:rgba(255,159,7,.1);
+  transition:.2s;
 }
 
-/* ACTIVITY WAVE */
-#wave {
-  position:absolute;
-  bottom:0;
-  width:100%;
-  height:40px;
+/* STATUS */
+#status {
+  font-size:14px;
 }
 
-/* LOG FEED */
+/* LOGS */
 #logs {
   font-size:11px;
   height:100%;
@@ -101,18 +104,13 @@ body {
 }
 
 .log {
-  opacity:.7;
+  opacity:.8;
 }
 
-/* HIDDEN ZONE */
-#ghost {
-  position:absolute;
-  top:20%;
-  left:40%;
-  width:50px;
+/* WAVE */
+#wave {
+  width:100%;
   height:50px;
-  opacity:0;
-  cursor:pointer;
 }
 
 /* TERMINAL */
@@ -123,6 +121,7 @@ body {
   padding:10px;
   border-top:1px solid rgba(255,159,7,.2);
   background:#000;
+  z-index:10;
 }
 
 #cmd {
@@ -131,6 +130,20 @@ body {
   border:none;
   color:#FF9F07;
   outline:none;
+  font-family:inherit;
+}
+
+/* HIDDEN ARG ZONE (does NOT block anything else) */
+#ghost {
+  position:absolute;
+  top:30%;
+  left:60%;
+  width:40px;
+  height:40px;
+  opacity:0;
+  pointer-events:auto;
+  z-index:6;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -140,9 +153,10 @@ body {
 <div id="amber"></div>
 <div id="scanlines"></div>
 
+<!-- DASHBOARD -->
 <div id="console">
 
-<!-- NETWORK GRID -->
+<!-- GRID -->
 <div class="panel">
 <h3>COMMUNICATION GRID</h3>
 <div class="grid" id="grid"></div>
@@ -166,39 +180,39 @@ body {
 <div id="logs"></div>
 </div>
 
-<!-- EMPTY (future systems) -->
 <div class="panel"><h3>RESERVED</h3></div>
 <div class="panel"><h3>RESERVED</h3></div>
 
 </div>
 
+<!-- HIDDEN ARG -->
 <div id="ghost"></div>
 
+<!-- TERMINAL -->
 <div id="terminal">
 <input id="cmd" placeholder=">">
 </div>
 
 <script>
 /* GRID */
-const grid=document.getElementById("grid");
+const grid = document.getElementById("grid");
 for(let i=0;i<60;i++){
   const c=document.createElement("div");
   c.className="cell";
   grid.appendChild(c);
 }
 
-/* RANDOM SIGNAL BLINK */
+/* GRID ACTIVITY */
 setInterval(()=>{
-  const cells=document.querySelectorAll(".cell");
-  cells.forEach(c=>{
-    if(Math.random()<0.1){
+  document.querySelectorAll(".cell").forEach(c=>{
+    if(Math.random()<0.08){
       c.style.background="#FF9F07";
       setTimeout(()=>c.style.background="rgba(255,159,7,.1)",200);
     }
   });
-},300);
+},250);
 
-/* WAVE */
+/* SIGNAL WAVE */
 const canvas=document.getElementById("wave");
 const ctx=canvas.getContext("2d");
 
@@ -207,13 +221,13 @@ function resize(){
   canvas.height=canvas.offsetHeight;
 }
 resize();
-window.onresize=resize;
+window.addEventListener("resize", resize);
 
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.beginPath();
   for(let x=0;x<canvas.width;x++){
-    const y=20+Math.sin(x*0.05+Date.now()/300)*10;
+    const y=25 + Math.sin(x*0.05 + Date.now()/250)*12;
     ctx.lineTo(x,y);
   }
   ctx.strokeStyle="#FF9F07";
@@ -226,8 +240,12 @@ draw();
 const status=document.getElementById("status");
 
 function updateStatus(){
-  const percent=Math.floor(Math.random()*20)+80;
-  status.textContent="NETWORK INTEGRITY: "+percent+"%";
+  const percent=Math.floor(Math.random()*15)+85;
+  status.innerHTML = `
+    INTEGRITY: ${percent}%<br>
+    ACTIVE RELAYS: ${Math.floor(Math.random()*5)+12}<br>
+    LATENCY: ${Math.floor(Math.random()*40)+20}ms
+  `;
 }
 setInterval(updateStatus,2000);
 updateStatus();
@@ -238,9 +256,9 @@ const logs=document.getElementById("logs");
 function addLog(){
   const msgs=[
     "PING ROUTED",
-    "RELAY ACTIVE",
     "SIGNAL VERIFIED",
     "DATA RECEIVED",
+    "RELAY ACTIVE",
     "NOISE DETECTED"
   ];
 
@@ -253,21 +271,29 @@ function addLog(){
 setInterval(addLog,1200);
 
 /* TERMINAL */
-cmd.onkeydown=e=>{
+const cmd=document.getElementById("cmd");
+
+cmd.addEventListener("keydown", e=>{
   if(e.key!=="Enter") return;
+
   const c=cmd.value.toLowerCase();
 
   if(c==="override"){
-    logs.innerHTML="> ACCESS GRANTED<br>> [REDACTED SIGNAL FOUND]";
+    logs.innerHTML="> ACCESS GRANTED<br>> [REDACTED SIGNAL DETECTED]";
+  }
+
+  if(c==="scan"){
+    addLog();
+    addLog();
   }
 
   cmd.value="";
-};
+});
 
-/* 👁️ ARG HOOK (hidden click) */
-document.getElementById("ghost").onclick=()=>{
+/* ARG HIDDEN CLICK */
+document.getElementById("ghost").addEventListener("click", ()=>{
   logs.innerHTML="> ...signal detected...<br>> frequency unlocked";
-};
+});
 </script>
 
 </body>
