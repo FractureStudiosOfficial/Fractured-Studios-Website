@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Central Command</title>
+<title>UIC Command Core</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -16,101 +16,89 @@ body {
   overflow:hidden;
 }
 
-/* CRT EFFECTS (NON-BLOCKING) */
-#amber {
+/* CRT (NON BLOCKING) */
+#amber, #scanlines {
   position:fixed;
   inset:0;
-  background:rgba(255,159,7,.05);
   pointer-events:none;
   z-index:1;
 }
-
+#amber { background:rgba(255,159,7,.05); }
 #scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.04) 0px,
     transparent 6px
   );
-  animation:flicker .15s infinite;
-  z-index:2;
 }
 
-@keyframes flicker {
-  0%{opacity:.2}
-  50%{opacity:.08}
-  100%{opacity:.2}
-}
-
-/* DASHBOARD (FIXED VISIBILITY) */
+/* CONSOLE */
 #console {
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%) perspective(1000px) rotateX(10deg);
-  width:92%;
-  height:75%;
-  border:1px solid rgba(255,159,7,.25);
-  background:rgba(0,0,0,.85);
+  transform:translate(-50%, -50%) perspective(900px) rotateX(10deg);
+  width:90%;
+  height:80%;
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   grid-template-rows:1fr 1fr;
   gap:12px;
   padding:15px;
-  box-shadow:0 0 40px rgba(255,159,7,.15);
   z-index:5;
 }
 
-/* PANELS */
+/* PANEL */
 .panel {
   border:1px solid rgba(255,159,7,.2);
   padding:10px;
-  position:relative;
-  overflow:hidden;
-  background:rgba(0,0,0,.6);
-}
-
-.panel h3 {
-  margin:0 0 6px 0;
-  font-size:12px;
-  opacity:.7;
-}
-
-/* GRID */
-.grid {
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:4px;
-}
-
-.cell {
-  height:12px;
-  background:rgba(255,159,7,.1);
+  background:rgba(0,0,0,.7);
+  cursor:pointer;
   transition:.2s;
 }
 
-/* STATUS */
-#status {
-  font-size:14px;
+.panel:hover {
+  background:rgba(255,159,7,.08);
 }
+
+.panel.active {
+  border-color:#FF9F07;
+  box-shadow:0 0 15px rgba(255,159,7,.2);
+}
+
+/* FOCUS PANEL */
+#focus {
+  position:absolute;
+  right:20px;
+  top:20px;
+  width:300px;
+  height:300px;
+  border:1px solid rgba(255,159,7,.3);
+  background:#000;
+  padding:10px;
+  z-index:6;
+}
+
+/* BUTTONS */
+.btn {
+  margin-top:8px;
+  padding:4px 8px;
+  border:1px solid rgba(255,159,7,.4);
+  display:inline-block;
+  cursor:pointer;
+}
+.btn:hover { background:rgba(255,159,7,.2); }
 
 /* LOGS */
 #logs {
-  font-size:11px;
-  height:100%;
+  position:absolute;
+  bottom:50px;
+  left:10px;
+  width:400px;
+  height:120px;
   overflow:hidden;
-}
-
-.log {
-  opacity:.8;
-}
-
-/* WAVE */
-#wave {
-  width:100%;
-  height:50px;
+  font-size:12px;
+  z-index:6;
 }
 
 /* TERMINAL */
@@ -118,10 +106,10 @@ body {
   position:absolute;
   bottom:0;
   width:100%;
+  background:#000;
   padding:10px;
   border-top:1px solid rgba(255,159,7,.2);
-  background:#000;
-  z-index:10;
+  z-index:7;
 }
 
 #cmd {
@@ -130,20 +118,6 @@ body {
   border:none;
   color:#FF9F07;
   outline:none;
-  font-family:inherit;
-}
-
-/* HIDDEN ARG ZONE (does NOT block anything else) */
-#ghost {
-  position:absolute;
-  top:30%;
-  left:60%;
-  width:40px;
-  height:40px;
-  opacity:0;
-  pointer-events:auto;
-  z-index:6;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -153,147 +127,114 @@ body {
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<!-- DASHBOARD -->
-<div id="console">
-
-<!-- GRID -->
-<div class="panel">
-<h3>COMMUNICATION GRID</h3>
-<div class="grid" id="grid"></div>
-</div>
-
-<!-- SIGNAL -->
-<div class="panel">
-<h3>SIGNAL ACTIVITY</h3>
-<canvas id="wave"></canvas>
-</div>
-
-<!-- STATUS -->
-<div class="panel">
-<h3>NETWORK STATUS</h3>
-<div id="status"></div>
-</div>
-
-<!-- LOGS -->
-<div class="panel">
-<h3>TRANSMISSIONS</h3>
+<div id="console"></div>
+<div id="focus">SELECT PANEL</div>
 <div id="logs"></div>
-</div>
 
-<div class="panel"><h3>RESERVED</h3></div>
-<div class="panel"><h3>RESERVED</h3></div>
-
-</div>
-
-<!-- HIDDEN ARG -->
-<div id="ghost"></div>
-
-<!-- TERMINAL -->
 <div id="terminal">
 <input id="cmd" placeholder=">">
 </div>
 
 <script>
-/* GRID */
-const grid = document.getElementById("grid");
-for(let i=0;i<60;i++){
-  const c=document.createElement("div");
-  c.className="cell";
-  grid.appendChild(c);
-}
-
-/* GRID ACTIVITY */
-setInterval(()=>{
-  document.querySelectorAll(".cell").forEach(c=>{
-    if(Math.random()<0.08){
-      c.style.background="#FF9F07";
-      setTimeout(()=>c.style.background="rgba(255,159,7,.1)",200);
-    }
-  });
-},250);
-
-/* SIGNAL WAVE */
-const canvas=document.getElementById("wave");
-const ctx=canvas.getContext("2d");
-
-function resize(){
-  canvas.width=canvas.offsetWidth;
-  canvas.height=canvas.offsetHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.beginPath();
-  for(let x=0;x<canvas.width;x++){
-    const y=25 + Math.sin(x*0.05 + Date.now()/250)*12;
-    ctx.lineTo(x,y);
+/* 🔧 MODULAR PANEL SYSTEM */
+const panels = [
+  {
+    name:"COMMUNICATIONS",
+    render:()=>`Active Relays: ${rand(12,18)}<br>Latency: ${rand(20,60)}ms`,
+    actions:[
+      {name:"SCAN", fn:()=>log("Scanning networks...")},
+      {name:"ROUTE", fn:()=>log("Routing signal...")}
+    ]
+  },
+  {
+    name:"SIGNAL TRACKING",
+    render:()=>`Signals Detected: ${rand(3,12)}<br>Noise Level: ${rand(1,5)}`,
+    actions:[
+      {name:"BOOST", fn:()=>log("Signal boosted")},
+      {name:"FILTER", fn:()=>log("Filtering noise")}
+    ]
+  },
+  {
+    name:"POWER GRID",
+    render:()=>`Output: ${rand(80,100)}%<br>Stability: ${rand(70,95)}%`,
+    actions:[
+      {name:"REDIRECT", fn:()=>log("Power redirected")}
+    ]
+  },
+  {
+    name:"DEEP SCAN",
+    render:()=>`Range: ${rand(200,900)} AU<br>Status: ACTIVE`,
+    actions:[
+      {name:"INITIATE", fn:()=>log("Deep scan initiated")}
+    ]
   }
-  ctx.strokeStyle="#FF9F07";
-  ctx.stroke();
-  requestAnimationFrame(draw);
-}
-draw();
+];
 
-/* STATUS */
-const status=document.getElementById("status");
+/* HELPERS */
+function rand(a,b){ return Math.floor(Math.random()*(b-a)+a); }
 
-function updateStatus(){
-  const percent=Math.floor(Math.random()*15)+85;
-  status.innerHTML = `
-    INTEGRITY: ${percent}%<br>
-    ACTIVE RELAYS: ${Math.floor(Math.random()*5)+12}<br>
-    LATENCY: ${Math.floor(Math.random()*40)+20}ms
-  `;
-}
-setInterval(updateStatus,2000);
-updateStatus();
-
-/* LOGS */
+const consoleEl=document.getElementById("console");
+const focus=document.getElementById("focus");
 const logs=document.getElementById("logs");
 
-function addLog(){
-  const msgs=[
-    "PING ROUTED",
-    "SIGNAL VERIFIED",
-    "DATA RECEIVED",
-    "RELAY ACTIVE",
-    "NOISE DETECTED"
-  ];
+/* BUILD PANELS */
+function buildPanels(){
+  consoleEl.innerHTML="";
+  panels.forEach((p,i)=>{
+    const div=document.createElement("div");
+    div.className="panel";
+    div.innerHTML=`<strong>${p.name}</strong><br>${p.render()}`;
 
-  const div=document.createElement("div");
-  div.className="log";
-  div.textContent="> "+msgs[Math.floor(Math.random()*msgs.length)];
+    div.onclick=()=>{
+      document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+      div.classList.add("active");
+      openPanel(p);
+    };
 
-  logs.prepend(div);
+    consoleEl.appendChild(div);
+  });
 }
-setInterval(addLog,1200);
+
+/* OPEN PANEL */
+function openPanel(p){
+  focus.innerHTML=`<h3>${p.name}</h3>${p.render()}`;
+
+  p.actions.forEach(a=>{
+    const btn=document.createElement("div");
+    btn.className="btn";
+    btn.textContent=a.name;
+    btn.onclick=a.fn;
+    focus.appendChild(btn);
+  });
+}
+
+/* LOG SYSTEM */
+function log(msg){
+  const d=document.createElement("div");
+  d.textContent="> "+msg;
+  logs.prepend(d);
+}
+
+/* AUTO UPDATE */
+setInterval(buildPanels,4000);
 
 /* TERMINAL */
-const cmd=document.getElementById("cmd");
-
-cmd.addEventListener("keydown", e=>{
+cmd.onkeydown=e=>{
   if(e.key!=="Enter") return;
 
   const c=cmd.value.toLowerCase();
 
+  if(c==="scan") log("Manual scan triggered");
   if(c==="override"){
-    logs.innerHTML="> ACCESS GRANTED<br>> [REDACTED SIGNAL DETECTED]";
-  }
-
-  if(c==="scan"){
-    addLog();
-    addLog();
+    log("ACCESS GRANTED");
+    log("[REDACTED NODE FOUND]");
   }
 
   cmd.value="";
-});
+};
 
-/* ARG HIDDEN CLICK */
-document.getElementById("ghost").addEventListener("click", ()=>{
-  logs.innerHTML="> ...signal detected...<br>> frequency unlocked";
-});
+/* INIT */
+buildPanels();
 </script>
 
 </body>
