@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. Systems | Active Projects</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  background:#111;
+  color:#FF9F07;
+  font-family:'Share Tech Mono', monospace;
+}
+
+/* CRT */
+#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+#scanlines {
+  position:fixed; inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.05) 0px,
+    rgba(255,255,255,.05) 2px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation:flicker .12s infinite;
+}
+@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+
+#container { padding:30px; }
+
+h1 { text-align:center; }
+
+/* PROJECT GRID */
+#projects {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.project {
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+  background:rgba(0,0,0,.3);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.project:hover {
+  background:rgba(255,159,7,.1);
+}
+
+.project-title {
+  font-size:1.1em;
+  margin-bottom:5px;
+}
+
+.project-status {
+  font-size:0.8em;
+  opacity:.7;
+}
+
+/* PROGRESS BAR */
+.progress-bar {
+  margin-top:10px;
+  height:6px;
+  background:rgba(255,159,7,.2);
+  position:relative;
+}
+
+.progress-fill {
+  height:100%;
+  background:#FF9F07;
+}
+
+/* INFO PANEL */
+#info {
+  border:1px solid rgba(255,159,7,.2);
+  padding:15px;
+  margin-bottom:20px;
+  min-height:120px;
+}
+
+/* LOGS */
+#logs {
+  border:1px solid rgba(255,159,7,.2);
+  padding:10px;
+  height:150px;
+  overflow-y:auto;
+  font-size:12px;
+}
+
+.log-line { opacity:.8; margin-bottom:3px; }
+
+/* TERMINAL */
+#terminal {
+  border-top:1px solid rgba(255,159,7,.2);
+  padding:10px;
+  position:sticky;
+  bottom:0;
+  background:#000;
+}
+
+#cmd {
+  width:100%;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#FF9F07;
+  font-family:inherit;
+}
+
+/* LOCK */
+#lock {
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+#lock-box {
+  border:1px solid rgba(255,159,7,.3);
+  padding:30px;
+  text-align:center;
+}
+
+#lock input {
+  background:transparent;
+  border:none;
+  border-bottom:1px solid rgba(255,159,7,.3);
+  color:#FF9F07;
+  outline:none;
+}
+
+#error { color:red; font-size:12px; opacity:0; }
+</style>
+</head>
+
+<body>
+
+<div id="amber"></div>
+<div id="scanlines"></div>
+
+<!-- LOCK -->
+<div id="lock">
+  <div id="lock-box">
+    <div>[ PROJECTS DATABASE ACCESS ]</div><br>
+    <span>></span>
+    <input id="pass" type="password">
+    <div id="error">INVALID CODE</div>
+  </div>
+</div>
+
+<div id="container">
+
+<h1>Active Solar System Projects</h1>
+
+<div id="projects"></div>
+
+<div id="info">Select a project to view details...</div>
+
+<div id="logs"></div>
+
+</div>
+
+<div id="terminal">
+<input id="cmd" placeholder="Enter command...">
+</div>
+
+<script>
+/* 🔧 EDIT PROJECTS HERE */
+const projects = [
+  {
+    name:"Mars Atmospheric Shield",
+    location:"Mars",
+    status:"ACTIVE",
+    progress:72,
+    priority:"HIGH",
+    station:"Mars Outpost",
+    desc:"Developing solar wind shielding for long-term colonization."
+  },
+  {
+    name:"Lunar Resource Extraction",
+    location:"Moon",
+    status:"ACTIVE",
+    progress:45,
+    priority:"MEDIUM",
+    station:"Alpha Lunar Station",
+    desc:"Mining helium-3 and rare metals for energy production."
+  },
+  {
+    name:"Europa Subsurface Probe",
+    location:"Europa",
+    status:"DELAYED",
+    progress:28,
+    priority:"HIGH",
+    station:"Europa Research Hub",
+    desc:"Drilling through ice crust to detect microbial life."
+  },
+  {
+    name:"Titan Signal Relay Expansion",
+    location:"Titan",
+    status:"ACTIVE",
+    progress:60,
+    priority:"LOW",
+    station:"Titan Relay",
+    desc:"Expanding deep-space communication infrastructure."
+  },
+  {
+    name:"Kuiper Deep Scan Array",
+    location:"Kuiper Belt",
+    status:"EXPERIMENTAL",
+    progress:15,
+    priority:"HIGH",
+    station:"Deep Space Array",
+    desc:"Scanning outer system for unknown signals."
+  }
+];
+
+/* PASSWORD */
+const lock = document.getElementById("lock");
+const pass = document.getElementById("pass");
+const err = document.getElementById("error");
+
+pass.focus();
+
+pass.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    if(pass.value==="uic-742"){
+      lock.style.display="none";
+    } else {
+      err.style.opacity=1;
+      pass.value="";
+      setTimeout(()=>err.style.opacity=0,1000);
+    }
+  }
+});
+
+/* GENERATE PROJECTS */
+const container = document.getElementById("projects");
+const info = document.getElementById("info");
+
+projects.forEach(p=>{
+  const div = document.createElement("div");
+  div.className="project";
+
+  div.innerHTML = `
+    <div class="project-title">${p.name}</div>
+    <div class="project-status">${p.status} | ${p.location}</div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:${p.progress}%"></div>
+    </div>
+  `;
+
+  div.onclick = ()=>{
+    info.innerHTML = `
+      <b>${p.name}</b><br>
+      Location: ${p.location}<br>
+      Status: ${p.status}<br>
+      Priority: ${p.priority}<br>
+      Assigned Station: ${p.station}<br>
+      Progress: ${p.progress}%<br><br>
+      ${p.desc}
+    `;
+  };
+
+  container.appendChild(div);
+});
+
+/* LOGS */
+const logs = document.getElementById("logs");
+
+function addLog(){
+  const msgs = [
+    "PROJECT UPDATE RECEIVED",
+    "PROGRESS INCREASED",
+    "RESOURCE TRANSFER COMPLETE",
+    "ANOMALY DETECTED",
+    "DATA SYNC COMPLETE"
+  ];
+
+  const div = document.createElement("div");
+  div.className="log-line";
+  div.textContent = "> " + msgs[Math.floor(Math.random()*msgs.length)];
+  logs.prepend(div);
+}
+
+setInterval(addLog,1500);
+
+/* TERMINAL */
+const cmd = document.getElementById("cmd");
+
+cmd.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+
+  const c = cmd.value.toLowerCase();
+
+  switch(c){
+    case "home": window.location="index.html"; break;
+    case "comms": window.location="communications.html"; break;
+    case "users": window.location="users.html"; break;
+  }
+
+  cmd.value="";
+});
+</script>
+
+</body>
+</html>
