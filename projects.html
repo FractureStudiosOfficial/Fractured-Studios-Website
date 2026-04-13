@@ -15,10 +15,19 @@ body {
   font-family:'Share Tech Mono', monospace;
 }
 
-/* CRT */
-#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
+/* CRT EFFECTS (FIXED CLICK ISSUE) */
+#amber {
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1;
+}
+
 #scanlines {
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
+  pointer-events:none;
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
@@ -27,10 +36,16 @@ body {
     transparent 9px
   );
   animation:flicker .12s infinite;
+  z-index:2;
 }
-@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
 
-/* LOCK */
+@keyframes flicker {
+  0%{opacity:.15}
+  50%{opacity:.07}
+  100%{opacity:.15}
+}
+
+/* LOCK SCREEN */
 #lock {
   position:fixed;
   inset:0;
@@ -41,6 +56,12 @@ body {
   z-index:9999;
 }
 
+#lock-box {
+  border:1px solid rgba(255,159,7,.3);
+  padding:30px;
+  text-align:center;
+}
+
 #lock input {
   background:transparent;
   border:none;
@@ -49,13 +70,16 @@ body {
   outline:none;
 }
 
-/* LAYOUT */
+/* MAIN LAYOUT */
 #container {
+  position:relative;
+  z-index:5;
   display:flex;
   flex-direction:column;
   height:100vh;
 }
 
+/* TOP BAR */
 #topbar {
   border-bottom:1px solid rgba(255,159,7,.2);
   padding:10px;
@@ -64,6 +88,7 @@ body {
   font-size:13px;
 }
 
+/* MAIN SPLIT */
 #main {
   display:flex;
   flex:1;
@@ -71,18 +96,21 @@ body {
 
 /* LEFT PANEL */
 #list {
-  width:300px;
+  width:280px;
   border-right:1px solid rgba(255,159,7,.2);
   overflow-y:auto;
 }
 
 .project {
-  padding:10px;
+  padding:12px;
   border-bottom:1px solid rgba(255,159,7,.1);
   cursor:pointer;
+  transition:.15s;
 }
 
-.project:hover { background:rgba(255,159,7,.1); }
+.project:hover {
+  background:rgba(255,159,7,.1);
+}
 
 /* RIGHT PANEL */
 #details {
@@ -90,6 +118,7 @@ body {
   padding:20px;
 }
 
+/* PROGRESS */
 .progress {
   height:8px;
   background:rgba(255,159,7,.2);
@@ -100,7 +129,7 @@ body {
   height:100%;
   background:#FF9F07;
   width:0%;
-  transition:width 0.5s ease;
+  transition:width .5s ease;
 }
 
 /* STATUS COLORS */
@@ -111,7 +140,7 @@ body {
 /* LOGS */
 #logs {
   margin-top:20px;
-  height:120px;
+  height:130px;
   overflow:auto;
   border:1px solid rgba(255,159,7,.2);
   padding:5px;
@@ -142,7 +171,7 @@ body {
 
 <!-- LOCK -->
 <div id="lock">
-  <div>
+  <div id="lock-box">
     [ PROJECT ACCESS ]<br><br>
     <span>></span>
     <input id="pass" type="password">
@@ -161,18 +190,20 @@ body {
 
 <div id="main">
 
-<!-- LEFT -->
+<!-- LEFT PANEL -->
 <div id="list"></div>
 
-<!-- RIGHT -->
+<!-- RIGHT PANEL -->
 <div id="details">
   <h2>Select a project</h2>
+  <p>Click a project on the left to view details.</p>
 </div>
 
 </div>
 
+<!-- TERMINAL -->
 <div id="terminal">
-<input id="cmd" placeholder="Enter command...">
+  <input id="cmd" placeholder="Enter command...">
 </div>
 
 </div>
@@ -188,29 +219,50 @@ const projects = [
 ];
 
 /* PASSWORD */
-pass.onkeydown=e=>{
-  if(e.key==="Enter"){
-    if(pass.value==="uic-742") lock.style.display="none";
-    else { err.style.opacity=1; pass.value=""; setTimeout(()=>err.style.opacity=0,1000); }
-  }
-};
+const pass = document.getElementById("pass");
+const lock = document.getElementById("lock");
+const err = document.getElementById("err");
 
-/* BUILD LIST */
+pass.focus();
+
+pass.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    if(pass.value==="uic-742"){
+      lock.style.display="none";
+    } else {
+      err.style.opacity=1;
+      pass.value="";
+      setTimeout(()=>err.style.opacity=0,1000);
+    }
+  }
+});
+
+/* ELEMENTS */
 const list = document.getElementById("list");
 const details = document.getElementById("details");
 
+/* RENDER LIST */
 function renderList(){
   list.innerHTML="";
+
   projects.forEach((p,i)=>{
     const div=document.createElement("div");
     div.className="project";
-    div.innerHTML=`${p.name}<br><span class="${p.status.toLowerCase()}">${p.status}</span>`;
-    div.onclick=()=>selectProject(i);
+
+    div.innerHTML=`
+      <strong>${p.name}</strong><br>
+      <span class="${p.status.toLowerCase()}">${p.status}</span>
+    `;
+
+    div.addEventListener("click", ()=>selectProject(i));
+
     list.appendChild(div);
   });
 }
 
 /* SELECT PROJECT */
+let logInterval;
+
 function selectProject(i){
   const p=projects[i];
 
@@ -220,7 +272,9 @@ function selectProject(i){
     Priority: ${p.priority}<br><br>
     ${p.desc}
 
-    <div class="progress"><div class="fill" id="bar"></div></div>
+    <div class="progress">
+      <div class="fill" id="bar"></div>
+    </div>
 
     <div id="logs"></div>
   `;
@@ -234,33 +288,37 @@ function selectProject(i){
 
 /* STATS */
 function updateStats(){
-  const active=projects.filter(p=>p.status==="ACTIVE").length;
-  const delayed=projects.filter(p=>p.status==="DELAYED").length;
+  document.getElementById("stat-active").textContent =
+    "ACTIVE: " + projects.filter(p=>p.status==="ACTIVE").length;
 
-  document.getElementById("stat-active").textContent="ACTIVE: "+active;
-  document.getElementById("stat-delayed").textContent="DELAYED: "+delayed;
-  document.getElementById("stat-total").textContent="TOTAL: "+projects.length;
+  document.getElementById("stat-delayed").textContent =
+    "DELAYED: " + projects.filter(p=>p.status==="DELAYED").length;
+
+  document.getElementById("stat-total").textContent =
+    "TOTAL: " + projects.length;
 }
 
 /* LOG SYSTEM */
-let logInterval;
-
 function startLogs(project){
   clearInterval(logInterval);
-  const logs=document.getElementById("logs");
 
-  logInterval=setInterval(()=>{
-    const msgs=[
+  const logs = document.getElementById("logs");
+
+  logInterval = setInterval(()=>{
+    if(!logs) return;
+
+    const messages = [
       "Data received",
       "Signal stable",
-      "Updating modules",
+      "System recalibrating",
       "Minor fluctuation detected",
-      "Progress recalibrated"
+      "Progress updated"
     ];
 
-    const div=document.createElement("div");
-    div.textContent="> "+project.name+": "+msgs[Math.floor(Math.random()*msgs.length)];
-    logs.prepend(div);
+    const line = document.createElement("div");
+    line.textContent = "> " + project.name + ": " + messages[Math.floor(Math.random()*messages.length)];
+
+    logs.prepend(line);
   },1500);
 }
 
@@ -269,15 +327,18 @@ renderList();
 updateStats();
 
 /* TERMINAL */
-cmd.onkeydown=e=>{
+const cmd = document.getElementById("cmd");
+
+cmd.addEventListener("keydown", e=>{
   if(e.key!=="Enter") return;
-  const c=cmd.value.toLowerCase();
+
+  const c = cmd.value.toLowerCase();
 
   if(c==="home") window.location="index.html";
   if(c==="comms") window.location="communications.html";
 
   cmd.value="";
-};
+});
 </script>
 
 </body>
