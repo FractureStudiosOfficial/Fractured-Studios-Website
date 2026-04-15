@@ -115,7 +115,7 @@ top:0;
 const TEXTURE = "2k_venus_surface.jpg";
 const ATMOSPHERE_TEXTURE = "2k_venus_atmosphere.jpg";
 
-/* Maxwell Montes (highest point on Venus) */
+/* Maxwell Montes */
 const BASE_LAT = 65;
 const BASE_LON = 3;
 
@@ -142,85 +142,74 @@ renderer.setClearColor(0x000000,1);
 renderer.domElement.style.left="260px";
 document.body.appendChild(renderer.domElement);
 
-/* planet group */
+/* group */
 const planetGroup = new THREE.Group();
 scene.add(planetGroup);
 
 /* PLANET */
-const surfaceTex = new THREE.TextureLoader().load(TEXTURE);
-
 const planet = new THREE.Mesh(
 new THREE.SphereGeometry(1,64,64),
-new THREE.MeshBasicMaterial({ map: surfaceTex })
+new THREE.MeshBasicMaterial({
+map: new THREE.TextureLoader().load(TEXTURE)
+})
 );
 
 planet.renderOrder = 0;
 planetGroup.add(planet);
 
-/* ATMOSPHERE (TEXTURED) */
-const atmosphereTex = new THREE.TextureLoader().load(ATMOSPHERE_TEXTURE);
-
+/* 🔥 FIXED ATMOSPHERE */
 const atmosphere = new THREE.Mesh(
-new THREE.SphereGeometry(1.05,64,64),
+new THREE.SphereGeometry(1.15,64,64), // bigger = visible separation
 new THREE.MeshBasicMaterial({
-map: atmosphereTex,
+map: new THREE.TextureLoader().load(ATMOSPHERE_TEXTURE),
 transparent:true,
 opacity:0.9,
 side: THREE.DoubleSide,
-depthWrite:false
+depthTest:false,          // KEY FIX
+depthWrite:false,
+blending: THREE.AdditiveBlending // makes it glow instead of hide
 })
 );
 
-atmosphere.renderOrder = 1;
+atmosphere.renderOrder = 5; // ALWAYS on top
 planetGroup.add(atmosphere);
 
 /* GRID */
 const grid = new THREE.Group();
-
 const latLines = 18;
 const lonLines = 36;
 
 for(let i=0;i<=latLines;i++){
 const lat = (i/latLines)*Math.PI - Math.PI/2;
-const points=[];
+const pts=[];
 for(let j=0;j<=64;j++){
-const lon = (j/64)*Math.PI*2;
-points.push(new THREE.Vector3(
+const lon=(j/64)*Math.PI*2;
+pts.push(new THREE.Vector3(
 Math.cos(lat)*Math.cos(lon),
 Math.sin(lat),
 Math.cos(lat)*Math.sin(lon)
 ));
 }
 grid.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(points),
-new THREE.LineBasicMaterial({
-color:0xFF9F07,
-transparent:true,
-opacity:.6,
-depthTest:false
-})
+new THREE.BufferGeometry().setFromPoints(pts),
+new THREE.LineBasicMaterial({color:0xFF9F07,transparent:true,opacity:.6,depthTest:false})
 ));
 }
 
 for(let i=0;i<lonLines;i++){
-const lon = (i/lonLines)*Math.PI*2;
-const points=[];
+const lon=(i/lonLines)*Math.PI*2;
+const pts=[];
 for(let j=0;j<=64;j++){
-const lat = (j/64)*Math.PI - Math.PI/2;
-points.push(new THREE.Vector3(
+const lat=(j/64)*Math.PI - Math.PI/2;
+pts.push(new THREE.Vector3(
 Math.cos(lat)*Math.cos(lon),
 Math.sin(lat),
 Math.cos(lat)*Math.sin(lon)
 ));
 }
 grid.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(points),
-new THREE.LineBasicMaterial({
-color:0xFF9F07,
-transparent:true,
-opacity:.6,
-depthTest:false
-})
+new THREE.BufferGeometry().setFromPoints(pts),
+new THREE.LineBasicMaterial({color:0xFF9F07,transparent:true,opacity:.6,depthTest:false})
 ));
 }
 
@@ -228,8 +217,8 @@ planetGroup.add(grid);
 
 /* helper */
 function latLonToVec(lat,lon,r=1.02){
-const phi = (90-lat)*(Math.PI/180);
-const theta = (lon+180)*(Math.PI/180);
+const phi=(90-lat)*(Math.PI/180);
+const theta=(lon+180)*(Math.PI/180);
 
 return new THREE.Vector3(
 -(r*Math.sin(phi)*Math.cos(theta)),
@@ -238,13 +227,11 @@ return new THREE.Vector3(
 );
 }
 
-/* MARKERS (always visible above atmosphere) */
+/* MARKERS */
 const poiMeshes=[];
 
 stations.forEach(s=>{
-const pos = latLonToVec(s.lat,s.lon);
-
-const mesh = new THREE.Mesh(
+const mesh=new THREE.Mesh(
 new THREE.SphereGeometry(0.03,10,10),
 new THREE.MeshBasicMaterial({
 color:0xFF9F07,
@@ -253,9 +240,9 @@ depthWrite:false
 })
 );
 
-mesh.position.copy(pos);
-mesh.userData = s;
-mesh.renderOrder = 2;
+mesh.position.copy(latLonToVec(s.lat,s.lon));
+mesh.userData=s;
+mesh.renderOrder=10;
 
 planetGroup.add(mesh);
 poiMeshes.push(mesh);
@@ -264,7 +251,7 @@ poiMeshes.push(mesh);
 /* UI */
 const stationList=document.getElementById("stationList");
 
-stations.forEach((s)=>{
+stations.forEach(s=>{
 const div=document.createElement("div");
 div.className="station";
 div.innerHTML=`<span>${s.icon}</span> <span>${s.name}</span>`;
@@ -274,9 +261,9 @@ stationList.appendChild(div);
 
 /* focus */
 function focusStation(st){
-const target = latLonToVec(st.lat,st.lon);
+const target=latLonToVec(st.lat,st.lon);
 
-const q = new THREE.Quaternion().setFromUnitVectors(
+const q=new THREE.Quaternion().setFromUnitVectors(
 target.clone().normalize(),
 new THREE.Vector3(0,0,1)
 );
@@ -285,20 +272,15 @@ planetGroup.quaternion.slerp(q,0.2);
 }
 
 /* controls */
-let dragging=false;
-let px=0,py=0;
+let dragging=false,px=0,py=0;
 
-window.addEventListener("mousedown",e=>{
-dragging=true;px=e.clientX;py=e.clientY;
-});
+window.addEventListener("mousedown",e=>{dragging=true;px=e.clientX;py=e.clientY;});
 window.addEventListener("mouseup",()=>dragging=false);
 
 window.addEventListener("mousemove",e=>{
-if(!dragging) return;
-
+if(!dragging)return;
 planetGroup.rotation.y+=(e.clientX-px)*0.005;
 planetGroup.rotation.x+=(e.clientY-py)*0.005;
-
 px=e.clientX;py=e.clientY;
 });
 
@@ -327,10 +309,7 @@ window.location=hit[0].object.userData.link;
 /* animate */
 function animate(){
 requestAnimationFrame(animate);
-
-/* subtle atmospheric motion */
-atmosphere.rotation.y += 0.0003;
-
+atmosphere.rotation.y += 0.0004;
 renderer.render(scene,camera);
 }
 animate();
