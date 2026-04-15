@@ -113,8 +113,9 @@ top:0;
 
 /* CONFIG */
 const TEXTURE = "2k_venus_surface.jpg";
-const ATMOSPHERE_TEXTURE = "2k_venus_atmosphere.jpg"; 
+const ATMOSPHERE_TEXTURE = "2k_venus_atmosphere.jpg";
 
+/* Maxwell Montes (highest point on Venus) */
 const BASE_LAT = 65;
 const BASE_LON = 3;
 
@@ -145,22 +146,22 @@ document.body.appendChild(renderer.domElement);
 const planetGroup = new THREE.Group();
 scene.add(planetGroup);
 
-/* SURFACE */
+/* PLANET */
 const surfaceTex = new THREE.TextureLoader().load(TEXTURE);
+
 const planet = new THREE.Mesh(
 new THREE.SphereGeometry(1,64,64),
-new THREE.MeshBasicMaterial({
-map: surfaceTex,
-color:0xFF9F07
-})
+new THREE.MeshBasicMaterial({ map: surfaceTex })
 );
+
+planet.renderOrder = 0;
 planetGroup.add(planet);
 
-/* 🌫️ ATMOSPHERE (TEXTURE-BASED) */
+/* ATMOSPHERE (TEXTURED) */
 const atmosphereTex = new THREE.TextureLoader().load(ATMOSPHERE_TEXTURE);
 
 const atmosphere = new THREE.Mesh(
-new THREE.SphereGeometry(1.1,64,64), // slightly larger than planet
+new THREE.SphereGeometry(1.05,64,64),
 new THREE.MeshBasicMaterial({
 map: atmosphereTex,
 transparent:true,
@@ -170,9 +171,7 @@ depthWrite:false
 })
 );
 
-/* ensure proper rendering */
 atmosphere.renderOrder = 1;
-
 planetGroup.add(atmosphere);
 
 /* GRID */
@@ -194,7 +193,12 @@ Math.cos(lat)*Math.sin(lon)
 }
 grid.add(new THREE.Line(
 new THREE.BufferGeometry().setFromPoints(points),
-new THREE.LineBasicMaterial({color:0xFF9F07,transparent:true,opacity:.6})
+new THREE.LineBasicMaterial({
+color:0xFF9F07,
+transparent:true,
+opacity:.6,
+depthTest:false
+})
 ));
 }
 
@@ -211,7 +215,12 @@ Math.cos(lat)*Math.sin(lon)
 }
 grid.add(new THREE.Line(
 new THREE.BufferGeometry().setFromPoints(points),
-new THREE.LineBasicMaterial({color:0xFF9F07,transparent:true,opacity:.6})
+new THREE.LineBasicMaterial({
+color:0xFF9F07,
+transparent:true,
+opacity:.6,
+depthTest:false
+})
 ));
 }
 
@@ -229,18 +238,24 @@ return new THREE.Vector3(
 );
 }
 
-/* POIs */
+/* MARKERS (always visible above atmosphere) */
 const poiMeshes=[];
+
 stations.forEach(s=>{
 const pos = latLonToVec(s.lat,s.lon);
 
 const mesh = new THREE.Mesh(
-new THREE.SphereGeometry(0.025,8,8),
-new THREE.MeshBasicMaterial({color:0xFF9F07})
+new THREE.SphereGeometry(0.03,10,10),
+new THREE.MeshBasicMaterial({
+color:0xFF9F07,
+depthTest:false,
+depthWrite:false
+})
 );
 
 mesh.position.copy(pos);
-mesh.userData=s;
+mesh.userData = s;
+mesh.renderOrder = 2;
 
 planetGroup.add(mesh);
 poiMeshes.push(mesh);
@@ -257,6 +272,7 @@ div.onclick=()=>focusStation(s);
 stationList.appendChild(div);
 });
 
+/* focus */
 function focusStation(st){
 const target = latLonToVec(st.lat,st.lon);
 
@@ -312,7 +328,7 @@ window.location=hit[0].object.userData.link;
 function animate(){
 requestAnimationFrame(animate);
 
-/* subtle cloud drift */
+/* subtle atmospheric motion */
 atmosphere.rotation.y += 0.0003;
 
 renderer.render(scene,camera);
