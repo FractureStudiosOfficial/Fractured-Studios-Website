@@ -93,7 +93,7 @@ top:0;
 
 <div class="section">
 <div>Atmosphere: Dense CO₂ / Sulfur Clouds</div>
-<div>Day Length: 243 days (retrograde)</div>
+<div>Day Length: 243 days</div>
 <div>Orbit: 225 days</div>
 <div>Gravity: 0.9g</div>
 </div>
@@ -113,12 +113,11 @@ top:0;
 
 /* CONFIG */
 const TEXTURE = "2k_venus_surface.jpg";
+const ATMOSPHERE_TEXTURE = "2k_venus_atmosphere.png"; 
 
-/* Maxwell Montes location */
 const BASE_LAT = 65;
 const BASE_LON = 3;
 
-/* stations (slightly offset so they don't overlap visually) */
 const stations = [
 { name:"Floating Islands Base", lat:BASE_LAT+1.5, lon:BASE_LON+1.5, icon:"☁️", link:"floating.html" },
 { name:"Surface Mass Driver", lat:BASE_LAT-1.5, lon:BASE_LON-1.5, icon:"⚙", link:"massdriver.html" }
@@ -146,31 +145,37 @@ document.body.appendChild(renderer.domElement);
 const planetGroup = new THREE.Group();
 scene.add(planetGroup);
 
-/* venus surface */
-const tex = new THREE.TextureLoader().load(TEXTURE);
+/* SURFACE */
+const surfaceTex = new THREE.TextureLoader().load(TEXTURE);
 const planet = new THREE.Mesh(
 new THREE.SphereGeometry(1,64,64),
 new THREE.MeshBasicMaterial({
-map: tex,
+map: surfaceTex,
 color:0xFF9F07
 })
 );
 planetGroup.add(planet);
 
-/* ATMOSPHERE LAYER (no lines) */
+/* 🌫️ ATMOSPHERE (TEXTURE-BASED) */
+const atmosphereTex = new THREE.TextureLoader().load(ATMOSPHERE_TEXTURE);
+
 const atmosphere = new THREE.Mesh(
-new THREE.SphereGeometry(1.08,64,64),
+new THREE.SphereGeometry(1.1,64,64), // slightly larger than planet
 new THREE.MeshBasicMaterial({
-color:0xFFB347,
+map: atmosphereTex,
 transparent:true,
-opacity:0.25,
+opacity:0.6,
 side: THREE.DoubleSide,
 depthWrite:false
 })
 );
+
+/* ensure proper rendering */
+atmosphere.renderOrder = 1;
+
 planetGroup.add(atmosphere);
 
-/* grid */
+/* GRID */
 const grid = new THREE.Group();
 
 const latLines = 18;
@@ -306,6 +311,10 @@ window.location=hit[0].object.userData.link;
 /* animate */
 function animate(){
 requestAnimationFrame(animate);
+
+/* subtle cloud drift */
+atmosphere.rotation.y += 0.0003;
+
 renderer.render(scene,camera);
 }
 animate();
