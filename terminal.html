@@ -17,6 +17,7 @@ body {
   perspective:1000px;
 }
 
+/* MAIN CONTAINER */
 #crt-container {
   height:100vh;
   display:flex;
@@ -25,6 +26,7 @@ body {
   padding:40px;
   transform-style:preserve-3d;
   transition:transform .08s ease-out;
+  box-sizing:border-box;
 }
 
 #terminal-title {
@@ -34,10 +36,12 @@ body {
   text-shadow: 0 0 8px #FF9F07;
 }
 
+/* TERMINAL AREA */
 #terminal-box {
   flex:1;
   display:flex;
   flex-direction:column;
+  min-height:0; /* FIX: prevents overflow issues */
 }
 
 #terminal {
@@ -46,8 +50,10 @@ body {
   border:1px solid rgba(255,159,7,.2);
   min-height:300px;
   overflow-y:auto;
+  flex:1;
 }
 
+/* INPUT */
 #prompt {
   display:flex;
   margin-top:10px;
@@ -60,16 +66,20 @@ body {
   color:#FF9F07;
   font-family:inherit;
   flex:1;
+  min-width:0;
 }
 
+/* OS LABEL */
 #os {
   position:fixed;
   bottom:10px;
   right:15px;
   font-size:12px;
   opacity:.7;
+  z-index:1002;
 }
 
+/* SCANLINES */
 #scanlines {
   position:fixed;
   inset:0;
@@ -90,11 +100,53 @@ body {
   100%{opacity:.15}
 }
 
+/* AMBER OVERLAY */
 #amber {
   position:fixed;
   inset:0;
   background:rgba(255,159,7,.04);
   pointer-events:none;
+  z-index:1000;
+}
+
+/* ========================= */
+/* 🔥 RESPONSIVE FIXES */
+/* ========================= */
+
+@media (max-width: 900px){
+#crt-container{
+  padding:20px;
+}
+
+#terminal-title{
+  font-size:22px;
+}
+
+#terminal{
+  padding:15px;
+}
+}
+
+@media (max-width: 500px){
+body{
+  font-size:14px;
+}
+
+#crt-container{
+  padding:15px;
+}
+
+#terminal-title{
+  font-size:18px;
+}
+
+#prompt{
+  margin-top:8px;
+}
+
+#prompt input{
+  font-size:14px;
+}
 }
 </style>
 </head>
@@ -127,7 +179,7 @@ const input = document.getElementById("cmd");
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 
-// Define sequences with exact pages to redirect
+/* COMMAND SEQUENCES */
 const sequences = {
   users: { cmds: ["init","access","grant"], page: "users.html" },
   stations: { cmds: ["station","alpha","open"], page: "folder_stations/stations.html" },
@@ -147,7 +199,7 @@ const sequences = {
 let currentSequence = null;
 let step = 0;
 
-// Startup sequence
+/* BOOT TEXT */
 const bootLines = [
   'U.I.C. Terminal Booting...',
   'Initializing Secure Modules...',
@@ -157,7 +209,6 @@ const bootLines = [
   '------------------------'
 ];
 
-// Fake errors
 const fakeErrors = [
   'ERROR: Network desync',
   'WARNING: Unknown protocol detected',
@@ -166,29 +217,31 @@ const fakeErrors = [
   'ERROR: Peripheral mismatch'
 ];
 
-// Boot function
+/* BOOT SEQUENCE */
 async function boot() {
   for (let line of bootLines) {
     const delay = 50 + Math.random()*100;
+
     if (Math.random() < 0.2) {
       const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
       terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
       terminal.scrollTop = terminal.scrollHeight;
       await new Promise(r => setTimeout(r, delay));
     }
+
     terminal.innerHTML += line + "<br>";
     terminal.scrollTop = terminal.scrollHeight;
     await new Promise(r => setTimeout(r, delay));
   }
+
   terminal.innerHTML += "<br>System Ready.<br>";
   input.disabled = false;
   input.focus();
 }
 
-// Boot the terminal
 boot();
 
-// Command input handler
+/* INPUT HANDLER */
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
 
@@ -198,6 +251,7 @@ input.addEventListener("keydown", e => {
 
   if (!currentSequence) {
     let found = false;
+
     for (let key in sequences) {
       if (value === sequences[key].cmds[0]) {
         currentSequence = key;
@@ -208,40 +262,57 @@ input.addEventListener("keydown", e => {
         break;
       }
     }
+
     if (!found) {
       terminal.innerHTML += "Unknown command.<br>";
     }
+
   } else {
     const seq = sequences[currentSequence];
+
     if (value === seq.cmds[step]) {
       step++;
+
       if (step === seq.cmds.length) {
         terminal.innerHTML += `<br>${currentSequence.toUpperCase()} Access Granted! Redirecting...<br>`;
         terminal.scrollTop = terminal.scrollHeight;
+
         setTimeout(() => {
-          window.location.href = seq.page; // redirect to exact page
+          window.location.href = seq.page;
         }, 500);
+
         currentSequence = null;
         step = 0;
       } else {
         terminal.innerHTML += `Step ${step} complete. Enter next command.<br>`;
       }
+
     } else {
       terminal.innerHTML += "Invalid command. Sequence reset.<br>";
       currentSequence = null;
       step = 0;
     }
+
     terminal.scrollTop = terminal.scrollHeight;
   }
 });
 
-// 3D tilt
+/* DESKTOP TILT */
 document.addEventListener("mousemove", e => {
   const x = (window.innerWidth/2 - e.clientX)/1000;
   const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
+
+/* MOBILE TILT */
+document.addEventListener("touchmove", e => {
+  const t = e.touches[0];
+  const x = (window.innerWidth/2 - t.clientX)/1000;
+  const y = (window.innerHeight/2 - t.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+},{passive:true});
 </script>
 
 </body>
