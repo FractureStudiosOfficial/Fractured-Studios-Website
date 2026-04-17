@@ -20,9 +20,10 @@ perspective:1000px;
 /* CRT container */
 #crt-container{
 padding:40px;
-padding-bottom:80px; /* prevent content hiding behind terminal */
+padding-bottom:80px;
 transform-style:preserve-3d;
 transition:transform .08s ease-out;
+box-sizing:border-box;
 }
 
 /* Amber tint overlay */
@@ -62,6 +63,7 @@ bottom:10px;
 right:15px;
 font-size:12px;
 opacity:.7;
+z-index:1002;
 }
 
 /* Header */
@@ -126,7 +128,7 @@ padding:10px;
 border-top:1px solid rgba(255,159,7,.3);
 display:flex;
 gap:10px;
-z-index:1002;
+z-index:1003;
 }
 
 #terminal input{
@@ -136,6 +138,63 @@ outline:none;
 color:#FF9F07;
 font-family:inherit;
 flex:1;
+min-width:0;
+}
+
+/* ========================= */
+/* 🔥 RESPONSIVE FIXES */
+/* ========================= */
+
+@media (max-width: 900px){
+#crt-container{
+padding:20px;
+padding-bottom:80px;
+}
+
+.game{
+grid-template-columns:1fr;
+gap:20px;
+}
+
+.game img{
+max-height:300px;
+object-fit:cover;
+}
+
+.header{
+margin-bottom:40px;
+}
+}
+
+@media (max-width: 500px){
+body{
+font-size:14px;
+}
+
+#crt-container{
+padding:15px;
+padding-bottom:80px;
+}
+
+.header h1{
+font-size:20px;
+}
+
+.game{
+padding:15px;
+}
+
+.game button{
+width:100%;
+}
+
+#terminal{
+padding:8px;
+}
+
+#terminal input{
+font-size:14px;
+}
 }
 </style>
 </head>
@@ -171,18 +230,6 @@ View Project
 </div>
 </div>
 
-<!-- FUTURE GAME TEMPLATE (duplicate this block for more games) -->
-<!--
-<div class="game">
-<img src="game2-thumb.png">
-<div>
-<h2>Game Title</h2>
-<p>Description</p>
-<button onclick="window.location='game2.html'">View Project</button>
-</div>
-</div>
--->
-
 </div>
 
 </div>
@@ -200,15 +247,25 @@ View Project
 const container=document.getElementById("crt-container")
 const os=document.getElementById("os")
 
-/* subtle 3D tilt */
+function applyTilt(x,y){
+const rx=(window.innerHeight/2-y)/400
+const ry=(window.innerWidth/2-x)/400
+container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+}
+
+/* Desktop */
 document.addEventListener("mousemove",(e)=>{
-const x=(window.innerWidth/2-e.clientX)/400
-const y=(window.innerHeight/2-e.clientY)/400
-container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
-os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
+applyTilt(e.clientX,e.clientY)
 })
 
-/* terminal input for navigation (optional) */
+/* Mobile */
+document.addEventListener("touchmove",(e)=>{
+const t=e.touches[0]
+applyTilt(t.clientX,t.clientY)
+},{passive:true})
+
+/* Terminal input */
 const input=document.getElementById("cmd")
 input.addEventListener("keydown",e=>{
 if(e.key==="Enter"){
