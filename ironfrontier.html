@@ -83,6 +83,7 @@ text-align:center;
 
 .logo img{
 width:250px;
+max-width:100%;
 filter:drop-shadow(0 0 10px #FF9F07);
 }
 
@@ -130,6 +131,8 @@ display:flex;
 align-items:center;
 justify-content:center;
 opacity:.6;
+text-align:center;
+padding:10px;
 }
 
 /* Bottom terminal */
@@ -143,6 +146,7 @@ padding:10px;
 border-top:1px solid rgba(255,159,7,.3);
 display:flex;
 gap:10px;
+z-index:1002;
 }
 
 #terminal input{
@@ -152,6 +156,56 @@ outline:none;
 color:#FF9F07;
 font-family:inherit;
 flex:1;
+min-width:0;
+}
+
+/* ========================= */
+/* RESPONSIVE FIXES */
+/* ========================= */
+
+@media (max-width: 900px){
+#crt-container{
+padding:20px;
+}
+
+.hero{
+grid-template-columns:1fr;
+gap:20px;
+}
+
+.logo img{
+width:180px;
+}
+
+.trailer{
+height:250px;
+}
+
+.section{
+margin-bottom:40px;
+}
+}
+
+@media (max-width: 500px){
+body{
+font-size:14px;
+}
+
+#crt-container{
+padding:15px;
+}
+
+.logo img{
+width:150px;
+}
+
+#terminal{
+padding:8px;
+}
+
+#terminal input{
+font-size:14px;
+}
 }
 </style>
 </head>
@@ -280,12 +334,23 @@ Add multiple paragraphs, lore, worldbuilding, etc.
 const container=document.getElementById("crt-container")
 const os=document.getElementById("os")
 
+function applyTilt(x,y){
+const rx=(window.innerHeight/2-y)/1500
+const ry=(window.innerWidth/2-x)/1500
+container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+}
+
+// Desktop mouse
 document.addEventListener("mousemove",(e)=>{
-const x=(window.innerWidth/2-e.clientX)/1500
-const y=(window.innerHeight/2-e.clientY)/1500
-container.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
-os.style.transform=`rotateX(${y}deg) rotateY(${x}deg)`
+applyTilt(e.clientX,e.clientY)
 })
+
+// Mobile touch
+document.addEventListener("touchmove",(e)=>{
+const t=e.touches[0]
+applyTilt(t.clientX,t.clientY)
+},{passive:true})
 
 const input=document.getElementById("cmd")
 input.addEventListener("keydown",e=>{
