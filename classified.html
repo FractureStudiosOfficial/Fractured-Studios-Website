@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Signal Intercept System</title>
+<title>SIGNAL INTERCEPT SYSTEM // MULTI-STATION</title>
 <style>
 body {
   margin:0;
@@ -12,20 +12,25 @@ body {
   display:flex;
   height:100vh;
 }
+
 .container { display:flex; width:100%; }
+
 .terminal {
   width:40%;
   border-right:1px solid #00ffcc;
   display:flex;
   flex-direction:column;
 }
+
 .output {
   flex:1;
   overflow-y:auto;
   padding:15px;
 }
+
 .output::-webkit-scrollbar { width:8px; }
 .output::-webkit-scrollbar-thumb { background:#00ffcc; }
+
 input {
   border:none;
   border-top:1px solid #00ffcc;
@@ -35,17 +40,33 @@ input {
   font-family:monospace;
   font-size:16px;
 }
+
 .canvasBox {
   width:60%;
   display:flex;
   justify-content:center;
   align-items:center;
+  position:relative;
 }
+
 canvas {
   width:90%;
   height:70%;
   border:1px solid #00ffcc;
 }
+
+.popup {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:black;
+  border:2px solid #00ffcc;
+  padding:20px;
+  display:none;
+  z-index:999;
+}
+
 .error { color:red; }
 .success { color:#00ffaa; }
 .hint { color:#ffaa00; }
@@ -54,13 +75,17 @@ canvas {
 <body>
 
 <div class="container">
+
   <div class="terminal">
     <div class="output" id="output"></div>
     <input id="input" placeholder="Enter command...">
   </div>
+
   <div class="canvasBox">
     <canvas id="scope"></canvas>
+    <div class="popup" id="popup"></div>
   </div>
+
 </div>
 
 <script>
@@ -68,24 +93,42 @@ const out = document.getElementById("output");
 const input = document.getElementById("input");
 const canvas = document.getElementById("scope");
 const ctx = canvas.getContext("2d");
+const popup = document.getElementById("popup");
 
 canvas.width = 800;
 canvas.height = 400;
+
+// ================= STATIONS =================
+const stations = {};
+const stationNames = [];
+
+for(let i=1;i<=20;i++){
+  let name = "STATION_" + i;
+  stationNames.push(name);
+  stations[name] = {
+    amplitude: Math.floor(Math.random()*100),
+    frequency: Math.floor(Math.random()*100),
+    phase: Math.floor(Math.random()*100)
+  };
+}
+
+// preset key stations for secret
+stations["ALPHA"] = { amplitude:72, frequency:38, phase:60 };
+stations["BETA"] = { amplitude:55, frequency:70, phase:20 };
+stations["OMEGA"] = { amplitude:90, frequency:25, phase:80 };
 
 let state = {
   amplitude: 50,
   frequency: 50,
   phase: 0,
-  target: {
-    amplitude: 72,
-    frequency: 38,
-    phase: 60
-  },
+  currentStation: "ALPHA",
+  lockedStations: {},
   locked: false
 };
 
 let sweepX = 0;
 
+// ================= UI =================
 function log(text, cls=""){
   const d=document.createElement("div");
   d.textContent=text;
@@ -94,150 +137,119 @@ function log(text, cls=""){
   out.scrollTop = out.scrollHeight;
 }
 
-function drawGrid(){
-  ctx.strokeStyle = "rgba(0,255,200,0.08)";
-  ctx.lineWidth = 1;
-
-  let spacing = 50;
-
-  for(let x=0;x<canvas.width;x+=spacing){
-    ctx.beginPath();
-    ctx.moveTo(x,0);
-    ctx.lineTo(x,canvas.height);
-    ctx.stroke();
-  }
-
-  for(let y=0;y<canvas.height;y+=spacing){
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(canvas.width,y);
-    ctx.stroke();
-  }
+function showPopup(html){
+  popup.style.display="block";
+  popup.innerHTML = html + "<br><br><button onclick=\"popup.style.display='none'\">CLOSE</button>";
 }
 
-function drawWave(){
-  // CRT fade (phosphor decay)
-  ctx.fillStyle = "rgba(0,0,0,0.12)";
+// ================= DRAW =================
+function draw(){
+  ctx.fillStyle="rgba(0,0,0,0.12)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  drawGrid();
-
-  let amp = state.amplitude/100 * 150;
-  let freq = state.frequency/100 * 0.1;
-  let phase = state.phase/100 * Math.PI * 2;
+  let amp = state.amplitude/100*150;
+  let freq = state.frequency/100*0.1;
+  let phase = state.phase/100*Math.PI*2;
 
   ctx.beginPath();
 
-  for(let x = 0; x < canvas.width; x++){
-    let t = (x + sweepX) * freq;
-    let y = canvas.height/2 + Math.sin(t + phase) * amp;
-
-    if(x === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  for(let x=0;x<canvas.width;x++){
+    let y = canvas.height/2 + Math.sin((x+sweepX)*freq + phase)*amp;
+    if(x===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
   }
 
-  // main bright line
-  ctx.strokeStyle = "#00ffcc";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle="#00ffcc";
+  ctx.lineWidth=2;
   ctx.stroke();
 
-  // glow pass (phosphor bleed)
-  ctx.strokeStyle = "rgba(0,255,200,0.2)";
-  ctx.lineWidth = 6;
-  ctx.stroke();
-
-  // sweep beam
-  ctx.beginPath();
-  ctx.moveTo(sweepX, 0);
-  ctx.lineTo(sweepX, canvas.height);
-  ctx.strokeStyle = "rgba(0,255,200,0.25)";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  sweepX += 3;
-  if(sweepX > canvas.width) sweepX = 0;
+  sweepX+=3;
+  if(sweepX>canvas.width) sweepX=0;
 }
 
-function checkLock(){
-  let a = Math.abs(state.amplitude - state.target.amplitude);
-  let f = Math.abs(state.frequency - state.target.frequency);
-  let p = Math.abs(state.phase - state.target.phase);
+// ================= SCAN =================
+function scan(){
+  let t = stations[state.currentStation];
 
-  if(a < 3 && f < 3 && p < 3){
-    if(!state.locked){
-      state.locked = true;
-      log("> SIGNAL LOCK ACHIEVED","success");
+  function hint(label, val, target){
+    let d = val-target;
+    if(Math.abs(d)<3) return label+": STABLE";
+    if(Math.abs(d)<10) return label+": CLOSE";
+    return d>0?label+": TOO HIGH":label+": TOO LOW";
+  }
+
+  log("> SCANNING " + state.currentStation,"hint");
+  log("> " + hint("AMP",state.amplitude,t.amplitude),"hint");
+  log("> " + hint("FREQ",state.frequency,t.frequency),"hint");
+  log("> " + hint("PHASE",state.phase,t.phase),"hint");
+}
+
+// ================= LOCK =================
+function checkLock(){
+  let t = stations[state.currentStation];
+
+  let a=Math.abs(state.amplitude-t.amplitude);
+  let f=Math.abs(state.frequency-t.frequency);
+  let p=Math.abs(state.phase-t.phase);
+
+  if(a<3&&f<3&&p<3){
+    if(!state.lockedStations[state.currentStation]){
+      state.lockedStations[state.currentStation]=true;
+      log("> " + state.currentStation + " LOCKED","success");
     }
   }
-}
 
-function scanHints(){
-  let aDiff = state.amplitude - state.target.amplitude;
-  let fDiff = state.frequency - state.target.frequency;
-  let pDiff = state.phase - state.target.phase;
-
-  function hint(label, diff){
-    if(Math.abs(diff) < 3) return `${label}: STABLE`;
-    if(Math.abs(diff) < 10) return `${label}: CLOSE`;
-    return diff > 0 ? `${label}: TOO HIGH` : `${label}: TOO LOW`;
+  // secret condition
+  let count = Object.keys(state.lockedStations).length;
+  if(count>=3 && !state.secret){
+    state.secret=true;
+    log("> SECRET FREQUENCY MATRIX COMPLETE","success");
+    showPopup(`
+      <b>CLASSIFIED TRANSMISSION</b><br><br>
+      MULTI-STATION LOCK CONFIRMED.<br>
+      AUTHORIZED ACCESS GRANTED.<br><br>
+      <a href="secret.html" target="_blank">OPEN ARCHIVE</a>
+    `);
   }
-
-  log("> SCANNING SIGNAL...","hint");
-  log("> " + hint("AMP", aDiff),"hint");
-  log("> " + hint("FREQ", fDiff),"hint");
-  log("> " + hint("PHASE", pDiff),"hint");
 }
 
+// ================= COMMANDS =================
 function handle(cmd){
-  log("> " + cmd);
+  log("> "+cmd);
 
-  let parts = cmd.split(" ");
+  let parts=cmd.split(" ");
 
-  if(parts[0] === "AMP"){
-    state.amplitude = Number(parts[1]);
-    log("> amplitude set to " + state.amplitude);
-  }
-  else if(parts[0] === "FREQ"){
-    state.frequency = Number(parts[1]);
-    log("> frequency set to " + state.frequency);
-  }
-  else if(parts[0] === "PHASE"){
-    state.phase = Number(parts[1]);
-    log("> phase set to " + state.phase);
-  }
-  else if(cmd === "STATUS"){
-    log(`> AMP:${state.amplitude} FREQ:${state.frequency} PHASE:${state.phase}`);
-  }
-  else if(cmd === "SCAN"){
-    scanHints();
-  }
-  else if(cmd === "LOCK" && state.locked){
-    log("> CHANNEL OPENED","success");
-  }
-  else{
-    log("> UNKNOWN COMMAND","error");
+  if(parts[0]==="AMP") state.amplitude=Number(parts[1]);
+  else if(parts[0]==="FREQ") state.frequency=Number(parts[1]);
+  else if(parts[0]==="PHASE") state.phase=Number(parts[1]);
+
+  else if(parts[0]==="SCAN") scan();
+
+  else if(parts[0]==="LOCK") checkLock();
+
+  else if(parts[0]==="STATION"){
+    let name=parts[1];
+    if(stations[name]){
+      state.currentStation=name;
+      log("> SWITCHED TO " + name,"hint");
+    } else log("> UNKNOWN STATION","error");
   }
 
-  checkLock();
+  else log("> UNKNOWN COMMAND","error");
 }
 
-input.addEventListener("keydown", e=>{
-  if(e.key === "Enter"){
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
     handle(input.value.trim().toUpperCase());
     input.value="";
   }
 });
 
-function loop(){
-  drawWave();
-  requestAnimationFrame(loop);
-}
-
+function loop(){ draw(); requestAnimationFrame(loop); }
 loop();
 
-log("> SIGNAL INTERCEPT SYSTEM");
-log("> ADJUST WAVE USING: AMP, FREQ, PHASE");
-log("> USE SCAN FOR HINTS");
+log("> MULTI-STATION SIGNAL SYSTEM ONLINE");
+log("> COMMANDS: AMP, FREQ, PHASE, SCAN, LOCK, STATION <name>");
 </script>
 
 </body>
