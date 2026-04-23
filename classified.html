@@ -2,143 +2,187 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SIGNAL INTERCEPT TERMINAL</title>
+<title>Signal Intercept System</title>
 <style>
 body {
-  background: black;
-  color: #00ffcc;
-  font-family: monospace;
-  padding: 20px;
+  margin:0;
+  background:black;
+  color:#00ffcc;
+  font-family:monospace;
+  display:flex;
+  height:100vh;
 }
-.terminal {
-  border: 1px solid #00ffcc;
-  padding: 20px;
-  height: 500px;
-  overflow-y: auto;
-}
-input {
-  width: 100%;
-  background: black;
-  border: none;
-  color: #00ffcc;
-  font-family: monospace;
-  font-size: 16px;
-}
-.error { color: red; }
-.success { color: #00ffaa; }
-.hint { color: #ffaa00; }
 
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: black;
-  border: 2px solid #00ffcc;
-  padding: 20px;
-  display: none;
+.container {
+  display:flex;
+  width:100%;
 }
+
+.terminal {
+  width:40%;
+  border-right:1px solid #00ffcc;
+  display:flex;
+  flex-direction:column;
+}
+
+.output {
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+}
+
+.output::-webkit-scrollbar {
+  width:8px;
+}
+.output::-webkit-scrollbar-thumb {
+  background:#00ffcc;
+}
+
+input {
+  border:none;
+  border-top:1px solid #00ffcc;
+  background:black;
+  color:#00ffcc;
+  padding:10px;
+  font-family:monospace;
+  font-size:16px;
+}
+
+.canvasBox {
+  width:60%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+canvas {
+  width:90%;
+  height:70%;
+  border:1px solid #00ffcc;
+}
+
+.error { color:red; }
+.success { color:#00ffaa; }
+.hint { color:#ffaa00; }
 </style>
 </head>
 <body>
 
-<h1>SIGNAL INTERCEPT TERMINAL</h1>
-
-<div class="terminal" id="terminal"></div>
-<input id="input" placeholder="Enter command...">
-
-<div class="popup" id="popup"></div>
+<div class="container">
+  <div class="terminal">
+    <div class="output" id="output"></div>
+    <input id="input" placeholder="Enter command...">
+  </div>
+  <div class="canvasBox">
+    <canvas id="scope"></canvas>
+  </div>
+</div>
 
 <script>
-const term = document.getElementById("terminal");
+const out = document.getElementById("output");
 const input = document.getElementById("input");
-const popup = document.getElementById("popup");
+const canvas = document.getElementById("scope");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 800;
+canvas.height = 400;
 
 let state = {
-  frequency: null,
-  signalLocked: false,
-  fragments: [],
-  decoded: false,
-  channel: 0
+  amplitude: 50,
+  frequency: 50,
+  phase: 0,
+  target: {
+    amplitude: 72,
+    frequency: 38,
+    phase: 60
+  },
+  locked: false
 };
 
-function log(text, cls="") {
-  const div = document.createElement("div");
-  div.textContent = text;
-  if(cls) div.className = cls;
-  term.appendChild(div);
-  term.scrollTop = term.scrollHeight;
+function log(text, cls=""){
+  const d=document.createElement("div");
+  d.textContent=text;
+  if(cls) d.className=cls;
+  out.appendChild(d);
+  out.scrollTop = out.scrollHeight;
 }
 
-function showPopup(content) {
-  popup.style.display = "block";
-  popup.innerHTML = content + "<br><br><button onclick='popup.style.display=\"none\"'>CLOSE</button>";
+function drawWave(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath();
+
+  let amp = state.amplitude/100 * 150;
+  let freq = state.frequency/100 * 0.1;
+  let phase = state.phase/100 * Math.PI * 2;
+
+  for(let x=0;x<canvas.width;x++){
+    let y = canvas.height/2 + Math.sin(x*freq + phase) * amp;
+    if(x===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+
+  ctx.strokeStyle = "#00ffcc";
+  ctx.stroke();
 }
 
-function handle(cmd) {
+function checkLock(){
+  let a = Math.abs(state.amplitude - state.target.amplitude);
+  let f = Math.abs(state.frequency - state.target.frequency);
+  let p = Math.abs(state.phase - state.target.phase);
+
+  if(a < 3 && f < 3 && p < 3){
+    state.locked = true;
+    log("> SIGNAL LOCK ACHIEVED","success");
+  }
+}
+
+function handle(cmd){
   log("> " + cmd);
 
-  // SCAN
-  if(cmd === "SCAN") {
-    let freq = (Math.random()*100).toFixed(2);
-    log("> SIGNAL DETECTED AT " + freq + " MHz", "success");
-    state.frequency = freq;
+  let parts = cmd.split(" ");
+
+  if(parts[0] === "AMP"){
+    state.amplitude = Number(parts[1]);
+    log("> amplitude set to " + state.amplitude);
+  }
+  else if(parts[0] === "FREQ"){
+    state.frequency = Number(parts[1]);
+    log("> frequency set to " + state.frequency);
+  }
+  else if(parts[0] === "PHASE"){
+    state.phase = Number(parts[1]);
+    log("> phase set to " + state.phase);
+  }
+  else if(cmd === "STATUS"){
+    log(`> AMP:${state.amplitude} FREQ:${state.frequency} PHASE:${state.phase}`);
+  }
+  else if(cmd === "LOCK" && state.locked){
+    log("> CHANNEL OPENED","success");
+  }
+  else{
+    log("> UNKNOWN COMMAND","error");
   }
 
-  // TUNE
-  else if(cmd.startsWith("TUNE ")) {
-    let val = cmd.split(" ")[1];
-    if(val == state.frequency) {
-      log("> SIGNAL LOCKED", "success");
-      state.signalLocked = true;
-    } else {
-      log("> NO SIGNAL", "error");
-    }
-  }
-
-  // INTERCEPT
-  else if(cmd === "INTERCEPT" && state.signalLocked) {
-    let fragment = ["XJ-9", "ALPHA", "73", "KZ"][Math.floor(Math.random()*4)];
-    state.fragments.push(fragment);
-    log("> FRAGMENT CAPTURED: " + fragment);
-    if(state.fragments.length >= 3) {
-      log("> ENOUGH FRAGMENTS. TRY: DECODE");
-    }
-  }
-
-  // DECODE
-  else if(cmd === "DECODE" && state.fragments.length >= 3) {
-    log("> RECONSTRUCTING SIGNAL...");
-    state.decoded = true;
-    log("> MESSAGE: \"SITE 73 ACTIVE\"", "success");
-    log("> NEW COMMAND: OPEN CHANNEL");
-  }
-
-  // CHANNEL
-  else if(cmd === "OPEN CHANNEL" && state.decoded) {
-    state.channel++;
-    log("> CHANNEL " + state.channel + " OPENED", "success");
-
-    showPopup(`
-      <b>TRANSMISSION ${state.channel}</b><br><br>
-      [PLACEHOLDER TEXT - ADD STORY HERE]
-    `);
-  }
-
-  else {
-    log("> UNKNOWN COMMAND", "error");
-  }
+  checkLock();
 }
 
 input.addEventListener("keydown", e=>{
-  if(e.key === "Enter") {
+  if(e.key === "Enter"){
     handle(input.value.trim().toUpperCase());
-    input.value = "";
+    input.value="";
   }
 });
 
-log("> SIGNAL TERMINAL INITIALIZED");
-log("> TRY: SCAN");
+function loop(){
+  drawWave();
+  requestAnimationFrame(loop);
+}
+
+loop();
+
+log("> SIGNAL INTERCEPT SYSTEM");
+log("> ADJUST WAVE USING: AMP, FREQ, PHASE");
+log("> TRY MATCHING THE SIGNAL");
 </script>
 
 </body>
