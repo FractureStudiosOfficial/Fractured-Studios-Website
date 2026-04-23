@@ -2,236 +2,143 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PROJECT ORANGE - CLASSIFIED SYSTEM V3</title>
+<title>SIGNAL INTERCEPT TERMINAL</title>
 <style>
 body {
   background: black;
-  color: #00ffff;
+  color: #00ffcc;
   font-family: monospace;
   padding: 20px;
 }
 .terminal {
-  border: 1px solid #00ffff;
+  border: 1px solid #00ffcc;
   padding: 20px;
   height: 500px;
   overflow-y: auto;
-  white-space: pre-wrap;
 }
 input {
+  width: 100%;
   background: black;
   border: none;
-  color: #00ffff;
+  color: #00ffcc;
   font-family: monospace;
   font-size: 16px;
-  width: 100%;
-  outline: none;
 }
 .error { color: red; }
-.success { color: #ff6600; }
+.success { color: #00ffaa; }
 .hint { color: #ffaa00; }
-.path { color: #00ff88; }
+
 .popup {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #000;
-  border: 2px solid #00ffff;
+  background: black;
+  border: 2px solid #00ffcc;
   padding: 20px;
-  max-width: 600px;
   display: none;
-  z-index: 1000;
 }
-.popup img { max-width: 100%; }
 </style>
 </head>
 <body>
 
-<h1>PROJECT ORANGE - CLASSIFIED SYSTEM</h1>
+<h1>SIGNAL INTERCEPT TERMINAL</h1>
+
 <div class="terminal" id="terminal"></div>
-<input type="text" id="commandInput" placeholder="Enter command here" autocomplete="off">
+<input id="input" placeholder="Enter command...">
 
 <div class="popup" id="popup"></div>
 
 <script>
-const terminal = document.getElementById('terminal');
-const input = document.getElementById('commandInput');
-const popup = document.getElementById('popup');
+const term = document.getElementById("terminal");
+const input = document.getElementById("input");
+const popup = document.getElementById("popup");
 
-// ================= STATE =================
 let state = {
-  level: 0,
-  cwd: "/root",
-  flags: {},
-  files: {},
-  errors: 0
+  frequency: null,
+  signalLocked: false,
+  fragments: [],
+  decoded: false,
+  channel: 0
 };
 
-const maxErrors = 20;
-
-// ================= FILE SYSTEM =================
-const fileSystem = {
-  root: {
-    logs: {
-      "system.log": "[LOG ENTRY]\nFragment: ZX-41",
-    },
-    nodes: {
-      "node_a.txt": "[NODE A DATA PLACEHOLDER]",
-      "node_b.img": "https://via.placeholder.com/400"
-    },
-    secure: {
-      "archive.txt": "[CLASSIFIED ARCHIVE DATA]"
-    }
-  }
-};
-
-// ================= UI =================
-function addLine(text, cls="") {
-  const line = document.createElement('div');
-  line.textContent = text;
-  if(cls) line.className = cls;
-  terminal.appendChild(line);
-  terminal.scrollTop = terminal.scrollHeight;
+function log(text, cls="") {
+  const div = document.createElement("div");
+  div.textContent = text;
+  if(cls) div.className = cls;
+  term.appendChild(div);
+  term.scrollTop = term.scrollHeight;
 }
 
-function showPopup(content, type="text") {
-  popup.style.display = 'block';
-  if(type === "image") {
-    popup.innerHTML = `<img src="${content}"><br><br><button onclick="popup.style.display='none'">CLOSE</button>`;
-  } else {
-    popup.innerHTML = `<div>${content}</div><br><button onclick="popup.style.display='none'">CLOSE</button>`;
-  }
-}
-
-// ================= SAVE / LOAD =================
-function saveGame() {
-  localStorage.setItem("orange_save", JSON.stringify(state));
-  addLine("> GAME SAVED", "success");
-}
-
-function loadGame() {
-  const save = localStorage.getItem("orange_save");
-  if(save) {
-    state = JSON.parse(save);
-    addLine("> SAVE LOADED", "success");
-    addLine("> LOCATION: " + state.cwd, "path");
-  } else {
-    addLine("> NO SAVE FOUND", "error");
-  }
-}
-
-// ================= FILE SYSTEM NAV =================
-function getDir(path) {
-  let parts = path.split("/").filter(Boolean);
-  let dir = fileSystem;
-  for(let p of parts) {
-    if(dir[p]) dir = dir[p];
-    else return null;
-  }
-  return dir;
-}
-
-function listDir() {
-  let dir = getDir(state.cwd);
-  if(!dir) return addLine("> DIRECTORY ERROR", "error");
-  Object.keys(dir).forEach(k => addLine(k));
-}
-
-function changeDir(target) {
-  let newPath;
-  if(target === "..") {
-    let parts = state.cwd.split("/");
-    parts.pop();
-    newPath = parts.join("/") || "/";
-  } else {
-    newPath = state.cwd === "/" ? `/${target}` : `${state.cwd}/${target}`;
-  }
-  if(getDir(newPath)) {
-    state.cwd = newPath;
-    addLine("> " + state.cwd, "path");
-  } else {
-    addLine("> PATH NOT FOUND", "error");
-  }
-}
-
-function openFile(name) {
-  let dir = getDir(state.cwd);
-  if(!dir || !dir[name]) return addLine("> FILE NOT FOUND", "error");
-
-  if(name.endsWith(".img")) {
-    showPopup(dir[name], "image");
-  } else {
-    showPopup(dir[name]);
-  }
-}
-
-// ================= GAME LOGIC =================
-function fail() {
-  state.errors++;
-  addLine("> INVALID COMMAND", "error");
-  if(state.errors >= maxErrors) {
-    addLine("> SYSTEM LOCKDOWN", "error");
-    setTimeout(()=>location.reload(),2000);
-  }
+function showPopup(content) {
+  popup.style.display = "block";
+  popup.innerHTML = content + "<br><br><button onclick='popup.style.display=\"none\"'>CLOSE</button>";
 }
 
 function handle(cmd) {
-  addLine("> " + cmd);
+  log("> " + cmd);
 
-  // GLOBAL COMMANDS
-  if(cmd === "SAVE") return saveGame();
-  if(cmd === "LOAD") return loadGame();
-  if(cmd === "LS") return listDir();
-  if(cmd.startsWith("CD ")) return changeDir(cmd.split(" ")[1]);
-  if(cmd.startsWith("OPEN ")) return openFile(cmd.split(" ")[1]);
-
-  // LEVEL SYSTEM
-  if(state.level === 0) {
-    if(cmd === "HELP") addLine("> TRY NAVIGATION COMMANDS", "hint");
-    else if(cmd === "SCAN LOGS") {
-      addLine("> FOUND CODE: ZX-41");
-      state.flags.code = true;
-    }
-    else if(cmd === "DECRYPT ZX-41" && state.flags.code) {
-      addLine("> DECRYPTED: 9041", "success");
-      state.level = 1;
-    }
-    else fail();
+  // SCAN
+  if(cmd === "SCAN") {
+    let freq = (Math.random()*100).toFixed(2);
+    log("> SIGNAL DETECTED AT " + freq + " MHz", "success");
+    state.frequency = freq;
   }
 
-  else if(state.level === 1) {
-    if(cmd === "SYNC NODES") {
-      addLine("> NODES LINKED", "success");
-      state.level = 2;
+  // TUNE
+  else if(cmd.startsWith("TUNE ")) {
+    let val = cmd.split(" ")[1];
+    if(val == state.frequency) {
+      log("> SIGNAL LOCKED", "success");
+      state.signalLocked = true;
+    } else {
+      log("> NO SIGNAL", "error");
     }
-    else fail();
   }
 
-  else if(state.level === 2) {
-    if(cmd === "ANALYZE ARCHIVE") {
-      showPopup("[ARCHIVE INTEL PLACEHOLDER]");
-      state.level = 3;
+  // INTERCEPT
+  else if(cmd === "INTERCEPT" && state.signalLocked) {
+    let fragment = ["XJ-9", "ALPHA", "73", "KZ"][Math.floor(Math.random()*4)];
+    state.fragments.push(fragment);
+    log("> FRAGMENT CAPTURED: " + fragment);
+    if(state.fragments.length >= 3) {
+      log("> ENOUGH FRAGMENTS. TRY: DECODE");
     }
-    else fail();
+  }
+
+  // DECODE
+  else if(cmd === "DECODE" && state.fragments.length >= 3) {
+    log("> RECONSTRUCTING SIGNAL...");
+    state.decoded = true;
+    log("> MESSAGE: \"SITE 73 ACTIVE\"", "success");
+    log("> NEW COMMAND: OPEN CHANNEL");
+  }
+
+  // CHANNEL
+  else if(cmd === "OPEN CHANNEL" && state.decoded) {
+    state.channel++;
+    log("> CHANNEL " + state.channel + " OPENED", "success");
+
+    showPopup(`
+      <b>TRANSMISSION ${state.channel}</b><br><br>
+      [PLACEHOLDER TEXT - ADD STORY HERE]
+    `);
   }
 
   else {
-    addLine("> ADVANCED SYSTEM ACTIVE", "success");
-    addLine("> BUILD MORE LEVELS HERE", "hint");
+    log("> UNKNOWN COMMAND", "error");
   }
 }
 
-// ================= INIT =================
-input.addEventListener('keydown', e => {
-  if(e.key === 'Enter') {
+input.addEventListener("keydown", e=>{
+  if(e.key === "Enter") {
     handle(input.value.trim().toUpperCase());
-    input.value = '';
+    input.value = "";
   }
 });
 
-addLine("> PROJECT ORANGE TERMINAL V3 INITIALIZED");
-addLine("> CURRENT DIR: /root", "path");
-addLine("> COMMANDS: LS, CD, OPEN, SAVE, LOAD");
+log("> SIGNAL TERMINAL INITIALIZED");
+log("> TRY: SCAN");
 </script>
 
 </body>
