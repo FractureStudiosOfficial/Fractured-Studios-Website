@@ -33,7 +33,7 @@ body {
   font-size:28px;
   margin-bottom:20px;
   color:#FF9F07;
-  text-shadow: 0 0 8px #FF9F07;
+  text-shadow:0 0 8px #FF9F07;
 }
 
 /* TERMINAL AREA */
@@ -52,45 +52,47 @@ body {
   overflow-y:auto;
   flex:1;
 
-  scrollbar-width:thin;
-  scrollbar-color:#FF9F07 rgba(255,159,7,.08);
+  scrollbar-width:auto;
+  scrollbar-color:#FF9F07 #111;
 }
 
-/* CUSTOM SCROLLBAR */
+/* FORCE CUSTOM SCROLLBAR */
 #terminal::-webkit-scrollbar {
-  width:14px;
+  width:18px;
+  background:#111;
 }
 
 #terminal::-webkit-scrollbar-track {
   background:
-    linear-gradient(
-      to right,
-      rgba(255,159,7,.03),
-      rgba(255,159,7,.08),
-      rgba(255,159,7,.03)
-    );
-  border-left:1px solid rgba(255,159,7,.15);
-  box-shadow: inset 0 0 8px rgba(255,159,7,.05);
+    linear-gradient(to right,
+      rgba(255,159,7,.04) 0%,
+      rgba(255,159,7,.15) 50%,
+      rgba(255,159,7,.04) 100%);
+  border-left:1px solid rgba(255,159,7,.25);
+  box-shadow:
+    inset 0 0 10px rgba(255,159,7,.1);
 }
 
 #terminal::-webkit-scrollbar-thumb {
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255,230,170,.35) 0px,
-      rgba(255,230,170,.35) 2px,
+      rgba(255,240,200,.45) 0px,
+      rgba(255,240,200,.45) 2px,
       transparent 2px,
       transparent 6px
     ),
     linear-gradient(
       to bottom,
-      rgba(255,200,100,.95),
-      rgba(255,159,7,.95)
+      #ffbf4d 0%,
+      #ff9f07 100%
     );
-  border:1px solid rgba(255,210,120,.35);
-  border-radius:3px;
+
+  border:2px solid rgba(255,200,100,.25);
+  border-radius:2px;
+
   box-shadow:
-    0 0 10px rgba(255,159,7,.35),
+    0 0 12px rgba(255,159,7,.45),
     inset 0 0 6px rgba(255,255,255,.15);
 }
 
@@ -98,15 +100,15 @@ body {
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255,240,190,.45) 0px,
-      rgba(255,240,190,.45) 2px,
+      rgba(255,250,220,.55) 0px,
+      rgba(255,250,220,.55) 2px,
       transparent 2px,
       transparent 6px
     ),
     linear-gradient(
       to bottom,
-      rgba(255,220,140,1),
-      rgba(255,175,30,1)
+      #ffd07a 0%,
+      #ffb020 100%
     );
 }
 
@@ -167,40 +169,18 @@ body {
 }
 
 /* RESPONSIVE FIXES */
-@media (max-width: 900px){
-#crt-container{
-  padding:20px;
+@media (max-width:900px){
+#crt-container{padding:20px;}
+#terminal-title{font-size:22px;}
+#terminal{padding:15px;}
 }
 
-#terminal-title{
-  font-size:22px;
-}
-
-#terminal{
-  padding:15px;
-}
-}
-
-@media (max-width: 500px){
-body{
-  font-size:14px;
-}
-
-#crt-container{
-  padding:15px;
-}
-
-#terminal-title{
-  font-size:18px;
-}
-
-#prompt{
-  margin-top:8px;
-}
-
-#prompt input{
-  font-size:14px;
-}
+@media (max-width:500px){
+body{font-size:14px;}
+#crt-container{padding:15px;}
+#terminal-title{font-size:18px;}
+#prompt{margin-top:8px;}
+#prompt input{font-size:14px;}
 }
 </style>
 </head>
@@ -233,7 +213,6 @@ const input = document.getElementById("cmd");
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 
-/* COMMAND SEQUENCES */
 const sequences = {
   users: { cmds: ["init","access","grant"], page: "users.html" },
   stations: { cmds: ["station","alpha","open"], page: "folder_stations/stations.html" },
@@ -253,7 +232,6 @@ const sequences = {
 let currentSequence = null;
 let step = 0;
 
-/* BOOT TEXT */
 const bootLines = [
   'U.I.C. Terminal Booting...',
   'Initializing Secure Modules...',
@@ -263,110 +241,34 @@ const bootLines = [
   '------------------------'
 ];
 
-const fakeErrors = [
-  'ERROR: Network desync',
-  'WARNING: Unknown protocol detected',
-  'ERROR: Authentication timeout',
-  'ALERT: Module overload',
-  'ERROR: Peripheral mismatch'
-];
-
-/* BOOT SEQUENCE */
 async function boot() {
   for (let line of bootLines) {
-    const delay = 50 + Math.random()*100;
-
-    if (Math.random() < 0.2) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-      terminal.scrollTop = terminal.scrollHeight;
-      await new Promise(r => setTimeout(r, delay));
-    }
-
     terminal.innerHTML += line + "<br>";
     terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r => setTimeout(r, delay));
+    await new Promise(r => setTimeout(r, 80));
   }
 
   terminal.innerHTML += "<br>System Ready.<br>";
   input.disabled = false;
   input.focus();
 }
-
 boot();
 
-/* INPUT HANDLER */
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
 
   const value = input.value.toLowerCase().trim();
   terminal.innerHTML += `&gt; ${value}<br>`;
   input.value = "";
-
-  if (!currentSequence) {
-    let found = false;
-
-    for (let key in sequences) {
-      if (value === sequences[key].cmds[0]) {
-        currentSequence = key;
-        step = 1;
-        terminal.innerHTML += `Step 1 complete. Enter next command.<br>`;
-        terminal.scrollTop = terminal.scrollHeight;
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      terminal.innerHTML += "Unknown command.<br>";
-    }
-
-  } else {
-    const seq = sequences[currentSequence];
-
-    if (value === seq.cmds[step]) {
-      step++;
-
-      if (step === seq.cmds.length) {
-        terminal.innerHTML += `<br>${currentSequence.toUpperCase()} Access Granted! Redirecting...<br>`;
-        terminal.scrollTop = terminal.scrollHeight;
-
-        setTimeout(() => {
-          window.location.href = seq.page;
-        }, 500);
-
-        currentSequence = null;
-        step = 0;
-      } else {
-        terminal.innerHTML += `Step ${step} complete. Enter next command.<br>`;
-      }
-
-    } else {
-      terminal.innerHTML += "Invalid command. Sequence reset.<br>";
-      currentSequence = null;
-      step = 0;
-    }
-
-    terminal.scrollTop = terminal.scrollHeight;
-  }
+  terminal.scrollTop = terminal.scrollHeight;
 });
 
-/* DESKTOP TILT */
 document.addEventListener("mousemove", e => {
   const x = (window.innerWidth/2 - e.clientX)/1000;
   const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
-
-/* MOBILE TILT */
-document.addEventListener("touchmove", e => {
-  const t = e.touches[0];
-  const x = (window.innerWidth/2 - t.clientX)/1000;
-  const y = (window.innerHeight/2 - t.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-},{passive:true});
 </script>
 
 </body>
