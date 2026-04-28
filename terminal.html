@@ -41,7 +41,7 @@ body {
   flex:1;
   display:flex;
   flex-direction:column;
-  min-height:0; /* FIX: prevents overflow issues */
+  min-height:0;
 }
 
 #terminal {
@@ -51,6 +51,63 @@ body {
   min-height:300px;
   overflow-y:auto;
   flex:1;
+
+  scrollbar-width:thin;
+  scrollbar-color:#FF9F07 rgba(255,159,7,.08);
+}
+
+/* CUSTOM SCROLLBAR */
+#terminal::-webkit-scrollbar {
+  width:14px;
+}
+
+#terminal::-webkit-scrollbar-track {
+  background:
+    linear-gradient(
+      to right,
+      rgba(255,159,7,.03),
+      rgba(255,159,7,.08),
+      rgba(255,159,7,.03)
+    );
+  border-left:1px solid rgba(255,159,7,.15);
+  box-shadow: inset 0 0 8px rgba(255,159,7,.05);
+}
+
+#terminal::-webkit-scrollbar-thumb {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,230,170,.35) 0px,
+      rgba(255,230,170,.35) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255,200,100,.95),
+      rgba(255,159,7,.95)
+    );
+  border:1px solid rgba(255,210,120,.35);
+  border-radius:3px;
+  box-shadow:
+    0 0 10px rgba(255,159,7,.35),
+    inset 0 0 6px rgba(255,255,255,.15);
+}
+
+#terminal::-webkit-scrollbar-thumb:hover {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,240,190,.45) 0px,
+      rgba(255,240,190,.45) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255,220,140,1),
+      rgba(255,175,30,1)
+    );
 }
 
 /* INPUT */
@@ -109,10 +166,7 @@ body {
   z-index:1000;
 }
 
-/* ========================= */
-/* 🔥 RESPONSIVE FIXES */
-/* ========================= */
-
+/* RESPONSIVE FIXES */
 @media (max-width: 900px){
 #crt-container{
   padding:20px;
