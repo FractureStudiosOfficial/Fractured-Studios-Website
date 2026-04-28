@@ -44,36 +44,61 @@ body {
   min-height:0;
 }
 
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:300px;
-  overflow-y:auto;
+/* CUSTOM TERMINAL SCROLLER WRAPPER */
+#terminal-wrapper {
+  position:relative;
   flex:1;
-
-  scrollbar-width:auto;
-  scrollbar-color:#FF9F07 #111;
+  min-height:300px;
+  border:1px solid rgba(255,159,7,.2);
+  background:rgba(0,0,0,.25);
+  overflow:hidden;
 }
 
-/* FORCE CUSTOM SCROLLBAR */
+/* ACTUAL TERMINAL */
+#terminal {
+  position:absolute;
+  inset:0;
+  overflow-y:scroll;
+  padding:20px;
+  padding-right:32px;
+  box-sizing:border-box;
+
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
 #terminal::-webkit-scrollbar {
-  width:18px;
-  background:#111;
+  display:none;
 }
 
-#terminal::-webkit-scrollbar-track {
+/* CUSTOM SCROLLBAR TRACK */
+#scrollbar-track {
+  position:absolute;
+  top:0;
+  right:0;
+  width:16px;
+  height:100%;
   background:
-    linear-gradient(to right,
-      rgba(255,159,7,.04) 0%,
-      rgba(255,159,7,.15) 50%,
-      rgba(255,159,7,.04) 100%);
-  border-left:1px solid rgba(255,159,7,.25);
-  box-shadow:
-    inset 0 0 10px rgba(255,159,7,.1);
+    linear-gradient(
+      to right,
+      rgba(255,159,7,.03),
+      rgba(255,159,7,.12),
+      rgba(255,159,7,.03)
+    );
+  border-left:1px solid rgba(255,159,7,.15);
+  box-shadow:inset 0 0 8px rgba(255,159,7,.08);
 }
 
-#terminal::-webkit-scrollbar-thumb {
+/* CUSTOM SCROLLBAR THUMB */
+#scrollbar-thumb {
+  position:absolute;
+  top:0;
+  left:1px;
+  width:14px;
+  min-height:40px;
+  border-radius:2px;
+  cursor:pointer;
+
   background:
     repeating-linear-gradient(
       to bottom,
@@ -88,28 +113,11 @@ body {
       #ff9f07 100%
     );
 
-  border:2px solid rgba(255,200,100,.25);
-  border-radius:2px;
+  border:1px solid rgba(255,210,120,.3);
 
   box-shadow:
-    0 0 12px rgba(255,159,7,.45),
-    inset 0 0 6px rgba(255,255,255,.15);
-}
-
-#terminal::-webkit-scrollbar-thumb:hover {
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,250,220,.55) 0px,
-      rgba(255,250,220,.55) 2px,
-      transparent 2px,
-      transparent 6px
-    ),
-    linear-gradient(
-      to bottom,
-      #ffd07a 0%,
-      #ffb020 100%
-    );
+    0 0 10px rgba(255,159,7,.35),
+    inset 0 0 4px rgba(255,255,255,.15);
 }
 
 /* INPUT */
@@ -153,6 +161,7 @@ body {
   animation:flicker .12s infinite;
   z-index:1001;
 }
+
 @keyframes flicker {
   0%{opacity:.15}
   50%{opacity:.07}
@@ -168,11 +177,11 @@ body {
   z-index:1000;
 }
 
-/* RESPONSIVE FIXES */
+/* RESPONSIVE */
 @media (max-width:900px){
 #crt-container{padding:20px;}
 #terminal-title{font-size:22px;}
-#terminal{padding:15px;}
+#terminal{padding:15px;padding-right:28px;}
 }
 
 @media (max-width:500px){
@@ -195,12 +204,20 @@ body{font-size:14px;}
   <div id="terminal-title">U.I.C. Systems Terminal Access Point</div>
 
   <div id="terminal-box">
-    <div id="terminal"></div>
+
+    <div id="terminal-wrapper">
+      <div id="terminal"></div>
+
+      <div id="scrollbar-track">
+        <div id="scrollbar-thumb"></div>
+      </div>
+    </div>
 
     <div id="prompt">
       <span>></span>
       <input id="cmd" autocomplete="off" disabled>
     </div>
+
   </div>
 
 </div>
@@ -213,6 +230,10 @@ const input = document.getElementById("cmd");
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 
+const thumb = document.getElementById("scrollbar-thumb");
+const track = document.getElementById("scrollbar-track");
+
+/* COMMAND SEQUENCES */
 const sequences = {
   users: { cmds: ["init","access","grant"], page: "users.html" },
   stations: { cmds: ["station","alpha","open"], page: "folder_stations/stations.html" },
@@ -224,14 +245,15 @@ const sequences = {
   communications: { cmds: ["comm","connect","link"], page: "communications.html" },
   personalmessanger: { cmds: ["pm","login","open"], page: "personalmessanger.html" },
   research: { cmds: ["res","start","execute"], page: "research.html" },
-  map: {cmds: ["map","system","locate"], page: "maps/solarmap.html" },
-  blackbox: {cmds: ["anomoly", "detection", "reports"], page: "blackbox.html" },
-  deltav: {cmds: ["burn", "prograde", "hohmann"], page: "deltav.html" }
+  map: { cmds: ["map","system","locate"], page: "maps/solarmap.html" },
+  blackbox: { cmds: ["anomoly","detection","reports"], page: "blackbox.html" },
+  deltav: { cmds: ["burn","prograde","hohmann"], page: "deltav.html" }
 };
 
 let currentSequence = null;
 let step = 0;
 
+/* BOOT TEXT */
 const bootLines = [
   'U.I.C. Terminal Booting...',
   'Initializing Secure Modules...',
@@ -241,34 +263,155 @@ const bootLines = [
   '------------------------'
 ];
 
+const fakeErrors = [
+  'ERROR: Network desync',
+  'WARNING: Unknown protocol detected',
+  'ERROR: Authentication timeout',
+  'ALERT: Module overload',
+  'ERROR: Peripheral mismatch'
+];
+
+/* CUSTOM SCROLLBAR UPDATE */
+function updateScrollbar() {
+  const visibleRatio = terminal.clientHeight / terminal.scrollHeight;
+  const thumbHeight = Math.max(40, track.clientHeight * visibleRatio);
+
+  thumb.style.height = thumbHeight + "px";
+
+  const scrollRatio = terminal.scrollTop / (terminal.scrollHeight - terminal.clientHeight);
+  const maxThumbMove = track.clientHeight - thumbHeight;
+
+  thumb.style.top = (scrollRatio * maxThumbMove) + "px";
+}
+
+terminal.addEventListener("scroll", updateScrollbar);
+window.addEventListener("resize", updateScrollbar);
+
+/* DRAG SCROLLBAR */
+let dragging = false;
+let dragOffset = 0;
+
+thumb.addEventListener("mousedown", e => {
+  dragging = true;
+  dragOffset = e.clientY - thumb.getBoundingClientRect().top;
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove", e => {
+  if (!dragging) return;
+
+  const trackRect = track.getBoundingClientRect();
+  const thumbHeight = thumb.offsetHeight;
+
+  let newTop = e.clientY - trackRect.top - dragOffset;
+  newTop = Math.max(0, Math.min(newTop, track.clientHeight - thumbHeight));
+
+  const scrollRatio = newTop / (track.clientHeight - thumbHeight);
+  terminal.scrollTop = scrollRatio * (terminal.scrollHeight - terminal.clientHeight);
+});
+
+document.addEventListener("mouseup", () => dragging = false);
+
+/* BOOT SEQUENCE */
 async function boot() {
   for (let line of bootLines) {
+    const delay = 50 + Math.random()*100;
+
+    if (Math.random() < 0.2) {
+      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
+      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
+      terminal.scrollTop = terminal.scrollHeight;
+      updateScrollbar();
+      await new Promise(r => setTimeout(r, delay));
+    }
+
     terminal.innerHTML += line + "<br>";
     terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r => setTimeout(r, 80));
+    updateScrollbar();
+
+    await new Promise(r => setTimeout(r, delay));
   }
 
   terminal.innerHTML += "<br>System Ready.<br>";
   input.disabled = false;
   input.focus();
+  updateScrollbar();
 }
+
 boot();
 
+/* INPUT HANDLER */
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
 
   const value = input.value.toLowerCase().trim();
   terminal.innerHTML += `&gt; ${value}<br>`;
   input.value = "";
+
+  if (!currentSequence) {
+    let found = false;
+
+    for (let key in sequences) {
+      if (value === sequences[key].cmds[0]) {
+        currentSequence = key;
+        step = 1;
+        terminal.innerHTML += `Step 1 complete. Enter next command.<br>`;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) terminal.innerHTML += "Unknown command.<br>";
+
+  } else {
+    const seq = sequences[currentSequence];
+
+    if (value === seq.cmds[step]) {
+      step++;
+
+      if (step === seq.cmds.length) {
+        terminal.innerHTML += `<br>${currentSequence.toUpperCase()} Access Granted! Redirecting...<br>`;
+
+        setTimeout(() => {
+          window.location.href = seq.page;
+        }, 500);
+
+        currentSequence = null;
+        step = 0;
+      } else {
+        terminal.innerHTML += `Step ${step} complete. Enter next command.<br>`;
+      }
+
+    } else {
+      terminal.innerHTML += "Invalid command. Sequence reset.<br>";
+      currentSequence = null;
+      step = 0;
+    }
+  }
+
   terminal.scrollTop = terminal.scrollHeight;
+  updateScrollbar();
 });
 
+/* DESKTOP TILT */
 document.addEventListener("mousemove", e => {
   const x = (window.innerWidth/2 - e.clientX)/1000;
   const y = (window.innerHeight/2 - e.clientY)/1000;
   container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
+
+/* MOBILE TILT */
+document.addEventListener("touchmove", e => {
+  const t = e.touches[0];
+  const x = (window.innerWidth/2 - t.clientX)/1000;
+  const y = (window.innerHeight/2 - t.clientY)/1000;
+  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+},{passive:true});
+
+/* INITIALIZE */
+setTimeout(updateScrollbar, 50);
 </script>
 
 </body>
