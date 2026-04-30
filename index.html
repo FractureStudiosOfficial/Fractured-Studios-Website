@@ -3,247 +3,384 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | Terminal</title>
+<title>UIC Terminal Access</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-  perspective:1000px;
+:root{
+    --amber:#ff9f07;
+    --amberBright:#ffc861;
 }
 
-/* CRT container */
-#crt-container {
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:#000;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
 }
 
-/* Terminal */
-#terminal-box {
-  width:50%;
+/* ---------- STARTUP ---------- */
+#startup{
+    position:fixed;
+    inset:0;
+    background:#000;
+    z-index:5000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:250px;
-  max-height:400px;
-  overflow-y:auto;
+#crt-open{
+    position:absolute;
+    width:0;
+    height:4px;
+    background:var(--amberBright);
+    box-shadow:0 0 40px var(--amber);
+    animation:crtOpen 1s ease forwards;
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
+@keyframes crtOpen{
+    0%{width:0;height:4px;}
+    35%{width:80%;height:4px;}
+    100%{width:80%;height:70%;}
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+#startup-panel{
+    opacity:0;
+    width:min(900px,80vw);
+    height:min(500px,70vh);
+    border:2px solid var(--amber);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    animation:fadeIn .4s ease forwards .8s;
 }
 
-/* Logo */
-#logo-area {
-  width:40%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+@keyframes fadeIn{to{opacity:1;}}
+
+#startup-title{
+    font-size:clamp(2.5rem,6vw,5rem);
+    letter-spacing:.4em;
 }
 
-#logo {
-  width:260px;
-  filter:drop-shadow(0 0 10px #FF9F07);
-  transition:.25s ease;
+#startup-sub{
+    margin-top:20px;
+    letter-spacing:.25em;
 }
 
-/* OS version */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+#welcome{
+    position:absolute;
+    opacity:0;
+    font-size:3rem;
+    letter-spacing:.4em;
 }
 
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+/* ---------- TERMINAL ---------- */
+#crt-container{
+    display:none;
+    height:100vh;
+    padding:30px;
 }
 
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+#terminal-frame{
+    height:100%;
+    border:2px solid var(--amber);
+    padding:20px;
+    background:#0a0a0a;
+    box-shadow:inset 0 0 25px rgba(255,159,7,.05);
 }
+
+#terminal-header{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,159,7,.2);
+    padding-bottom:10px;
+    margin-bottom:15px;
+}
+
+#terminal-title{
+    letter-spacing:.2em;
+    font-size:26px;
+}
+
+#terminal-wrapper{
+    position:relative;
+    height:calc(100% - 100px);
+    border:1px solid rgba(255,159,7,.2);
+    overflow:hidden;
+}
+
+#terminal{
+    position:absolute;
+    inset:0;
+    overflow-y:scroll;
+    padding:20px 35px 20px 20px;
+    scrollbar-width:none;
+}
+#terminal::-webkit-scrollbar{display:none;}
+
+#scrollbar-track{
+    position:absolute;
+    top:0;
+    right:0;
+    width:18px;
+    height:100%;
+    border-left:1px solid rgba(255,159,7,.15);
+}
+
+#scrollbar-thumb{
+    position:absolute;
+    left:2px;
+    width:14px;
+    min-height:50px;
+    background:linear-gradient(#ffc861,#ff9f07);
+    cursor:pointer;
+}
+
+#prompt{
+    display:flex;
+    margin-top:10px;
+    gap:10px;
+}
+
+#cmd{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--amber);
+    font:inherit;
+    outline:none;
+}
+
+/* overlays */
+#scanlines,#amber{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.04) 0 2px,
+        transparent 2px 6px
+    );
+    opacity:.12;
+}
+#amber{background:rgba(255,159,7,.04);}
 </style>
 </head>
-
 <body>
+
+<!-- AUDIO PLACEHOLDERS -->
+<audio id="startupSound" src="startup-placeholder.mp3"></audio>
+<audio id="typeSound" src="typing-placeholder.mp3"></audio>
+
+<div id="startup">
+    <div id="crt-open"></div>
+
+    <div id="startup-panel">
+        <div id="startup-title">U.I.C.</div>
+        <div id="startup-sub">UNIVERSAL INTERSTELLAR COMPUTERS</div>
+        <div id="welcome">WELCOME</div>
+    </div>
+</div>
 
 <div id="amber"></div>
 <div id="scanlines"></div>
 
 <div id="crt-container">
+    <div id="terminal-frame">
 
-  <div id="terminal-box">
-    <div id="terminal"></div>
+        <div id="terminal-header">
+            <div id="terminal-title"></div>
+        </div>
 
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" disabled>
+        <div id="terminal-wrapper">
+            <div id="terminal"></div>
+
+            <div id="scrollbar-track">
+                <div id="scrollbar-thumb"></div>
+            </div>
+        </div>
+
+        <div id="prompt">
+            <span>&gt;</span>
+            <input id="cmd" disabled autocomplete="off">
+        </div>
+
     </div>
-
-    <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact, Terminal
-    </p>
-  </div>
-
-  <div id="logo-area">
-    <img id="logo" src="FracturedF-Transparant.png">
-  </div>
-
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
-
 <script>
-// ELEMENTS
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
-const logo = document.getElementById("logo");
-const container = document.getElementById("crt-container");
-const os = document.getElementById("os");
+const terminalTitle = document.getElementById("terminal-title");
 
-// COMMAND LOGOS
-const commandLogos = {
-  about: "Aboutui.png",
-  games: "Gamesui.png",
-  contact: "Mail-UI.png",
-  terminal: "terminal.png"  // NEW terminal command
+const startupSound = document.getElementById("startupSound");
+const typeSound = document.getElementById("typeSound");
+
+/* ==========================
+   MODULAR COMMAND DATABASE
+========================== */
+const commands = {
+    users: {
+        sequence: ["init","access","grant"],
+        page: "users.html"
+    },
+    classified: {
+        sequence: ["class","secure","enter","override"],
+        page: "classified.html"
+    },
+    ships: {
+        sequence: ["fleet","engage","authorize"],
+        page: "folder_ships/ships.html"
+    }
 };
 
-let pendingCommand = null;
+let activeCommand = null;
+let stepIndex = 0;
 
-// 3D tilt
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
+/* ==========================
+   TYPING EFFECTS
+========================== */
+async function typeLine(text,speed=20,html=false){
+    const div = document.createElement("div");
+    terminal.appendChild(div);
 
-// CUSTOM STARTUP SEQUENCE
-const bootLines = [
-  'U.I.C. Startup sequence...',
-  'Initializing kernel modules...',
-  'Loading device drivers...',
-  'Verifying memory...',
-  'Checking system integrity...',
-  'Calibrating display output...',
-  'Starting process scheduler...',
-  'Startup successful',
-  '------------------------',
-  'Welcome to U.I.C. Systems',
-  '------------------------'
-];
+    for(let i=0;i<text.length;i++){
+        div.innerHTML += text[i];
+        terminal.scrollTop = terminal.scrollHeight;
 
-// FAKE ERRORS
-const fakeErrors = [
-  'ERROR: Memory leak detected',
-  'WARNING: Clock desync',
-  'ERROR: Bus timeout',
-  'ALERT: Unknown device',
-  'ERROR: Kernel mismatch'
-];
+        if(typeSound.src) {
+            typeSound.currentTime = 0;
+            typeSound.play().catch(()=>{});
+        }
 
-// ASYNC BOOT WITH RANDOM SPEEDS
-async function boot() {
-  for (let line of bootLines) {
-    const delay = 40 + Math.random()*80;
-    if (Math.random() < 0.3) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-      terminal.scrollTop = terminal.scrollHeight;
-      await new Promise(r => setTimeout(r, delay));
+        await new Promise(r=>setTimeout(r,speed));
     }
-    terminal.innerHTML += line + "<br>";
-    terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r => setTimeout(r, delay));
-  }
-
-  terminal.innerHTML += "<br>System Ready.<br>";
-  terminal.scrollTop = terminal.scrollHeight;
-  input.disabled = false;
-  input.focus();
 }
 
-// START BOOT
-boot();
-
-// COMMAND HANDLER
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-
-  const value = input.value.toLowerCase().trim();
-  terminal.innerHTML += `&gt; ${value}<br>`;
-  input.value = "";
-
-  if (pendingCommand) {
-    if (value === "y") {
-      // Redirect to page named after command
-      if(pendingCommand === "terminal") window.location = "terminal.html";
-      else window.location = pendingCommand + ".html";
-    } else {
-      terminal.innerHTML += "Cancelled.<br>";
-      logo.src = "FracturedF-Transparant.png";
+async function typeTitle(text){
+    for(let i=0;i<text.length;i++){
+        terminalTitle.textContent += text[i];
+        await new Promise(r=>setTimeout(r,35));
     }
-    pendingCommand = null;
-    terminal.scrollTop = terminal.scrollHeight;
-    return;
-  }
+}
 
-  if (commandLogos[value]) {
-    pendingCommand = value;
-    logo.src = commandLogos[value];
-    terminal.innerHTML += "Confirm? (Y/N)<br>";
-  } else {
-    terminal.innerHTML += "Unknown command<br>";
-  }
-  terminal.scrollTop = terminal.scrollHeight;
+/* ==========================
+   BOOT SEQUENCE
+========================== */
+async function bootSequence(){
+    startupSound.play().catch(()=>{});
+
+    await new Promise(r=>setTimeout(r,2200));
+
+    document.getElementById("startup-title").style.opacity="0";
+    document.getElementById("startup-sub").style.opacity="0";
+
+    const welcome = document.getElementById("welcome");
+    welcome.style.opacity="1";
+
+    await new Promise(r=>setTimeout(r,1400));
+
+    document.getElementById("startup").style.opacity="0";
+
+    await new Promise(r=>setTimeout(r,500));
+
+    document.getElementById("startup").remove();
+
+    document.getElementById("crt-container").style.display="block";
+
+    await typeTitle("U.I.C. SYSTEMS TERMINAL ACCESS");
+
+    const bootLines = [
+        "Initializing U.I.C. Mainframe...",
+        "Loading Security Protocols...",
+        "Authenticating Terminal Node...",
+        "Verifying User Clearance...",
+        "System Online",
+        "---------------------------",
+        "",
+        "SYSTEM READY."
+    ];
+
+    for(const line of bootLines){
+        await typeLine(line,20);
+    }
+
+    input.disabled = false;
+    input.focus();
+}
+
+/* ==========================
+   COMMAND INPUT
+========================== */
+input.addEventListener("keydown", async e=>{
+    if(e.key !== "Enter") return;
+
+    const value = input.value.trim().toLowerCase();
+    input.value = "";
+
+    await typeLine("> " + value,10);
+
+    if(!activeCommand){
+
+        let found = false;
+
+        for(const key in commands){
+            if(value === commands[key].sequence[0]){
+                activeCommand = key;
+                stepIndex = 1;
+
+                await typeLine(`STEP 1/${commands[key].sequence.length} ACCEPTED`);
+                found = true;
+                break;
+            }
+        }
+
+        if(!found){
+            await typeLine("UNKNOWN COMMAND");
+        }
+
+    }else{
+
+        const cmd = commands[activeCommand];
+
+        if(value === cmd.sequence[stepIndex]){
+
+            stepIndex++;
+
+            if(stepIndex >= cmd.sequence.length){
+
+                await typeLine(`${activeCommand.toUpperCase()} ACCESS GRANTED`);
+                await typeLine("REDIRECTING...");
+
+                setTimeout(()=>{
+                    window.location.href = cmd.page;
+                },700);
+
+                activeCommand = null;
+                stepIndex = 0;
+
+            }else{
+                await typeLine(`STEP ${stepIndex}/${cmd.sequence.length} ACCEPTED`);
+            }
+
+        }else{
+            await typeLine("INVALID SEQUENCE — RESET");
+            activeCommand = null;
+            stepIndex = 0;
+        }
+    }
 });
+
+bootSequence();
 </script>
 
 </body>
