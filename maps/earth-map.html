@@ -63,7 +63,54 @@ inset 0 0 30px rgba(255,159,7,.03);
 display:flex;
 flex-direction:column;
 }
+/* UIC Styled Scrollbar */
+#panel::-webkit-scrollbar{
+width:12px;
+}
 
+#panel::-webkit-scrollbar-track{
+background:rgba(0,0,0,.55);
+border-left:1px solid rgba(255,159,7,.12);
+}
+
+#panel::-webkit-scrollbar-thumb{
+background:
+linear-gradient(
+to bottom,
+rgba(255,159,7,.35),
+rgba(255,159,7,.18)
+);
+border:1px solid rgba(255,159,7,.35);
+box-shadow:
+inset 0 0 6px rgba(255,159,7,.15),
+0 0 8px rgba(255,159,7,.08);
+}
+
+#panel::-webkit-scrollbar-thumb:hover{
+background:
+linear-gradient(
+to bottom,
+rgba(255,159,7,.5),
+rgba(255,159,7,.28)
+);
+}
+
+/* Optional notch / grip effect */
+#panel::-webkit-scrollbar-thumb{
+background-image:
+repeating-linear-gradient(
+to bottom,
+transparent 0px,
+transparent 6px,
+rgba(0,0,0,.18) 6px,
+rgba(0,0,0,.18) 8px
+),
+linear-gradient(
+to bottom,
+rgba(255,159,7,.35),
+rgba(255,159,7,.18)
+);
+}
 #ui-shell::before{
 content:"";
 position:absolute;
