@@ -3,25 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solar System Map | U.I.C. Systems</title>
+<title>Solar Navigation | U.I.C. Systems</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
+:root{
+--amber:#FF9F07;
+--amberSoft:rgba(255,159,7,.15);
+--amberMid:rgba(255,159,7,.25);
+}
+
 body{
 margin:0;
-background:
-radial-gradient(circle at center,#101010 0%,#050505 60%,#000 100%);
-color:#FF9F07;
+background:#050505;
+color:var(--amber);
 font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* ===== CRT FX ===== */
+/* CRT FX */
 #amber{
 position:fixed;
 inset:0;
-background:rgba(255,159,7,.045);
+background:radial-gradient(circle at center, rgba(255,159,7,.05), transparent 70%);
 pointer-events:none;
 z-index:1000;
 }
@@ -32,187 +37,208 @@ inset:0;
 pointer-events:none;
 background:repeating-linear-gradient(
 to bottom,
-rgba(255,255,255,.045) 0px,
-rgba(255,255,255,.045) 2px,
-transparent 4px,
-transparent 8px
+rgba(255,255,255,.05) 0px,
+rgba(255,255,255,.05) 2px,
+transparent 5px,
+transparent 9px
 );
-mix-blend-mode:screen;
 animation:flicker .12s infinite;
 z-index:1001;
 }
 
 @keyframes flicker{
-0%{opacity:.16}
-50%{opacity:.08}
-100%{opacity:.16}
+0%{opacity:.15;}
+50%{opacity:.07;}
+100%{opacity:.15;}
 }
 
-/* ===== CANVAS ===== */
+/* MAIN FRAME */
+#ui-shell{
+position:fixed;
+inset:20px;
+border:2px solid var(--amber);
+box-shadow:
+0 0 25px rgba(255,159,7,.08),
+inset 0 0 30px rgba(255,159,7,.03);
+display:flex;
+flex-direction:column;
+background:rgba(0,0,0,.35);
+}
+
+/* INNER FRAME */
+#ui-shell::before{
+content:"";
+position:absolute;
+inset:12px;
+border:1px solid rgba(255,159,7,.15);
+pointer-events:none;
+}
+
+/* HEADER */
+#header{
+height:64px;
+border-bottom:1px solid var(--amberSoft);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 20px;
+letter-spacing:.2em;
+font-size:14px;
+background:linear-gradient(to bottom, rgba(255,159,7,.05), transparent);
+z-index:2;
+}
+
+#header-right{
+opacity:.65;
+font-size:12px;
+}
+
+/* MAP AREA */
+#map-wrap{
+position:relative;
+flex:1;
+padding:16px;
+}
+
+#canvas-frame{
+position:relative;
+width:100%;
+height:100%;
+border:1px solid var(--amberSoft);
+background:
+radial-gradient(circle at center, rgba(255,159,7,.03), transparent 70%),
+rgba(0,0,0,.45);
+overflow:hidden;
+box-shadow:
+inset 0 0 25px rgba(255,159,7,.03);
+}
+
 canvas{
 display:block;
-position:relative;
-z-index:1;
+width:100%;
+height:100%;
 }
 
-/* ===== HUD PANEL ===== */
-#hud{
-position:fixed;
-top:22px;
-left:22px;
-z-index:20;
-
-padding:14px 18px;
-min-width:300px;
-
-background:
-linear-gradient(145deg,
-rgba(20,20,20,.92),
-rgba(8,8,8,.88));
-
-border:1px solid rgba(255,159,7,.28);
-
-box-shadow:
-0 0 24px rgba(255,159,7,.08),
-inset 0 0 18px rgba(255,159,7,.04),
-inset 0 1px 0 rgba(255,159,7,.12);
-
-backdrop-filter:blur(8px);
-}
-
-#hud::before{
-content:"";
+/* HUD PANELS */
+.hud-panel{
 position:absolute;
-inset:6px;
-border:1px solid rgba(255,159,7,.08);
-pointer-events:none;
+padding:10px 14px;
+font-size:12px;
+border:1px solid var(--amberSoft);
+background:rgba(0,0,0,.55);
+backdrop-filter:blur(4px);
+box-shadow:0 0 15px rgba(255,159,7,.04);
+z-index:3;
 }
 
-#hud-title{
-font-size:14px;
-letter-spacing:.22em;
-margin-bottom:8px;
-opacity:.95;
-}
+#controls{ top:20px; left:20px; }
+#legend{ top:20px; right:20px; text-align:right; }
 
-#hud-sub{
-font-size:11px;
-opacity:.55;
-line-height:1.6;
-}
-
-/* ===== TOOLTIP ===== */
+/* Tooltip */
 #tooltip{
-position:fixed;
-pointer-events:none;
-padding:12px 14px;
-min-width:150px;
-
-background:
-linear-gradient(145deg,
-rgba(15,15,15,.95),
-rgba(0,0,0,.92));
-
-border:1px solid rgba(255,159,7,.35);
-
-box-shadow:
-0 0 18px rgba(255,159,7,.15),
-inset 0 0 10px rgba(255,159,7,.04);
-
-font-size:12px;
-line-height:1.5;
-opacity:0;
-transition:.15s ease;
-z-index:5000;
-white-space:nowrap;
-backdrop-filter:blur(6px);
-}
-
-#tooltip strong{
-display:block;
-margin-bottom:4px;
-font-size:13px;
-}
-
-/* ===== CORNER FRAME ===== */
-#frame{
-position:fixed;
-inset:14px;
-border:1px solid rgba(255,159,7,.08);
-pointer-events:none;
-z-index:15;
-}
-
-#frame::before,
-#frame::after{
-content:"";
 position:absolute;
-width:60px;
-height:60px;
-border-color:rgba(255,159,7,.22);
-border-style:solid;
-}
-
-#frame::before{
-top:0;
-left:0;
-border-width:2px 0 0 2px;
-}
-
-#frame::after{
-bottom:0;
-right:0;
-border-width:0 2px 2px 0;
-}
-
-/* ===== OS TEXT ===== */
-#os{
-position:fixed;
-bottom:14px;
-right:18px;
+pointer-events:none;
+padding:10px 14px;
 font-size:12px;
-opacity:.65;
-z-index:50;
+border:1px solid var(--amberSoft);
+background:rgba(0,0,0,.88);
+box-shadow:0 0 20px rgba(255,159,7,.12);
+opacity:0;
+transform:translateY(6px);
+transition:.15s ease;
+z-index:10;
+white-space:nowrap;
+}
+
+/* Footer */
+#footer{
+height:34px;
+border-top:1px solid var(--amberSoft);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 16px;
+font-size:12px;
+opacity:.7;
+}
+
+/* CORNER ACCENTS */
+.corner{
+position:absolute;
+width:28px;
+height:28px;
+border-color:var(--amber);
+border-style:solid;
+z-index:5;
 pointer-events:none;
 }
+.c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
+.c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
+.c3{bottom:-2px;left:-2px;border-width:0 0 3px 3px;}
+.c4{bottom:-2px;right:-2px;border-width:0 3px 3px 0;}
 </style>
 </head>
+
 <body>
 
 <div id="amber"></div>
 <div id="scanlines"></div>
-<div id="frame"></div>
 
-<div id="hud">
-<div id="hud-title">SOLAR NAVIGATION ARRAY</div>
-<div id="hud-sub">
+<div id="ui-shell">
+
+<div class="corner c1"></div>
+<div class="corner c2"></div>
+<div class="corner c3"></div>
+<div class="corner c4"></div>
+
+<div id="header">
+<div>SOLAR NAVIGATION ARRAY</div>
+<div id="header-right">UIC DEEP SPACE CARTOGRAPHY SYSTEM</div>
+</div>
+
+<div id="map-wrap">
+
+<div id="controls" class="hud-panel">
 DRAG TO PAN<br>
-SCROLL TO ZOOM<br>
-CLICK BODY FOR DETAILS
-</div>
+SCROLL TO ZOOM
 </div>
 
-<div id="tooltip"></div>
+<div id="legend" class="hud-panel">
+CLICK PLANETS / MOONS<br>
+TO ACCESS LOCAL MAPS
+</div>
+
+<div id="canvas-frame">
 <canvas id="space"></canvas>
+<div id="tooltip"></div>
+</div>
 
-<div id="os">UIC OS v1.0.4</div>
+</div>
+
+<div id="footer">
+<div>U.I.C. ORBITAL MAPPING INTERFACE</div>
+<div>UIC OS v1.0.4</div>
+</div>
+
+</div>
 
 <script>
 const canvas = document.getElementById("space");
 const ctx = canvas.getContext("2d");
+const frame = document.getElementById("canvas-frame");
 const tooltip = document.getElementById("tooltip");
 
 function resize(){
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = frame.clientWidth;
+canvas.height = frame.clientHeight;
 }
 resize();
 window.addEventListener("resize", resize);
 
-/* CAMERA */
+/* Camera */
 let camX=0, camY=0, zoom=1;
 
-/* DRAG */
+/* Drag */
 let dragging=false,lastX=0,lastY=0;
 
 canvas.addEventListener("mousedown",e=>{
@@ -225,172 +251,158 @@ window.addEventListener("mouseup",()=>dragging=false);
 
 window.addEventListener("mousemove",e=>{
 if(dragging){
-camX+=(e.clientX-lastX)/zoom;
-camY+=(e.clientY-lastY)/zoom;
+camX += (e.clientX-lastX)/zoom;
+camY += (e.clientY-lastY)/zoom;
 lastX=e.clientX;
 lastY=e.clientY;
 }
-handleTooltip(e);
+handleHover(e);
 });
 
-/* ZOOM */
+/* Zoom */
 canvas.addEventListener("wheel",e=>{
 e.preventDefault();
-zoom*=e.deltaY<0?1.1:.9;
-zoom=Math.max(.25,Math.min(zoom,6));
+zoom *= e.deltaY<0 ? 1.1 : 0.9;
+zoom=Math.max(.25,Math.min(zoom,8));
 },{passive:false});
 
-/* DATA */
+/* Bodies w/ real-ish orbital offsets */
 const bodies={
-sun:{r:14,orbit:0,speed:0,name:"Sun"},
-mercury:{r:3,orbit:50,speed:4.15,ecc:.18,offsetY:-8,rot:.10,name:"Mercury",link:"mmercury-map.html"},
-venus:{r:4,orbit:78,speed:1.62,ecc:.04,offsetY:10,rot:.30,name:"Venus",link:"venus-map.html"},
-earth:{r:5,orbit:108,speed:1,ecc:.02,offsetY:-4,rot:-.20,name:"Earth",link:"earth-map.html"},
-mars:{r:4,orbit:145,speed:.53,ecc:.09,offsetY:14,rot:.40,name:"Mars",link:"mars-map.html"},
-jupiter:{r:9,orbit:220,speed:.084,ecc:.05,offsetY:-12,rot:.15,name:"Jupiter",link:"jupiter-map.html"},
-saturn:{r:8,orbit:300,speed:.034,ecc:.06,offsetY:18,rot:-.25,name:"Saturn",link:"saturn-map.html"},
-uranus:{r:7,orbit:380,speed:.012,ecc:.04,offsetY:-20,rot:.40,name:"Uranus",link:"uranus-map.html"},
-neptune:{r:7,orbit:460,speed:.006,ecc:.02,offsetY:12,rot:-.15,name:"Neptune",link:"neptune-map.html"}
+sun:{r:12,orbit:0,speed:0,name:"Sun"},
+mercury:{r:3,orbit:40,speed:4.15,offset:0.3,name:"Mercury",link:"mmercury-map.html"},
+venus:{r:4,orbit:60,speed:1.62,offset:1.2,name:"Venus",link:"venus-map.html"},
+earth:{r:5,orbit:80,speed:1,offset:2.5,name:"Earth",link:"earth-map.html"},
+mars:{r:4,orbit:105,speed:.53,offset:0.9,name:"Mars",link:"mars-map.html"},
+jupiter:{r:9,orbit:150,speed:.084,offset:4.2,name:"Jupiter",link:"jupiter-map.html"},
+saturn:{r:8,orbit:190,speed:.034,offset:3.1,name:"Saturn",link:"saturn-map.html"},
+uranus:{r:7,orbit:225,speed:.012,offset:5.3,name:"Uranus",link:"uranus-map.html"},
+neptune:{r:7,orbit:255,speed:.006,offset:2.1,name:"Neptune",link:"neptune-map.html"}
 };
 
 const moons=[
-{parent:"earth",r:2,orbit:12,speed:8,name:"Moon",link:"moon-map.html"},
-{parent:"mars",r:1.5,orbit:8,speed:12,name:"Phobos",link:"phobos-map.html"},
-{parent:"mars",r:1.2,orbit:13,speed:7,name:"Deimos",link:"deimos-map.html"},
-{parent:"jupiter",r:2,orbit:18,speed:3,name:"Europa",link:"europa-map.html"}
+{parent:"earth",r:2,orbit:10,speed:8,offset:.5,name:"Moon",link:"moon-map.html"},
+{parent:"mars",r:1.5,orbit:6,speed:12,offset:2,name:"Phobos",link:"phobos-map.html"},
+{parent:"mars",r:1.2,orbit:10,speed:7,offset:4,name:"Deimos",link:"deimos-map.html"},
+{parent:"jupiter",r:2,orbit:14,speed:3,offset:1.5,name:"Europa",link:"europa-map.html"}
 ];
 
+let hovered=null;
 let time=0;
 
-/* TOOLTIP */
-function handleTooltip(e){
-const mx=(e.clientX-canvas.width/2)/zoom-camX;
-const my=(e.clientY-canvas.height/2)/zoom-camY;
+/* Hover Logic */
+function handleHover(e){
+const rect=canvas.getBoundingClientRect();
+const mx=(e.clientX-rect.left-canvas.width/2)/zoom-camX;
+const my=(e.clientY-rect.top-canvas.height/2)/zoom-camY;
 
-let found=null;
+hovered=null;
 
-for(const name in bodies){
-const b=bodies[name];
-if(b.pos && Math.hypot(mx-b.pos.x,my-b.pos.y)<b.r+6){found=b;break;}
+for(const key in bodies){
+const b=bodies[key];
+if(!b.pos) continue;
+if(Math.hypot(mx-b.pos.x,my-b.pos.y)<b.r+6) hovered=b;
 }
 
-if(!found){
 for(const m of moons){
-if(m.pos && Math.hypot(mx-m.pos.x,my-m.pos.y)<m.r+6){found=m;break;}
-}
+if(!m.pos) continue;
+if(Math.hypot(mx-m.pos.x,my-m.pos.y)<m.r+6) hovered=m;
 }
 
-if(found){
-tooltip.style.opacity=1;
-tooltip.style.left=e.clientX+20+"px";
-tooltip.style.top=e.clientY+20+"px";
-tooltip.innerHTML=`<strong>${found.name}</strong>Orbital Body<br>Click for Details`;
+if(hovered){
+tooltip.style.opacity="1";
+tooltip.style.transform="translateY(0)";
+tooltip.style.left=(e.clientX+18)+"px";
+tooltip.style.top=(e.clientY+18)+"px";
+tooltip.textContent=hovered.name;
 }else{
-tooltip.style.opacity=0;
+tooltip.style.opacity="0";
+tooltip.style.transform="translateY(6px)";
 }
 }
 
-/* CLICK */
-canvas.addEventListener("click",e=>{
-const mx=(e.clientX-canvas.width/2)/zoom-camX;
-const my=(e.clientY-canvas.height/2)/zoom-camY;
-
-for(const name in bodies){
-const b=bodies[name];
-if(b.link && Math.hypot(mx-b.pos.x,my-b.pos.y)<b.r+6){
-window.location=b.link;
-return;
-}
-}
-
-for(const m of moons){
-if(m.link && Math.hypot(mx-m.pos.x,my-m.pos.y)<m.r+6){
-window.location=m.link;
-return;
-}
-}
+/* Click Detection */
+canvas.addEventListener("click",()=>{
+if(hovered?.link) window.location=hovered.link;
 });
 
-/* DRAW */
 function draw(){
+
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 ctx.save();
+
 ctx.translate(canvas.width/2,canvas.height/2);
 ctx.scale(zoom,zoom);
 ctx.translate(camX,camY);
 
-/* ORBITS */
-for(const name in bodies){
-const b=bodies[name];
-if(!b.orbit) continue;
-
-ctx.save();
-ctx.rotate(b.rot);
-
-ctx.beginPath();
-ctx.strokeStyle="rgba(255,159,7,.13)";
+/* Orbit Lines */
+ctx.strokeStyle="rgba(255,159,7,.15)";
 ctx.lineWidth=1;
-ctx.ellipse(
-0,b.offsetY,
-b.orbit,
-b.orbit*(1-b.ecc),
-0,0,Math.PI*2
-);
-ctx.stroke();
 
-ctx.restore();
+for(const key in bodies){
+const b=bodies[key];
+if(!b.orbit) continue;
+ctx.beginPath();
+ctx.arc(0,0,b.orbit,0,Math.PI*2);
+ctx.stroke();
 }
 
-/* PLANETS */
-for(const name in bodies){
-const b=bodies[name];
+/* Bodies */
+for(const key in bodies){
+const b=bodies[key];
+
 let x=0,y=0;
 
 if(b.orbit){
-const angle=time*b.speed*.0001;
-let px=Math.cos(angle)*b.orbit;
-let py=Math.sin(angle)*(b.orbit*(1-b.ecc))+b.offsetY;
-
-x=px*Math.cos(b.rot)-py*Math.sin(b.rot);
-y=px*Math.sin(b.rot)+py*Math.cos(b.rot);
+const angle=time*b.speed*.0001+b.offset;
+x=Math.cos(angle)*b.orbit;
+y=Math.sin(angle)*b.orbit;
 }
 
 b.pos={x,y};
 
 ctx.beginPath();
 ctx.fillStyle="#FF9F07";
-ctx.shadowBlur=12;
+ctx.shadowBlur=(hovered===b)?18:8;
 ctx.shadowColor="#FF9F07";
 ctx.arc(x,y,b.r,0,Math.PI*2);
 ctx.fill();
+
 ctx.shadowBlur=0;
 
-ctx.font="7px Share Tech Mono";
-ctx.fillStyle="rgba(255,159,7,.8)";
+ctx.font="6px Share Tech Mono";
+ctx.fillStyle="rgba(255,159,7,.85)";
 ctx.textAlign="center";
-ctx.fillText(b.name,x,y+b.r+12);
+ctx.fillText(b.name,x,y+b.r+10);
 }
 
-/* MOONS */
+/* Moons */
 for(const m of moons){
 const p=bodies[m.parent];
-const angle=time*m.speed*.0001;
+const angle=time*m.speed*.0001+m.offset;
 
 const x=p.pos.x+Math.cos(angle)*m.orbit;
 const y=p.pos.y+Math.sin(angle)*m.orbit;
 
 m.pos={x,y};
 
-ctx.beginPath();
 ctx.strokeStyle="rgba(255,159,7,.08)";
+ctx.beginPath();
 ctx.arc(p.pos.x,p.pos.y,m.orbit,0,Math.PI*2);
 ctx.stroke();
 
 ctx.beginPath();
 ctx.fillStyle="#FF9F07";
+ctx.shadowBlur=(hovered===m)?14:5;
+ctx.shadowColor="#FF9F07";
 ctx.arc(x,y,m.r,0,Math.PI*2);
 ctx.fill();
+
+ctx.shadowBlur=0;
+
+ctx.font="4px Share Tech Mono";
+ctx.fillStyle="rgba(255,159,7,.7)";
+ctx.fillText(m.name,x,y+m.r+8);
 }
 
 ctx.restore();
