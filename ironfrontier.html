@@ -8,204 +8,298 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+}
+
+*{box-sizing:border-box;}
+
 body{
-margin:0;
-background:#111;
-color:#FF9F07;
-font-family:'Share Tech Mono',monospace;
-overflow-x:hidden;
-perspective:1000px;
+    margin:0;
+    background:#050505;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    overflow-x:hidden;
+    perspective:1000px;
 }
 
-/* Scrollable CRT container */
+/* =========================
+   CRT CONTAINER
+========================= */
 #crt-container{
-padding:40px;
-transform-style:preserve-3d;
-transition:transform .08s ease-out;
+    padding:35px;
+    padding-bottom:95px;
+    transform-style:preserve-3d;
+    transition:transform .08s ease-out;
 }
 
-/* Amber tint */
-#amber{
-position:fixed;
-inset:0;
-background:rgba(255,159,7,.04);
-pointer-events:none;
-z-index:1000;
+/* =========================
+   PANEL BASE
+========================= */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.24);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.03),
+            rgba(0,0,0,.22)
+        );
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.03),
+        0 0 25px rgba(255,159,7,.04);
 }
 
-/* Scanlines */
-#scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,.05) 0px,
-rgba(255,255,255,.05) 2px,
-transparent 5px,
-transparent 9px
-);
-animation:flicker .12s infinite;
-z-index:1001;
-}
-@keyframes flicker{
-0%{opacity:.15}
-50%{opacity:.08}
-100%{opacity:.15}
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(255,159,7,.12);
+    pointer-events:none;
 }
 
-/* OS Version */
-#os{
-position:fixed;
-bottom:10px;
-right:15px;
-font-size:12px;
-opacity:.7;
-}
-
-/* HERO */
+/* =========================
+   HERO
+========================= */
 .hero{
-display:grid;
-grid-template-columns:1.2fr 1fr;
-gap:40px;
-margin-bottom:60px;
+    display:grid;
+    grid-template-columns:1.25fr 1fr;
+    gap:30px;
+    margin-bottom:50px;
+    padding:22px;
 }
 
-.hero img{
-width:100%;
-border:1px solid rgba(255,159,7,.2);
-box-shadow:0 0 20px rgba(255,159,7,.15);
+.hero-banner{
+    padding:12px;
+    border:1px solid rgba(255,159,7,.14);
+    background:rgba(255,159,7,.02);
 }
 
-.logo{
-text-align:center;
+.hero-banner img{
+    width:100%;
+    display:block;
+    border:1px solid rgba(255,159,7,.18);
+    box-shadow:0 0 18px rgba(255,159,7,.08);
 }
 
-.logo img{
-width:250px;
-max-width:100%;
-filter:drop-shadow(0 0 10px #FF9F07);
+.logo-panel{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+    border-left:1px solid rgba(255,159,7,.12);
 }
 
-/* SECTION */
+.logo-panel img{
+    width:260px;
+    max-width:100%;
+    filter:drop-shadow(0 0 12px rgba(255,159,7,.35));
+    margin-bottom:20px;
+}
+
+.subtitle{
+    opacity:.85;
+    margin-bottom:10px;
+}
+
+.meta{
+    opacity:.65;
+    font-size:14px;
+    margin-bottom:25px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.button-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.action-btn{
+    padding:12px 22px;
+    border:1px solid var(--amber);
+    background:transparent;
+    color:var(--amber);
+    font-family:inherit;
+    cursor:pointer;
+    letter-spacing:.08em;
+    transition:.2s ease;
+    text-decoration:none;
+}
+
+.action-btn:hover{
+    background:rgba(255,159,7,.12);
+    box-shadow:0 0 12px rgba(255,159,7,.14);
+}
+
+/* =========================
+   SECTIONS
+========================= */
 .section{
-margin-bottom:60px;
+    margin-bottom:45px;
+    padding:24px;
 }
 
 .section h2{
-border-bottom:1px solid rgba(255,159,7,.3);
-padding-bottom:10px;
-margin-bottom:20px;
+    margin-top:0;
+    margin-bottom:20px;
+    padding-bottom:10px;
+    border-bottom:1px solid rgba(255,159,7,.22);
+    letter-spacing:.15em;
 }
 
-/* Screenshot row */
-.screens{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-gap:20px;
-}
-
-.screens img{
-width:100%;
-border:1px solid rgba(255,159,7,.2);
-}
-
-/* Feature grid */
+/* =========================
+   FEATURES
+========================= */
 .features{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:18px;
 }
 
 .feature{
-background:rgba(0,0,0,.25);
-padding:15px;
-border:1px solid rgba(255,159,7,.2);
+    padding:18px;
+    border:1px solid rgba(255,159,7,.14);
+    background:rgba(255,159,7,.025);
 }
 
-/* Trailer */
+.feature h3{
+    margin-top:0;
+}
+
+/* =========================
+   MEDIA GRIDS
+========================= */
+.screens{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:18px;
+}
+
+.screens img{
+    width:100%;
+    display:block;
+    border:1px solid rgba(255,159,7,.18);
+    background:#000;
+}
+
+/* =========================
+   TRAILER
+========================= */
 .trailer{
-height:400px;
-border:1px dashed rgba(255,159,7,.3);
-display:flex;
-align-items:center;
-justify-content:center;
-opacity:.6;
-text-align:center;
-padding:10px;
+    height:400px;
+    border:1px dashed rgba(255,159,7,.28);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:.65;
+    text-align:center;
+    padding:15px;
 }
 
-/* Bottom terminal */
+/* =========================
+   TERMINAL NAV
+========================= */
 #terminal{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:rgba(0,0,0,.35);
-padding:10px;
-border-top:1px solid rgba(255,159,7,.3);
-display:flex;
-gap:10px;
-z-index:1002;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:12px 18px;
+    display:flex;
+    gap:10px;
+    z-index:1003;
+
+    border-top:2px solid rgba(255,159,7,.22);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.04),
+            rgba(0,0,0,.45)
+        );
 }
 
 #terminal input{
-background:transparent;
-border:none;
-outline:none;
-color:#FF9F07;
-font-family:inherit;
-flex:1;
-min-width:0;
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font-family:inherit;
+    flex:1;
+    min-width:0;
 }
 
-/* ========================= */
-/* RESPONSIVE FIXES */
-/* ========================= */
-
-@media (max-width: 900px){
-#crt-container{
-padding:20px;
+/* =========================
+   CRT FX
+========================= */
+#scanlines,#amber{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
 }
 
-.hero{
-grid-template-columns:1fr;
-gap:20px;
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 2px,
+        transparent 5px,
+        transparent 9px
+    );
+    animation:flicker .12s infinite;
+    z-index:1001;
 }
 
-.logo img{
-width:180px;
+@keyframes flicker{
+    0%{opacity:.15}
+    50%{opacity:.08}
+    100%{opacity:.15}
 }
 
-.trailer{
-height:250px;
+#amber{
+    background:rgba(255,159,7,.04);
+    z-index:1000;
 }
 
-.section{
-margin-bottom:40px;
-}
-}
-
-@media (max-width: 500px){
-body{
-font-size:14px;
-}
-
-#crt-container{
-padding:15px;
+#os{
+    position:fixed;
+    bottom:55px;
+    right:15px;
+    font-size:12px;
+    opacity:.7;
+    z-index:1004;
 }
 
-.logo img{
-width:150px;
+/* =========================
+   RESPONSIVE
+========================= */
+@media(max-width:900px){
+    #crt-container{padding:20px;padding-bottom:90px;}
+
+    .hero{
+        grid-template-columns:1fr;
+    }
+
+    .logo-panel{
+        border-left:none;
+        border-top:1px solid rgba(255,159,7,.12);
+        padding-top:25px;
+    }
+
+    .trailer{
+        height:260px;
+    }
 }
 
-#terminal{
-padding:8px;
-}
-
-#terminal input{
-font-size:14px;
-}
+@media(max-width:500px){
+    body{font-size:14px;}
+    #crt-container{padding:15px;padding-bottom:85px;}
 }
 </style>
 </head>
@@ -217,150 +311,163 @@ font-size:14px;
 
 <div id="crt-container">
 
-<!-- HERO -->
-<div class="hero">
+    <!-- HERO -->
+    <div class="hero panel">
 
-<div>
-<img src="NEW-Iron-Frontier-Thumbnail.png" alt="banner">
-</div>
+        <div class="hero-banner">
+            <img src="NEW-Iron-Frontier-Thumbnail.png" alt="banner">
+        </div>
 
-<div class="logo">
-<img src="TheIronFrontier_Logo (1).png">
-<p> Space Age Soviet Industrial </p>
-<p>Singleplayer • Atmospheric • Narrative Driven</p>
-</div>
+        <div class="logo-panel">
+            <img src="TheIronFrontier_Logo (1).png">
 
-</div>
+            <div class="subtitle">SPACE AGE SOVIET INDUSTRIAL</div>
+            <div class="meta">SINGLEPLAYER • ATMOSPHERIC • NARRATIVE DRIVEN</div>
 
-<!-- ABOUT -->
-<div class="section">
-<h2>About The Game</h2>
-<p>
-The Iron Frontier is a narrative-driven experience set in an alternate history where the space race had many succsses resulting in humanity expanding into the solar system.
-</p>
+            <div class="button-row">
+                <a class="action-btn" href="#trailer-section">WATCH TRAILER</a>
+                <a id="steamBtn" class="action-btn" href="#" target="_blank">WISHLIST ON STEAM</a>
+            </div>
+        </div>
 
-<p>
-(DESCRIPTION PLACEHOLDER, ill update this eventually)
-</p>
-</div>
+    </div>
 
-<!-- FEATURES -->
-<div class="section">
-<h2>Key Features</h2>
+    <!-- ABOUT -->
+    <div class="section panel">
+        <h2>ABOUT THE GAME</h2>
+        <p>
+            The Iron Frontier is a narrative-driven experience set in an alternate history where the space race had many successes resulting in humanity expanding into the solar system.
+        </p>
+        <p>
+            (DESCRIPTION PLACEHOLDER, ill update this eventually)
+        </p>
+    </div>
 
-<div class="features">
+    <!-- FEATURES -->
+    <div class="section panel">
+        <h2>KEY FEATURES</h2>
 
-<div class="feature">
-<h3>Exploration</h3>
-<p>Traverse Space Age space stations, and figure out why some of the smartest scientists have taken them over.</p>
-</div>
+        <div class="features">
+            <div class="feature">
+                <h3>Exploration</h3>
+                <p>Traverse space age stations and uncover why brilliant scientists have taken them over.</p>
+            </div>
 
-<div class="feature">
-<h3>Atmosphere</h3>
-<p>Hand painted stylised visuals and immersive sound design.</p>
-</div>
+            <div class="feature">
+                <h3>Atmosphere</h3>
+                <p>Hand painted stylised visuals and immersive sound design.</p>
+            </div>
 
-<div class="feature">
-<h3>Story</h3>
-<p>Re-open the space atations across the solar ststem shut down by rouge scientists, although you may see some things not meant for you.</p>
-</div>
+            <div class="feature">
+                <h3>Story</h3>
+                <p>Re-open the stations across the solar system shut down by rogue scientists.</p>
+            </div>
 
-<div class="feature">
-<h3>Survival</h3>
-<p>Manage your oxegyn supply as you go, don't let it get to low.</p>
-</div>
+            <div class="feature">
+                <h3>Survival</h3>
+                <p>Manage your oxygen supply carefully as you progress.</p>
+            </div>
+        </div>
+    </div>
 
-</div>
-</div>
+    <!-- SCREENSHOTS -->
+    <div class="section panel">
+        <h2>SCREENSHOTS</h2>
 
-<!-- SCREENSHOTS -->
-<div class="section">
-<h2>Screenshots</h2>
+        <div class="screens">
+            <img src="screenshot1.png">
+            <img src="screenshot2.png">
+            <img src="screenshot3.png">
+        </div>
+    </div>
 
-<div class="screens">
-<img src="screenshot1.png">
-<img src="screenshot2.png">
-<img src="screenshot3.png">
-</div>
+    <!-- TRAILER -->
+    <div class="section panel" id="trailer-section">
+        <h2>TRAILER</h2>
 
-</div>
+        <div class="trailer">
+            Drop trailer embed here
+        </div>
+    </div>
 
-<!-- TRAILER -->
-<div class="section">
-<h2>Trailer</h2>
+    <!-- STORY -->
+    <div class="section panel">
+        <h2>STORY</h2>
+        <p>[STEAM DESCRIPTION PLACEHOLDER]</p>
+    </div>
 
-<div class="trailer">
-Drop trailer embed here
-</div>
+    <!-- MORE MEDIA -->
+    <div class="section panel">
+        <h2>MORE MEDIA</h2>
 
-</div>
-
-<!-- STORY -->
-<div class="section">
-<h2>Story</h2>
-<p>
-[STEAM DESCRIPTION PLACEHOLDER, again Ill update this once I get a steam page]
-</p>
-
-<p>
-
-</p>
-</div>
-
-<!-- MORE MEDIA -->
-<div class="section">
-<h2>More Media</h2>
-
-<div class="screens">
-<img src="media1.png">
-<img src="media2.png">
-<img src="media3.png">
-<img src="media4.png">
-</div>
-
-</div>
+        <div class="screens">
+            <img src="media1.png">
+            <img src="media2.png">
+            <img src="media3.png">
+            <img src="media4.png">
+        </div>
+    </div>
 
 </div>
 
 <!-- TERMINAL NAV -->
 <div id="terminal">
-<span>></span>
-<input id="cmd" placeholder="type command...">
+    <span>&gt;</span>
+    <input id="cmd" placeholder="type command...">
 </div>
 
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-const container=document.getElementById("crt-container")
-const os=document.getElementById("os")
+/* =========================
+   STEAM BUTTON CONFIG
+========================= */
+const STEAM_BUTTON_ENABLED = 0; // 0 = hidden, 1 = visible
+const STEAM_URL = "https://store.steampowered.com/app/YOUR_APP_ID";
+
+/* Steam Button Toggle */
+const steamBtn = document.getElementById("steamBtn");
+
+if(STEAM_BUTTON_ENABLED){
+    steamBtn.href = STEAM_URL;
+}else{
+    steamBtn.style.display = "none";
+}
+
+/* Tilt */
+const container=document.getElementById("crt-container");
+const os=document.getElementById("os");
 
 function applyTilt(x,y){
-const rx=(window.innerHeight/2-y)/1500
-const ry=(window.innerWidth/2-x)/1500
-container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
-os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+    const rx=(window.innerHeight/2-y)/1500;
+    const ry=(window.innerWidth/2-x)/1500;
+
+    container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+    os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
 }
 
-// Desktop mouse
 document.addEventListener("mousemove",(e)=>{
-applyTilt(e.clientX,e.clientY)
-})
+    applyTilt(e.clientX,e.clientY);
+});
 
-// Mobile touch
 document.addEventListener("touchmove",(e)=>{
-const t=e.touches[0]
-applyTilt(t.clientX,t.clientY)
-},{passive:true})
+    const t=e.touches[0];
+    applyTilt(t.clientX,t.clientY);
+},{passive:true});
 
-const input=document.getElementById("cmd")
+/* Terminal Nav */
+const input=document.getElementById("cmd");
+
 input.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-const v=input.value.toLowerCase()
-if(v==="home")window.location="index.html"
-if(v==="games")window.location="games.html"
-input.value=""
-}
-})
+    if(e.key==="Enter"){
+        const v=input.value.toLowerCase();
+
+        if(v==="home") window.location="index.html";
+        if(v==="games") window.location="games.html";
+
+        input.value="";
+    }
+});
 </script>
 
 </body>
