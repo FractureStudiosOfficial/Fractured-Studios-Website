@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Suit Archive</title>
+<title>UIC Suit Inspection Chamber</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --amber:#ff9f07;
+  --glass:rgba(0,0,0,.35);
+  --line:rgba(255,159,7,.22);
 }
 
 /* =========================
@@ -17,15 +19,13 @@
 ========================= */
 body{
   margin:0;
-  background:#0b0b0b;
+  background:#070707;
   color:var(--amber);
   font-family:'Share Tech Mono', monospace;
   overflow:hidden;
 }
 
-/* =========================
-   FX LAYERS (SAFE)
-========================= */
+/* FX LAYERS */
 #amber,
 #scanlines{
   position:fixed;
@@ -43,21 +43,21 @@ body{
     to bottom,
     rgba(255,255,255,.05) 0px,
     rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
+    transparent 6px,
+    transparent 10px
   );
   animation:flicker .12s infinite;
   z-index:2;
 }
 
 @keyframes flicker{
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+  0%{opacity:.14}
+  50%{opacity:.06}
+  100%{opacity:.14}
 }
 
 /* =========================
-   MAIN WRAP
+   MAIN LAYOUT
 ========================= */
 #ui{
   position:relative;
@@ -67,68 +67,76 @@ body{
 }
 
 /* =========================
-   VERTICAL TABS
+   LEFT PANEL (SUIT SELECT)
 ========================= */
-#tabs{
-  width:220px;
-  background:rgba(0,0,0,.35);
-  border-right:1px solid rgba(255,159,7,.2);
+#panel{
+  width:260px;
+  background:rgba(0,0,0,.45);
+  border-right:1px solid var(--line);
   display:flex;
   flex-direction:column;
 }
 
-.tab{
+.panel-header{
   padding:18px;
+  border-bottom:1px solid var(--line);
+  letter-spacing:.2em;
+  font-size:14px;
+  opacity:.8;
+}
+
+.suit-tab{
+  padding:16px;
   cursor:pointer;
-  border-bottom:1px solid rgba(255,159,7,.1);
+  border-bottom:1px solid rgba(255,159,7,.08);
   transition:.2s;
 }
 
-.tab:hover{
-  background:rgba(255,159,7,.08);
+.suit-tab:hover{
+  background:rgba(255,159,7,.06);
 }
 
-.tab.active{
+.suit-tab.active{
   background:rgba(255,159,7,.12);
-  box-shadow:inset 0 0 20px rgba(255,159,7,.15);
+  box-shadow:inset 0 0 20px rgba(255,159,7,.08);
 }
 
 /* =========================
-   VIEWER
+   VIEWPORT
 ========================= */
-#viewer{
+#viewport{
   flex:1;
   position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.2);
+  background:radial-gradient(circle at center, rgba(255,159,7,.05), transparent 60%);
 }
 
-/* 3D canvas holder */
-#model-container{
-  width:100%;
-  height:100%;
+/* TITLE */
+#title{
   position:absolute;
+  top:30px;
+  left:30px;
+  font-size:18px;
+  letter-spacing:.25em;
+  z-index:10;
 }
 
-/* overlay UI */
+/* INFO PANEL */
 #hud{
   position:absolute;
   bottom:30px;
   left:30px;
   display:flex;
   gap:10px;
+  z-index:10;
 }
 
-/* buttons */
 .btn{
   padding:10px 14px;
   border:1px solid var(--amber);
   background:transparent;
   color:var(--amber);
-  font-family:inherit;
   cursor:pointer;
+  font-family:inherit;
   transition:.2s;
 }
 
@@ -136,13 +144,10 @@ body{
   background:rgba(255,159,7,.12);
 }
 
-/* label */
-#suit-name{
-  position:absolute;
-  top:30px;
-  left:30px;
-  font-size:18px;
-  letter-spacing:.2em;
+/* 3D CONTAINER */
+#model-wrap{
+  width:100%;
+  height:100%;
 }
 
 /* OS */
@@ -164,130 +169,151 @@ body{
 
 <div id="ui">
 
-  <!-- TABS -->
-  <div id="tabs">
+  <!-- LEFT PANEL -->
+  <div id="panel">
+    <div class="panel-header">SUIT ARCHIVE</div>
 
-    <div class="tab active" onclick="loadSuit('emu')">
+    <div class="suit-tab active" onclick="switchSuit('emu')">
       U.S. EMU SUIT
     </div>
 
-    <div class="tab" onclick="loadSuit('orlan')">
+    <div class="suit-tab" onclick="switchSuit('orlan')">
       SOVIET ORLAN
     </div>
-
   </div>
 
-  <!-- VIEWER -->
-  <div id="viewer">
+  <!-- VIEWPORT -->
+  <div id="viewport">
 
-    <div id="suit-name">EMU EVA SUIT</div>
+    <div id="title">EMU EVA SUIT</div>
 
-    <div id="model-container"></div>
+    <div id="model-wrap"></div>
 
     <div id="hud">
-      <button class="btn" onclick="openInfo()">INFO</button>
+      <button class="btn" onclick="openInfo()">VIEW DOSSIER</button>
     </div>
 
   </div>
 
 </div>
 
-<div id="os">UIC SUIT ARCHIVE v1.0</div>
+<div id="os">UIC SUIT CHAMBER v1.0</div>
 
-<!-- THREE.JS (for 3D models) -->
+<!-- THREE JS (WORKING VERSION) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
 /* =========================
-   CONFIG (YOU EDIT THIS)
+   SUITS CONFIG (EDIT HERE)
 ========================= */
 const suits = {
   emu:{
     name:"EMU EVA SUIT",
     model:"emu.glb",
-    info:"emu"
+    page:"emu.html"
   },
   orlan:{
     name:"SOVIET ORLAN SUIT",
     model:"Displaypose.glb",
-    info:"orlan"
+    page:"orlan.html"
   }
 };
 
+let current = "emu";
+let model = null;
+
 /* =========================
-   THREE SETUP
+   THREE SETUP (FIXED)
 ========================= */
-const container = document.getElementById("model-container");
-
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.z = 3;
 
-const renderer = new THREE.WebGLRenderer({alpha:true});
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+
+camera.position.set(0,1.2,3);
+
+const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-container.appendChild(renderer.domElement);
+document.getElementById("model-wrap").appendChild(renderer.domElement);
 
-const light = new THREE.AmbientLight(0xffffff, 1.2);
-scene.add(light);
+/* LIGHTING (THIS FIXES “MODEL NOT SHOWING”) */
+const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
+light1.position.set(3,3,3);
+scene.add(light1);
 
-let currentModel = null;
+const light2 = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(light2);
+
+/* LOADER */
+const loader = new THREE.GLTFLoader();
 
 /* =========================
    LOAD SUIT
 ========================= */
 function loadSuit(id){
 
-  const data = suits[id];
+  current = id;
 
-  document.getElementById("suit-name").textContent = data.name;
+  document.getElementById("title").textContent = suits[id].name;
 
-  // tab UI
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".suit-tab").forEach(t=>t.classList.remove("active"));
   event.target.classList.add("active");
 
-  // remove old model
-  if(currentModel){
-    scene.remove(currentModel);
-    currentModel = null;
+  if(model){
+    scene.remove(model);
+    model = null;
   }
 
-  const loader = new THREE.GLTFLoader();
+  loader.load(
+    suits[id].model,
+    gltf=>{
+      model = gltf.scene;
 
-  loader.load(data.model, gltf=>{
-    currentModel = gltf.scene;
-    currentModel.scale.set(1,1,1);
-    scene.add(currentModel);
-  });
+      /* IMPORTANT: scale safety */
+      model.scale.set(1,1,1);
+      model.position.set(0,-1,0);
+
+      scene.add(model);
+    },
+    undefined,
+    err=>{
+      console.error("Model failed to load:", err);
+    }
+  );
 }
 
-/* default */
-loadSuit("emu");
+/* alias for tabs */
+function switchSuit(id){
+  loadSuit(id);
+}
 
 /* =========================
-   ROTATION LOOP
+   INFO BUTTON
+========================= */
+function openInfo(){
+  window.location = `folder_suits/${current}.html`;
+}
+
+/* =========================
+   ANIMATION LOOP
 ========================= */
 function animate(){
   requestAnimationFrame(animate);
 
-  if(currentModel){
-    currentModel.rotation.y += 0.003;
+  if(model){
+    model.rotation.y += 0.0025;
   }
 
   renderer.render(scene,camera);
 }
 animate();
 
-/* =========================
-   INFO BUTTON
-========================= */
-function openInfo(){
-  const active = document.querySelector(".tab.active");
-  const suitKey = active.textContent.includes("EMU") ? "emu" : "orlan";
-  window.location = `folder_suits/${suits[suitKey].info}.html`;
-}
-
-/* resize */
+/* resize fix */
 window.addEventListener("resize", ()=>{
   camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
