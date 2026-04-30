@@ -3,161 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Suit Inspection Chamber</title>
+<title>UIC Suit Registry</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --amber:#ff9f07;
-  --glass:rgba(0,0,0,.35);
-  --line:rgba(255,159,7,.22);
-}
-
-/* =========================
-   BASE
-========================= */
 body{
-  margin:0;
-  background:#070707;
-  color:var(--amber);
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
+margin:0;
+background:#070707;
+color:#FF9F07;
+font-family:'Share Tech Mono', monospace;
+overflow:hidden;
 }
 
-/* FX LAYERS */
-#amber,
+/* CRT LAYERS */
 #scanlines{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-}
-
-#amber{
-  background:rgba(255,159,7,.04);
-  z-index:1;
-}
-
-#scanlines{
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 6px,
-    transparent 10px
-  );
-  animation:flicker .12s infinite;
-  z-index:2;
+position:fixed;
+inset:0;
+pointer-events:none;
+background:repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,.04) 0px,
+rgba(255,255,255,.04) 2px,
+transparent 5px,
+transparent 9px
+);
+animation:flicker .12s infinite;
 }
 
 @keyframes flicker{
-  0%{opacity:.14}
-  50%{opacity:.06}
-  100%{opacity:.14}
+0%{opacity:.15}
+50%{opacity:.08}
+100%{opacity:.15}
 }
 
-/* =========================
-   MAIN LAYOUT
-========================= */
+#amber{
+position:fixed;
+inset:0;
+background:rgba(255,159,7,.04);
+pointer-events:none;
+}
+
+/* MAIN GRID */
 #ui{
-  position:relative;
-  z-index:5;
-  height:100vh;
-  display:flex;
+display:grid;
+grid-template-columns:260px 1fr;
+height:100vh;
 }
 
-/* =========================
-   LEFT PANEL (SUIT SELECT)
-========================= */
-#panel{
-  width:260px;
-  background:rgba(0,0,0,.45);
-  border-right:1px solid var(--line);
-  display:flex;
-  flex-direction:column;
+/* SIDE TABS */
+#tabs{
+border-right:1px solid rgba(255,159,7,.2);
+background:rgba(0,0,0,.35);
+display:flex;
+flex-direction:column;
+padding:20px;
+gap:15px;
 }
 
-.panel-header{
-  padding:18px;
-  border-bottom:1px solid var(--line);
-  letter-spacing:.2em;
-  font-size:14px;
-  opacity:.8;
+.tab{
+padding:15px;
+border:1px solid rgba(255,159,7,.2);
+cursor:pointer;
+transition:.2s;
+background:rgba(0,0,0,.2);
 }
 
-.suit-tab{
-  padding:16px;
-  cursor:pointer;
-  border-bottom:1px solid rgba(255,159,7,.08);
-  transition:.2s;
+.tab:hover{
+background:rgba(255,159,7,.08);
+transform:translateX(4px);
 }
 
-.suit-tab:hover{
-  background:rgba(255,159,7,.06);
+.tab.active{
+background:rgba(255,159,7,.12);
+box-shadow:0 0 15px rgba(255,159,7,.15);
 }
 
-.suit-tab.active{
-  background:rgba(255,159,7,.12);
-  box-shadow:inset 0 0 20px rgba(255,159,7,.08);
+/* VIEWER */
+#viewer{
+position:relative;
+display:flex;
+flex-direction:column;
 }
 
-/* =========================
-   VIEWPORT
-========================= */
-#viewport{
-  flex:1;
-  position:relative;
-  background:radial-gradient(circle at center, rgba(255,159,7,.05), transparent 60%);
-}
-
-/* TITLE */
-#title{
-  position:absolute;
-  top:30px;
-  left:30px;
-  font-size:18px;
-  letter-spacing:.25em;
-  z-index:10;
+#model-container{
+flex:1;
+position:relative;
 }
 
 /* INFO PANEL */
-#hud{
-  position:absolute;
-  bottom:30px;
-  left:30px;
-  display:flex;
-  gap:10px;
-  z-index:10;
+#info{
+height:160px;
+border-top:1px solid rgba(255,159,7,.2);
+background:rgba(0,0,0,.35);
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
-.btn{
-  padding:10px 14px;
-  border:1px solid var(--amber);
-  background:transparent;
-  color:var(--amber);
-  cursor:pointer;
-  font-family:inherit;
-  transition:.2s;
+#info button{
+background:transparent;
+border:1px solid #FF9F07;
+color:#FF9F07;
+padding:10px 20px;
+cursor:pointer;
+font-family:inherit;
+transition:.2s;
 }
 
-.btn:hover{
-  background:rgba(255,159,7,.12);
+#info button:hover{
+background:rgba(255,159,7,.1);
 }
 
-/* 3D CONTAINER */
-#model-wrap{
-  width:100%;
-  height:100%;
+/* HEADER LABEL */
+#header{
+position:absolute;
+top:15px;
+left:20px;
+z-index:10;
+opacity:.8;
+letter-spacing:.2em;
 }
 
 /* OS */
 #os{
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
-  z-index:10;
+position:fixed;
+bottom:10px;
+right:15px;
+font-size:12px;
+opacity:.7;
+pointer-events:none;
 }
 </style>
 </head>
@@ -169,156 +145,127 @@ body{
 
 <div id="ui">
 
-  <!-- LEFT PANEL -->
-  <div id="panel">
-    <div class="panel-header">SUIT ARCHIVE</div>
+<!-- TABS -->
+<div id="tabs">
+<div class="tab active" onclick="loadSuit('emu')">US EMU SUIT</div>
+<div class="tab" onclick="loadSuit('orlan')">SOVIET ORLAN</div>
+</div>
 
-    <div class="suit-tab active" onclick="switchSuit('emu')">
-      U.S. EMU SUIT
-    </div>
+<!-- VIEWER -->
+<div id="viewer">
 
-    <div class="suit-tab" onclick="switchSuit('orlan')">
-      SOVIET ORLAN
-    </div>
-  </div>
+<div id="header">UIC SUIT REGISTRY</div>
+<div id="model-container"></div>
 
-  <!-- VIEWPORT -->
-  <div id="viewport">
+<div id="info">
+<div id="desc">
+Loading suit data...
+</div>
 
-    <div id="title">EMU EVA SUIT</div>
-
-    <div id="model-wrap"></div>
-
-    <div id="hud">
-      <button class="btn" onclick="openInfo()">VIEW DOSSIER</button>
-    </div>
-
-  </div>
+<button id="infoBtn">VIEW FILE</button>
+</div>
 
 </div>
 
-<div id="os">UIC SUIT CHAMBER v1.0</div>
+</div>
 
-<!-- THREE JS (WORKING VERSION) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<div id="os">UIC OS v1.0.4</div>
+
+<!-- THREE.JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
-/* =========================
-   SUITS CONFIG (EDIT HERE)
-========================= */
+let scene, camera, renderer, model;
+
+const container = document.getElementById("model-container");
+const desc = document.getElementById("desc");
+const infoBtn = document.getElementById("infoBtn");
+
 const suits = {
-  emu:{
-    name:"EMU EVA SUIT",
-    model:"emu.glb",
-    page:"emu.html"
-  },
-  orlan:{
-    name:"SOVIET ORLAN SUIT",
-    model:"Displaypose.glb",
-    page:"orlan.html"
-  }
+emu:{
+file:"models/emu.glb",
+page:"folder_suits/emu.html",
+text:"United States Extravehicular Mobility Unit. Designed for orbital EVA operations and deep-space station maintenance."
+},
+orlan:{
+file:"folder_suits/Displaypose.glb",
+page:"folder_suits/orlan.html",
+text:"Soviet Orlan EVA suit. Modular semi-rigid design optimized for long-duration extravehicular operations."
+}
 };
 
 let current = "emu";
-let model = null;
 
-/* =========================
-   THREE SETUP (FIXED)
-========================= */
-const scene = new THREE.Scene();
+/* INIT THREE */
+function init(){
+scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 2.5;
 
-camera.position.set(0,1.2,3);
-
-const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById("model-wrap").appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
-/* LIGHTING (THIS FIXES “MODEL NOT SHOWING”) */
-const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
-light1.position.set(3,3,3);
-scene.add(light1);
+/* LIGHT */
+const light = new THREE.DirectionalLight(0xff9f07, 1);
+light.position.set(2,2,2);
+scene.add(light);
 
-const light2 = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(light2);
+const ambient = new THREE.AmbientLight(0x333333);
+scene.add(ambient);
 
-/* LOADER */
+loadModel(current);
+
+animate();
+}
+
+/* LOAD MODEL */
+function loadModel(key){
+current = key;
+
+if(model) scene.remove(model);
+
 const loader = new THREE.GLTFLoader();
 
-/* =========================
-   LOAD SUIT
-========================= */
-function loadSuit(id){
-
-  current = id;
-
-  document.getElementById("title").textContent = suits[id].name;
-
-  document.querySelectorAll(".suit-tab").forEach(t=>t.classList.remove("active"));
-  event.target.classList.add("active");
-
-  if(model){
-    scene.remove(model);
-    model = null;
-  }
-
-  loader.load(
-    suits[id].model,
-    gltf=>{
-      model = gltf.scene;
-
-      /* IMPORTANT: scale safety */
-      model.scale.set(1,1,1);
-      model.position.set(0,-1,0);
-
-      scene.add(model);
-    },
-    undefined,
-    err=>{
-      console.error("Model failed to load:", err);
-    }
-  );
-}
-
-/* alias for tabs */
-function switchSuit(id){
-  loadSuit(id);
-}
-
-/* =========================
-   INFO BUTTON
-========================= */
-function openInfo(){
-  window.location = `folder_suits/${current}.html`;
-}
-
-/* =========================
-   ANIMATION LOOP
-========================= */
-function animate(){
-  requestAnimationFrame(animate);
-
-  if(model){
-    model.rotation.y += 0.0025;
-  }
-
-  renderer.render(scene,camera);
-}
-animate();
-
-/* resize fix */
-window.addEventListener("resize", ()=>{
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+loader.load(suits[key].file, gltf=>{
+model = gltf.scene;
+model.scale.set(1,1,1);
+scene.add(model);
 });
+
+desc.textContent = suits[key].text;
+infoBtn.onclick = ()=> window.location = suits[key].page;
+}
+
+/* ANIMATE */
+function animate(){
+requestAnimationFrame(animate);
+
+if(model){
+model.rotation.y += 0.003;
+model.rotation.x += 0.0015;
+}
+
+renderer.render(scene,camera);
+}
+
+/* RESIZE */
+window.addEventListener("resize", ()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* TAB SWITCH */
+function loadSuit(name){
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+event.target.classList.add("active");
+loadModel(name);
+}
+
+init();
 </script>
 
 </body>
