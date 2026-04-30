@@ -3,188 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | James Maniston</title>
+<title>UIC Personnel Dossier</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow-y:auto;
+:root{
+    --amber:#FF9F07;
+    --dim:rgba(255,159,7,.25);
 }
 
-/* CRT EFFECTS */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    background:#050505;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    overflow-y:auto;
 }
 
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
+/* =========================
+   CRT OVERLAY FX
+========================= */
+#amber{
+    position:fixed;
+    inset:0;
+    background:rgba(255,159,7,.04);
+    pointer-events:none;
 }
 
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+#scanlines{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 2px,
+        transparent 5px,
+        transparent 9px
+    );
+    animation:flicker .12s infinite;
+    z-index:1001;
 }
 
-/* MAIN CONTENT */
-#crt-container {
-  padding:40px;
-  min-height:100vh;
-  box-sizing:border-box;
+@keyframes flicker{
+    0%{opacity:.15}
+    50%{opacity:.08}
+    100%{opacity:.15}
 }
 
-h1 {
-  margin-top:0;
-  text-align:center;
+/* =========================
+   MAIN CONTAINER
+========================= */
+#crt-container{
+    padding:45px;
+    min-height:100vh;
 }
 
-.character-info {
-  display:flex;
-  flex-direction:column;
-  gap:15px;
-  max-width:900px;
-  margin:0 auto;
+/* =========================
+   TITLE HEADER (DOSSIER STYLE)
+========================= */
+h1{
+    text-align:center;
+    letter-spacing:.25em;
+    margin-top:0;
+    padding:20px;
+    border:2px solid rgba(255,159,7,.2);
+    background:rgba(0,0,0,.25);
+    box-shadow:inset 0 0 25px rgba(255,159,7,.03);
 }
 
-.section {
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.2);
-  padding:15px;
+/* =========================
+   PROFILE GRID FRAME
+========================= */
+.character-info{
+    max-width:900px;
+    margin:30px auto;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
 }
 
-.section h2 {
-  margin-top:0;
-  font-size:1.2em;
-  border-bottom:1px dashed rgba(255,159,7,.3);
-  padding-bottom:5px;
+/* =========================
+   DATA SECTIONS (UPGRADED)
+========================= */
+.section{
+    position:relative;
+    padding:16px 18px;
+
+    border:1px solid rgba(255,159,7,.18);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.02),
+            rgba(0,0,0,.35)
+        );
 }
 
-.section p { margin:5px 0; }
-
-#back-btn {
-  display:block;
-  margin:20px auto;
-  padding:10px 20px;
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.2);
-  text-align:center;
-  cursor:pointer;
-  width:fit-content;
-  transition:.2s ease;
+/* INNER FRAME DETAIL */
+.section::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(255,159,7,.08);
+    pointer-events:none;
 }
 
-#back-btn:hover {
-  background:rgba(0,0,0,.4);
+/* SECTION HEADERS */
+.section h2{
+    margin:0 0 10px 0;
+    font-size:14px;
+    letter-spacing:.15em;
+    border-bottom:1px dashed rgba(255,159,7,.25);
+    padding-bottom:6px;
 }
 
-/* TERMINAL */
-#terminal-box {
-  background:rgba(0,0,0,.25);
-  padding:15px;
-  border-top:1px solid rgba(255,159,7,.2);
-  position:sticky;
-  bottom:0;
-  width:100%;
-  box-sizing:border-box;
+/* TEXT */
+.section p, .section li{
+    margin:4px 0;
+    opacity:.9;
 }
 
-#prompt {
-  display:flex;
-  flex:1;
+/* LIST CLEANUP */
+ul{
+    margin:0;
+    padding-left:18px;
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+/* =========================
+   BACK BUTTON (SYSTEM BUTTON)
+========================= */
+#back-btn{
+    margin:30px auto;
+    width:fit-content;
+    padding:10px 18px;
+
+    border:1px solid rgba(255,159,7,.25);
+    background:rgba(0,0,0,.3);
+
+    cursor:pointer;
+    transition:.2s ease;
+    letter-spacing:.1em;
 }
 
-/* 🔒 PASSWORD OVERLAY (FULLY OPAQUE) */
-#password-overlay {
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#000; /* SOLID BLACK */
-  z-index:2000;
+#back-btn:hover{
+    background:rgba(255,159,7,.08);
+    box-shadow:0 0 15px rgba(255,159,7,.12);
 }
 
-#password-panel {
-  background:#000; /* SOLID BLACK */
-  border:1px solid rgba(255,159,7,0.3);
-  padding:30px 50px;
-  text-align:center;
-  box-shadow:0 0 25px rgba(255,159,7,0.15);
+/* =========================
+   TERMINAL BAR
+========================= */
+#terminal-box{
+    position:sticky;
+    bottom:0;
+
+    display:flex;
+    padding:12px 18px;
+    gap:10px;
+
+    border-top:2px solid rgba(255,159,7,.2);
+    background:rgba(0,0,0,.5);
 }
 
-.lock-title {
-  font-size:1.4em;
-  margin-bottom:10px;
+#terminal-box input{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font-family:inherit;
 }
 
-.lock-sub {
-  font-size:0.85em;
-  opacity:0.7;
-  margin-bottom:20px;
+/* =========================
+   OS LABEL
+========================= */
+#os{
+    position:fixed;
+    bottom:10px;
+    right:15px;
+    font-size:12px;
+    opacity:.7;
 }
 
-.password-input-row {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-  border-bottom:1px solid rgba(255,159,7,.3);
-  padding-bottom:5px;
+/* =========================
+   LOCK SCREEN UPGRADE
+========================= */
+#password-overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#000;
+    z-index:2000;
 }
 
-.password-input-row input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  font-size:1em;
-  width:220px;
+#password-panel{
+    width:340px;
+    padding:30px;
+
+    background:#000;
+    border:1px solid rgba(255,159,7,.3);
+
+    text-align:center;
+    box-shadow:0 0 25px rgba(255,159,7,.12);
 }
 
-#password-error {
-  margin-top:15px;
-  font-size:0.8em;
-  color:#ff3b3b;
-  opacity:0;
-  transition:opacity .2s ease;
+/* HEADER */
+.lock-title{
+    letter-spacing:.2em;
+    margin-bottom:10px;
 }
 
-/* OS TEXT */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+.lock-sub{
+    opacity:.6;
+    font-size:12px;
+    margin-bottom:20px;
+}
+
+/* INPUT */
+.password-input-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:6px;
+}
+
+.password-input-row input{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+}
+
+/* ERROR */
+#password-error{
+    margin-top:15px;
+    font-size:12px;
+    color:#ff3b3b;
+    opacity:0;
+    transition:.2s ease;
 }
 </style>
 </head>
@@ -194,10 +258,11 @@ h1 {
 <div id="amber"></div>
 <div id="scanlines"></div>
 
-<!-- 🔒 LOCK SCREEN -->
+<!-- LOCK SCREEN -->
 <div id="password-overlay">
   <div id="password-panel">
-    <div class="lock-title">[ ACCESS RESTRICTED ]</div>
+
+    <div class="lock-title">UIC SECURE DOSSIER ACCESS</div>
     <div class="lock-sub">ENTER CLEARANCE CODE</div>
 
     <div class="password-input-row">
@@ -206,91 +271,108 @@ h1 {
     </div>
 
     <div id="password-error">INVALID CODE</div>
+
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <div id="crt-container">
 
-  <h1>Character Profile</h1>
+<h1>PERSONNEL DOSSIER // JAMES MANISTON</h1>
 
-  <div class="character-info">
-    <div class="section"><h2>Name</h2><p>Dr. James Maniston</p></div>
-    <div class="section"><h2>Occupation / Role</h2><p>Lead Scientist / Engineer / Astrophysicist</p></div>
-    <div class="section"><h2>Space Station Assignment</h2><p>Alpha Lunar Station, Moon Orbit</p></div>
-    <div class="section"><h2>Current Task / Project</h2><p>Heading the co-op Venetian Mass Driver on the Venetian surface, along with [[UNABLE TO ACCESS USER]]</p></div>
+<div class="character-info">
 
-    <div class="section">
-      <h2>Previous Missions</h2>
-      <ul>
-         <li>Horizion Station: Extraplanetary Engineering Training </li>
-        <li>Venus Orbital Lab: Atmospheric Survey</li>
-        <li>Venetian Surface: Habitation Module Tests</li>
-        <li>Von Braun Station EVA: Addition to the communications relay</li>
-      </ul>
-    </div>
-
-    <div class="section"><h2>Age</h2><p>38</p></div>
-    <div class="section"><h2>Nationality / Affiliation</h2><p>USA / NASA</p></div>
-    <div class="section"><h2>Status</h2><p>On Duty / Venetian Mass Driver Project Head</p></div>
-
-    <div class="section">
-      <h2>Notes / Logs</h2>
-      <p>Subject is highly experienced in EVA operations and zero-gravity engineering. Resources have been allocated for their Venetian Mass Driver project as a further Soviet Union, and US collabration.</p>
-    </div>
+  <div class="section">
+    <h2>IDENTIFICATION</h2>
+    <p>Dr. James Maniston</p>
   </div>
 
-  <div id="back-btn" onclick="window.location='users.html'">Return to User List</div>
-
-  <div id="terminal-box">
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off">
-    </div>
+  <div class="section">
+    <h2>ROLE CLASSIFICATION</h2>
+    <p>Lead Scientist / Engineer / Astrophysicist</p>
   </div>
 
+  <div class="section">
+    <h2>STATION ASSIGNMENT</h2>
+    <p>Alpha Lunar Station, Moon Orbit</p>
+  </div>
+
+  <div class="section">
+    <h2>CURRENT OPERATION</h2>
+    <p>Venetian Mass Driver Project — Joint Earth/Soviet Initiative</p>
+  </div>
+
+  <div class="section">
+    <h2>MISSION HISTORY</h2>
+    <ul>
+      <li>Horizion Station: Extraplanetary Engineering Training</li>
+      <li>Venus Orbital Lab: Atmospheric Survey</li>
+      <li>Venetian Surface: Habitation Module Tests</li>
+      <li>Von Braun Station EVA: Communications Relay Integration</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>STATUS</h2>
+    <p>ACTIVE DUTY</p>
+  </div>
+
+  <div class="section">
+    <h2>ARCHIVAL NOTES</h2>
+    <p>Subject demonstrates high proficiency in EVA engineering and zero-g structural systems. Clearance extended due to joint international research protocols.</p>
+  </div>
+
+</div>
+
+<div id="back-btn" onclick="window.location='users.html'">
+RETURN TO USER INDEX
+</div>
+
+</div>
+
+<!-- TERMINAL -->
+<div id="terminal-box">
+  <span>></span>
+  <input id="cmd" autocomplete="off">
 </div>
 
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-/* PASSWORD SYSTEM */
-const overlay = document.getElementById("password-overlay");
-const passInput = document.getElementById("password-input");
-const errorText = document.getElementById("password-error");
+/* PASSWORD SYSTEM (UNCHANGED LOGIC) */
+const overlay=document.getElementById("password-overlay");
+const passInput=document.getElementById("password-input");
+const errorText=document.getElementById("password-error");
 
-const PASSWORD = "uic-742";
+const PASSWORD="uic-742";
 
 passInput.focus();
 
-passInput.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
+passInput.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
 
-  if (passInput.value.toLowerCase().trim() === PASSWORD) {
-    overlay.style.display = "none";
-  } else {
-    errorText.style.opacity = "1";
-    passInput.value = "";
-    setTimeout(() => errorText.style.opacity = "0", 1000);
+  if(passInput.value.toLowerCase().trim()===PASSWORD){
+    overlay.style.display="none";
+  }else{
+    errorText.style.opacity="1";
+    passInput.value="";
+    setTimeout(()=>errorText.style.opacity="0",1000);
   }
 });
 
-/* TERMINAL COMMANDS */
-const input = document.getElementById("cmd");
+/* TERMINAL (UNCHANGED LOGIC) */
+const input=document.getElementById("cmd");
 
-input.addEventListener("keydown", e=>{
-  if(e.key!=="Enter") return;
+input.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
 
-  const cmd = input.value.toLowerCase().trim();
+  const cmd=input.value.toLowerCase().trim();
 
-  switch(cmd){
-    case "users": window.location="users.html"; break;
-    case "about": window.location="about.html"; break;
-    case "games": window.location="games.html"; break;
-    case "contact": window.location="contact.html"; break;
-    case "home": window.location="index.html"; break;
-    default: console.log("Unknown command: "+cmd);
-  }
+  if(cmd==="users")window.location="users.html";
+  if(cmd==="about")window.location="about.html";
+  if(cmd==="games")window.location="games.html";
+  if(cmd==="contact")window.location="contact.html";
+  if(cmd==="home")window.location="index.html";
 
   input.value="";
 });
