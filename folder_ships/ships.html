@@ -10,6 +10,9 @@
 <style>
 :root{
   --amber:#ff9f07;
+  --amberSoft:rgba(255,159,7,.12);
+  --panel:rgba(0,0,0,.35);
+  --line:rgba(255,159,7,.22);
 }
 
 /* =========================
@@ -23,22 +26,19 @@ body{
   overflow-x:hidden;
 }
 
-/* =========================
-   FX LAYER (NEVER INTERACTS)
-========================= */
-#amber,
+/* CRT LAYERS */
+#amber{
+  position:fixed;
+  inset:0;
+  background:rgba(255,159,7,.04);
+  pointer-events:none;
+  z-index:1000;
+}
+
 #scanlines{
   position:fixed;
   inset:0;
   pointer-events:none;
-}
-
-#amber{
-  background:rgba(255,159,7,.04);
-  z-index:1;
-}
-
-#scanlines{
   background:repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.05) 0px,
@@ -47,7 +47,7 @@ body{
     transparent 9px
   );
   animation:flicker .12s infinite;
-  z-index:2;
+  z-index:1001;
 }
 
 @keyframes flicker{
@@ -57,11 +57,9 @@ body{
 }
 
 /* =========================
-   MAIN UI LAYER
+   MAIN FRAME
 ========================= */
 #crt-container{
-  position:relative;
-  z-index:5;
   padding:50px;
   min-height:100vh;
   box-sizing:border-box;
@@ -69,28 +67,46 @@ body{
   transition:transform .08s ease-out;
 }
 
-/* HEADER */
+/* HEADER PANEL */
 .header{
-  background:rgba(0,0,0,.35);
-  border:1px solid rgba(255,159,7,.2);
-  padding:20px;
-  margin-bottom:25px;
+  position:relative;
+  margin-bottom:30px;
+  padding:25px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:0 0 25px rgba(255,159,7,.05);
 }
 
 .header h1{
   margin:0;
+  font-size:28px;
   letter-spacing:.2em;
 }
 
-/* WRAPPER */
+.header p{
+  margin-top:8px;
+  opacity:.6;
+}
+
+/* SUB GRID BACKDROP */
 #grid-wrap{
+  position:relative;
+  padding:25px;
   background:rgba(0,0,0,.2);
   border:1px solid rgba(255,159,7,.1);
-  padding:20px;
+}
+
+/* subtle internal frame lines */
+#grid-wrap::before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border:1px dashed rgba(255,159,7,.08);
+  pointer-events:none;
 }
 
 /* =========================
-   SHIP CARDS
+   SHIP CARDS (UPGRADED)
 ========================= */
 .ships{
   display:flex;
@@ -99,27 +115,48 @@ body{
 }
 
 .ship-entry{
-  position:relative;
-  z-index:10; /* IMPORTANT CLICK FIX */
-  
   display:flex;
   justify-content:space-between;
   align-items:center;
 
   padding:14px 16px;
   background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,159,7,.22);
+  border:1px solid var(--line);
+
+  position:relative;
+  overflow:hidden;
 
   transition:.2s ease;
 }
 
-.ship-entry:hover{
-  background:rgba(0,0,0,.4);
-  border-color:rgba(255,159,7,.4);
+/* subtle scan glow */
+.ship-entry::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,159,7,.05),
+    transparent
+  );
+  transform:translateX(-100%);
+  transition:.6s ease;
 }
 
+.ship-entry:hover::before{
+  transform:translateX(100%);
+}
+
+.ship-entry:hover{
+  background:rgba(0,0,0,.4);
+  border-color:rgba(255,159,7,.35);
+}
+
+/* left side identity */
 .ship-name{
   font-weight:bold;
+  letter-spacing:.05em;
 }
 
 .ship-type{
@@ -128,11 +165,8 @@ body{
   font-size:12px;
 }
 
-/* BUTTON FIX (THIS IS THE KEY PART) */
+/* RIGHT BUTTON */
 .details-button{
-  position:relative;
-  z-index:20; /* MUST BE ABOVE EVERYTHING */
-
   background:transparent;
   border:1px solid var(--amber);
   color:var(--amber);
@@ -140,30 +174,30 @@ body{
   cursor:pointer;
   font-family:inherit;
   letter-spacing:.1em;
-
   transition:.2s ease;
 }
 
 .details-button:hover{
   background:rgba(255,159,7,.12);
+  box-shadow:0 0 12px rgba(255,159,7,.2);
 }
 
 /* =========================
    TERMINAL
 ========================= */
 #terminal-box{
-  margin-top:20px;
-  padding:12px;
+  margin-top:25px;
+  padding:12px 14px;
   background:rgba(0,0,0,.35);
-  border:1px solid rgba(255,159,7,.2);
-
+  border:1px solid var(--line);
+  display:flex;
   position:sticky;
   bottom:0;
-  z-index:20;
 }
 
 #prompt{
   display:flex;
+  flex:1;
 }
 
 #prompt input{
@@ -182,7 +216,6 @@ body{
   right:15px;
   font-size:12px;
   opacity:.7;
-  z-index:50;
 }
 </style>
 </head>
@@ -196,6 +229,7 @@ body{
 
   <div class="header">
     <h1>U.I.C. NAVAL ARCHIVE</h1>
+    <p>Active & Historical Vessel Registry</p>
   </div>
 
   <div id="grid-wrap">
@@ -203,17 +237,27 @@ body{
     <div class="ships">
 
       <div class="ship-entry">
-        <div><span class="ship-name">Soyuz</span> <span class="ship-type">(RU)</span></div>
+        <div><span class="ship-name">Soyuz</span> <span class="ship-type">(Russia)</span></div>
         <button class="details-button" onclick="window.location='soyuz.html'">ACCESS</button>
       </div>
 
       <div class="ship-entry">
-        <div><span class="ship-name">Von Braun</span> <span class="ship-type">(US)</span></div>
+        <div><span class="ship-name">Von Braun</span> <span class="ship-type">(USA)</span></div>
         <button class="details-button" onclick="window.location='vonbraun.html'">ACCESS</button>
       </div>
 
       <div class="ship-entry">
-        <div><span class="ship-name">ISS</span> <span class="ship-type">(INT)</span></div>
+        <div><span class="ship-name">Shenzhou</span> <span class="ship-type">(China)</span></div>
+        <button class="details-button" onclick="window.location='shenzhou.html'">ACCESS</button>
+      </div>
+
+      <div class="ship-entry">
+        <div><span class="ship-name">Discovery One</span> <span class="ship-type">(USA)</span></div>
+        <button class="details-button" onclick="window.location='discoveryone.html'">ACCESS</button>
+      </div>
+
+      <div class="ship-entry">
+        <div><span class="ship-name">ISS</span> <span class="ship-type">(International)</span></div>
         <button class="details-button" onclick="window.location='iss.html'">ACCESS</button>
       </div>
 
@@ -224,12 +268,16 @@ body{
 
     </div>
 
+    <p style="opacity:.5;margin-top:20px;">
+      NOTE: Some registry entries are partially corrupted or redacted.
+    </p>
+
   </div>
 
   <div id="terminal-box">
     <div id="prompt">
       <span>></span>
-      <input id="cmd" autocomplete="off">
+      <input id="cmd" autocomplete="off" placeholder="Enter command">
     </div>
   </div>
 
@@ -254,9 +302,14 @@ input.addEventListener("keydown", e=>{
 
   const cmd = input.value.toLowerCase().trim();
 
-  if(cmd === "home") window.location="index.html";
-  if(cmd === "ships") window.location="ships.html";
-  if(cmd === "games") window.location="games.html";
+  switch(cmd){
+    case "home": window.location="index.html"; break;
+    case "ships": window.location="ships.html"; break;
+    case "stations": window.location="stations.html"; break;
+    case "about": window.location="about.html"; break;
+    case "games": window.location="games.html"; break;
+    case "contact": window.location="contact.html"; break;
+  }
 
   input.value="";
 });
