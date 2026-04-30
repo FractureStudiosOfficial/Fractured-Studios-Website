@@ -8,410 +8,386 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-  perspective:1000px;
+:root{
+    --amber:#ff9f07;
+    --amberBright:#ffc861;
+    --dark:#050505;
+    --panel:#111;
+    --line:rgba(255,159,7,.22);
 }
 
-/* MAIN CONTAINER */
-#crt-container {
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  padding:40px;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
-  box-sizing:border-box;
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    overflow:hidden;
+    background:#000;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
 }
 
-#terminal-title {
-  font-size:28px;
-  margin-bottom:20px;
-  color:#FF9F07;
-  text-shadow:0 0 8px #FF9F07;
+/* ======================================
+   CRT POWER ON INTRO
+====================================== */
+#startup{
+    position:fixed;
+    inset:0;
+    background:#000;
+    z-index:5000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
 }
 
-/* TERMINAL AREA */
-#terminal-box {
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  min-height:0;
+#crt-open{
+    position:absolute;
+    width:0%;
+    height:4px;
+    background:var(--amberBright);
+    box-shadow:0 0 40px var(--amber);
+    animation:crtOpen 1s ease forwards;
 }
 
-/* CUSTOM TERMINAL SCROLLER WRAPPER */
-#terminal-wrapper {
-  position:relative;
-  flex:1;
-  min-height:300px;
-  border:1px solid rgba(255,159,7,.2);
-  background:rgba(0,0,0,.25);
-  overflow:hidden;
+@keyframes crtOpen{
+    0%{width:0;height:4px;opacity:1;}
+    35%{width:80%;height:4px;}
+    100%{width:80%;height:70%;opacity:1;}
 }
 
-/* ACTUAL TERMINAL */
-#terminal {
-  position:absolute;
-  inset:0;
-  overflow-y:scroll;
-  padding:20px;
-  padding-right:32px;
-  box-sizing:border-box;
-
-  scrollbar-width:none;
-  -ms-overflow-style:none;
+#startup-panel{
+    opacity:0;
+    width:min(900px,80vw);
+    height:min(500px,70vh);
+    border:2px solid var(--amber);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    animation:panelFade 0.4s ease forwards;
+    animation-delay:0.8s;
+    background:
+        linear-gradient(rgba(255,159,7,.03),rgba(255,159,7,.015));
+    box-shadow:
+        0 0 50px rgba(255,159,7,.08),
+        inset 0 0 40px rgba(255,159,7,.03);
 }
 
-#terminal::-webkit-scrollbar {
-  display:none;
+@keyframes panelFade{
+    to{opacity:1;}
 }
 
-/* CUSTOM SCROLLBAR TRACK */
-#scrollbar-track {
-  position:absolute;
-  top:0;
-  right:0;
-  width:16px;
-  height:100%;
-  background:
-    linear-gradient(
-      to right,
-      rgba(255,159,7,.03),
-      rgba(255,159,7,.12),
-      rgba(255,159,7,.03)
+/* segmented sci-fi border */
+#startup-panel::before,
+#startup-panel::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:1px solid rgba(255,159,7,.18);
+    pointer-events:none;
+}
+
+.corner{
+    position:absolute;
+    width:40px;
+    height:40px;
+    border-color:var(--amber);
+    border-style:solid;
+}
+.c1{top:-2px;left:-2px;border-width:4px 0 0 4px;}
+.c2{top:-2px;right:-2px;border-width:4px 4px 0 0;}
+.c3{bottom:-2px;left:-2px;border-width:0 0 4px 4px;}
+.c4{bottom:-2px;right:-2px;border-width:0 4px 4px 0;}
+
+#startup-title{
+    font-size:clamp(2.5rem,6vw,5rem);
+    letter-spacing:.4em;
+    text-shadow:0 0 20px var(--amber);
+}
+
+#startup-sub{
+    margin-top:20px;
+    font-size:clamp(.8rem,1.5vw,1.2rem);
+    letter-spacing:.3em;
+    opacity:.8;
+}
+
+#welcome{
+    position:absolute;
+    opacity:0;
+    font-size:3rem;
+    letter-spacing:.5em;
+    text-shadow:0 0 20px var(--amber);
+}
+
+/* ======================================
+   MAIN TERMINAL
+====================================== */
+#crt-container{
+    display:none;
+    height:100vh;
+    padding:30px;
+    perspective:1000px;
+}
+
+#terminal-frame{
+    width:100%;
+    height:100%;
+    border:2px solid var(--amber);
+    background:
+        linear-gradient(180deg,#111,#080808);
+    box-shadow:
+        inset 0 0 40px rgba(255,159,7,.03),
+        0 0 40px rgba(255,159,7,.06);
+    position:relative;
+    padding:20px;
+}
+
+/* segmented outer decorations */
+#terminal-frame::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(255,159,7,.15);
+    pointer-events:none;
+}
+
+#terminal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+    padding-bottom:12px;
+    border-bottom:1px solid rgba(255,159,7,.18);
+}
+
+#terminal-title{
+    font-size:28px;
+    letter-spacing:.2em;
+}
+
+.status-lights{
+    display:flex;
+    gap:10px;
+}
+
+.light{
+    width:12px;
+    height:12px;
+    border:1px solid var(--amber);
+    background:rgba(255,159,7,.2);
+    box-shadow:0 0 8px rgba(255,159,7,.4);
+}
+
+/* Terminal Well */
+#terminal-wrapper{
+    position:relative;
+    height:calc(100% - 90px);
+    border:1px solid rgba(255,159,7,.18);
+    background:
+        linear-gradient(180deg,rgba(255,159,7,.03),rgba(0,0,0,.2));
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.03);
+    overflow:hidden;
+}
+
+#terminal{
+    position:absolute;
+    inset:0;
+    padding:20px 32px 20px 20px;
+    overflow-y:scroll;
+    scrollbar-width:none;
+}
+#terminal::-webkit-scrollbar{display:none;}
+
+/* Fancy Scrollbar */
+#scrollbar-track{
+    position:absolute;
+    right:0;
+    top:0;
+    width:18px;
+    height:100%;
+    border-left:1px solid rgba(255,159,7,.15);
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,159,7,.04) 0px,
+            rgba(255,159,7,.04) 8px,
+            transparent 8px,
+            transparent 16px
+        );
+}
+
+#scrollbar-thumb{
+    position:absolute;
+    width:14px;
+    left:2px;
+    min-height:50px;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,240,200,.5) 0 2px,
+            transparent 2px 6px
+        ),
+        linear-gradient(#ffc861,#ff9f07);
+    border:1px solid rgba(255,220,150,.3);
+    box-shadow:0 0 10px rgba(255,159,7,.3);
+    cursor:pointer;
+}
+
+/* Prompt */
+#prompt{
+    display:flex;
+    margin-top:10px;
+    gap:10px;
+}
+
+#prompt input{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--amber);
+    font:inherit;
+    outline:none;
+}
+
+/* overlays */
+#scanlines,
+#amber{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.04) 0 2px,
+        transparent 2px 6px
     );
-  border-left:1px solid rgba(255,159,7,.15);
-  box-shadow:inset 0 0 8px rgba(255,159,7,.08);
+    opacity:.13;
 }
 
-/* CUSTOM SCROLLBAR THUMB */
-#scrollbar-thumb {
-  position:absolute;
-  top:0;
-  left:1px;
-  width:14px;
-  min-height:40px;
-  border-radius:2px;
-  cursor:pointer;
-
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,240,200,.45) 0px,
-      rgba(255,240,200,.45) 2px,
-      transparent 2px,
-      transparent 6px
-    ),
-    linear-gradient(
-      to bottom,
-      #ffbf4d 0%,
-      #ff9f07 100%
-    );
-
-  border:1px solid rgba(255,210,120,.3);
-
-  box-shadow:
-    0 0 10px rgba(255,159,7,.35),
-    inset 0 0 4px rgba(255,255,255,.15);
-}
-
-/* INPUT */
-#prompt {
-  display:flex;
-  margin-top:10px;
-}
-
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
-  min-width:0;
-}
-
-/* OS LABEL */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
-  z-index:1002;
-}
-
-/* SCANLINES */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
-}
-
-/* AMBER OVERLAY */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-  z-index:1000;
-}
-
-/* RESPONSIVE */
-@media (max-width:900px){
-#crt-container{padding:20px;}
-#terminal-title{font-size:22px;}
-#terminal{padding:15px;padding-right:28px;}
-}
-
-@media (max-width:500px){
-body{font-size:14px;}
-#crt-container{padding:15px;}
-#terminal-title{font-size:18px;}
-#prompt{margin-top:8px;}
-#prompt input{font-size:14px;}
+#amber{
+    background:rgba(255,159,7,.04);
 }
 </style>
 </head>
-
 <body>
+
+<div id="startup">
+    <div id="crt-open"></div>
+
+    <div id="startup-panel">
+        <div class="corner c1"></div>
+        <div class="corner c2"></div>
+        <div class="corner c3"></div>
+        <div class="corner c4"></div>
+
+        <div id="startup-title">U.I.C.</div>
+        <div id="startup-sub">UNIVERSAL INTERSTELLAR COMPUTERS</div>
+        <div id="welcome">WELCOME</div>
+    </div>
+</div>
 
 <div id="amber"></div>
 <div id="scanlines"></div>
 
 <div id="crt-container">
+    <div id="terminal-frame">
 
-  <div id="terminal-title">U.I.C. Systems Terminal Access Point</div>
+        <div id="terminal-header">
+            <div id="terminal-title"></div>
 
-  <div id="terminal-box">
+            <div class="status-lights">
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+            </div>
+        </div>
 
-    <div id="terminal-wrapper">
-      <div id="terminal"></div>
+        <div id="terminal-wrapper">
+            <div id="terminal"></div>
+            <div id="scrollbar-track">
+                <div id="scrollbar-thumb"></div>
+            </div>
+        </div>
 
-      <div id="scrollbar-track">
-        <div id="scrollbar-thumb"></div>
-      </div>
+        <div id="prompt">
+            <span>&gt;</span>
+            <input id="cmd" disabled autocomplete="off">
+        </div>
+
     </div>
-
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" disabled>
-    </div>
-
-  </div>
-
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
-
 <script>
+const startupTitle = document.getElementById("startup-title");
+const startupSub = document.getElementById("startup-sub");
+const welcome = document.getElementById("welcome");
+const startup = document.getElementById("startup");
+
+const terminalContainer = document.getElementById("crt-container");
+const terminalTitle = document.getElementById("terminal-title");
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
-const container = document.getElementById("crt-container");
-const os = document.getElementById("os");
 
-const thumb = document.getElementById("scrollbar-thumb");
-const track = document.getElementById("scrollbar-track");
-
-/* COMMAND SEQUENCES */
-const sequences = {
-  users: { cmds: ["init","access","grant"], page: "users.html" },
-  stations: { cmds: ["station","alpha","open"], page: "folder_stations/stations.html" },
-  projects: { cmds: ["proj","verify","unlock"], page: "projects.html" },
-  ships: { cmds: ["fleet","engage","authorize"], page: "folder_ships/ships.html" },
-  funding: { cmds: ["finance","review","approve"], page: "funding.html" },
-  classified: { cmds: ["class","secure","enter"], page: "classified.html" },
-  systemstatus: { cmds: ["sys","status","check"], page: "systemstatus.html" },
-  communications: { cmds: ["comm","connect","link"], page: "communications.html" },
-  personalmessanger: { cmds: ["pm","login","open"], page: "personalmessanger.html" },
-  research: { cmds: ["res","start","execute"], page: "research.html" },
-  map: { cmds: ["map","system","locate"], page: "maps/solarmap.html" },
-  blackbox: { cmds: ["anomoly","detection","reports"], page: "blackbox.html" },
-  deltav: { cmds: ["burn","prograde","hohmann"], page: "deltav.html" }
-};
-
-let currentSequence = null;
-let step = 0;
-
-/* BOOT TEXT */
 const bootLines = [
-  'U.I.C. Terminal Booting...',
-  'Initializing Secure Modules...',
-  'Loading Security Protocols...',
-  'Verifying Access Permissions...',
-  'System Online',
-  '------------------------'
+  "Initializing U.I.C. Mainframe...",
+  "Loading Security Protocols...",
+  "Authenticating Terminal Node...",
+  "Verifying User Clearance...",
+  "System Online",
+  "-----------------------------"
 ];
 
-const fakeErrors = [
-  'ERROR: Network desync',
-  'WARNING: Unknown protocol detected',
-  'ERROR: Authentication timeout',
-  'ALERT: Module overload',
-  'ERROR: Peripheral mismatch'
-];
-
-/* CUSTOM SCROLLBAR UPDATE */
-function updateScrollbar() {
-  const visibleRatio = terminal.clientHeight / terminal.scrollHeight;
-  const thumbHeight = Math.max(40, track.clientHeight * visibleRatio);
-
-  thumb.style.height = thumbHeight + "px";
-
-  const scrollRatio = terminal.scrollTop / (terminal.scrollHeight - terminal.clientHeight);
-  const maxThumbMove = track.clientHeight - thumbHeight;
-
-  thumb.style.top = (scrollRatio * maxThumbMove) + "px";
+async function typeText(el,text,speed=50){
+    el.textContent="";
+    for(let i=0;i<text.length;i++){
+        el.textContent += text[i];
+        await new Promise(r=>setTimeout(r,speed));
+    }
 }
 
-terminal.addEventListener("scroll", updateScrollbar);
-window.addEventListener("resize", updateScrollbar);
+async function introSequence(){
 
-/* DRAG SCROLLBAR */
-let dragging = false;
-let dragOffset = 0;
+    await new Promise(r=>setTimeout(r,2200));
 
-thumb.addEventListener("mousedown", e => {
-  dragging = true;
-  dragOffset = e.clientY - thumb.getBoundingClientRect().top;
-  e.preventDefault();
-});
+    startupTitle.style.opacity="0";
+    startupSub.style.opacity="0";
 
-document.addEventListener("mousemove", e => {
-  if (!dragging) return;
+    welcome.style.opacity="1";
 
-  const trackRect = track.getBoundingClientRect();
-  const thumbHeight = thumb.offsetHeight;
+    await new Promise(r=>setTimeout(r,1400));
 
-  let newTop = e.clientY - trackRect.top - dragOffset;
-  newTop = Math.max(0, Math.min(newTop, track.clientHeight - thumbHeight));
+    startup.style.opacity="0";
+    startup.style.transition="opacity .5s ease";
 
-  const scrollRatio = newTop / (track.clientHeight - thumbHeight);
-  terminal.scrollTop = scrollRatio * (terminal.scrollHeight - terminal.clientHeight);
-});
+    await new Promise(r=>setTimeout(r,500));
 
-document.addEventListener("mouseup", () => dragging = false);
+    startup.remove();
+    terminalContainer.style.display="block";
 
-/* BOOT SEQUENCE */
-async function boot() {
-  for (let line of bootLines) {
-    const delay = 50 + Math.random()*100;
+    await typeText(terminalTitle,"U.I.C. SYSTEMS TERMINAL ACCESS",40);
 
-    if (Math.random() < 0.2) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-      terminal.scrollTop = terminal.scrollHeight;
-      updateScrollbar();
-      await new Promise(r => setTimeout(r, delay));
-    }
-
-    terminal.innerHTML += line + "<br>";
-    terminal.scrollTop = terminal.scrollHeight;
-    updateScrollbar();
-
-    await new Promise(r => setTimeout(r, delay));
-  }
-
-  terminal.innerHTML += "<br>System Ready.<br>";
-  input.disabled = false;
-  input.focus();
-  updateScrollbar();
+    await boot();
 }
 
-boot();
-
-/* INPUT HANDLER */
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-
-  const value = input.value.toLowerCase().trim();
-  terminal.innerHTML += `&gt; ${value}<br>`;
-  input.value = "";
-
-  if (!currentSequence) {
-    let found = false;
-
-    for (let key in sequences) {
-      if (value === sequences[key].cmds[0]) {
-        currentSequence = key;
-        step = 1;
-        terminal.innerHTML += `Step 1 complete. Enter next command.<br>`;
-        found = true;
-        break;
-      }
+async function boot(){
+    for(const line of bootLines){
+        terminal.innerHTML += line + "<br>";
+        terminal.scrollTop = terminal.scrollHeight;
+        await new Promise(r=>setTimeout(r,250));
     }
 
-    if (!found) terminal.innerHTML += "Unknown command.<br>";
+    terminal.innerHTML += "<br>SYSTEM READY.<br>";
+    input.disabled = false;
+    input.focus();
+}
 
-  } else {
-    const seq = sequences[currentSequence];
-
-    if (value === seq.cmds[step]) {
-      step++;
-
-      if (step === seq.cmds.length) {
-        terminal.innerHTML += `<br>${currentSequence.toUpperCase()} Access Granted! Redirecting...<br>`;
-
-        setTimeout(() => {
-          window.location.href = seq.page;
-        }, 500);
-
-        currentSequence = null;
-        step = 0;
-      } else {
-        terminal.innerHTML += `Step ${step} complete. Enter next command.<br>`;
-      }
-
-    } else {
-      terminal.innerHTML += "Invalid command. Sequence reset.<br>";
-      currentSequence = null;
-      step = 0;
-    }
-  }
-
-  terminal.scrollTop = terminal.scrollHeight;
-  updateScrollbar();
-});
-
-/* DESKTOP TILT */
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
-
-/* MOBILE TILT */
-document.addEventListener("touchmove", e => {
-  const t = e.touches[0];
-  const x = (window.innerWidth/2 - t.clientX)/1000;
-  const y = (window.innerHeight/2 - t.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-},{passive:true});
-
-/* INITIALIZE */
-setTimeout(updateScrollbar, 50);
+introSequence();
 </script>
 
 </body>
