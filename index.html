@@ -61,12 +61,65 @@ body{
     width:min(900px,80vw);
     height:min(500px,70vh);
     border:2px solid var(--amber);
+    position:relative;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    position:relative;
+    text-align:center;
     animation:fadeIn .4s ease forwards .8s;
+
+    background:
+        linear-gradient(
+            rgba(255,159,7,.03),
+            rgba(255,159,7,.015)
+        );
+
+    box-shadow:
+        0 0 50px rgba(255,159,7,.08),
+        inset 0 0 40px rgba(255,159,7,.03);
+}
+
+/* INNER SEGMENTED BORDER */
+#startup-panel::before,
+#startup-panel::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:1px solid rgba(255,159,7,.18);
+    pointer-events:none;
+}
+
+    .corner{
+    position:absolute;
+    width:40px;
+    height:40px;
+    border-color:var(--amber);
+    border-style:solid;
+}
+
+.c1{
+    top:-2px;
+    left:-2px;
+    border-width:4px 0 0 4px;
+}
+
+.c2{
+    top:-2px;
+    right:-2px;
+    border-width:4px 4px 0 0;
+}
+
+.c3{
+    bottom:-2px;
+    left:-2px;
+    border-width:0 0 4px 4px;
+}
+
+.c4{
+    bottom:-2px;
+    right:-2px;
+    border-width:0 4px 4px 0;
 }
 
 @keyframes fadeIn{
@@ -146,15 +199,49 @@ body{
     right:0;
     width:18px;
     height:100%;
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(255,159,7,.03),
+            rgba(255,159,7,.12),
+            rgba(255,159,7,.03)
+        );
+
     border-left:1px solid rgba(255,159,7,.15);
+
+    box-shadow:
+        inset 0 0 8px rgba(255,159,7,.08);
 }
 
 #scrollbar-thumb{
     position:absolute;
+    top:0;
     left:2px;
     width:14px;
     min-height:50px;
-    background:linear-gradient(#ffc861,#ff9f07);
+    cursor:pointer;
+    border-radius:2px;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,240,200,.45) 0px,
+            rgba(255,240,200,.45) 2px,
+            transparent 2px,
+            transparent 6px
+        ),
+        linear-gradient(
+            to bottom,
+            #ffbf4d 0%,
+            #ff9f07 100%
+        );
+
+    border:1px solid rgba(255,210,120,.3);
+
+    box-shadow:
+        0 0 10px rgba(255,159,7,.35),
+        inset 0 0 4px rgba(255,255,255,.15);
 }
 
 /* Prompt */
@@ -222,7 +309,11 @@ body{
 <div id="startup">
     <div id="crt-open"></div>
 
-    <div id="startup-panel">
+   <div id="startup-panel">
+    <div class="corner c1"></div>
+    <div class="corner c2"></div>
+    <div class="corner c3"></div>
+    <div class="corner c4"></div>
         <div id="startup-title">U.I.C.</div>
         <div id="startup-sub">UNIVERSAL INTERSTELLAR COMPUTERS</div>
         <div id="welcome">WELCOME</div>
