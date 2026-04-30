@@ -11,6 +11,11 @@
 :root{
     --amber:#ff9f07;
     --amberBright:#ffc861;
+
+    /* ADJUSTABLE CRT SETTINGS */
+    --scanline-opacity:.22;
+    --flicker-min:.08;
+    --flicker-max:.24;
 }
 
 *{box-sizing:border-box;}
@@ -23,7 +28,9 @@ body{
     font-family:'Share Tech Mono', monospace;
 }
 
-/* ---------- STARTUP ---------- */
+/* =========================
+   STARTUP SCREEN
+========================= */
 #startup{
     position:fixed;
     inset:0;
@@ -54,24 +61,28 @@ body{
     width:min(900px,80vw);
     height:min(500px,70vh);
     border:2px solid var(--amber);
-    position:relative;
     display:flex;
     flex-direction:column;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
+    position:relative;
     animation:fadeIn .4s ease forwards .8s;
 }
 
-@keyframes fadeIn{to{opacity:1;}}
+@keyframes fadeIn{
+    to{opacity:1;}
+}
 
 #startup-title{
     font-size:clamp(2.5rem,6vw,5rem);
     letter-spacing:.4em;
+    text-shadow:0 0 20px var(--amber);
 }
 
 #startup-sub{
     margin-top:20px;
     letter-spacing:.25em;
+    opacity:.85;
 }
 
 #welcome{
@@ -79,9 +90,12 @@ body{
     opacity:0;
     font-size:3rem;
     letter-spacing:.4em;
+    text-shadow:0 0 20px var(--amber);
 }
 
-/* ---------- TERMINAL ---------- */
+/* =========================
+   TERMINAL
+========================= */
 #crt-container{
     display:none;
     height:100vh;
@@ -93,38 +107,39 @@ body{
     border:2px solid var(--amber);
     padding:20px;
     background:#0a0a0a;
-    box-shadow:inset 0 0 25px rgba(255,159,7,.05);
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.05),
+        0 0 20px rgba(255,159,7,.08);
 }
 
 #terminal-header{
-    display:flex;
-    justify-content:space-between;
     border-bottom:1px solid rgba(255,159,7,.2);
     padding-bottom:10px;
     margin-bottom:15px;
 }
 
 #terminal-title{
-    letter-spacing:.2em;
     font-size:26px;
+    letter-spacing:.2em;
 }
 
 #terminal-wrapper{
     position:relative;
     height:calc(100% - 100px);
-    border:1px solid rgba(255,159,7,.2);
+    border:1px solid rgba(255,159,7,.18);
     overflow:hidden;
 }
 
 #terminal{
     position:absolute;
     inset:0;
-    overflow-y:scroll;
-    padding:20px 35px 20px 20px;
+    overflow-y:auto;
+    padding:20px 36px 20px 20px;
     scrollbar-width:none;
 }
 #terminal::-webkit-scrollbar{display:none;}
 
+/* Scrollbar */
 #scrollbar-track{
     position:absolute;
     top:0;
@@ -140,44 +155,67 @@ body{
     width:14px;
     min-height:50px;
     background:linear-gradient(#ffc861,#ff9f07);
-    cursor:pointer;
 }
 
+/* Prompt */
 #prompt{
     display:flex;
-    margin-top:10px;
     gap:10px;
+    margin-top:10px;
 }
 
 #cmd{
     flex:1;
     background:none;
     border:none;
+    outline:none;
     color:var(--amber);
     font:inherit;
-    outline:none;
 }
 
-/* overlays */
-#scanlines,#amber{
+.cursor{
+    animation:blink 1s step-end infinite;
+}
+
+@keyframes blink{
+    50%{opacity:0;}
+}
+
+/* =========================
+   CRT FX
+========================= */
+#scanlines,
+#amber{
     position:fixed;
     inset:0;
     pointer-events:none;
 }
+
 #scanlines{
-    background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,.04) 0 2px,
-        transparent 2px 6px
-    );
-    opacity:.12;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,var(--scanline-opacity)) 0px,
+            rgba(255,255,255,var(--scanline-opacity)) 2px,
+            transparent 2px,
+            transparent 6px
+        );
+    animation:flicker .12s infinite;
 }
-#amber{background:rgba(255,159,7,.04);}
+
+@keyframes flicker{
+    0%{opacity:var(--flicker-min);}
+    50%{opacity:var(--flicker-max);}
+    100%{opacity:var(--flicker-min);}
+}
+
+#amber{
+    background:rgba(255,159,7,.04);
+}
 </style>
 </head>
 <body>
 
-<!-- AUDIO PLACEHOLDERS -->
 <audio id="startupSound" src="startup-placeholder.mp3"></audio>
 <audio id="typeSound" src="typing-placeholder.mp3"></audio>
 
@@ -218,68 +256,80 @@ body{
 </div>
 
 <script>
+/* =========================
+   CONFIG
+========================= */
+const UIC_DISPLAY_TIME = 4000; // HOW LONG UIC STAYS BEFORE WELCOME
+
+/* =========================
+   ELEMENTS
+========================= */
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
-const terminalTitle = document.getElementById("terminal-title");
+const title = document.getElementById("terminal-title");
 
 const startupSound = document.getElementById("startupSound");
 const typeSound = document.getElementById("typeSound");
 
-/* ==========================
-   MODULAR COMMAND DATABASE
-========================== */
+/* =========================
+   COMMAND DATABASE
+========================= */
 const commands = {
-    users: {
-        sequence: ["init","access","grant"],
-        page: "users.html"
+    users:{
+        sequence:["init","access","grant"],
+        page:"users.html"
     },
-    classified: {
-        sequence: ["class","secure","enter","override"],
-        page: "classified.html"
+    classified:{
+        sequence:["class","secure","enter","override"],
+        page:"classified.html"
     },
-    ships: {
-        sequence: ["fleet","engage","authorize"],
-        page: "folder_ships/ships.html"
+    ships:{
+        sequence:["fleet","engage","authorize"],
+        page:"folder_ships/ships.html"
     }
 };
 
 let activeCommand = null;
 let stepIndex = 0;
+let busy = false;
 
-/* ==========================
-   TYPING EFFECTS
-========================== */
-async function typeLine(text,speed=20,html=false){
+/* =========================
+   TYPE FUNCTIONS
+========================= */
+async function typeLine(text,speed=18){
     const div = document.createElement("div");
     terminal.appendChild(div);
 
-    for(let i=0;i<text.length;i++){
-        div.innerHTML += text[i];
-        terminal.scrollTop = terminal.scrollHeight;
+    for(let char of text){
+        div.textContent += char;
 
-        if(typeSound.src) {
+        if(typeSound.src){
             typeSound.currentTime = 0;
             typeSound.play().catch(()=>{});
         }
 
+        terminal.scrollTop = terminal.scrollHeight;
         await new Promise(r=>setTimeout(r,speed));
     }
 }
 
 async function typeTitle(text){
-    for(let i=0;i<text.length;i++){
-        terminalTitle.textContent += text[i];
+    title.textContent = "";
+
+    for(let char of text){
+        title.textContent += char;
         await new Promise(r=>setTimeout(r,35));
     }
 }
 
-/* ==========================
-   BOOT SEQUENCE
-========================== */
-async function bootSequence(){
+/* =========================
+   STARTUP SEQUENCE
+========================= */
+async function startupSequence(){
+
     startupSound.play().catch(()=>{});
 
-    await new Promise(r=>setTimeout(r,2200));
+    await new Promise(r=>setTimeout(r,UIC_DISPLAY_TIME));
 
     document.getElementById("startup-title").style.opacity="0";
     document.getElementById("startup-sub").style.opacity="0";
@@ -287,7 +337,7 @@ async function bootSequence(){
     const welcome = document.getElementById("welcome");
     welcome.style.opacity="1";
 
-    await new Promise(r=>setTimeout(r,1400));
+    await new Promise(r=>setTimeout(r,1500));
 
     document.getElementById("startup").style.opacity="0";
 
@@ -311,20 +361,25 @@ async function bootSequence(){
     ];
 
     for(const line of bootLines){
-        await typeLine(line,20);
+        await typeLine(line);
     }
 
     input.disabled = false;
     input.focus();
 }
 
-/* ==========================
-   COMMAND INPUT
-========================== */
-input.addEventListener("keydown", async e=>{
-    if(e.key !== "Enter") return;
+/* =========================
+   COMMAND HANDLER
+========================= */
+input.addEventListener("keydown", async (e)=>{
+    if(e.key !== "Enter" || busy) return;
+
+    e.preventDefault();
 
     const value = input.value.trim().toLowerCase();
+    if(!value) return;
+
+    busy = true;
     input.value = "";
 
     await typeLine("> " + value,10);
@@ -334,7 +389,9 @@ input.addEventListener("keydown", async e=>{
         let found = false;
 
         for(const key in commands){
+
             if(value === commands[key].sequence[0]){
+
                 activeCommand = key;
                 stepIndex = 1;
 
@@ -369,18 +426,26 @@ input.addEventListener("keydown", async e=>{
                 stepIndex = 0;
 
             }else{
+
                 await typeLine(`STEP ${stepIndex}/${cmd.sequence.length} ACCEPTED`);
             }
 
         }else{
+
             await typeLine("INVALID SEQUENCE — RESET");
             activeCommand = null;
             stepIndex = 0;
         }
     }
+
+    busy = false;
+    input.focus();
 });
 
-bootSequence();
+/* =========================
+   INIT
+========================= */
+startupSequence();
 </script>
 
 </body>
