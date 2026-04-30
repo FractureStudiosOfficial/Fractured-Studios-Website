@@ -10,17 +10,18 @@
 <style>
 body{
 margin:0;
-background:#000;
+background:
+radial-gradient(circle at center,#101010 0%,#050505 60%,#000 100%);
 color:#FF9F07;
 font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* ===== CRT OVERLAYS ===== */
+/* ===== CRT FX ===== */
 #amber{
 position:fixed;
 inset:0;
-background:rgba(255,159,7,.05);
+background:rgba(255,159,7,.045);
 pointer-events:none;
 z-index:1000;
 }
@@ -31,67 +32,146 @@ inset:0;
 pointer-events:none;
 background:repeating-linear-gradient(
 to bottom,
-rgba(255,255,255,.05) 0px,
-rgba(255,255,255,.05) 2px,
-transparent 5px,
-transparent 9px
+rgba(255,255,255,.045) 0px,
+rgba(255,255,255,.045) 2px,
+transparent 4px,
+transparent 8px
 );
+mix-blend-mode:screen;
 animation:flicker .12s infinite;
 z-index:1001;
 }
 
 @keyframes flicker{
-0%{opacity:.15}
-50%{opacity:.07}
-100%{opacity:.15}
+0%{opacity:.16}
+50%{opacity:.08}
+100%{opacity:.16}
 }
 
+/* ===== CANVAS ===== */
 canvas{
 display:block;
+position:relative;
+z-index:1;
 }
 
-/* ===== HUD ===== */
+/* ===== HUD PANEL ===== */
 #hud{
 position:fixed;
-top:18px;
-left:20px;
-padding:12px 18px;
-background:rgba(0,0,0,.55);
-border:1px solid rgba(255,159,7,.25);
-box-shadow:
-0 0 18px rgba(255,159,7,.08),
-inset 0 0 12px rgba(255,159,7,.03);
-font-size:13px;
-letter-spacing:.08em;
+top:22px;
+left:22px;
 z-index:20;
-backdrop-filter:blur(4px);
+
+padding:14px 18px;
+min-width:300px;
+
+background:
+linear-gradient(145deg,
+rgba(20,20,20,.92),
+rgba(8,8,8,.88));
+
+border:1px solid rgba(255,159,7,.28);
+
+box-shadow:
+0 0 24px rgba(255,159,7,.08),
+inset 0 0 18px rgba(255,159,7,.04),
+inset 0 1px 0 rgba(255,159,7,.12);
+
+backdrop-filter:blur(8px);
+}
+
+#hud::before{
+content:"";
+position:absolute;
+inset:6px;
+border:1px solid rgba(255,159,7,.08);
+pointer-events:none;
+}
+
+#hud-title{
+font-size:14px;
+letter-spacing:.22em;
+margin-bottom:8px;
+opacity:.95;
+}
+
+#hud-sub{
+font-size:11px;
+opacity:.55;
+line-height:1.6;
 }
 
 /* ===== TOOLTIP ===== */
 #tooltip{
 position:fixed;
 pointer-events:none;
-padding:10px 14px;
-background:rgba(0,0,0,.9);
+padding:12px 14px;
+min-width:150px;
+
+background:
+linear-gradient(145deg,
+rgba(15,15,15,.95),
+rgba(0,0,0,.92));
+
 border:1px solid rgba(255,159,7,.35);
+
 box-shadow:
-0 0 12px rgba(255,159,7,.18),
-inset 0 0 8px rgba(255,159,7,.04);
+0 0 18px rgba(255,159,7,.15),
+inset 0 0 10px rgba(255,159,7,.04);
+
 font-size:12px;
+line-height:1.5;
 opacity:0;
 transition:.15s ease;
 z-index:5000;
 white-space:nowrap;
-backdrop-filter:blur(4px);
+backdrop-filter:blur(6px);
 }
 
-/* ===== OS LABEL ===== */
+#tooltip strong{
+display:block;
+margin-bottom:4px;
+font-size:13px;
+}
+
+/* ===== CORNER FRAME ===== */
+#frame{
+position:fixed;
+inset:14px;
+border:1px solid rgba(255,159,7,.08);
+pointer-events:none;
+z-index:15;
+}
+
+#frame::before,
+#frame::after{
+content:"";
+position:absolute;
+width:60px;
+height:60px;
+border-color:rgba(255,159,7,.22);
+border-style:solid;
+}
+
+#frame::before{
+top:0;
+left:0;
+border-width:2px 0 0 2px;
+}
+
+#frame::after{
+bottom:0;
+right:0;
+border-width:0 2px 2px 0;
+}
+
+/* ===== OS TEXT ===== */
 #os{
 position:fixed;
-bottom:10px;
-right:15px;
+bottom:14px;
+right:18px;
 font-size:12px;
-opacity:.7;
+opacity:.65;
 z-index:50;
 pointer-events:none;
 }
@@ -101,13 +181,18 @@ pointer-events:none;
 
 <div id="amber"></div>
 <div id="scanlines"></div>
+<div id="frame"></div>
 
 <div id="hud">
-SOLAR NAVIGATION — DRAG TO PAN — SCROLL TO ZOOM
+<div id="hud-title">SOLAR NAVIGATION ARRAY</div>
+<div id="hud-sub">
+DRAG TO PAN<br>
+SCROLL TO ZOOM<br>
+CLICK BODY FOR DETAILS
+</div>
 </div>
 
 <div id="tooltip"></div>
-
 <canvas id="space"></canvas>
 
 <div id="os">UIC OS v1.0.4</div>
@@ -118,249 +203,200 @@ const ctx = canvas.getContext("2d");
 const tooltip = document.getElementById("tooltip");
 
 function resize(){
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener("resize", resize);
 
-/* ===== CAMERA ===== */
-let camX = 0;
-let camY = 0;
-let zoom = 1;
+/* CAMERA */
+let camX=0, camY=0, zoom=1;
 
-/* ===== DRAG ===== */
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
+/* DRAG */
+let dragging=false,lastX=0,lastY=0;
 
-canvas.addEventListener("mousedown", e=>{
-  dragging = true;
-  lastX = e.clientX;
-  lastY = e.clientY;
+canvas.addEventListener("mousedown",e=>{
+dragging=true;
+lastX=e.clientX;
+lastY=e.clientY;
 });
 
-window.addEventListener("mouseup", ()=> dragging = false);
+window.addEventListener("mouseup",()=>dragging=false);
 
-window.addEventListener("mousemove", e=>{
-  if(dragging){
-    camX += (e.clientX - lastX)/zoom;
-    camY += (e.clientY - lastY)/zoom;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  }
-
-  handleTooltip(e);
+window.addEventListener("mousemove",e=>{
+if(dragging){
+camX+=(e.clientX-lastX)/zoom;
+camY+=(e.clientY-lastY)/zoom;
+lastX=e.clientX;
+lastY=e.clientY;
+}
+handleTooltip(e);
 });
 
-/* ===== ZOOM ===== */
-canvas.addEventListener("wheel", e=>{
-  e.preventDefault();
-  const scale = 1.1;
-  if(e.deltaY < 0) zoom *= scale;
-  else zoom /= scale;
-
-  zoom = Math.max(0.25, Math.min(zoom, 6));
+/* ZOOM */
+canvas.addEventListener("wheel",e=>{
+e.preventDefault();
+zoom*=e.deltaY<0?1.1:.9;
+zoom=Math.max(.25,Math.min(zoom,6));
 },{passive:false});
 
-/* ===== BODY DATA ===== */
-const bodies = {
-  sun:{ r:14, orbit:0, speed:0, name:"Sun" },
-
-  mercury:{ r:3, orbit:50, speed:4.15, ecc:.18, offsetY:-8, rot:0.10, name:"Mercury", link:"mmercury-map.html" },
-  venus:{ r:4, orbit:78, speed:1.62, ecc:.04, offsetY:10, rot:0.30, name:"Venus", link:"venus-map.html" },
-  earth:{ r:5, orbit:108, speed:1.00, ecc:.02, offsetY:-4, rot:-0.20, name:"Earth", link:"earth-map.html" },
-  mars:{ r:4, orbit:145, speed:0.53, ecc:.09, offsetY:14, rot:0.40, name:"Mars", link:"mars-map.html" },
-  jupiter:{ r:9, orbit:220, speed:0.084, ecc:.05, offsetY:-12, rot:0.15, name:"Jupiter", link:"jupiter-map.html" },
-  saturn:{ r:8, orbit:300, speed:0.034, ecc:.06, offsetY:18, rot:-0.25, name:"Saturn", link:"saturn-map.html" },
-  uranus:{ r:7, orbit:380, speed:0.012, ecc:.04, offsetY:-20, rot:0.40, name:"Uranus", link:"uranus-map.html" },
-  neptune:{ r:7, orbit:460, speed:0.006, ecc:.02, offsetY:12, rot:-0.15, name:"Neptune", link:"neptune-map.html" }
+/* DATA */
+const bodies={
+sun:{r:14,orbit:0,speed:0,name:"Sun"},
+mercury:{r:3,orbit:50,speed:4.15,ecc:.18,offsetY:-8,rot:.10,name:"Mercury",link:"mmercury-map.html"},
+venus:{r:4,orbit:78,speed:1.62,ecc:.04,offsetY:10,rot:.30,name:"Venus",link:"venus-map.html"},
+earth:{r:5,orbit:108,speed:1,ecc:.02,offsetY:-4,rot:-.20,name:"Earth",link:"earth-map.html"},
+mars:{r:4,orbit:145,speed:.53,ecc:.09,offsetY:14,rot:.40,name:"Mars",link:"mars-map.html"},
+jupiter:{r:9,orbit:220,speed:.084,ecc:.05,offsetY:-12,rot:.15,name:"Jupiter",link:"jupiter-map.html"},
+saturn:{r:8,orbit:300,speed:.034,ecc:.06,offsetY:18,rot:-.25,name:"Saturn",link:"saturn-map.html"},
+uranus:{r:7,orbit:380,speed:.012,ecc:.04,offsetY:-20,rot:.40,name:"Uranus",link:"uranus-map.html"},
+neptune:{r:7,orbit:460,speed:.006,ecc:.02,offsetY:12,rot:-.15,name:"Neptune",link:"neptune-map.html"}
 };
 
-/* ===== MOONS ===== */
-const moons = [
-  { parent:"earth", r:2, orbit:12, speed:8, name:"Moon", link:"moon-map.html" },
-  { parent:"mars", r:1.5, orbit:8, speed:12, name:"Phobos", link:"phobos-map.html" },
-  { parent:"mars", r:1.2, orbit:13, speed:7, name:"Deimos", link:"deimos-map.html" },
-  { parent:"jupiter", r:2, orbit:18, speed:3, name:"Europa", link:"europa-map.html" }
+const moons=[
+{parent:"earth",r:2,orbit:12,speed:8,name:"Moon",link:"moon-map.html"},
+{parent:"mars",r:1.5,orbit:8,speed:12,name:"Phobos",link:"phobos-map.html"},
+{parent:"mars",r:1.2,orbit:13,speed:7,name:"Deimos",link:"deimos-map.html"},
+{parent:"jupiter",r:2,orbit:18,speed:3,name:"Europa",link:"europa-map.html"}
 ];
 
-let time = 0;
+let time=0;
 
-/* ===== CLICK DETECTION ===== */
-canvas.addEventListener("click", e=>{
-  const mx = (e.clientX - canvas.width/2)/zoom - camX;
-  const my = (e.clientY - canvas.height/2)/zoom - camY;
-
-  for(const name in bodies){
-    const b = bodies[name];
-    if(!b.pos || !b.link) continue;
-
-    const dx = mx - b.pos.x;
-    const dy = my - b.pos.y;
-
-    if(Math.hypot(dx,dy) < b.r+5){
-      window.location = b.link;
-      return;
-    }
-  }
-
-  for(const m of moons){
-    if(!m.pos) continue;
-
-    const dx = mx - m.pos.x;
-    const dy = my - m.pos.y;
-
-    if(Math.hypot(dx,dy) < m.r+5){
-      window.location = m.link;
-      return;
-    }
-  }
-});
-
-/* ===== TOOLTIP ===== */
+/* TOOLTIP */
 function handleTooltip(e){
-  const mx = (e.clientX - canvas.width/2)/zoom - camX;
-  const my = (e.clientY - canvas.height/2)/zoom - camY;
+const mx=(e.clientX-canvas.width/2)/zoom-camX;
+const my=(e.clientY-canvas.height/2)/zoom-camY;
 
-  let found = null;
+let found=null;
 
-  for(const name in bodies){
-    const b = bodies[name];
-    if(!b.pos) continue;
-
-    if(Math.hypot(mx-b.pos.x,my-b.pos.y) < b.r+5){
-      found = b;
-      break;
-    }
-  }
-
-  if(!found){
-    for(const m of moons){
-      if(!m.pos) continue;
-
-      if(Math.hypot(mx-m.pos.x,my-m.pos.y) < m.r+5){
-        found = m;
-        break;
-      }
-    }
-  }
-
-  if(found){
-    tooltip.style.opacity = "1";
-    tooltip.style.left = e.clientX + 18 + "px";
-    tooltip.style.top = e.clientY + 18 + "px";
-    tooltip.innerHTML = `
-      <strong>${found.name}</strong><br>
-      Orbital Body<br>
-      Click for Details
-    `;
-  } else {
-    tooltip.style.opacity = "0";
-  }
+for(const name in bodies){
+const b=bodies[name];
+if(b.pos && Math.hypot(mx-b.pos.x,my-b.pos.y)<b.r+6){found=b;break;}
 }
 
-/* ===== DRAW LOOP ===== */
+if(!found){
+for(const m of moons){
+if(m.pos && Math.hypot(mx-m.pos.x,my-m.pos.y)<m.r+6){found=m;break;}
+}
+}
+
+if(found){
+tooltip.style.opacity=1;
+tooltip.style.left=e.clientX+20+"px";
+tooltip.style.top=e.clientY+20+"px";
+tooltip.innerHTML=`<strong>${found.name}</strong>Orbital Body<br>Click for Details`;
+}else{
+tooltip.style.opacity=0;
+}
+}
+
+/* CLICK */
+canvas.addEventListener("click",e=>{
+const mx=(e.clientX-canvas.width/2)/zoom-camX;
+const my=(e.clientY-canvas.height/2)/zoom-camY;
+
+for(const name in bodies){
+const b=bodies[name];
+if(b.link && Math.hypot(mx-b.pos.x,my-b.pos.y)<b.r+6){
+window.location=b.link;
+return;
+}
+}
+
+for(const m of moons){
+if(m.link && Math.hypot(mx-m.pos.x,my-m.pos.y)<m.r+6){
+window.location=m.link;
+return;
+}
+}
+});
+
+/* DRAW */
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.save();
+ctx.save();
+ctx.translate(canvas.width/2,canvas.height/2);
+ctx.scale(zoom,zoom);
+ctx.translate(camX,camY);
 
-  ctx.translate(canvas.width/2, canvas.height/2);
-  ctx.scale(zoom, zoom);
-  ctx.translate(camX, camY);
+/* ORBITS */
+for(const name in bodies){
+const b=bodies[name];
+if(!b.orbit) continue;
 
-  /* ORBITS */
-  for(const name in bodies){
-    const b = bodies[name];
-    if(b.orbit === 0) continue;
+ctx.save();
+ctx.rotate(b.rot);
 
-    ctx.save();
-    ctx.rotate(b.rot);
+ctx.beginPath();
+ctx.strokeStyle="rgba(255,159,7,.13)";
+ctx.lineWidth=1;
+ctx.ellipse(
+0,b.offsetY,
+b.orbit,
+b.orbit*(1-b.ecc),
+0,0,Math.PI*2
+);
+ctx.stroke();
 
-    ctx.beginPath();
-    ctx.strokeStyle = "rgba(255,159,7,.14)";
-    ctx.lineWidth = 1;
+ctx.restore();
+}
 
-    ctx.ellipse(
-      0,
-      b.offsetY,
-      b.orbit,
-      b.orbit * (1-b.ecc),
-      0,
-      0,
-      Math.PI*2
-    );
+/* PLANETS */
+for(const name in bodies){
+const b=bodies[name];
+let x=0,y=0;
 
-    ctx.stroke();
-    ctx.restore();
-  }
+if(b.orbit){
+const angle=time*b.speed*.0001;
+let px=Math.cos(angle)*b.orbit;
+let py=Math.sin(angle)*(b.orbit*(1-b.ecc))+b.offsetY;
 
-  /* PLANETS */
-  for(const name in bodies){
-    const b = bodies[name];
+x=px*Math.cos(b.rot)-py*Math.sin(b.rot);
+y=px*Math.sin(b.rot)+py*Math.cos(b.rot);
+}
 
-    let x = 0;
-    let y = 0;
+b.pos={x,y};
 
-    if(b.orbit !== 0){
-      const angle = time * b.speed * 0.0001;
+ctx.beginPath();
+ctx.fillStyle="#FF9F07";
+ctx.shadowBlur=12;
+ctx.shadowColor="#FF9F07";
+ctx.arc(x,y,b.r,0,Math.PI*2);
+ctx.fill();
+ctx.shadowBlur=0;
 
-      const rx = b.orbit;
-      const ry = b.orbit * (1-b.ecc);
+ctx.font="7px Share Tech Mono";
+ctx.fillStyle="rgba(255,159,7,.8)";
+ctx.textAlign="center";
+ctx.fillText(b.name,x,y+b.r+12);
+}
 
-      x = Math.cos(angle) * rx;
-      y = Math.sin(angle) * ry + b.offsetY;
+/* MOONS */
+for(const m of moons){
+const p=bodies[m.parent];
+const angle=time*m.speed*.0001;
 
-      const rotX = x*Math.cos(b.rot) - y*Math.sin(b.rot);
-      const rotY = x*Math.sin(b.rot) + y*Math.cos(b.rot);
+const x=p.pos.x+Math.cos(angle)*m.orbit;
+const y=p.pos.y+Math.sin(angle)*m.orbit;
 
-      x = rotX;
-      y = rotY;
-    }
+m.pos={x,y};
 
-    b.pos = {x,y};
+ctx.beginPath();
+ctx.strokeStyle="rgba(255,159,7,.08)";
+ctx.arc(p.pos.x,p.pos.y,m.orbit,0,Math.PI*2);
+ctx.stroke();
 
-    ctx.beginPath();
-    ctx.fillStyle = "#FF9F07";
-    ctx.arc(x,y,b.r,0,Math.PI*2);
-    ctx.fill();
+ctx.beginPath();
+ctx.fillStyle="#FF9F07";
+ctx.arc(x,y,m.r,0,Math.PI*2);
+ctx.fill();
+}
 
-    ctx.font = "7px Share Tech Mono";
-    ctx.fillStyle = "rgba(255,159,7,.85)";
-    ctx.textAlign = "center";
-    ctx.fillText(b.name,x,y+b.r+12);
-  }
+ctx.restore();
 
-  /* MOONS */
-  for(const m of moons){
-    const parent = bodies[m.parent];
-    const angle = time * m.speed * 0.0001;
-
-    const x = parent.pos.x + Math.cos(angle)*m.orbit;
-    const y = parent.pos.y + Math.sin(angle)*m.orbit;
-
-    m.pos = {x,y};
-
-    ctx.beginPath();
-    ctx.strokeStyle = "rgba(255,159,7,.08)";
-    ctx.arc(parent.pos.x,parent.pos.y,m.orbit,0,Math.PI*2);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.fillStyle = "#FF9F07";
-    ctx.arc(x,y,m.r,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.font = "5px Share Tech Mono";
-    ctx.fillStyle = "rgba(255,159,7,.65)";
-    ctx.fillText(m.name,x,y+m.r+8);
-  }
-
-  ctx.restore();
-
-  time++;
-  requestAnimationFrame(draw);
+time++;
+requestAnimationFrame(draw);
 }
 
 draw();
