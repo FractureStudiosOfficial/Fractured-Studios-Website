@@ -8,193 +8,301 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+}
+
+*{box-sizing:border-box;}
+
 body{
-margin:0;
-background:#111;
-color:#FF9F07;
-font-family:'Share Tech Mono',monospace;
-overflow-x:hidden;
-perspective:1000px;
+    margin:0;
+    background:#050505;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    overflow-x:hidden;
+    perspective:1000px;
 }
 
-/* CRT container */
+/* =========================
+   CRT CONTAINER
+========================= */
 #crt-container{
-padding:40px;
-padding-bottom:80px;
-transform-style:preserve-3d;
-transition:transform .08s ease-out;
-box-sizing:border-box;
+    padding:35px;
+    padding-bottom:95px;
+    transform-style:preserve-3d;
+    transition:transform .08s ease-out;
 }
 
-/* Amber tint overlay */
-#amber{
-position:fixed;
-inset:0;
-background:rgba(255,159,7,.04);
-pointer-events:none;
-z-index:1000;
+/* =========================
+   PANEL BASE
+========================= */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.25);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.03),
+            rgba(0,0,0,.22)
+        );
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.03),
+        0 0 25px rgba(255,159,7,.04);
 }
 
-/* Scanlines */
-#scanlines{
-position:fixed;
-inset:0;
-pointer-events:none;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,.05) 0px,
-rgba(255,255,255,.05) 2px,
-transparent 2px,
-transparent 6px
-);
-animation:flicker .12s infinite;
-z-index:1001;
-}
-@keyframes flicker{
-0%{opacity:.15}
-50%{opacity:.08}
-100%{opacity:.15}
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(255,159,7,.12);
+    pointer-events:none;
 }
 
-/* OS version */
-#os{
-position:fixed;
-bottom:10px;
-right:15px;
-font-size:12px;
-opacity:.7;
-z-index:1002;
-}
-
-/* Header */
+/* =========================
+   HEADER
+========================= */
 .header{
-margin-bottom:50px;
+    padding:25px;
+    margin-bottom:35px;
 }
 
 .header h1{
-margin:0;
-border-bottom:1px solid rgba(255,159,7,.3);
-padding-bottom:10px;
+    margin:0 0 12px 0;
+    font-size:32px;
+    letter-spacing:.25em;
+    border-bottom:1px solid rgba(255,159,7,.25);
+    padding-bottom:12px;
 }
 
-/* Games list */
+.header p{
+    margin:0;
+    opacity:.75;
+    letter-spacing:.08em;
+}
+
+/* =========================
+   GAME LIST
+========================= */
 .games{
-display:flex;
-flex-direction:column;
-gap:40px;
+    display:flex;
+    flex-direction:column;
+    gap:35px;
 }
 
-/* Game card */
+/* =========================
+   GAME CARD
+========================= */
 .game{
-display:grid;
-grid-template-columns:420px 1fr;
-gap:30px;
-padding:20px;
-background:rgba(0,0,0,.25);
-border:1px solid rgba(255,159,7,.2);
+    display:grid;
+    grid-template-columns:420px 1fr;
+    gap:30px;
+    padding:22px;
+    position:relative;
 }
 
-.game img{
-width:100%;
-border:1px solid rgba(255,159,7,.2);
+.game::after{
+    content:"";
+    position:absolute;
+    top:18px;
+    bottom:18px;
+    left:440px;
+    width:1px;
+    background:rgba(255,159,7,.12);
+}
+
+.game-image{
+    position:relative;
+    padding:12px;
+    border:1px solid rgba(255,159,7,.14);
+    background:rgba(255,159,7,.02);
+}
+
+.game-image img{
+    width:100%;
+    display:block;
+    border:1px solid rgba(255,159,7,.18);
+}
+
+.game-info{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
 
 .game h2{
-margin-top:0;
+    margin:0 0 15px 0;
+    font-size:28px;
+    letter-spacing:.12em;
 }
 
+.game p{
+    margin:0 0 15px 0;
+    line-height:1.6;
+    opacity:.9;
+}
+
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.tag{
+    padding:6px 10px;
+    border:1px solid rgba(255,159,7,.18);
+    background:rgba(255,159,7,.03);
+    font-size:12px;
+    letter-spacing:.08em;
+}
+
+/* =========================
+   BUTTON
+========================= */
 .game button{
-background:transparent;
-border:1px solid #FF9F07;
-color:#FF9F07;
-padding:10px 20px;
-cursor:pointer;
-font-family:inherit;
-margin-top:10px;
+    align-self:flex-start;
+    background:transparent;
+    border:1px solid var(--amber);
+    color:var(--amber);
+    padding:12px 22px;
+    cursor:pointer;
+    font-family:inherit;
+    letter-spacing:.08em;
+    transition:.2s ease;
 }
 
 .game button:hover{
-background:rgba(255,159,7,.15);
+    background:rgba(255,159,7,.12);
+    box-shadow:0 0 12px rgba(255,159,7,.15);
 }
 
-/* Bottom terminal */
+/* =========================
+   TERMINAL BAR
+========================= */
 #terminal{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:rgba(0,0,0,.35);
-padding:10px;
-border-top:1px solid rgba(255,159,7,.3);
-display:flex;
-gap:10px;
-z-index:1003;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:12px 18px;
+    display:flex;
+    gap:10px;
+    z-index:1003;
+
+    border-top:2px solid rgba(255,159,7,.22);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.04),
+            rgba(0,0,0,.45)
+        );
+
+    box-shadow:
+        0 -10px 20px rgba(0,0,0,.35);
 }
 
 #terminal input{
-background:transparent;
-border:none;
-outline:none;
-color:#FF9F07;
-font-family:inherit;
-flex:1;
-min-width:0;
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font-family:inherit;
+    flex:1;
+    min-width:0;
 }
 
-/* ========================= */
-/* 🔥 RESPONSIVE FIXES */
-/* ========================= */
-
-@media (max-width: 900px){
-#crt-container{
-padding:20px;
-padding-bottom:80px;
+/* =========================
+   OS LABEL
+========================= */
+#os{
+    position:fixed;
+    bottom:55px;
+    right:15px;
+    font-size:12px;
+    opacity:.7;
+    z-index:1004;
 }
 
-.game{
-grid-template-columns:1fr;
-gap:20px;
+/* =========================
+   CRT FX
+========================= */
+#scanlines,
+#amber{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
 }
 
-.game img{
-max-height:300px;
-object-fit:cover;
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 2px,
+        transparent 2px,
+        transparent 6px
+    );
+    animation:flicker .12s infinite;
+    z-index:1001;
 }
 
-.header{
-margin-bottom:40px;
-}
-}
-
-@media (max-width: 500px){
-body{
-font-size:14px;
+@keyframes flicker{
+    0%{opacity:.15;}
+    50%{opacity:.08;}
+    100%{opacity:.15;}
 }
 
-#crt-container{
-padding:15px;
-padding-bottom:80px;
+#amber{
+    background:rgba(255,159,7,.04);
+    z-index:1000;
 }
 
-.header h1{
-font-size:20px;
+/* =========================
+   RESPONSIVE
+========================= */
+@media(max-width:900px){
+
+    #crt-container{
+        padding:20px;
+        padding-bottom:90px;
+    }
+
+    .game{
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+
+    .game::after{
+        display:none;
+    }
+
+    .game-image img{
+        max-height:300px;
+        object-fit:cover;
+    }
 }
 
-.game{
-padding:15px;
-}
+@media(max-width:500px){
 
-.game button{
-width:100%;
-}
+    body{
+        font-size:14px;
+    }
 
-#terminal{
-padding:8px;
-}
+    .header h1{
+        font-size:24px;
+    }
 
-#terminal input{
-font-size:14px;
-}
+    .game{
+        padding:15px;
+    }
+
+    .game button{
+        width:100%;
+    }
+
+    #terminal{
+        padding:10px;
+    }
 }
 </style>
 </head>
@@ -206,76 +314,92 @@ font-size:14px;
 
 <div id="crt-container">
 
-<div class="header">
-<h1>Games</h1>
-<p>Available in development projects.</p>
+    <!-- HEADER -->
+    <div class="header panel">
+        <h1>GAMES</h1>
+        <p>AVAILABLE IN DEVELOPMENT PROJECTS</p>
+    </div>
+
+    <!-- GAMES LIST -->
+    <div class="games">
+
+        <div class="game panel">
+
+            <div class="game-image">
+                <img src="NEW-Iron-Frontier-Thumbnail.png" alt="The Iron Frontier">
+            </div>
+
+            <div class="game-info">
+                <h2>THE IRON FRONTIER</h2>
+
+                <p>
+                    A narrative-driven cold war era puzzle game following two cosmonauts stranded on the surface of Venus. Unknown to them, most of humanity has been forced back to Earth from the solar system.
+                </p>
+
+                <div class="tags">
+                    <div class="tag">SINGLEPLAYER</div>
+                    <div class="tag">ATMOSPHERIC</div>
+                    <div class="tag">EXPLORATION</div>
+                    <div class="tag">NARRATIVE</div>
+                </div>
+
+                <button onclick="window.location='ironfrontier.html'">
+                    VIEW PROJECT
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
-<div class="games">
-
-<!-- GAME ENTRY -->
-<div class="game">
-<img src="NEW-Iron-Frontier-Thumbnail.png" alt="The Iron Frontier">
-<div>
-<h2>The Iron Frontier</h2>
-<p>
-A narrative-driven cold war era puzzle game following two cosmonaughts stranded on the surface of Venus. Unknown to them, most of humanity has been forced back to earth from the solar system.
-</p>
-<p>
-Singleplayer • Atmospheric • Exploration • Narrative
-</p>
-<button onclick="window.location='ironfrontier.html'">
-View Project
-</button>
-</div>
-</div>
-
-</div>
-
-</div>
-
-<!-- Bottom terminal -->
+<!-- TERMINAL -->
 <div id="terminal">
-<span>></span>
-<input id="cmd" placeholder="type command...">
+    <span>&gt;</span>
+    <input id="cmd" placeholder="type command...">
 </div>
 
-<!-- OS version -->
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-const container=document.getElementById("crt-container")
-const os=document.getElementById("os")
+const container=document.getElementById("crt-container");
+const os=document.getElementById("os");
 
 function applyTilt(x,y){
-const rx=(window.innerHeight/2-y)/1000
-const ry=(window.innerWidth/2-x)/1000
-container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
-os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`
+    const rx=(window.innerHeight/2-y)/1000;
+    const ry=(window.innerWidth/2-x)/1000;
+
+    container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+    os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
 }
 
 /* Desktop */
 document.addEventListener("mousemove",(e)=>{
-applyTilt(e.clientX,e.clientY)
-})
+    applyTilt(e.clientX,e.clientY);
+});
 
 /* Mobile */
 document.addEventListener("touchmove",(e)=>{
-const t=e.touches[0]
-applyTilt(t.clientX,t.clientY)
-},{passive:true})
+    const t=e.touches[0];
+    applyTilt(t.clientX,t.clientY);
+},{passive:true});
 
-/* Terminal input */
-const input=document.getElementById("cmd")
+/* Terminal Input */
+const input=document.getElementById("cmd");
+
 input.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-const v=input.value.toLowerCase()
-if(v==="home") window.location="index.html"
-if(v==="games") window.location="games.html"
-if(v==="ironfrontier") window.location="ironfrontier.html"
-input.value=""
-}
-})
+    if(e.key==="Enter"){
+
+        const v=input.value.toLowerCase();
+
+        if(v==="home") window.location="index.html";
+        if(v==="games") window.location="games.html";
+        if(v==="ironfrontier") window.location="ironfrontier.html";
+
+        input.value="";
+    }
+});
 </script>
 
 </body>
