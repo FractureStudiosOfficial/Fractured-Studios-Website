@@ -8,105 +8,252 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-  perspective:1000px;
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
 }
 
-/* CRT container */
-#crt-container {
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    background:#050505;
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    overflow:hidden;
+    perspective:1000px;
 }
 
-/* Terminal */
-#terminal-box {
-  width:50%;
+/* =========================
+   MAIN CRT CONTAINER
+========================= */
+#crt-container{
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:40px;
+    gap:30px;
+    transform-style:preserve-3d;
+    transition:transform .08s ease-out;
 }
 
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:250px;
-  max-height:400px;
-  overflow-y:auto;
+/* =========================
+   PANEL BASE
+========================= */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.35);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.035),
+            rgba(0,0,0,.25)
+        );
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.03),
+        0 0 25px rgba(255,159,7,.04);
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(255,159,7,.12);
+    pointer-events:none;
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+/* =========================
+   TERMINAL MODULE
+========================= */
+#terminal-box{
+    width:55%;
+    height:80vh;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
 }
 
-/* Logo */
-#logo-area {
-  width:40%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+#terminal-header{
+    border-bottom:1px solid rgba(255,159,7,.18);
+    padding-bottom:10px;
+    margin-bottom:15px;
+    font-size:20px;
+    letter-spacing:.2em;
 }
 
-#logo {
-  width:260px;
-  filter:drop-shadow(0 0 10px #FF9F07);
-  transition:.25s ease;
+#terminal{
+    flex:1;
+    position:relative;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,159,7,.025),
+            rgba(0,0,0,.18)
+        );
+    border:1px solid rgba(255,159,7,.18);
+    padding:20px;
+    overflow-y:auto;
+    min-height:0;
+    scrollbar-width:none;
+}
+#terminal::-webkit-scrollbar{display:none;}
+
+/* Prompt */
+#prompt{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,159,7,.12);
 }
 
-/* OS version */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+#prompt input{
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font:inherit;
+    flex:1;
 }
 
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+/* Command Footer */
+#available{
+    margin-top:15px;
+    padding:12px 16px;
+    border:1px solid rgba(255,159,7,.12);
+    background:rgba(255,159,7,.03);
+    opacity:.75;
+    font-size:14px;
+    letter-spacing:.08em;
 }
 
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+/* =========================
+   LOGO DISPLAY MODULE
+========================= */
+#logo-area{
+    width:40%;
+    height:80vh;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+}
+
+#logo-frame{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    padding:40px;
+}
+
+#logo-frame::before,
+#logo-frame::after{
+    content:"";
+    position:absolute;
+    border:1px solid rgba(255,159,7,.14);
+    inset:18px;
+}
+
+#logo{
+    width:min(320px,80%);
+    max-height:70%;
+    object-fit:contain;
+    filter:
+        drop-shadow(0 0 14px rgba(255,159,7,.35));
+    transition:.3s ease;
+}
+
+/* Decorative telemetry bars */
+#logo-stats{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.stat{
+    padding:10px;
+    border:1px solid rgba(255,159,7,.14);
+    background:rgba(255,159,7,.025);
+    text-align:center;
+    font-size:12px;
+    opacity:.7;
+}
+
+/* =========================
+   OS LABEL
+========================= */
+#os{
+    position:fixed;
+    bottom:10px;
+    right:15px;
+    font-size:12px;
+    opacity:.7;
+    z-index:10;
+}
+
+/* =========================
+   CRT EFFECTS
+========================= */
+#scanlines,
+#amber{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.05) 0px,
+        rgba(255,255,255,.05) 2px,
+        transparent 2px,
+        transparent 7px
+    );
+    animation:flicker .12s infinite;
+    z-index:1001;
+}
+
+@keyframes flicker{
+    0%{opacity:.14;}
+    50%{opacity:.08;}
+    100%{opacity:.14;}
+}
+
+#amber{
+    background:rgba(255,159,7,.04);
+    z-index:1000;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media(max-width:900px){
+    #crt-container{
+        flex-direction:column;
+        padding:20px;
+        overflow-y:auto;
+    }
+
+    #terminal-box,
+    #logo-area{
+        width:100%;
+        height:auto;
+    }
+
+    #terminal-box{
+        min-height:400px;
+    }
+
+    #logo-frame{
+        min-height:300px;
+    }
 }
 </style>
 </head>
@@ -118,131 +265,156 @@ body {
 
 <div id="crt-container">
 
-  <div id="terminal-box">
-    <div id="terminal"></div>
+    <!-- TERMINAL -->
+    <div id="terminal-box" class="panel">
 
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" disabled>
+        <div id="terminal-header">
+            FRACTURED STUDIOS TERMINAL
+        </div>
+
+        <div id="terminal"></div>
+
+        <div id="prompt">
+            <span>&gt;</span>
+            <input id="cmd" autocomplete="off" disabled>
+        </div>
+
+        <div id="available">
+            AVAILABLE TERMS :: ABOUT • GAMES • CONTACT • TERMINAL
+        </div>
+
     </div>
 
-    <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact, Terminal
-    </p>
-  </div>
+    <!-- LOGO MODULE -->
+    <div id="logo-area" class="panel">
 
-  <div id="logo-area">
-    <img id="logo" src="FracturedF-Transparant.png">
-  </div>
+        <div id="logo-frame">
+            <img id="logo" src="FracturedF-Transparant.png">
+        </div>
+
+        <div id="logo-stats">
+            <div class="stat">STATUS: ONLINE</div>
+            <div class="stat">BUILD: PUBLIC</div>
+            <div class="stat">NODE: PRIME</div>
+        </div>
+
+    </div>
 
 </div>
 
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-// ELEMENTS
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
 const logo = document.getElementById("logo");
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 
-// COMMAND LOGOS
 const commandLogos = {
-  about: "Aboutui.png",
-  games: "Gamesui.png",
-  contact: "Mail-UI.png",
-  terminal: "terminal.png"  // NEW terminal command
+    about:"Aboutui.png",
+    games:"Gamesui.png",
+    contact:"Mail-UI.png",
+    terminal:"terminal.png"
 };
 
 let pendingCommand = null;
 
-// 3D tilt
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+/* 3D TILT */
+document.addEventListener("mousemove", e=>{
+    const x = (window.innerWidth/2 - e.clientX)/1000;
+    const y = (window.innerHeight/2 - e.clientY)/1000;
+
+    container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+    os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
 });
 
-// CUSTOM STARTUP SEQUENCE
+/* BOOT TEXT */
 const bootLines = [
-  'U.I.C. Startup sequence...',
-  'Initializing kernel modules...',
-  'Loading device drivers...',
-  'Verifying memory...',
-  'Checking system integrity...',
-  'Calibrating display output...',
-  'Starting process scheduler...',
-  'Startup successful',
-  '------------------------',
-  'Welcome to U.I.C. Systems',
-  '------------------------'
+    'U.I.C. Startup sequence...',
+    'Initializing kernel modules...',
+    'Loading device drivers...',
+    'Verifying memory...',
+    'Checking system integrity...',
+    'Calibrating display output...',
+    'Starting process scheduler...',
+    'Startup successful',
+    '------------------------',
+    'Welcome to U.I.C. Systems',
+    '------------------------'
 ];
 
-// FAKE ERRORS
 const fakeErrors = [
-  'ERROR: Memory leak detected',
-  'WARNING: Clock desync',
-  'ERROR: Bus timeout',
-  'ALERT: Unknown device',
-  'ERROR: Kernel mismatch'
+    'ERROR: Memory leak detected',
+    'WARNING: Clock desync',
+    'ERROR: Bus timeout',
+    'ALERT: Unknown device',
+    'ERROR: Kernel mismatch'
 ];
 
-// ASYNC BOOT WITH RANDOM SPEEDS
-async function boot() {
-  for (let line of bootLines) {
-    const delay = 40 + Math.random()*80;
-    if (Math.random() < 0.3) {
-      const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
-      terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
-      terminal.scrollTop = terminal.scrollHeight;
-      await new Promise(r => setTimeout(r, delay));
-    }
-    terminal.innerHTML += line + "<br>";
-    terminal.scrollTop = terminal.scrollHeight;
-    await new Promise(r => setTimeout(r, delay));
-  }
+async function boot(){
+    for(let line of bootLines){
 
-  terminal.innerHTML += "<br>System Ready.<br>";
-  terminal.scrollTop = terminal.scrollHeight;
-  input.disabled = false;
-  input.focus();
+        const delay = 40 + Math.random()*80;
+
+        if(Math.random() < 0.3){
+            const err = fakeErrors[Math.floor(Math.random()*fakeErrors.length)];
+            terminal.innerHTML += `<span style="color:#ff6a00">${err}</span><br>`;
+            terminal.scrollTop = terminal.scrollHeight;
+            await new Promise(r=>setTimeout(r,delay));
+        }
+
+        terminal.innerHTML += line + "<br>";
+        terminal.scrollTop = terminal.scrollHeight;
+
+        await new Promise(r=>setTimeout(r,delay));
+    }
+
+    terminal.innerHTML += "<br>System Ready.<br>";
+    terminal.scrollTop = terminal.scrollHeight;
+
+    input.disabled = false;
+    input.focus();
 }
 
-// START BOOT
 boot();
 
-// COMMAND HANDLER
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
+/* COMMAND HANDLER */
+input.addEventListener("keydown", e=>{
+    if(e.key !== "Enter") return;
 
-  const value = input.value.toLowerCase().trim();
-  terminal.innerHTML += `&gt; ${value}<br>`;
-  input.value = "";
+    const value = input.value.toLowerCase().trim();
 
-  if (pendingCommand) {
-    if (value === "y") {
-      // Redirect to page named after command
-      if(pendingCommand === "terminal") window.location = "terminal.html";
-      else window.location = pendingCommand + ".html";
-    } else {
-      terminal.innerHTML += "Cancelled.<br>";
-      logo.src = "FracturedF-Transparant.png";
+    terminal.innerHTML += `&gt; ${value}<br>`;
+    input.value = "";
+
+    if(pendingCommand){
+
+        if(value === "y"){
+            if(pendingCommand === "terminal"){
+                window.location = "terminal.html";
+            }else{
+                window.location = pendingCommand + ".html";
+            }
+        }else{
+            terminal.innerHTML += "Cancelled.<br>";
+            logo.src = "FracturedF-Transparant.png";
+        }
+
+        pendingCommand = null;
+        terminal.scrollTop = terminal.scrollHeight;
+        return;
     }
-    pendingCommand = null;
-    terminal.scrollTop = terminal.scrollHeight;
-    return;
-  }
 
-  if (commandLogos[value]) {
-    pendingCommand = value;
-    logo.src = commandLogos[value];
-    terminal.innerHTML += "Confirm? (Y/N)<br>";
-  } else {
-    terminal.innerHTML += "Unknown command<br>";
-  }
-  terminal.scrollTop = terminal.scrollHeight;
+    if(commandLogos[value]){
+        pendingCommand = value;
+        logo.src = commandLogos[value];
+        terminal.innerHTML += "Confirm? (Y/N)<br>";
+    }else{
+        terminal.innerHTML += "Unknown command<br>";
+    }
+
+    terminal.scrollTop = terminal.scrollHeight;
 });
 </script>
 
