@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mars Surface Operations | U.I.C. Systems</title>
+<title>Mars Operations Grid | U.I.C. Systems</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -21,7 +21,7 @@ font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* CRT FX */
+/* CRT */
 #amber{
 position:fixed;
 inset:0;
@@ -47,21 +47,21 @@ z-index:1001;
 
 @keyframes flicker{
 0%{opacity:.15;}
-50%{opacity:.07;}
+50%{opacity:.08;}
 100%{opacity:.15;}
 }
 
-/* MAIN UI */
+/* MAIN */
 #ui-shell{
 position:fixed;
 inset:20px;
 border:2px solid var(--amber);
 background:rgba(0,0,0,.35);
+display:flex;
+flex-direction:column;
 box-shadow:
 0 0 25px rgba(255,159,7,.08),
 inset 0 0 30px rgba(255,159,7,.03);
-display:flex;
-flex-direction:column;
 }
 
 #ui-shell::before{
@@ -72,14 +72,65 @@ border:1px solid rgba(255,159,7,.12);
 pointer-events:none;
 }
 
-/* SCROLLBAR */
+/* CORNERS */
+.corner{
+position:absolute;
+width:28px;
+height:28px;
+border-style:solid;
+border-color:var(--amber);
+pointer-events:none;
+z-index:10;
+}
+
+.c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
+.c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
+.c3{bottom:-2px;left:-2px;border-width:0 0 3px 3px;}
+.c4{bottom:-2px;right:-2px;border-width:0 3px 3px 0;}
+
+/* HEADER */
+#header{
+height:64px;
+border-bottom:1px solid var(--amberSoft);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 20px;
+letter-spacing:.18em;
+font-size:14px;
+background:linear-gradient(to bottom, rgba(255,159,7,.05), transparent);
+}
+
+#header-right{
+font-size:12px;
+opacity:.65;
+}
+
+/* CONTENT */
+#content{
+flex:1;
+display:grid;
+grid-template-columns:320px 1fr;
+min-height:0;
+}
+
+/* PANEL */
+#panel{
+border-right:1px solid var(--amberSoft);
+background:rgba(0,0,0,.45);
+padding:20px;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
 #panel::-webkit-scrollbar{
 width:12px;
 }
 
 #panel::-webkit-scrollbar-track{
 background:rgba(0,0,0,.55);
-border-left:1px solid rgba(255,159,7,.12);
 }
 
 #panel::-webkit-scrollbar-thumb{
@@ -99,44 +150,6 @@ rgba(255,159,7,.18)
 border:1px solid rgba(255,159,7,.35);
 }
 
-/* HEADER */
-#header{
-height:64px;
-border-bottom:1px solid var(--amberSoft);
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:0 20px;
-letter-spacing:.18em;
-font-size:14px;
-background:linear-gradient(to bottom, rgba(255,159,7,.05), transparent);
-z-index:2;
-}
-
-#header-right{
-font-size:12px;
-opacity:.65;
-}
-
-/* CONTENT */
-#content{
-flex:1;
-display:grid;
-grid-template-columns:320px 1fr;
-min-height:0;
-}
-
-/* SIDEBAR */
-#panel{
-border-right:1px solid var(--amberSoft);
-background:rgba(0,0,0,.45);
-padding:20px;
-overflow-y:auto;
-display:flex;
-flex-direction:column;
-gap:20px;
-}
-
 .panel-block{
 border:1px solid var(--amberSoft);
 background:rgba(0,0,0,.35);
@@ -152,13 +165,13 @@ margin-bottom:10px;
 
 #planetName{
 font-size:24px;
-margin-bottom:6px;
+margin-bottom:8px;
 }
 
 .stat{
 margin:6px 0;
-opacity:.85;
 font-size:14px;
+opacity:.85;
 }
 
 /* STATIONS */
@@ -189,12 +202,12 @@ padding:16px;
 #viewport{
 width:100%;
 height:100%;
+position:relative;
+overflow:hidden;
 border:1px solid var(--amberSoft);
 background:
 radial-gradient(circle at center, rgba(255,159,7,.03), transparent 70%),
 rgba(0,0,0,.55);
-position:relative;
-overflow:hidden;
 box-shadow:inset 0 0 30px rgba(255,159,7,.03);
 }
 
@@ -232,22 +245,6 @@ font-size:12px;
 opacity:.7;
 }
 
-/* CORNERS */
-.corner{
-position:absolute;
-width:28px;
-height:28px;
-border-color:var(--amber);
-border-style:solid;
-pointer-events:none;
-z-index:10;
-}
-
-.c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
-.c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
-.c3{bottom:-2px;left:-2px;border-width:0 0 3px 3px;}
-.c4{bottom:-2px;right:-2px;border-width:0 3px 3px 0;}
-
 canvas{
 display:block;
 }
@@ -266,8 +263,8 @@ display:block;
 <div class="corner c4"></div>
 
 <div id="header">
-<div>MARS SURFACE OPERATIONS GRID</div>
-<div id="header-right">UIC COLONIAL NETWORK // ARES DIVISION</div>
+<div>MARS OPERATIONS GRID</div>
+<div id="header-right">UIC ARES NETWORK // PLANETARY MONITORING</div>
 </div>
 
 <div id="content">
@@ -288,7 +285,7 @@ display:block;
 </div>
 
 <div class="panel-block">
-<div class="panel-title">ACTIVE FACILITIES</div>
+<div class="panel-title">ACTIVE INSTALLATIONS</div>
 <div id="stationList"></div>
 </div>
 
@@ -306,7 +303,7 @@ SCROLL TO ZOOM
 
 <div id="hud-status" class="hud">
 UIC MARSNET ACTIVE<br>
-3 FACILITIES ONLINE
+4 INSTALLATIONS ONLINE
 </div>
 
 </div>
@@ -316,8 +313,8 @@ UIC MARSNET ACTIVE<br>
 </div>
 
 <div id="footer">
-<div>U.I.C. MARTIAN MONITORING INTERFACE</div>
-<div>UIC OS v2.3.7 // MARSNET</div>
+<div>U.I.C. MARTIAN SURVEILLANCE INTERFACE</div>
+<div>UIC OS v2.8.1 // ARES</div>
 </div>
 
 </div>
@@ -336,27 +333,36 @@ name:"Mars Colony",
 lat:18.4,
 lon:77.5,
 icon:"⬢",
-link:"marscolony.html"
+link:"marscolony.html",
+orbit:false
 },
 {
 name:"Drilling Rig",
 lat:19.1,
 lon:78.4,
 icon:"⛏",
-link:"drillingrig.html"
+link:"drillingrig.html",
+orbit:false
 },
 {
 name:"Fabrication Modules",
 lat:17.8,
 lon:76.6,
 icon:"▣",
-link:"fabrication.html"
+link:"fabrication.html",
+orbit:false
+},
+{
+name:"Mars Orbital Station",
+icon:"◉",
+link:"orbitalstation.html",
+orbit:true
 }
 ];
 
 const viewport=document.getElementById("viewport");
 
-/* THREE */
+/* SCENE */
 const scene=new THREE.Scene();
 
 const camera=new THREE.PerspectiveCamera(
@@ -384,20 +390,18 @@ renderer.setPixelRatio(window.devicePixelRatio);
 viewport.appendChild(renderer.domElement);
 
 /* LIGHTING */
-const ambient=new THREE.AmbientLight(0xffbb88,.5);
+const ambient=new THREE.AmbientLight(0xffbb88,.55);
 scene.add(ambient);
 
 const sun=new THREE.DirectionalLight(0xffaa66,1.8);
-
 sun.position.set(5,2,5);
-
 scene.add(sun);
 
 /* PLANET GROUP */
 const planetGroup=new THREE.Group();
 scene.add(planetGroup);
 
-/* TEXTURE LOADER */
+/* TEXTURES */
 const loader=new THREE.TextureLoader();
 
 const marsTexture=loader.load(TEXTURE);
@@ -411,7 +415,7 @@ map:marsTexture,
 displacementMap:marsHeight,
 displacementScale:0.035,
 roughness:.95,
-metalness:0.02,
+metalness:.02,
 color:0xffffff
 })
 );
@@ -446,7 +450,7 @@ new THREE.BufferGeometry().setFromPoints(pts),
 new THREE.LineBasicMaterial({
 color:0xFF9F07,
 transparent:true,
-opacity:.28
+opacity:.22
 })
 )
 );
@@ -477,7 +481,7 @@ new THREE.BufferGeometry().setFromPoints(pts),
 new THREE.LineBasicMaterial({
 color:0xFF9F07,
 transparent:true,
-opacity:.28
+opacity:.22
 })
 )
 );
@@ -499,9 +503,12 @@ r*Math.sin(phi)*Math.sin(theta)
 }
 
 /* POIs */
-const poiMeshes=[];
+const clickable=[];
 
+/* SURFACE STATIONS */
 stations.forEach(s=>{
+
+if(s.orbit) return;
 
 const pos=latLonToVec(s.lat,s.lon);
 
@@ -518,7 +525,7 @@ mesh.userData=s;
 
 planetGroup.add(mesh);
 
-poiMeshes.push(mesh);
+clickable.push(mesh);
 
 /* antenna line */
 const lineGeo=new THREE.BufferGeometry().setFromPoints([
@@ -536,6 +543,56 @@ color:0xFF9F07
 planetGroup.add(line);
 });
 
+/* ORBIT RING */
+const orbitRadius=1.35;
+const orbitPoints=[];
+
+for(let i=0;i<=128;i++){
+
+const a=(i/128)*Math.PI*2;
+
+orbitPoints.push(
+new THREE.Vector3(
+Math.cos(a)*orbitRadius,
+0,
+Math.sin(a)*orbitRadius
+)
+);
+}
+
+const orbitRing=new THREE.Line(
+new THREE.BufferGeometry().setFromPoints(orbitPoints),
+new THREE.LineBasicMaterial({
+color:0xFF9F07,
+transparent:true,
+opacity:.35
+})
+);
+
+planetGroup.add(orbitRing);
+
+/* ORBITAL STATION */
+const orbitalPivot=new THREE.Group();
+planetGroup.add(orbitalPivot);
+
+const orbitalStation=new THREE.Mesh(
+new THREE.BoxGeometry(0.06,0.06,0.12),
+new THREE.MeshBasicMaterial({
+color:0xFF9F07
+})
+);
+
+orbitalStation.position.set(orbitRadius,0,0);
+
+orbitalStation.userData={
+name:"Mars Orbital Station",
+link:"orbitalstation.html"
+};
+
+orbitalPivot.add(orbitalStation);
+
+clickable.push(orbitalStation);
+
 /* STATION LIST */
 const stationList=document.getElementById("stationList");
 
@@ -550,7 +607,17 @@ div.innerHTML=`
 <span>${s.name}</span>
 `;
 
-div.onclick=()=>focusStation(s);
+div.onclick=()=>{
+
+if(s.orbit){
+
+camera.position.z=2.2;
+
+return;
+}
+
+focusStation(s);
+};
 
 stationList.appendChild(div);
 });
@@ -608,7 +675,7 @@ Math.min(6,camera.position.z)
 );
 });
 
-/* CLICK POI */
+/* CLICK */
 const raycaster=new THREE.Raycaster();
 const mouse=new THREE.Vector2();
 
@@ -621,7 +688,7 @@ mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
 
 raycaster.setFromCamera(mouse,camera);
 
-const hit=raycaster.intersectObjects(poiMeshes);
+const hit=raycaster.intersectObjects(clickable);
 
 if(hit.length){
 
@@ -632,15 +699,19 @@ window.location=hit[0].object.userData.link;
 /* START ROTATION */
 mars.rotation.y=1.8;
 
-/* ANIMATION */
+/* ANIMATE */
 function animate(){
 
 requestAnimationFrame(animate);
 
+/* planet rotation */
 mars.rotation.y+=0.0007;
 
-/* pulse POIs */
-poiMeshes.forEach((m,i)=>{
+/* orbital station movement */
+orbitalPivot.rotation.y+=0.002;
+
+/* pulse station markers */
+clickable.forEach((m,i)=>{
 
 const pulse=1+Math.sin(Date.now()*0.003+i)*0.15;
 
