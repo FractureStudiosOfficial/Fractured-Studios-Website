@@ -21,7 +21,7 @@ font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* CRT FX */
+/* CRT EFFECTS */
 #amber{
 position:fixed;
 inset:0;
@@ -51,17 +51,17 @@ z-index:1001;
 100%{opacity:.15;}
 }
 
-/* MAIN UI */
+/* MAIN SHELL */
 #ui-shell{
 position:fixed;
 inset:20px;
 border:2px solid var(--amber);
 background:rgba(0,0,0,.35);
+display:flex;
+flex-direction:column;
 box-shadow:
 0 0 25px rgba(255,159,7,.08),
 inset 0 0 30px rgba(255,159,7,.03);
-display:flex;
-flex-direction:column;
 }
 
 #ui-shell::before{
@@ -80,7 +80,6 @@ height:28px;
 border-style:solid;
 border-color:var(--amber);
 pointer-events:none;
-z-index:10;
 }
 .c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
 .c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
@@ -169,8 +168,8 @@ margin-bottom:6px;
 
 .stat{
 margin:6px 0;
-opacity:.85;
 font-size:14px;
+opacity:.85;
 }
 
 /* STATIONS */
@@ -180,10 +179,10 @@ padding:10px 12px;
 margin-bottom:8px;
 border:1px solid transparent;
 background:rgba(255,159,7,.02);
-transition:.2s ease;
+transition:.2s;
 display:flex;
-align-items:center;
 gap:10px;
+align-items:center;
 }
 
 .station:hover{
@@ -224,18 +223,6 @@ backdrop-filter:blur(4px);
 #hud-controls{top:18px;left:18px;}
 #hud-status{top:18px;right:18px;text-align:right;}
 
-/* FOOTER */
-#footer{
-height:34px;
-border-top:1px solid var(--amberSoft);
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:0 16px;
-font-size:12px;
-opacity:.7;
-}
-
 canvas{display:block;}
 </style>
 </head>
@@ -259,7 +246,6 @@ canvas{display:block;}
 
 <div id="content">
 
-<!-- SIDEBAR -->
 <div id="panel">
 
 <div class="panel-block">
@@ -278,7 +264,6 @@ canvas{display:block;}
 
 </div>
 
-<!-- VIEWPORT -->
 <div id="viewport-wrap">
 <div id="viewport">
 
@@ -295,11 +280,6 @@ REGIONAL DATA FILE
 </div>
 </div>
 
-</div>
-
-<div id="footer">
-<div>U.I.C. PLANETARY MONITORING INTERFACE</div>
-<div>UIC OS v1.0.4</div>
 </div>
 
 </div>
@@ -346,78 +326,57 @@ const tex=new THREE.TextureLoader().load(TEXTURE);
 const earth=new THREE.Mesh(
 new THREE.SphereGeometry(1,64,64),
 new THREE.MeshBasicMaterial({
-map:tex,
-color:0xFF9F07
+map:tex
 })
 );
 
 planetGroup.add(earth);
 
-/* === MARS-STYLE GRID (APPLIED TO EARTH) === */
+/* === MARS-STYLE GRID OVER EARTH === */
 const grid=new THREE.Group();
 
-/* latitude lines */
-for(let i=0;i<=18;i++){
+const gridMat=new THREE.LineBasicMaterial({
+color:0xFF9F07,
+transparent:true,
+opacity:0.18
+});
 
+/* latitude */
+for(let i=0;i<=18;i++){
 const lat=(i/18)*Math.PI-Math.PI/2;
 const pts=[];
-
-for(let j=0;j<=64;j++){
-
-const lon=(j/64)*Math.PI*2;
-
+for(let j=0;j<=96;j++){
+const lon=(j/96)*Math.PI*2;
 pts.push(new THREE.Vector3(
 Math.cos(lat)*Math.cos(lon),
 Math.sin(lat),
 Math.cos(lat)*Math.sin(lon)
 ));
 }
-
-grid.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(pts),
-new THREE.LineBasicMaterial({
-color:0xFF9F07,
-transparent:true,
-opacity:.22
-})
-));
+grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
 }
 
-/* longitude lines */
+/* longitude */
 for(let i=0;i<36;i++){
-
 const lon=(i/36)*Math.PI*2;
 const pts=[];
-
-for(let j=0;j<=64;j++){
-
-const lat=(j/64)*Math.PI-Math.PI/2;
-
+for(let j=0;j<=96;j++){
+const lat=(j/96)*Math.PI-Math.PI/2;
 pts.push(new THREE.Vector3(
 Math.cos(lat)*Math.cos(lon),
 Math.sin(lat),
 Math.cos(lat)*Math.sin(lon)
 ));
 }
-
-grid.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(pts),
-new THREE.LineBasicMaterial({
-color:0xFF9F07,
-transparent:true,
-opacity:.22
-})
-));
+grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
 }
 
 planetGroup.add(grid);
 
-/* LAT/LON */
+/* LATLON */
 function latLonToVec(lat,lon,r=1.03){
-
 const phi=(90-lat)*(Math.PI/180);
 const theta=(lon+180)*(Math.PI/180);
-
 return new THREE.Vector3(
 -(r*Math.sin(phi)*Math.cos(theta)),
 r*Math.cos(phi),
@@ -425,11 +384,10 @@ r*Math.sin(phi)*Math.sin(theta)
 );
 }
 
-/* POIs */
+/* POIS */
 const poiMeshes=[];
 
 stations.forEach(s=>{
-
 const pos=latLonToVec(s.lat,s.lon);
 
 const mesh=new THREE.Mesh(
@@ -444,11 +402,10 @@ planetGroup.add(mesh);
 poiMeshes.push(mesh);
 });
 
-/* UI LIST */
+/* LIST */
 const stationList=document.getElementById("stationList");
 
 stations.forEach(s=>{
-
 const div=document.createElement("div");
 div.className="station";
 div.innerHTML=`<span>${s.icon}</span><span>${s.name}</span>`;
@@ -458,14 +415,11 @@ stationList.appendChild(div);
 
 /* FOCUS */
 function focusStation(st){
-
 const target=latLonToVec(st.lat,st.lon);
-
 const q=new THREE.Quaternion().setFromUnitVectors(
 target.clone().normalize(),
 new THREE.Vector3(0,0,1)
 );
-
 planetGroup.quaternion.slerp(q,.25);
 }
 
@@ -473,21 +427,16 @@ planetGroup.quaternion.slerp(q,.25);
 let dragging=false,px=0,py=0;
 
 window.addEventListener("mousedown",e=>{
-dragging=true;
-px=e.clientX;
-py=e.clientY;
+dragging=true;px=e.clientX;py=e.clientY;
 });
 
 window.addEventListener("mouseup",()=>dragging=false);
 
 window.addEventListener("mousemove",e=>{
 if(!dragging) return;
-
 planetGroup.rotation.y+=(e.clientX-px)*0.005;
 planetGroup.rotation.x+=(e.clientY-py)*0.005;
-
-px=e.clientX;
-py=e.clientY;
+px=e.clientX;py=e.clientY;
 });
 
 /* ZOOM */
@@ -501,9 +450,7 @@ const raycaster=new THREE.Raycaster();
 const mouse=new THREE.Vector2();
 
 window.addEventListener("click",e=>{
-
 const rect=renderer.domElement.getBoundingClientRect();
-
 mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
 mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
 
@@ -516,7 +463,7 @@ window.location=hit[0].object.userData.link;
 }
 });
 
-/* RENDER */
+/* RENDER LOOP */
 function animate(){
 requestAnimationFrame(animate);
 renderer.render(scene,camera);
@@ -525,11 +472,9 @@ animate();
 
 /* RESIZE */
 window.addEventListener("resize",()=>{
-
 camera.aspect=viewport.clientWidth/viewport.clientHeight;
 camera.updateProjectionMatrix();
 renderer.setSize(viewport.clientWidth,viewport.clientHeight);
-
 });
 
 </script>
