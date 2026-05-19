@@ -51,7 +51,7 @@ z-index:1001;
 100%{opacity:.15;}
 }
 
-/* MAIN UI SHELL */
+/* MAIN UI */
 #ui-shell{
 position:fixed;
 inset:20px;
@@ -64,6 +64,15 @@ display:flex;
 flex-direction:column;
 }
 
+#ui-shell::before{
+content:"";
+position:absolute;
+inset:12px;
+border:1px solid rgba(255,159,7,.12);
+pointer-events:none;
+}
+
+/* SCROLLBAR */
 #panel::-webkit-scrollbar{
 width:12px;
 }
@@ -88,26 +97,6 @@ rgba(255,159,7,.35),
 rgba(255,159,7,.18)
 );
 border:1px solid rgba(255,159,7,.35);
-box-shadow:
-inset 0 0 6px rgba(255,159,7,.15),
-0 0 8px rgba(255,159,7,.08);
-}
-
-#panel::-webkit-scrollbar-thumb:hover{
-background:
-linear-gradient(
-to bottom,
-rgba(255,159,7,.5),
-rgba(255,159,7,.28)
-);
-}
-
-#ui-shell::before{
-content:"";
-position:absolute;
-inset:12px;
-border:1px solid rgba(255,159,7,.12);
-pointer-events:none;
 }
 
 /* HEADER */
@@ -152,7 +141,6 @@ gap:20px;
 border:1px solid var(--amberSoft);
 background:rgba(0,0,0,.35);
 padding:16px;
-box-shadow:inset 0 0 15px rgba(255,159,7,.02);
 }
 
 .panel-title{
@@ -254,6 +242,7 @@ border-style:solid;
 pointer-events:none;
 z-index:10;
 }
+
 .c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
 .c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
 .c3{bottom:-2px;left:-2px;border-width:0 0 3px 3px;}
@@ -288,12 +277,14 @@ display:block;
 
 <div class="panel-block">
 <div id="planetName">MARS // COLONIAL ERA</div>
+
 <div class="panel-title">PLANETARY DATA</div>
+
 <div class="stat">Atmosphere: CO₂ / Thin</div>
 <div class="stat">Day Length: 24h 37m</div>
 <div class="stat">Orbit: 687 Days</div>
 <div class="stat">Gravity: 0.38g</div>
-<div class="stat">Region: Arabia Terra Sector</div>
+<div class="stat">Sector: Arabia Terra</div>
 </div>
 
 <div class="panel-block">
@@ -305,6 +296,7 @@ display:block;
 
 <!-- VIEWPORT -->
 <div id="viewport-wrap">
+
 <div id="viewport">
 
 <div id="hud-controls" class="hud">
@@ -313,11 +305,12 @@ SCROLL TO ZOOM
 </div>
 
 <div id="hud-status" class="hud">
-UIC SATELLITE LINK ACTIVE<br>
+UIC MARSNET ACTIVE<br>
 3 FACILITIES ONLINE
 </div>
 
 </div>
+
 </div>
 
 </div>
@@ -332,6 +325,11 @@ UIC SATELLITE LINK ACTIVE<br>
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
+/* TEXTURES */
+const TEXTURE="2k_mars.jpg";
+const HEIGHTMAP="mars_heightmap.jpg";
+
+/* STATIONS */
 const stations=[
 {
 name:"Mars Colony",
@@ -342,15 +340,15 @@ link:"marscolony.html"
 },
 {
 name:"Drilling Rig",
-lat:19.2,
-lon:79.1,
+lat:19.1,
+lon:78.4,
 icon:"⛏",
 link:"drillingrig.html"
 },
 {
 name:"Fabrication Modules",
-lat:17.9,
-lon:76.2,
+lat:17.8,
+lon:76.6,
 icon:"▣",
 link:"fabrication.html"
 }
@@ -358,7 +356,7 @@ link:"fabrication.html"
 
 const viewport=document.getElementById("viewport");
 
-/* THREE SETUP */
+/* THREE */
 const scene=new THREE.Scene();
 
 const camera=new THREE.PerspectiveCamera(
@@ -370,6 +368,7 @@ viewport.clientWidth/viewport.clientHeight,
 
 camera.position.z=3;
 
+/* RENDERER */
 const renderer=new THREE.WebGLRenderer({
 antialias:true,
 alpha:true
@@ -385,147 +384,24 @@ renderer.setPixelRatio(window.devicePixelRatio);
 viewport.appendChild(renderer.domElement);
 
 /* LIGHTING */
-const ambient=new THREE.AmbientLight(0xffbb88,.55);
+const ambient=new THREE.AmbientLight(0xffbb88,.5);
 scene.add(ambient);
 
 const sun=new THREE.DirectionalLight(0xffaa66,1.8);
+
 sun.position.set(5,2,5);
+
 scene.add(sun);
 
 /* PLANET GROUP */
 const planetGroup=new THREE.Group();
 scene.add(planetGroup);
 
-/* PROCEDURAL MARS TEXTURE */
-function generateMarsTexture(){
+/* TEXTURE LOADER */
+const loader=new THREE.TextureLoader();
 
-const canvas=document.createElement("canvas");
-canvas.width=1024;
-canvas.height=512;
-
-const ctx=canvas.getContext("2d");
-
-const img=ctx.createImageData(canvas.width,canvas.height);
-
-function noise(x,y){
-
-return (
-Math.sin(x*0.021)*0.5+
-Math.sin(y*0.018)*0.5+
-Math.sin((x+y)*0.012)+
-Math.sin(Math.sqrt(x*x+y*y)*0.02)
-);
-}
-
-for(let y=0;y<canvas.height;y++){
-
-for(let x=0;x<canvas.width;x++){
-
-const i=(y*canvas.width+x)*4;
-
-const n=noise(x,y);
-
-const height=
-Math.floor(
-90+
-n*35+
-Math.random()*10
-);
-
-let r=height+50;
-let g=height*0.6;
-let b=height*0.35;
-
-/* Olympus Mons style volcanic area */
-const dx=x-700;
-const dy=y-180;
-const dist=Math.sqrt(dx*dx+dy*dy);
-
-if(dist<90){
-r+=25;
-g+=15;
-}
-
-/* Valles Marineris canyon */
-if(y>220 && y<280){
-r-=20;
-g-=15;
-b-=10;
-}
-
-/* Polar caps */
-if(y<35 || y>475){
-r+=70;
-g+=70;
-b+=70;
-}
-
-img.data[i]=r;
-img.data[i+1]=g;
-img.data[i+2]=b;
-img.data[i+3]=255;
-}
-}
-
-ctx.putImageData(img,0,0);
-
-const tex=new THREE.CanvasTexture(canvas);
-tex.wrapS=THREE.RepeatWrapping;
-tex.wrapT=THREE.RepeatWrapping;
-
-return tex;
-}
-
-/* HEIGHTMAP DISPLACEMENT */
-function generateHeightMap(){
-
-const size=256;
-const data=new Uint8Array(size*size);
-
-for(let y=0;y<size;y++){
-
-for(let x=0;x<size;x++){
-
-const i=y*size+x;
-
-let h=
-Math.sin(x*0.07)*20+
-Math.cos(y*0.05)*15+
-Math.sin((x+y)*0.03)*25;
-
-/* giant volcano */
-const dx=x-180;
-const dy=y-90;
-
-const d=Math.sqrt(dx*dx+dy*dy);
-
-if(d<45){
-h+=45-(d);
-}
-
-/* canyon */
-if(y>115 && y<135){
-h-=35;
-}
-
-data[i]=128+h;
-}
-}
-
-const tex=new THREE.DataTexture(
-data,
-size,
-size,
-THREE.RedFormat
-);
-
-tex.needsUpdate=true;
-
-return tex;
-}
-
-const marsTexture=generateMarsTexture();
-const marsHeight=generateHeightMap();
+const marsTexture=loader.load(TEXTURE);
+const marsHeight=loader.load(HEIGHTMAP);
 
 /* MARS */
 const mars=new THREE.Mesh(
@@ -533,10 +409,10 @@ new THREE.SphereGeometry(1,256,256),
 new THREE.MeshStandardMaterial({
 map:marsTexture,
 displacementMap:marsHeight,
-displacementScale:0.045,
+displacementScale:0.035,
 roughness:.95,
 metalness:0.02,
-color:0xffaa66
+color:0xffffff
 })
 );
 
@@ -570,7 +446,7 @@ new THREE.BufferGeometry().setFromPoints(pts),
 new THREE.LineBasicMaterial({
 color:0xFF9F07,
 transparent:true,
-opacity:.25
+opacity:.28
 })
 )
 );
@@ -601,7 +477,7 @@ new THREE.BufferGeometry().setFromPoints(pts),
 new THREE.LineBasicMaterial({
 color:0xFF9F07,
 transparent:true,
-opacity:.25
+opacity:.28
 })
 )
 );
@@ -609,7 +485,7 @@ opacity:.25
 
 planetGroup.add(grid);
 
-/* LAT/LON TO POSITION */
+/* LAT/LON */
 function latLonToVec(lat,lon,r=1.04){
 
 const phi=(90-lat)*(Math.PI/180);
@@ -644,7 +520,7 @@ planetGroup.add(mesh);
 
 poiMeshes.push(mesh);
 
-/* vertical antenna line */
+/* antenna line */
 const lineGeo=new THREE.BufferGeometry().setFromPoints([
 pos.clone().multiplyScalar(.985),
 pos.clone().multiplyScalar(1.08)
@@ -705,7 +581,10 @@ px=e.clientX;
 py=e.clientY;
 });
 
-window.addEventListener("mouseup",()=>dragging=false);
+window.addEventListener("mouseup",()=>{
+
+dragging=false;
+});
 
 window.addEventListener("mousemove",e=>{
 
@@ -750,16 +629,17 @@ window.location=hit[0].object.userData.link;
 }
 });
 
-/* ROTATION */
+/* START ROTATION */
 mars.rotation.y=1.8;
 
-/* ANIMATE */
+/* ANIMATION */
 function animate(){
 
 requestAnimationFrame(animate);
 
-mars.rotation.y+=0.0008;
+mars.rotation.y+=0.0007;
 
+/* pulse POIs */
 poiMeshes.forEach((m,i)=>{
 
 const pulse=1+Math.sin(Date.now()*0.003+i)*0.15;
