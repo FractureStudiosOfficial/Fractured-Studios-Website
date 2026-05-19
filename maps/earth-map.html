@@ -21,7 +21,7 @@ font-family:'Share Tech Mono', monospace;
 overflow:hidden;
 }
 
-/* CRT */
+/* CRT EFFECTS */
 #amber{
 position:fixed;
 inset:0;
@@ -51,7 +51,7 @@ z-index:1001;
 100%{opacity:.15;}
 }
 
-/* UI */
+/* MAIN SHELL */
 #ui-shell{
 position:fixed;
 inset:20px;
@@ -104,7 +104,7 @@ font-size:12px;
 opacity:.65;
 }
 
-/* LAYOUT */
+/* CONTENT */
 #content{
 flex:1;
 display:grid;
@@ -121,6 +121,31 @@ overflow-y:auto;
 display:flex;
 flex-direction:column;
 gap:20px;
+}
+
+#panel::-webkit-scrollbar{
+width:12px;
+}
+
+#panel::-webkit-scrollbar-track{
+background:rgba(0,0,0,.55);
+}
+
+#panel::-webkit-scrollbar-thumb{
+background-image:
+repeating-linear-gradient(
+to bottom,
+transparent 0px,
+transparent 6px,
+rgba(0,0,0,.18) 6px,
+rgba(0,0,0,.18) 8px
+),
+linear-gradient(
+to bottom,
+rgba(255,159,7,.35),
+rgba(255,159,7,.18)
+);
+border:1px solid rgba(255,159,7,.35);
 }
 
 .panel-block{
@@ -154,7 +179,7 @@ padding:10px 12px;
 margin-bottom:8px;
 border:1px solid transparent;
 background:rgba(255,159,7,.02);
-transition:.2s ease;
+transition:.2s;
 display:flex;
 gap:10px;
 align-items:center;
@@ -307,84 +332,44 @@ map:tex
 
 planetGroup.add(earth);
 
-/* =========================
-   GLOW + PHOSPHOR GRID LAYER
-========================= */
-
+/* === MARS-STYLE GRID OVER EARTH === */
 const grid=new THREE.Group();
 
-/* core grid (visible lines) */
-const coreMat=new THREE.LineBasicMaterial({
+const gridMat=new THREE.LineBasicMaterial({
 color:0xFF9F07,
 transparent:true,
-opacity:0.28,
-blending:THREE.AdditiveBlending
+opacity:0.30
 });
 
-/* glow/bleed grid (slightly scaled duplicate) */
-const glowMat=new THREE.LineBasicMaterial({
-color:0xFF9F07,
-transparent:true,
-opacity:0.10,
-blending:THREE.AdditiveBlending
-});
-
-/* build function */
-function buildGrid(material, scale=1){
-
-const g=new THREE.Group();
-
+/* latitude */
 for(let i=0;i<=18;i++){
-
 const lat=(i/18)*Math.PI-Math.PI/2;
 const pts=[];
-
 for(let j=0;j<=96;j++){
 const lon=(j/96)*Math.PI*2;
-
 pts.push(new THREE.Vector3(
-Math.cos(lat)*Math.cos(lon)*scale,
-Math.sin(lat)*scale,
-Math.cos(lat)*Math.sin(lon)*scale
+Math.cos(lat)*Math.cos(lon),
+Math.sin(lat),
+Math.cos(lat)*Math.sin(lon)
 ));
 }
-
-g.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(pts),
-material
-));
+grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
 }
 
+/* longitude */
 for(let i=0;i<36;i++){
-
 const lon=(i/36)*Math.PI*2;
 const pts=[];
-
 for(let j=0;j<=96;j++){
 const lat=(j/96)*Math.PI-Math.PI/2;
-
 pts.push(new THREE.Vector3(
-Math.cos(lat)*Math.cos(lon)*scale,
-Math.sin(lat)*scale,
-Math.cos(lat)*Math.sin(lon)*scale
+Math.cos(lat)*Math.cos(lon),
+Math.sin(lat),
+Math.cos(lat)*Math.sin(lon)
 ));
 }
-
-g.add(new THREE.Line(
-new THREE.BufferGeometry().setFromPoints(pts),
-material
-));
+grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));
 }
-
-return g;
-}
-
-/* core + glow layers */
-const gridCore=buildGrid(coreMat,1.001);
-const gridGlow=buildGrid(glowMat,1.01);
-
-grid.add(gridCore);
-grid.add(gridGlow);
 
 planetGroup.add(grid);
 
@@ -417,7 +402,7 @@ planetGroup.add(mesh);
 poiMeshes.push(mesh);
 });
 
-/* UI LIST */
+/* LIST */
 const stationList=document.getElementById("stationList");
 
 stations.forEach(s=>{
@@ -478,7 +463,7 @@ window.location=hit[0].object.userData.link;
 }
 });
 
-/* RENDER */
+/* RENDER LOOP */
 function animate(){
 requestAnimationFrame(animate);
 renderer.render(scene,camera);
