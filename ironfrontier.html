@@ -199,9 +199,16 @@ body{
     border:1px solid rgba(255,159,7,.18);
     background:#000;
     overflow:hidden;
-    box-shadow:0 0 18px rgba(255,159,7,.08);
+    box-shadow:
+        inset 0 0 25px rgba(255,159,7,.04),
+        0 0 18px rgba(255,159,7,.08);
 }
 
+.trailer iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
 .trailer iframe{
     width:100%;
     height:100%;
@@ -392,9 +399,9 @@ body{
     <div class="trailer">
         <iframe
             id="trailer-player"
-            src="https://youtu.be/f2T6Xta1HRo?si=_dwv8roxPC8P2j1y"
-            title="The Iron Frontier Trailer (PLACEHOLDER NOT FINAL)"
+            title="The Iron Frontier Trailer (PLACE HOLDER, IS NOT FINAL)"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
     </div>
@@ -428,7 +435,27 @@ body{
 <div id="os">UIC OS v1.0.4</div>
 
 <script>
-/* =========================
+    
+
+    /* =========================
+   TRAILER CONFIG
+========================= */
+
+/*
+    FUTURE UPDATES:
+
+    Replace ONLY the URL below.
+
+    Example:
+    const TRAILER_URL =
+    "https://www.youtube.com/embed/dQw4w9WgXcQ";
+*/
+
+const TRAILER_URL =
+    "https://youtu.be/f2T6Xta1HRo?si=_dwv8roxPC8P2j1y";
+    
+    
+    /* =========================
    STEAM BUTTON CONFIG
 ========================= */
 const STEAM_BUTTON_ENABLED = 0; // 0 = hidden, 1 = visible
@@ -442,7 +469,10 @@ if(STEAM_BUTTON_ENABLED){
 }else{
     steamBtn.style.display = "none";
 }
-
+    
+/* Trailer Player */
+document.getElementById("trailer-player").src = TRAILER_URL;
+    
 /* Tilt */
 const container=document.getElementById("crt-container");
 const os=document.getElementById("os");
@@ -491,6 +521,7 @@ input.addEventListener("keydown",e=>{
 
 document.getElementById("trailer-player").src =
     getYoutubeEmbedUrl(TRAILER_URL);
+    
 });
 </script>
 
