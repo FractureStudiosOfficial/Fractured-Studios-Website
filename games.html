@@ -5,33 +5,179 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Games | Fractured Studios</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
 <style>
 :root{
     --amber:#FF9F07;
     --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --scanBlack:#0a0603;
 }
 
 *{box-sizing:border-box;}
 
-body{
+html,body{
     margin:0;
-    background:#050505;
+    height:100%;
+    background:#000;
+    overflow:hidden;
+}
+
+body{
     color:var(--amber);
     font-family:'Share Tech Mono', monospace;
-    overflow-x:hidden;
-    perspective:1000px;
+    perspective:1400px;
 }
 
 /* =========================
-   CRT CONTAINER
+   CRT BEZEL (outer plastic case)
+========================= */
+#bezel{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
+    z-index:0;
+}
+
+#bezel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,.015) 0 1px,
+            transparent 1px 3px
+        );
+    pointer-events:none;
+}
+
+#bezel-label{
+    position:fixed;
+    bottom:14px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:5;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:#7a5230;
+    text-shadow:0 1px 0 #000;
+    font-family:'VT323',monospace;
+    user-select:none;
+}
+
+#brand-led{
+    position:fixed;
+    bottom:16px;
+    left:calc(50% - 90px);
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
+    animation:led-pulse 2.4s ease-in-out infinite;
+    z-index:5;
+}
+
+@keyframes led-pulse{
+    0%,100%{opacity:.55;}
+    50%{opacity:1;}
+}
+
+/* =========================
+   FISHEYE / CURVED SCREEN
+========================= */
+#screen-wrap{
+    position:fixed;
+    inset:22px;
+    border-radius:48px / 60px;
+    background:#050505;
+    box-shadow:
+        0 0 0 4px #0a0605,
+        0 0 0 8px #1a0f07,
+        0 0 0 10px #2a1a0d,
+        0 0 40px rgba(0,0,0,.9) inset,
+        0 30px 60px rgba(0,0,0,.85);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    isolation:isolate;
+}
+
+#screen{
+    position:absolute;
+    inset:0;
+    filter:url(#fisheye);
+    transform:scale(1.02);
+    overflow:hidden;
+}
+
+/* Scroll surface — everything scrolls inside the tube */
+#screen-scroll{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:none;
+}
+#screen-scroll::-webkit-scrollbar{display:none;}
+
+/* Overlays */
+#glare{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1200;
+    background:
+        radial-gradient(
+            ellipse 60% 45% at 28% 18%,
+            rgba(255,255,255,.14),
+            rgba(255,255,255,.03) 40%,
+            transparent 70%
+        ),
+        radial-gradient(
+            ellipse 40% 30% at 78% 82%,
+            rgba(255,159,7,.05),
+            transparent 70%
+        );
+    mix-blend-mode:screen;
+}
+
+#vignette{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1100;
+    background:radial-gradient(
+        ellipse 90% 90% at 50% 50%,
+        transparent 45%,
+        rgba(0,0,0,.35) 75%,
+        rgba(0,0,0,.9) 100%
+    );
+}
+
+#corners{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1105;
+    background:
+        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
+}
+
+/* =========================
+   MAIN CRT CONTAINER
 ========================= */
 #crt-container{
-    padding:35px;
-    padding-bottom:95px;
+    padding:56px 64px 130px;
     transform-style:preserve-3d;
-    transition:transform .08s ease-out;
+    transition:transform .1s ease-out;
+    min-height:100%;
+    position:relative;
+    z-index:2;
 }
 
 /* =========================
@@ -39,46 +185,119 @@ body{
 ========================= */
 .panel{
     position:relative;
-    border:2px solid rgba(255,159,7,.25);
+    border:2px solid rgba(255,159,7,.45);
     background:
-        linear-gradient(
-            180deg,
-            rgba(255,159,7,.03),
-            rgba(0,0,0,.22)
+        linear-gradient(180deg,
+            rgba(255,159,7,.05),
+            rgba(0,0,0,.35)
         );
     box-shadow:
-        inset 0 0 25px rgba(255,159,7,.03),
-        0 0 25px rgba(255,159,7,.04);
+        inset 0 0 30px rgba(255,159,7,.06),
+        inset 0 0 2px rgba(255,200,90,.25),
+        0 0 30px rgba(255,159,7,.08);
+    border-radius:6px;
 }
 
 .panel::before{
     content:"";
     position:absolute;
-    inset:10px;
-    border:1px solid rgba(255,159,7,.12);
+    inset:8px;
+    border:1px dashed rgba(255,159,7,.18);
     pointer-events:none;
+    border-radius:3px;
+}
+
+.panel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
+    opacity:.7;
 }
 
 /* =========================
    HEADER
 ========================= */
 .header{
-    padding:25px;
-    margin-bottom:35px;
+    padding:26px 28px;
+    margin-bottom:36px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
 }
 
-.header h1{
+.header-left h1{
     margin:0 0 12px 0;
-    font-size:32px;
-    letter-spacing:.25em;
-    border-bottom:1px solid rgba(255,159,7,.25);
-    padding-bottom:12px;
+    font-size:34px;
+    letter-spacing:.28em;
+    text-shadow:
+        0 0 4px rgba(255,159,7,.7),
+        0 0 14px rgba(255,140,0,.35);
 }
 
-.header p{
+.header-left p{
     margin:0;
-    opacity:.75;
-    letter-spacing:.08em;
+    opacity:.85;
+    letter-spacing:.14em;
+    font-size:13px;
+    text-shadow:0 0 3px rgba(255,159,7,.5);
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.header-right .tag{
+    font-size:11px;
+    letter-spacing:.2em;
+    padding:4px 10px;
+    border:1px solid rgba(255,159,7,.4);
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+
+.header-right .tag.blink{
+    animation:tag-blink 1.6s steps(2) infinite;
+}
+@keyframes tag-blink{50%{opacity:.35;}}
+
+/* Marquee ticker under header */
+.ticker{
+    grid-column:1/-1;
+    margin-top:10px;
+    padding:8px 12px;
+    border:1px solid rgba(255,159,7,.22);
+    background:rgba(255,159,7,.04);
+    font-size:12px;
+    letter-spacing:.18em;
+    overflow:hidden;
+    white-space:nowrap;
+    position:relative;
+    width:100%;
+}
+.ticker-inner{
+    display:inline-block;
+    padding-left:100%;
+    animation:tick 30s linear infinite;
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+@keyframes tick{
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
 }
 
 /* =========================
@@ -87,16 +306,16 @@ body{
 .games{
     display:flex;
     flex-direction:column;
-    gap:35px;
+    gap:36px;
 }
 
-    button,
+button,
 input,
 a{
     position:relative;
     z-index:5;
-    transform:translateZ(20px);
 }
+
 /* =========================
    GAME CARD
 ========================= */
@@ -104,7 +323,7 @@ a{
     display:grid;
     grid-template-columns:420px 1fr;
     gap:30px;
-    padding:22px;
+    padding:24px;
     position:relative;
 }
 
@@ -113,22 +332,76 @@ a{
     position:absolute;
     top:18px;
     bottom:18px;
-    left:440px;
+    left:444px;
     width:1px;
-    background:rgba(255,159,7,.12);
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,159,7,.4) 0 4px,
+            transparent 4px 8px
+        );
+}
+
+/* index number */
+.game-index{
+    position:absolute;
+    top:8px;
+    right:14px;
+    font-size:11px;
+    letter-spacing:.3em;
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    opacity:.8;
 }
 
 .game-image{
     position:relative;
-    padding:12px;
-    border:1px solid rgba(255,159,7,.14);
-    background:rgba(255,159,7,.02);
+    padding:14px;
+    border:1px solid rgba(255,159,7,.28);
+    background:
+        radial-gradient(circle at 50% 50%,rgba(255,159,7,.06),transparent 65%),
+        repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);
+    overflow:hidden;
+}
+
+/* corner tick marks on image frame */
+.game-image::before,
+.game-image::after{
+    content:"";
+    position:absolute;
+    width:12px;height:12px;
+    border:1px solid var(--amberBright);
+    opacity:.9;
+    pointer-events:none;
+}
+.game-image::before{
+    top:4px;left:4px;
+    border-right:none;
+    border-bottom:none;
+}
+.game-image::after{
+    bottom:4px;right:4px;
+    border-left:none;
+    border-top:none;
 }
 
 .game-image img{
     width:100%;
     display:block;
-    border:1px solid rgba(255,159,7,.18);
+    border:1px solid rgba(255,159,7,.35);
+    filter:
+        drop-shadow(0 0 6px rgba(255,159,7,.35))
+        contrast(1.05) saturate(0.95);
+}
+
+.game-image .caption{
+    margin-top:10px;
+    display:flex;
+    justify-content:space-between;
+    font-size:10px;
+    letter-spacing:.24em;
+    opacity:.7;
+    padding:0 2px;
 }
 
 .game-info{
@@ -138,30 +411,81 @@ a{
 }
 
 .game h2{
-    margin:0 0 15px 0;
+    margin:0 0 6px 0;
     font-size:28px;
-    letter-spacing:.12em;
+    letter-spacing:.14em;
+    text-shadow:
+        0 0 4px rgba(255,159,7,.7),
+        0 0 14px rgba(255,140,0,.3);
+}
+
+.game .sub{
+    margin:0 0 14px 0;
+    font-size:11px;
+    letter-spacing:.24em;
+    color:var(--amberBright);
+    opacity:.85;
 }
 
 .game p{
     margin:0 0 15px 0;
-    line-height:1.6;
-    opacity:.9;
+    line-height:1.65;
+    opacity:.92;
+    text-shadow:0 0 2px rgba(255,159,7,.5);
 }
 
 .tags{
     display:flex;
     flex-wrap:wrap;
-    gap:10px;
-    margin-bottom:20px;
+    gap:8px;
+    margin-bottom:18px;
 }
 
 .tag{
-    padding:6px 10px;
-    border:1px solid rgba(255,159,7,.18);
-    background:rgba(255,159,7,.03);
-    font-size:12px;
-    letter-spacing:.08em;
+    padding:5px 10px;
+    border:1px solid rgba(255,159,7,.3);
+    background:rgba(255,159,7,.05);
+    font-size:11px;
+    letter-spacing:.14em;
+}
+
+/* mini "specs" grid */
+.specs{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:18px;
+    font-size:11px;
+    letter-spacing:.16em;
+}
+.specs .spec{
+    padding:8px 10px;
+    border:1px solid rgba(255,159,7,.22);
+    background:rgba(255,159,7,.04);
+}
+.specs .spec b{
+    display:block;
+    font-weight:normal;
+    color:var(--amberBright);
+    opacity:.9;
+    margin-bottom:3px;
+    font-size:10px;
+    letter-spacing:.24em;
+}
+.specs .bar{
+    height:4px;
+    margin-top:6px;
+    background:rgba(255,159,7,.12);
+    position:relative;
+    overflow:hidden;
+}
+.specs .bar::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg,var(--amber),var(--amberBright));
+    box-shadow:0 0 6px rgba(255,159,7,.7);
+    transform:translateX(var(--fill,-40%));
 }
 
 /* =========================
@@ -175,39 +499,58 @@ a{
     padding:12px 22px;
     cursor:pointer;
     font-family:inherit;
-    letter-spacing:.08em;
+    letter-spacing:.14em;
     transition:.2s ease;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+    position:relative;
+}
+
+.game button::before{
+    content:"";
+    position:absolute;
+    inset:-3px;
+    border:1px solid rgba(255,159,7,.25);
+    pointer-events:none;
 }
 
 .game button:hover{
-    background:rgba(255,159,7,.12);
-    box-shadow:0 0 12px rgba(255,159,7,.15);
+    background:rgba(255,159,7,.15);
+    box-shadow:0 0 18px rgba(255,159,7,.25);
+    color:var(--amberBright);
 }
 
 /* =========================
    TERMINAL BAR
 ========================= */
 #terminal{
-    position:fixed;
+    position:absolute;
     bottom:0;
     left:0;
     right:0;
-    padding:12px 18px;
+    padding:14px 22px;
     display:flex;
-    gap:10px;
+    gap:12px;
+    align-items:center;
     z-index:1003;
-
-    border-top:2px solid rgba(255,159,7,.22);
+    border-top:2px solid rgba(255,159,7,.35);
     background:
         linear-gradient(
             180deg,
-            rgba(255,159,7,.04),
-            rgba(0,0,0,.45)
+            rgba(255,159,7,.06),
+            rgba(0,0,0,.55)
         );
-
     box-shadow:
-        0 -10px 20px rgba(0,0,0,.35);
+        0 -10px 20px rgba(0,0,0,.35),
+        inset 0 0 20px rgba(255,159,7,.06);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
 }
+
+#terminal .chev{
+    color:var(--amberBright);
+    animation:chev 1s steps(2) infinite;
+    text-shadow:0 0 6px rgba(255,159,7,.7);
+}
+@keyframes chev{50%{opacity:.3;}}
 
 #terminal input{
     background:none;
@@ -217,26 +560,49 @@ a{
     font-family:inherit;
     flex:1;
     min-width:0;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    caret-color:var(--amberBright);
+}
+
+#terminal .hint{
+    font-size:11px;
+    letter-spacing:.2em;
+    opacity:.7;
 }
 
 /* =========================
-   OS LABEL
+   OS LABEL + CLOCK
 ========================= */
 #os{
-    position:fixed;
-    bottom:55px;
-    right:15px;
+    position:absolute;
+    bottom:68px;
+    right:22px;
     font-size:12px;
-    opacity:.7;
+    opacity:.8;
     z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+#clock{
+    position:absolute;
+    bottom:68px;
+    left:22px;
+    font-size:12px;
+    opacity:.8;
+    z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
 }
 
 /* =========================
    CRT FX
 ========================= */
 #scanlines,
-#amber{
-    position:fixed;
+#amber-tint,
+#rgb-mask,
+#roll{
+    position:absolute;
     inset:0;
     pointer-events:none;
 }
@@ -244,170 +610,269 @@ a{
 #scanlines{
     background:repeating-linear-gradient(
         to bottom,
-        rgba(255,255,255,.05) 0px,
-        rgba(255,255,255,.05) 2px,
-        transparent 2px,
-        transparent 6px
+        rgba(0,0,0,.35) 0px,
+        rgba(0,0,0,.35) 1px,
+        transparent 1px,
+        transparent 3px
     );
-    animation:flicker .12s infinite;
-    z-index:1001;
+    animation:flicker .14s infinite;
+    z-index:1300;
+    mix-blend-mode:multiply;
+}
+
+#rgb-mask{
+    background:repeating-linear-gradient(
+        90deg,
+        rgba(255,0,0,.05) 0 1px,
+        rgba(0,255,0,.05) 1px 2px,
+        rgba(0,0,255,.05) 2px 3px
+    );
+    z-index:1250;
+    mix-blend-mode:overlay;
+    opacity:.6;
+}
+
+#roll{
+    background:linear-gradient(
+        180deg,
+        transparent 0%,
+        transparent 42%,
+        rgba(255,255,255,.06) 47%,
+        rgba(255,255,255,.10) 50%,
+        rgba(255,255,255,.06) 53%,
+        transparent 58%,
+        transparent 100%
+    );
+    z-index:1310;
+    mix-blend-mode:screen;
+    animation:roll 9s linear infinite;
+}
+@keyframes roll{
+    0%{transform:translateY(-100%);}
+    100%{transform:translateY(100%);}
 }
 
 @keyframes flicker{
-    0%{opacity:.15;}
-    50%{opacity:.08;}
-    100%{opacity:.15;}
+    0%{opacity:.55;}
+    47%{opacity:.5;}
+    50%{opacity:.85;}
+    53%{opacity:.5;}
+    100%{opacity:.55;}
 }
 
-#amber{
-    background:rgba(255,159,7,.04);
-    z-index:1000;
+#amber-tint{
+    background:radial-gradient(ellipse at 50% 50%,
+        rgba(255,159,7,.05),
+        rgba(255,80,0,.08) 80%);
+    z-index:1150;
+    mix-blend-mode:screen;
+}
+
+#poweron{
+    position:absolute;
+    inset:0;
+    background:#fff;
+    z-index:2000;
+    pointer-events:none;
+    animation:poweron 1.6s ease-out forwards;
+}
+@keyframes poweron{
+    0%{opacity:0;}
+    5%{opacity:.9;}
+    10%{opacity:.15;}
+    20%{transform:scaleY(.005);opacity:1;background:#fff;}
+    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
+    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 @media(max-width:900px){
-
     #crt-container{
-        padding:20px;
-        padding-bottom:90px;
+        padding:30px 22px 120px;
     }
-
     .game{
         grid-template-columns:1fr;
         gap:20px;
     }
-
-    .game::after{
-        display:none;
-    }
-
+    .game::after{display:none;}
     .game-image img{
         max-height:300px;
         object-fit:cover;
     }
+    #screen-wrap{inset:12px;border-radius:32px/40px;}
 }
 
 @media(max-width:500px){
-
-    body{
-        font-size:14px;
-    }
-
-    .header h1{
-        font-size:24px;
-    }
-
-    .game{
-        padding:15px;
-    }
-
-    .game button{
-        width:100%;
-    }
-
-    #terminal{
-        padding:10px;
-    }
+    body{font-size:14px;}
+    .header-left h1{font-size:24px;}
+    .game{padding:16px;}
+    .game button{width:100%;}
+    #terminal{padding:12px;}
+    .specs{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
+<!-- Fisheye SVG filter -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
 
-<div id="crt-container">
+<div id="bezel"></div>
 
-    <!-- HEADER -->
-    <div class="header panel">
-        <h1>GAMES</h1>
-        <p>AVAILABLE IN DEVELOPMENT PROJECTS</p>
-    </div>
+<div id="screen-wrap">
 
-    <!-- GAMES LIST -->
-    <div class="games">
+    <div id="screen">
+        <div id="screen-scroll">
+            <div id="crt-container">
 
-        <div class="game panel">
-
-            <div class="game-image">
-                <img src="NEW-Iron-Frontier-Thumbnail.png" alt="The Iron Frontier">
-            </div>
-
-            <div class="game-info">
-                <h2>THE IRON FRONTIER</h2>
-
-                <p>
-                    A narrative-driven cold war era puzzle game following two cosmonauts stranded on the surface of Venus. Unknown to them, most of humanity has been forced back to Earth from the solar system.
-                </p>
-
-                <div class="tags">
-                    <div class="tag">SINGLEPLAYER</div>
-                    <div class="tag">ATMOSPHERIC</div>
-                    <div class="tag">EXPLORATION</div>
-                    <div class="tag">NARRATIVE</div>
+                <!-- HEADER -->
+                <div class="header panel">
+                    <div class="header-left">
+                        <h1>GAMES</h1>
+                        <p>AVAILABLE IN DEVELOPMENT PROJECTS</p>
+                    </div>
+                    <div class="header-right">
+                        <span class="tag">CH.02</span>
+                        <span class="tag blink">LIVE</span>
+                    </div>
+                    <div class="ticker">
+                        <span class="ticker-inner">// FRACTURED STUDIOS BROADCAST // CURRENT ROSTER: 1 TITLE IN DEVELOPMENT // THE IRON FRONTIER — VENUS SURFACE OPERATION // STATUS: PRE-ALPHA // TYPE 'HOME' TO RETURN • 'IRONFRONTIER' TO OPEN PROJECT //</span>
+                    </div>
                 </div>
 
-                <button onclick="window.location='ironfrontier.html'">
-                    VIEW PROJECT
-                </button>
+                <!-- GAMES LIST -->
+                <div class="games">
+
+                    <div class="game panel">
+
+                        <div class="game-index">GM-01 / 01</div>
+
+                        <div class="game-image">
+                            <img src="NEW-Iron-Frontier-Thumbnail.png" alt="The Iron Frontier">
+                            <div class="caption">
+                                <span>REEL A</span>
+                                <span>1962.11.09</span>
+                            </div>
+                        </div>
+
+                        <div class="game-info">
+                            <h2>THE IRON FRONTIER</h2>
+                            <div class="sub">// CLASSIFIED — TRANSMISSION 07 //</div>
+
+                            <p>
+                                A narrative-driven cold war era puzzle game following two cosmonauts stranded on the surface of Venus. Unknown to them, most of humanity has been forced back to Earth from the solar system.
+                            </p>
+
+                            <div class="tags">
+                                <div class="tag">SINGLEPLAYER</div>
+                                <div class="tag">ATMOSPHERIC</div>
+                                <div class="tag">EXPLORATION</div>
+                                <div class="tag">NARRATIVE</div>
+                            </div>
+
+                            <div class="specs">
+                                <div class="spec"><b>STATUS</b>PRE-ALPHA<div class="bar" style="--fill:-72%"></div></div>
+                                <div class="spec"><b>PLATFORM</b>PC / STEAM<div class="bar" style="--fill:-30%"></div></div>
+                                <div class="spec"><b>ENGINE</b>PROPRIETARY<div class="bar" style="--fill:-55%"></div></div>
+                            </div>
+
+                            <button onclick="window.location='ironfrontier.html'">
+                                VIEW PROJECT &nbsp;»
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
-
         </div>
+    </div>
 
+    <!-- CRT overlays inside screen (unwarped) -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="poweron"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4</div>
+
+    <!-- TERMINAL BAR -->
+    <div id="terminal">
+        <span class="chev">&gt;</span>
+        <input id="cmd" placeholder="type command...">
+        <span class="hint">HOME • GAMES • IRONFRONTIER</span>
     </div>
 
 </div>
 
-<!-- TERMINAL -->
-<div id="terminal">
-    <span>&gt;</span>
-    <input id="cmd" placeholder="type command...">
-</div>
-
-<div id="os">UIC OS v1.0.4</div>
+<div id="bezel-label">FRACTURED • MODEL FR-77</div>
+<div id="brand-led"></div>
 
 <script>
-const container=document.getElementById("crt-container");
-const os=document.getElementById("os");
+const container = document.getElementById("crt-container");
+const os = document.getElementById("os");
+const clock = document.getElementById("clock");
 
 function applyTilt(x,y){
-    const rx=(window.innerHeight/2-y)/1000;
-    const ry=(window.innerWidth/2-x)/1000;
-
-    container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
-    os.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+    const rx = (window.innerHeight/2 - y)/1200;
+    const ry = (window.innerWidth/2 - x)/1200;
+    container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 }
 
 /* Desktop */
 document.addEventListener("mousemove",(e)=>{
-    applyTilt(e.clientX,e.clientY);
+    applyTilt(e.clientX, e.clientY);
 });
 
 /* Mobile */
 document.addEventListener("touchmove",(e)=>{
-    const t=e.touches[0];
-    applyTilt(t.clientX,t.clientY);
+    const t = e.touches[0];
+    applyTilt(t.clientX, t.clientY);
 },{passive:true});
 
+/* Clock ticker */
+function tickClock(){
+    const d = new Date();
+    const pad = n=>n.toString().padStart(2,"0");
+    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(tickClock,1000);
+tickClock();
+
 /* Terminal Input */
-const input=document.getElementById("cmd");
+const input = document.getElementById("cmd");
 
-input.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
+input.addEventListener("keydown", e=>{
+    if(e.key === "Enter"){
+        const v = input.value.toLowerCase().trim();
 
-        const v=input.value.toLowerCase();
+        if(v === "home") window.location = "index.html";
+        if(v === "games") window.location = "games.html";
+        if(v === "ironfrontier") window.location = "ironfrontier.html";
 
-        if(v==="home") window.location="index.html";
-        if(v==="games") window.location="games.html";
-        if(v==="ironfrontier") window.location="ironfrontier.html";
-
-        input.value="";
+        input.value = "";
     }
 });
 </script>
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
