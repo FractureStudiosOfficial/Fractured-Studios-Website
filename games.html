@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+x<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -30,30 +30,20 @@ body{
     perspective:1400px;
 }
 
-/* =========================
-   CRT BEZEL (outer plastic case)
-========================= */
+/* CRT BEZEL */
 #bezel{
     position:fixed;
     inset:0;
-    background:
-        radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
+    background:radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
     z-index:0;
 }
-
 #bezel::before{
     content:"";
     position:absolute;
     inset:0;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255,255,255,.015) 0 1px,
-            transparent 1px 3px
-        );
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
     pointer-events:none;
 }
-
 #bezel-label{
     position:fixed;
     bottom:14px;
@@ -67,7 +57,6 @@ body{
     font-family:'VT323',monospace;
     user-select:none;
 }
-
 #brand-led{
     position:fixed;
     bottom:16px;
@@ -79,15 +68,9 @@ body{
     animation:led-pulse 2.4s ease-in-out infinite;
     z-index:5;
 }
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
-@keyframes led-pulse{
-    0%,100%{opacity:.55;}
-    50%{opacity:1;}
-}
-
-/* =========================
-   FISHEYE / CURVED SCREEN
-========================= */
+/* SCREEN */
 #screen-wrap{
     position:fixed;
     inset:22px;
@@ -103,7 +86,6 @@ body{
     transform-style:preserve-3d;
     isolation:isolate;
 }
-
 #screen{
     position:absolute;
     inset:0;
@@ -111,8 +93,6 @@ body{
     transform:scale(1.02);
     overflow:hidden;
 }
-
-/* Scroll surface — everything scrolls inside the tube */
 #screen-scroll{
     position:absolute;
     inset:0;
@@ -122,40 +102,23 @@ body{
 }
 #screen-scroll::-webkit-scrollbar{display:none;}
 
-/* Overlays */
 #glare{
     position:absolute;
     inset:0;
     pointer-events:none;
     z-index:1200;
     background:
-        radial-gradient(
-            ellipse 60% 45% at 28% 18%,
-            rgba(255,255,255,.14),
-            rgba(255,255,255,.03) 40%,
-            transparent 70%
-        ),
-        radial-gradient(
-            ellipse 40% 30% at 78% 82%,
-            rgba(255,159,7,.05),
-            transparent 70%
-        );
+        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
+        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
     mix-blend-mode:screen;
 }
-
 #vignette{
     position:absolute;
     inset:0;
     pointer-events:none;
     z-index:1100;
-    background:radial-gradient(
-        ellipse 90% 90% at 50% 50%,
-        transparent 45%,
-        rgba(0,0,0,.35) 75%,
-        rgba(0,0,0,.9) 100%
-    );
+    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
 }
-
 #corners{
     position:absolute;
     inset:0;
@@ -168,9 +131,7 @@ body{
         radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
 }
 
-/* =========================
-   MAIN CRT CONTAINER
-========================= */
+/* CONTAINER — promoted to own layer to isolate hover repaints from the filter */
 #crt-container{
     padding:56px 64px 130px;
     transform-style:preserve-3d;
@@ -178,26 +139,20 @@ body{
     min-height:100%;
     position:relative;
     z-index:2;
+    will-change:transform;
 }
 
-/* =========================
-   PANEL BASE
-========================= */
+/* PANELS */
 .panel{
     position:relative;
     border:2px solid rgba(255,159,7,.45);
-    background:
-        linear-gradient(180deg,
-            rgba(255,159,7,.05),
-            rgba(0,0,0,.35)
-        );
+    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
     box-shadow:
         inset 0 0 30px rgba(255,159,7,.06),
         inset 0 0 2px rgba(255,200,90,.25),
         0 0 30px rgba(255,159,7,.08);
     border-radius:6px;
 }
-
 .panel::before{
     content:"";
     position:absolute;
@@ -206,7 +161,6 @@ body{
     pointer-events:none;
     border-radius:3px;
 }
-
 .panel::after{
     content:"";
     position:absolute;
@@ -224,273 +178,49 @@ body{
     opacity:.7;
 }
 
-/* =========================
-   HEADER
-========================= */
-.header{
-    padding:26px 28px;
-    margin-bottom:36px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-}
-
-.header-left h1{
-    margin:0 0 12px 0;
-    font-size:34px;
-    letter-spacing:.28em;
-    text-shadow:
-        0 0 4px rgba(255,159,7,.7),
-        0 0 14px rgba(255,140,0,.35);
-}
-
-.header-left p{
-    margin:0;
-    opacity:.85;
-    letter-spacing:.14em;
-    font-size:13px;
-    text-shadow:0 0 3px rgba(255,159,7,.5);
-}
-
-.header-right{
-    display:flex;
-    gap:10px;
-    align-items:center;
-}
-
-.header-right .tag{
-    font-size:11px;
-    letter-spacing:.2em;
-    padding:4px 10px;
-    border:1px solid rgba(255,159,7,.4);
-    color:var(--amberBright);
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-}
-
-.header-right .tag.blink{
-    animation:tag-blink 1.6s steps(2) infinite;
-}
+/* HEADER */
+.header{padding:26px 28px;margin-bottom:36px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.header-left h1{margin:0 0 12px 0;font-size:34px;letter-spacing:.28em;text-shadow:0 0 4px rgba(255,159,7,.7),0 0 14px rgba(255,140,0,.35);}
+.header-left p{margin:0;opacity:.85;letter-spacing:.14em;font-size:13px;text-shadow:0 0 3px rgba(255,159,7,.5);}
+.header-right{display:flex;gap:10px;align-items:center;}
+.header-right .tag{font-size:11px;letter-spacing:.2em;padding:4px 10px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.6);}
+.header-right .tag.blink{animation:tag-blink 1.6s steps(2) infinite;}
 @keyframes tag-blink{50%{opacity:.35;}}
 
-/* Marquee ticker under header */
-.ticker{
-    grid-column:1/-1;
-    margin-top:10px;
-    padding:8px 12px;
-    border:1px solid rgba(255,159,7,.22);
-    background:rgba(255,159,7,.04);
-    font-size:12px;
-    letter-spacing:.18em;
-    overflow:hidden;
-    white-space:nowrap;
-    position:relative;
-    width:100%;
-}
-.ticker-inner{
-    display:inline-block;
-    padding-left:100%;
-    animation:tick 30s linear infinite;
-    color:var(--amberBright);
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-@keyframes tick{
-    from{transform:translateX(0);}
-    to{transform:translateX(-100%);}
-}
+.ticker{grid-column:1/-1;margin-top:10px;padding:8px 12px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.04);font-size:12px;letter-spacing:.18em;overflow:hidden;white-space:nowrap;position:relative;width:100%;}
+.ticker-inner{display:inline-block;padding-left:100%;animation:tick 30s linear infinite;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+@keyframes tick{from{transform:translateX(0);}to{transform:translateX(-100%);}}
 
-/* =========================
-   GAME LIST
-========================= */
-.games{
-    display:flex;
-    flex-direction:column;
-    gap:36px;
-}
+/* GAMES */
+.games{display:flex;flex-direction:column;gap:36px;}
+button,input,a{position:relative;z-index:5;}
 
-button,
-input,
-a{
-    position:relative;
-    z-index:5;
-}
+.game{display:grid;grid-template-columns:420px 1fr;gap:30px;padding:24px;position:relative;}
+.game::after{content:"";position:absolute;top:18px;bottom:18px;left:444px;width:1px;background:repeating-linear-gradient(0deg,rgba(255,159,7,.4) 0 4px,transparent 4px 8px);}
+.game-index{position:absolute;top:8px;right:14px;font-size:11px;letter-spacing:.3em;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.6);opacity:.8;}
 
-/* =========================
-   GAME CARD
-========================= */
-.game{
-    display:grid;
-    grid-template-columns:420px 1fr;
-    gap:30px;
-    padding:24px;
-    position:relative;
-}
+.game-image{position:relative;padding:14px;border:1px solid rgba(255,159,7,.28);background:radial-gradient(circle at 50% 50%,rgba(255,159,7,.06),transparent 65%),repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);overflow:hidden;}
+.game-image::before,.game-image::after{content:"";position:absolute;width:12px;height:12px;border:1px solid var(--amberBright);opacity:.9;pointer-events:none;}
+.game-image::before{top:4px;left:4px;border-right:none;border-bottom:none;}
+.game-image::after{bottom:4px;right:4px;border-left:none;border-top:none;}
+.game-image img{width:100%;display:block;border:1px solid rgba(255,159,7,.35);filter:drop-shadow(0 0 6px rgba(255,159,7,.35)) contrast(1.05) saturate(0.95);}
+.game-image .caption{margin-top:10px;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.24em;opacity:.7;padding:0 2px;}
 
-.game::after{
-    content:"";
-    position:absolute;
-    top:18px;
-    bottom:18px;
-    left:444px;
-    width:1px;
-    background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(255,159,7,.4) 0 4px,
-            transparent 4px 8px
-        );
-}
+.game-info{display:flex;flex-direction:column;justify-content:center;}
+.game h2{margin:0 0 6px 0;font-size:28px;letter-spacing:.14em;text-shadow:0 0 4px rgba(255,159,7,.7),0 0 14px rgba(255,140,0,.3);}
+.game .sub{margin:0 0 14px 0;font-size:11px;letter-spacing:.24em;color:var(--amberBright);opacity:.85;}
+.game p{margin:0 0 15px 0;line-height:1.65;opacity:.92;text-shadow:0 0 2px rgba(255,159,7,.5);}
 
-/* index number */
-.game-index{
-    position:absolute;
-    top:8px;
-    right:14px;
-    font-size:11px;
-    letter-spacing:.3em;
-    color:var(--amberBright);
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-    opacity:.8;
-}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.tag{padding:5px 10px;border:1px solid rgba(255,159,7,.3);background:rgba(255,159,7,.05);font-size:11px;letter-spacing:.14em;}
 
-.game-image{
-    position:relative;
-    padding:14px;
-    border:1px solid rgba(255,159,7,.28);
-    background:
-        radial-gradient(circle at 50% 50%,rgba(255,159,7,.06),transparent 65%),
-        repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);
-    overflow:hidden;
-}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;font-size:11px;letter-spacing:.16em;}
+.specs .spec{padding:8px 10px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.04);}
+.specs .spec b{display:block;font-weight:normal;color:var(--amberBright);opacity:.9;margin-bottom:3px;font-size:10px;letter-spacing:.24em;}
+.specs .bar{height:4px;margin-top:6px;background:rgba(255,159,7,.12);position:relative;overflow:hidden;}
+.specs .bar::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--amber),var(--amberBright));box-shadow:0 0 6px rgba(255,159,7,.7);transform:translateX(var(--fill,-40%));}
 
-/* corner tick marks on image frame */
-.game-image::before,
-.game-image::after{
-    content:"";
-    position:absolute;
-    width:12px;height:12px;
-    border:1px solid var(--amberBright);
-    opacity:.9;
-    pointer-events:none;
-}
-.game-image::before{
-    top:4px;left:4px;
-    border-right:none;
-    border-bottom:none;
-}
-.game-image::after{
-    bottom:4px;right:4px;
-    border-left:none;
-    border-top:none;
-}
-
-.game-image img{
-    width:100%;
-    display:block;
-    border:1px solid rgba(255,159,7,.35);
-    filter:
-        drop-shadow(0 0 6px rgba(255,159,7,.35))
-        contrast(1.05) saturate(0.95);
-}
-
-.game-image .caption{
-    margin-top:10px;
-    display:flex;
-    justify-content:space-between;
-    font-size:10px;
-    letter-spacing:.24em;
-    opacity:.7;
-    padding:0 2px;
-}
-
-.game-info{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-}
-
-.game h2{
-    margin:0 0 6px 0;
-    font-size:28px;
-    letter-spacing:.14em;
-    text-shadow:
-        0 0 4px rgba(255,159,7,.7),
-        0 0 14px rgba(255,140,0,.3);
-}
-
-.game .sub{
-    margin:0 0 14px 0;
-    font-size:11px;
-    letter-spacing:.24em;
-    color:var(--amberBright);
-    opacity:.85;
-}
-
-.game p{
-    margin:0 0 15px 0;
-    line-height:1.65;
-    opacity:.92;
-    text-shadow:0 0 2px rgba(255,159,7,.5);
-}
-
-.tags{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-bottom:18px;
-}
-
-.tag{
-    padding:5px 10px;
-    border:1px solid rgba(255,159,7,.3);
-    background:rgba(255,159,7,.05);
-    font-size:11px;
-    letter-spacing:.14em;
-}
-
-/* mini "specs" grid */
-.specs{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-    margin-bottom:18px;
-    font-size:11px;
-    letter-spacing:.16em;
-}
-.specs .spec{
-    padding:8px 10px;
-    border:1px solid rgba(255,159,7,.22);
-    background:rgba(255,159,7,.04);
-}
-.specs .spec b{
-    display:block;
-    font-weight:normal;
-    color:var(--amberBright);
-    opacity:.9;
-    margin-bottom:3px;
-    font-size:10px;
-    letter-spacing:.24em;
-}
-.specs .bar{
-    height:4px;
-    margin-top:6px;
-    background:rgba(255,159,7,.12);
-    position:relative;
-    overflow:hidden;
-}
-.specs .bar::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(90deg,var(--amber),var(--amberBright));
-    box-shadow:0 0 6px rgba(255,159,7,.7);
-    transform:translateX(var(--fill,-40%));
-}
-
-/* =========================
-   BUTTON
-========================= */
+/* BUTTON — promoted so hover only repaints itself, not the filtered subtree */
 .game button{
     align-self:flex-start;
     background:transparent;
@@ -503,207 +233,40 @@ a{
     transition:.2s ease;
     text-shadow:0 0 4px rgba(255,159,7,.5);
     position:relative;
+    will-change:background, box-shadow, color;
 }
+.game button::before{content:"";position:absolute;inset:-3px;border:1px solid rgba(255,159,7,.25);pointer-events:none;}
+.game button:hover{background:rgba(255,159,7,.15);box-shadow:0 0 18px rgba(255,159,7,.25);color:var(--amberBright);}
 
-.game button::before{
-    content:"";
-    position:absolute;
-    inset:-3px;
-    border:1px solid rgba(255,159,7,.25);
-    pointer-events:none;
-}
-
-.game button:hover{
-    background:rgba(255,159,7,.15);
-    box-shadow:0 0 18px rgba(255,159,7,.25);
-    color:var(--amberBright);
-}
-
-/* =========================
-   TERMINAL BAR
-========================= */
-#terminal{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    padding:14px 22px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    z-index:1003;
-    border-top:2px solid rgba(255,159,7,.35);
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,159,7,.06),
-            rgba(0,0,0,.55)
-        );
-    box-shadow:
-        0 -10px 20px rgba(0,0,0,.35),
-        inset 0 0 20px rgba(255,159,7,.06);
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-}
-
-#terminal .chev{
-    color:var(--amberBright);
-    animation:chev 1s steps(2) infinite;
-    text-shadow:0 0 6px rgba(255,159,7,.7);
-}
+/* TERMINAL BAR */
+#terminal{position:absolute;bottom:0;left:0;right:0;padding:14px 22px;display:flex;gap:12px;align-items:center;z-index:1003;border-top:2px solid rgba(255,159,7,.35);background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));box-shadow:0 -10px 20px rgba(0,0,0,.35),inset 0 0 20px rgba(255,159,7,.06);text-shadow:0 0 4px rgba(255,159,7,.6);}
+#terminal .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;text-shadow:0 0 6px rgba(255,159,7,.7);}
 @keyframes chev{50%{opacity:.3;}}
+#terminal input{background:none;border:none;outline:none;color:var(--amber);font-family:inherit;flex:1;min-width:0;text-shadow:0 0 4px rgba(255,159,7,.6);caret-color:var(--amberBright);}
+#terminal .hint{font-size:11px;letter-spacing:.2em;opacity:.7;}
 
-#terminal input{
-    background:none;
-    border:none;
-    outline:none;
-    color:var(--amber);
-    font-family:inherit;
-    flex:1;
-    min-width:0;
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-    caret-color:var(--amberBright);
-}
+#os{position:absolute;bottom:68px;right:22px;font-size:12px;opacity:.8;z-index:1004;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+#clock{position:absolute;bottom:68px;left:22px;font-size:12px;opacity:.8;z-index:1004;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);}
 
-#terminal .hint{
-    font-size:11px;
-    letter-spacing:.2em;
-    opacity:.7;
-}
+/* CRT FX */
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.6;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);z-index:1150;mix-blend-mode:screen;}
 
-/* =========================
-   OS LABEL + CLOCK
-========================= */
-#os{
-    position:absolute;
-    bottom:68px;
-    right:22px;
-    font-size:12px;
-    opacity:.8;
-    z-index:1004;
-    letter-spacing:.2em;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
+#poweron{position:absolute;inset:0;background:#fff;z-index:2000;pointer-events:none;animation:poweron 1.6s ease-out forwards;}
+@keyframes poweron{0%{opacity:0;}5%{opacity:.9;}10%{opacity:.15;}20%{transform:scaleY(.005);opacity:1;background:#fff;}25%{transform:scaleY(1);opacity:.6;background:#ffb060;}100%{transform:scaleY(1);opacity:0;background:#ffb060;}}
 
-#clock{
-    position:absolute;
-    bottom:68px;
-    left:22px;
-    font-size:12px;
-    opacity:.8;
-    z-index:1004;
-    letter-spacing:.2em;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-
-/* =========================
-   CRT FX
-========================= */
-#scanlines,
-#amber-tint,
-#rgb-mask,
-#roll{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-}
-
-#scanlines{
-    background:repeating-linear-gradient(
-        to bottom,
-        rgba(0,0,0,.35) 0px,
-        rgba(0,0,0,.35) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-    animation:flicker .14s infinite;
-    z-index:1300;
-    mix-blend-mode:multiply;
-}
-
-#rgb-mask{
-    background:repeating-linear-gradient(
-        90deg,
-        rgba(255,0,0,.05) 0 1px,
-        rgba(0,255,0,.05) 1px 2px,
-        rgba(0,0,255,.05) 2px 3px
-    );
-    z-index:1250;
-    mix-blend-mode:overlay;
-    opacity:.6;
-}
-
-#roll{
-    background:linear-gradient(
-        180deg,
-        transparent 0%,
-        transparent 42%,
-        rgba(255,255,255,.06) 47%,
-        rgba(255,255,255,.10) 50%,
-        rgba(255,255,255,.06) 53%,
-        transparent 58%,
-        transparent 100%
-    );
-    z-index:1310;
-    mix-blend-mode:screen;
-    animation:roll 9s linear infinite;
-}
-@keyframes roll{
-    0%{transform:translateY(-100%);}
-    100%{transform:translateY(100%);}
-}
-
-@keyframes flicker{
-    0%{opacity:.55;}
-    47%{opacity:.5;}
-    50%{opacity:.85;}
-    53%{opacity:.5;}
-    100%{opacity:.55;}
-}
-
-#amber-tint{
-    background:radial-gradient(ellipse at 50% 50%,
-        rgba(255,159,7,.05),
-        rgba(255,80,0,.08) 80%);
-    z-index:1150;
-    mix-blend-mode:screen;
-}
-
-#poweron{
-    position:absolute;
-    inset:0;
-    background:#fff;
-    z-index:2000;
-    pointer-events:none;
-    animation:poweron 1.6s ease-out forwards;
-}
-@keyframes poweron{
-    0%{opacity:0;}
-    5%{opacity:.9;}
-    10%{opacity:.15;}
-    20%{transform:scaleY(.005);opacity:1;background:#fff;}
-    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
-    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
 @media(max-width:900px){
-    #crt-container{
-        padding:30px 22px 120px;
-    }
-    .game{
-        grid-template-columns:1fr;
-        gap:20px;
-    }
+    #crt-container{padding:30px 22px 120px;}
+    .game{grid-template-columns:1fr;gap:20px;}
     .game::after{display:none;}
-    .game-image img{
-        max-height:300px;
-        object-fit:cover;
-    }
+    .game-image img{max-height:300px;object-fit:cover;}
     #screen-wrap{inset:12px;border-radius:32px/40px;}
 }
-
 @media(max-width:500px){
     body{font-size:14px;}
     .header-left h1{font-size:24px;}
@@ -717,14 +280,14 @@ a{
 
 <body>
 
-<!-- Fisheye SVG filter -->
+<!-- Fisheye SVG filter — displacement scale reduced from 26 -> 14 to cut per-frame rasterization cost -->
 <svg width="0" height="0" style="position:absolute">
     <defs>
         <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
             <feImage
                 href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
                 result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
-            <feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
         </filter>
     </defs>
 </svg>
@@ -737,7 +300,6 @@ a{
         <div id="screen-scroll">
             <div id="crt-container">
 
-                <!-- HEADER -->
                 <div class="header panel">
                     <div class="header-left">
                         <h1>GAMES</h1>
@@ -752,11 +314,8 @@ a{
                     </div>
                 </div>
 
-                <!-- GAMES LIST -->
                 <div class="games">
-
                     <div class="game panel">
-
                         <div class="game-index">GM-01 / 01</div>
 
                         <div class="game-image">
@@ -792,16 +351,13 @@ a{
                                 VIEW PROJECT &nbsp;»
                             </button>
                         </div>
-
                     </div>
-
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- CRT overlays inside screen (unwarped) -->
     <div id="amber-tint"></div>
     <div id="rgb-mask"></div>
     <div id="scanlines"></div>
@@ -814,7 +370,6 @@ a{
     <div id="clock">SYS ::</div>
     <div id="os">UIC OS v1.0.4</div>
 
-    <!-- TERMINAL BAR -->
     <div id="terminal">
         <span class="chev">&gt;</span>
         <input id="cmd" placeholder="type command...">
@@ -831,24 +386,34 @@ const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
 const clock = document.getElementById("clock");
 
-function applyTilt(x,y){
-    const rx = (window.innerHeight/2 - y)/1200;
-    const ry = (window.innerWidth/2 - x)/1200;
-    container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-}
+/* rAF-throttled tilt — avoids re-running the SVG fisheye filter on every raw
+   mousemove, which was the cause of hover flicker. */
+let tiltPending = false;
+let lastX = window.innerWidth/2;
+let lastY = window.innerHeight/2;
 
-/* Desktop */
+function scheduleTilt(){
+    if(tiltPending) return;
+    tiltPending = true;
+    requestAnimationFrame(()=>{
+        const rx = (window.innerHeight/2 - lastY)/1200;
+        const ry = (window.innerWidth/2  - lastX)/1200;
+        container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        tiltPending = false;
+    });
+}
+function applyTilt(x,y){ lastX=x; lastY=y; scheduleTilt(); }
+
 document.addEventListener("mousemove",(e)=>{
     applyTilt(e.clientX, e.clientY);
-});
+},{passive:true});
 
-/* Mobile */
 document.addEventListener("touchmove",(e)=>{
     const t = e.touches[0];
     applyTilt(t.clientX, t.clientY);
 },{passive:true});
 
-/* Clock ticker */
+/* Clock */
 function tickClock(){
     const d = new Date();
     const pad = n=>n.toString().padStart(2,"0");
@@ -857,22 +422,18 @@ function tickClock(){
 setInterval(tickClock,1000);
 tickClock();
 
-/* Terminal Input */
+/* Terminal */
 const input = document.getElementById("cmd");
-
 input.addEventListener("keydown", e=>{
     if(e.key === "Enter"){
         const v = input.value.toLowerCase().trim();
-
         if(v === "home") window.location = "index.html";
         if(v === "games") window.location = "games.html";
         if(v === "ironfrontier") window.location = "ironfrontier.html";
-
         input.value = "";
     }
 });
 </script>
 
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
