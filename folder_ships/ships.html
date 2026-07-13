@@ -3,315 +3,711 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ships | U.I.C. Systems</title>
+<title>U.I.C. // NAVAL ARCHIVE</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --amber:#ff9f07;
-  --amberSoft:rgba(255,159,7,.12);
-  --panel:rgba(0,0,0,.35);
-  --line:rgba(255,159,7,.22);
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --scanBlack:#0a0603;
 }
 
-/* =========================
-   BASE
-========================= */
-body{
-  margin:0;
-  background:#0b0b0b;
-  color:var(--amber);
-  font-family:'Share Tech Mono', monospace;
-  overflow-x:hidden;
-}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-/* CRT LAYERS */
-#amber{
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
-  z-index:1000;
+/* ─── BEZEL ─── */
+#bezel{
+    position:fixed;inset:0;
+    background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);
+    z-index:0;
 }
+#bezel::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
+    pointer-events:none;
+}
+#bezel-label{
+    position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+    z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;
+    text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;
+}
+#brand-led{
+    position:fixed;bottom:16px;left:calc(50% - 180px);
+    width:6px;height:6px;border-radius:50%;
+    background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
+    animation:led-pulse 2.4s ease-in-out infinite;z-index:5;
+}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
+/* ─── SCREEN WRAP + FISHEYE ─── */
+#screen-wrap{
+    position:fixed;inset:22px;border-radius:48px/60px;background:#050505;
+    box-shadow:
+        0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,
+        0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);
+    overflow:hidden;transform-style:preserve-3d;isolation:isolate;
+}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
+
+/* CRT overlays */
+#glare{
+    position:absolute;inset:0;pointer-events:none;z-index:1200;
+    background:
+        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
+        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
+    mix-blend-mode:screen;
+}
+#vignette{
+    position:absolute;inset:0;pointer-events:none;z-index:1100;
+    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
+}
+#corners{
+    position:absolute;inset:0;pointer-events:none;z-index:1105;
+    background:
+        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
+}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
 #scanlines{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);
+    animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;
+}
+#rgb-mask{
+    background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);
+    z-index:1250;mix-blend-mode:overlay;opacity:.6;
+}
+#roll{
+    background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);
+    z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;
+}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);
+    z-index:1150;mix-blend-mode:screen;
+}
+#poweron{
+    position:absolute;inset:0;background:#fff;z-index:2000;pointer-events:none;
+    animation:poweron 1.6s ease-out forwards;
+}
+@keyframes poweron{
+    0%{opacity:0;}5%{opacity:.9;}10%{opacity:.15;}
+    20%{transform:scaleY(.005);opacity:1;background:#fff;}
+    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
+    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
 }
 
-@keyframes flicker{
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+/* ─── PANEL BASE ─── */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.45);
+    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
+    box-shadow:
+        inset 0 0 30px rgba(255,159,7,.06),
+        inset 0 0 2px rgba(255,200,90,.25),
+        0 0 30px rgba(255,159,7,.08);
+    border-radius:6px;
+}
+.panel::before{
+    content:"";position:absolute;inset:8px;
+    border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;
+}
+.panel::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
+    opacity:.7;
 }
 
-/* =========================
-   MAIN FRAME
-========================= */
+/* ─── MAIN CONTAINER ─── */
 #crt-container{
-  padding:50px;
-  min-height:100vh;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+    position:absolute;inset:0;
+    display:flex;align-items:stretch;justify-content:space-between;
+    padding:44px 56px 70px;gap:28px;
+    transform-style:preserve-3d;transition:transform .1s ease-out;
+    z-index:2;
 }
 
-/* HEADER PANEL */
-.header{
-  position:relative;
-  margin-bottom:30px;
-  padding:25px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  box-shadow:0 0 25px rgba(255,159,7,.05);
+/* ─── LEFT — SHIP REGISTRY ─── */
+#registry-box{
+    width:58%;
+    display:flex;flex-direction:column;
+    padding:22px;
 }
-
-.header h1{
-  margin:0;
-  font-size:28px;
-  letter-spacing:.2em;
+#registry-header{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:10px;margin-bottom:16px;
 }
-
-.header p{
-  margin-top:8px;
-  opacity:.6;
+#registry-header h1{
+    margin:0;font-size:20px;letter-spacing:.28em;
+    text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);
 }
-
-/* SUB GRID BACKDROP */
-#grid-wrap{
-  position:relative;
-  padding:25px;
-  background:rgba(0,0,0,.2);
-  border:1px solid rgba(255,159,7,.1);
+#registry-header .tag{
+    font-size:11px;color:var(--amberBright);letter-spacing:.2em;
+    padding:2px 8px;border:1px solid rgba(255,159,7,.4);
+    animation:tag-blink 1.8s steps(2) infinite;
 }
+@keyframes tag-blink{50%{opacity:.35;}}
 
-/* subtle internal frame lines */
-#grid-wrap::before{
-  content:"";
-  position:absolute;
-  inset:10px;
-  border:1px dashed rgba(255,159,7,.08);
-  pointer-events:none;
+/* Scrollable ship list */
+#ship-list{
+    flex:1;overflow-y:auto;scrollbar-width:none;
+    display:flex;flex-direction:column;gap:10px;
+    min-height:0;
 }
+#ship-list::-webkit-scrollbar{display:none;}
 
-/* =========================
-   SHIP CARDS (UPGRADED)
-========================= */
-.ships{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
+/* ─── SHIP ENTRY ─── */
 .ship-entry{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  padding:14px 16px;
-  background:rgba(0,0,0,.25);
-  border:1px solid var(--line);
-
-  position:relative;
-  overflow:hidden;
-
-  transition:.2s ease;
+    position:relative;overflow:hidden;
+    padding:14px 18px;
+    border:1px solid rgba(255,159,7,.28);
+    background:linear-gradient(90deg,rgba(255,159,7,.04),rgba(0,0,0,.25));
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    transition:.2s ease;cursor:default;
 }
-
-/* subtle scan glow */
 .ship-entry::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,159,7,.05),
-    transparent
-  );
-  transform:translateX(-100%);
-  transition:.6s ease;
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,159,7,.06),transparent);
+    transform:translateX(-100%);transition:.55s ease;
 }
-
-.ship-entry:hover::before{
-  transform:translateX(100%);
-}
-
+.ship-entry:hover::before{transform:translateX(100%);}
 .ship-entry:hover{
-  background:rgba(0,0,0,.4);
-  border-color:rgba(255,159,7,.35);
+    background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(0,0,0,.35));
+    border-color:rgba(255,159,7,.5);
+    box-shadow:0 0 18px rgba(255,159,7,.08);
 }
+/* left bracket accent */
+.ship-entry::after{
+    content:"";position:absolute;left:0;top:0;bottom:0;
+    width:3px;
+    background:linear-gradient(180deg,transparent,var(--amber),transparent);
+    opacity:0;transition:.2s ease;
+}
+.ship-entry:hover::after{opacity:.7;}
 
-/* left side identity */
+.ship-left{display:flex;flex-direction:column;gap:4px;}
+.ship-designation{
+    font-size:11px;letter-spacing:.22em;opacity:.5;color:var(--amberBright);
+}
 .ship-name{
-  font-weight:bold;
-  letter-spacing:.05em;
+    font-size:16px;letter-spacing:.14em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+.ship-meta{
+    font-size:11px;letter-spacing:.12em;opacity:.65;
+    display:flex;gap:14px;flex-wrap:wrap;margin-top:2px;
+}
+.ship-meta .sep{opacity:.35;}
+
+.ship-right{display:flex;align-items:center;gap:10px;}
+.ship-status{
+    font-size:10px;letter-spacing:.2em;padding:3px 8px;
+    border:1px solid rgba(255,159,7,.3);
+    color:var(--amberBright);opacity:.75;
+}
+.ship-status.active{
+    border-color:rgba(143,255,138,.4);color:#8fff8a;
+    text-shadow:0 0 5px rgba(143,255,138,.5);opacity:1;
+}
+.ship-status.decom{border-color:rgba(255,74,43,.35);color:#ff4a2b;opacity:.75;}
+
+.access-btn{
+    padding:8px 16px;
+    border:1px solid var(--amber);background:transparent;
+    color:var(--amber);font-family:inherit;letter-spacing:.14em;
+    cursor:pointer;font-size:12px;transition:.2s ease;
+    text-shadow:0 0 4px rgba(255,159,7,.5);position:relative;
+}
+.access-btn::before{
+    content:"";position:absolute;inset:-3px;
+    border:1px solid rgba(255,159,7,.2);pointer-events:none;
+}
+.access-btn:hover{
+    background:rgba(255,159,7,.14);
+    box-shadow:0 0 18px rgba(255,159,7,.25);
 }
 
-.ship-type{
-  opacity:.6;
-  margin-left:8px;
-  font-size:12px;
+/* Registry footer note */
+#registry-note{
+    margin-top:12px;padding:10px 14px;
+    border:1px solid rgba(255,159,7,.15);
+    background:rgba(255,159,7,.03);
+    font-size:11px;letter-spacing:.14em;opacity:.55;
+    line-height:1.6;
 }
 
-/* RIGHT BUTTON */
-.details-button{
-  background:transparent;
-  border:1px solid var(--amber);
-  color:var(--amber);
-  padding:6px 14px;
-  cursor:pointer;
-  font-family:inherit;
-  letter-spacing:.1em;
-  transition:.2s ease;
-}
-
-.details-button:hover{
-  background:rgba(255,159,7,.12);
-  box-shadow:0 0 12px rgba(255,159,7,.2);
-}
-
-/* =========================
-   TERMINAL
-========================= */
-#terminal-box{
-  margin-top:25px;
-  padding:12px 14px;
-  background:rgba(0,0,0,.35);
-  border:1px solid var(--line);
-  display:flex;
-  position:sticky;
-  bottom:0;
-}
-
+/* Prompt */
 #prompt{
-  display:flex;
-  flex:1;
+    display:flex;gap:10px;margin-top:12px;padding:10px 14px;
+    border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);
+    align-items:center;
 }
-
+#prompt .chev{
+    color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.7);
+    animation:chev 1s steps(2) infinite;
+}
+@keyframes chev{50%{opacity:.3;}}
 #prompt input{
-  flex:1;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:var(--amber);
-  font-family:inherit;
+    background:none;border:none;outline:none;color:var(--amber);
+    font:inherit;flex:1;text-shadow:0 0 4px rgba(255,159,7,.6);
+    caret-color:var(--amberBright);letter-spacing:.1em;
+}
+#available{
+    margin-top:10px;padding:10px 14px;
+    border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.04);
+    opacity:.8;font-size:12px;letter-spacing:.12em;
+    display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+#available .k{color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.6);}
+
+/* ─── RIGHT — TELEMETRY PANEL ─── */
+#telem-box{
+    width:38%;
+    display:flex;flex-direction:column;
+    padding:22px;gap:16px;
+}
+#telem-header{
+    font-size:14px;letter-spacing:.3em;
+    padding-bottom:8px;border-bottom:1px solid rgba(255,159,7,.25);
+    display:flex;justify-content:space-between;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
 }
 
-/* OS */
+/* Reticle display frame */
+#telem-frame{
+    flex:1;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    background:
+        radial-gradient(circle at 50% 50%,rgba(255,159,7,.06),transparent 60%),
+        repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);
+    border:1px solid rgba(255,159,7,.22);overflow:hidden;
+    min-height:180px;
+}
+#telem-frame::before{
+    content:"";position:absolute;inset:0;
+    background:
+        radial-gradient(circle,transparent 38%,rgba(255,159,7,.14) 38.5%,transparent 39.5%),
+        radial-gradient(circle,transparent 28%,rgba(255,159,7,.10) 28.5%,transparent 29.5%),
+        radial-gradient(circle,transparent 18%,rgba(255,159,7,.08) 18.5%,transparent 19.5%);
+    pointer-events:none;animation:reticle-spin 40s linear infinite;
+}
+#telem-frame::after{
+    content:"";position:absolute;inset:0;
+    background:
+        linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 50% 0/1px 100% no-repeat,
+        linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 0 50%/100% 1px no-repeat;
+    pointer-events:none;
+}
+@keyframes reticle-spin{to{transform:rotate(360deg);}}
+
+#telem-readout{
+    position:relative;z-index:2;text-align:center;
+    display:flex;flex-direction:column;gap:8px;align-items:center;
+}
+#telem-vessel-name{
+    font-family:'VT323',monospace;font-size:36px;letter-spacing:.18em;
+    color:var(--amberBright);
+    text-shadow:0 0 10px rgba(255,159,7,.7),0 0 24px rgba(255,140,0,.4);
+    animation:vessel-pulse 4s ease-in-out infinite;
+}
+@keyframes vessel-pulse{0%,100%{opacity:.85;}50%{opacity:1;}}
+#telem-vessel-type{font-size:11px;letter-spacing:.22em;opacity:.6;}
+#telem-vessel-origin{font-size:11px;letter-spacing:.2em;opacity:.55;color:var(--amberBright);}
+
+/* Stat tiles */
+#telem-stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+.stat{
+    padding:8px 6px;border:1px solid rgba(255,159,7,.22);
+    background:rgba(255,159,7,.04);text-align:center;
+    font-size:10px;letter-spacing:.14em;position:relative;overflow:hidden;
+}
+.stat .val{
+    font-family:'VT323',monospace;font-size:20px;letter-spacing:.1em;
+    color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.6);
+    display:block;margin-bottom:2px;
+}
+.stat .bar{height:3px;margin-top:4px;background:rgba(255,159,7,.12);position:relative;overflow:hidden;}
+.stat .bar::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,var(--amber),var(--amberBright));
+    animation:bar-fill 3.2s ease-in-out infinite alternate;
+    box-shadow:0 0 6px rgba(255,159,7,.7);
+}
+.stat:nth-child(2) .bar::before{animation-duration:2.4s;}
+.stat:nth-child(3) .bar::before{animation-duration:4.1s;}
+@keyframes bar-fill{0%{transform:translateX(-70%);}100%{transform:translateX(0%);}}
+
+/* Scrolling data feed */
+#telem-feed{
+    padding:10px 12px;border:1px solid rgba(255,159,7,.18);
+    background:rgba(0,0,0,.25);
+    font-size:11px;letter-spacing:.1em;line-height:1.7;
+    overflow:hidden;height:90px;position:relative;
+}
+#telem-feed::before{
+    content:"// LIVE FEED //";
+    position:absolute;top:6px;right:10px;
+    font-size:10px;letter-spacing:.2em;opacity:.4;
+}
+#feed-inner{position:absolute;width:calc(100% - 24px);}
+
+/* ─── OS / CLOCK ─── */
 #os{
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+    position:absolute;bottom:16px;right:24px;font-size:12px;opacity:.8;
+    z-index:6;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+#clock{
+    position:absolute;bottom:16px;left:24px;font-size:12px;opacity:.8;
+    z-index:6;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:860px){
+    #crt-container{flex-direction:column;padding:24px 20px 60px;overflow-y:auto;}
+    #registry-box,#telem-box{width:100%;}
+    #screen-wrap{inset:10px;border-radius:32px/40px;}
+    #telem-frame{min-height:200px;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
+<!-- Fisheye SVG filter -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
 
-<div id="crt-container">
+<div id="bezel"></div>
 
-  <div class="header">
-    <h1>U.I.C. NAVAL ARCHIVE</h1>
-    <p>Active & Historical Vessel Registry</p>
-  </div>
+<div id="screen-wrap">
+    <div id="screen">
+        <div id="crt-container">
 
-  <div id="grid-wrap">
+            <!-- ═══════════════ LEFT: SHIP REGISTRY ═══════════════ -->
+            <div id="registry-box" class="panel">
+                <div id="registry-header">
+                    <h1>U.I.C. NAVAL ARCHIVE</h1>
+                    <span class="tag">LIVE</span>
+                </div>
 
-    <div class="ships">
+                <div id="ship-list">
 
-      <div class="ship-entry">
-        <div><span class="ship-name">Soyuz</span> <span class="ship-type">(Russia)</span></div>
-        <button class="details-button" onclick="window.location='soyuz.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="Soyuz" data-type="CREWED TRANSPORT" data-origin="USSR / RUSSIA" data-status="ACTIVE" data-crew="3" data-year="1966" data-href="soyuz.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-001 // SOYUZ CLASS</div>
+                            <div class="ship-name">Soyuz</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: USSR/RUSSIA</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 3</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1966–PRESENT</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status active">ACTIVE</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-      <div class="ship-entry">
-        <div><span class="ship-name">Von Braun</span> <span class="ship-type">(USA)</span></div>
-        <button class="details-button" onclick="window.location='vonbraun.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="Von Braun" data-type="DEEP SPACE CRUISER" data-origin="USA" data-status="ACTIVE" data-crew="12" data-year="1985" data-href="vonbraun.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-002 // VON BRAUN CLASS</div>
+                            <div class="ship-name">Von Braun</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: USA</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 12</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1985–PRESENT</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status active">ACTIVE</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-      <div class="ship-entry">
-        <div><span class="ship-name">Shenzhou</span> <span class="ship-type">(China)</span></div>
-        <button class="details-button" onclick="window.location='shenzhou.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="Shenzhou" data-type="ORBITAL FERRY" data-origin="CHINA" data-status="ACTIVE" data-crew="3" data-year="1999" data-href="shenzhou.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-003 // SHENZHOU CLASS</div>
+                            <div class="ship-name">Shenzhou</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: CHINA</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 3</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1999–PRESENT</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status active">ACTIVE</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-      <div class="ship-entry">
-        <div><span class="ship-name">Discovery One</span> <span class="ship-type">(USA)</span></div>
-        <button class="details-button" onclick="window.location='discoveryone.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="Discovery One" data-type="LONG-RANGE EXPLORER" data-origin="USA" data-status="DECOM" data-crew="5" data-year="1974" data-href="discoveryone.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-004 // DISCOVERY CLASS</div>
+                            <div class="ship-name">Discovery One</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: USA</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 5</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1974–1992</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status decom">DECOM</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-      <div class="ship-entry">
-        <div><span class="ship-name">ISS</span> <span class="ship-type">(International)</span></div>
-        <button class="details-button" onclick="window.location='iss.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="ISS" data-type="ORBITAL PLATFORM" data-origin="INTERNATIONAL" data-status="ACTIVE" data-crew="7" data-year="1998" data-href="iss.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-005 // STATION CLASS</div>
+                            <div class="ship-name">ISS</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: INTERNATIONAL</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 7</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1998–PRESENT</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status active">ACTIVE</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-      <div class="ship-entry">
-        <div><span class="ship-name">Buran</span> <span class="ship-type">(USSR)</span></div>
-        <button class="details-button" onclick="window.location='buran.html'">ACCESS</button>
-      </div>
+                    <div class="ship-entry" data-name="Buran" data-type="ORBITAL SHUTTLE" data-origin="USSR" data-status="DECOM" data-crew="10" data-year="1988" data-href="buran.html">
+                        <div class="ship-left">
+                            <div class="ship-designation">REG-006 // BURAN CLASS</div>
+                            <div class="ship-name">Buran</div>
+                            <div class="ship-meta">
+                                <span>ORIGIN: USSR</span>
+                                <span class="sep">|</span>
+                                <span>CREW: 10</span>
+                                <span class="sep">|</span>
+                                <span>SERVICE: 1988–1993</span>
+                            </div>
+                        </div>
+                        <div class="ship-right">
+                            <div class="ship-status decom">DECOM</div>
+                            <button class="access-btn">ACCESS</button>
+                        </div>
+                    </div>
 
-    </div>
+                </div><!-- /ship-list -->
 
-    <p style="opacity:.5;margin-top:20px;">
-      NOTE: Some registry entries are partially corrupted or redacted.
-    </p>
+                <div id="registry-note">
+                    // NOTE: Some registry entries are partially corrupted or redacted. Clearance level 3+ required for full manifest access.
+                </div>
 
-  </div>
+                <div id="prompt">
+                    <span class="chev">&gt;</span>
+                    <input id="cmd" autocomplete="off" placeholder="ENTER COMMAND">
+                </div>
+                <div id="available">
+                    <span>AVAILABLE TERMS</span>
+                    <span>
+                        <span class="k">HOME</span> •
+                        <span class="k">SHIPS</span> •
+                        <span class="k">STATIONS</span> •
+                        <span class="k">ABOUT</span> •
+                        <span class="k">GAMES</span> •
+                        <span class="k">CONTACT</span>
+                    </span>
+                </div>
+            </div><!-- /registry-box -->
 
-  <div id="terminal-box">
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off" placeholder="Enter command">
-    </div>
-  </div>
+            <!-- ═══════════════ RIGHT: TELEMETRY ═══════════════ -->
+            <div id="telem-box" class="panel">
+                <div id="telem-header">
+                    <span>// VESSEL TELEMETRY</span>
+                    <span id="signal-hz">60.00Hz</span>
+                </div>
 
+                <!-- Reticle frame with vessel readout -->
+                <div id="telem-frame">
+                    <div id="telem-readout">
+                        <div id="telem-vessel-name">— — —</div>
+                        <div id="telem-vessel-type">SELECT A VESSEL</div>
+                        <div id="telem-vessel-origin">// HOVER TO SCAN //</div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div id="telem-stats">
+                    <div class="stat">
+                        <span class="val" id="stat-crew">—</span>
+                        CREW CAP.
+                        <div class="bar"></div>
+                    </div>
+                    <div class="stat">
+                        <span class="val" id="stat-year">—</span>
+                        LAUNCH YR
+                        <div class="bar"></div>
+                    </div>
+                    <div class="stat">
+                        <span class="val" id="stat-status">—</span>
+                        STATUS
+                        <div class="bar"></div>
+                    </div>
+                </div>
+
+                <!-- Live feed -->
+                <div id="telem-feed">
+                    <div id="feed-inner"></div>
+                </div>
+
+            </div><!-- /telem-box -->
+
+        </div><!-- /crt-container -->
+    </div><!-- /screen -->
+
+    <!-- CRT overlays -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="poweron"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4</div>
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
+<div id="bezel-label">U.I.C. SYSTEMS • MODEL NR-88</div>
+<div id="brand-led"></div>
 
 <script>
-const container = document.getElementById("crt-container");
-const os = document.getElementById("os");
+/* ─── CLOCK + HZ ─── */
+const clock = document.getElementById("clock");
+const hz    = document.getElementById("signal-hz");
+function tickClock(){
+    const d = new Date(), pad = n=>n.toString().padStart(2,"0");
+    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    hz.textContent = (59.90 + Math.random()*.2).toFixed(2)+"Hz";
+}
+setInterval(tickClock,1000);
+tickClock();
 
+/* ─── CRT PARALLAX TILT ─── */
+const container = document.getElementById("crt-container");
 document.addEventListener("mousemove", e=>{
-  const x = (window.innerWidth/2 - e.clientX)/1000;
-  const y = (window.innerHeight/2 - e.clientY)/1000;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+    const x = (window.innerWidth/2  - e.clientX)/1200;
+    const y = (window.innerHeight/2 - e.clientY)/1200;
+    container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+},{passive:true});
+
+/* ─── TELEMETRY HOVER ─── */
+const nameEl   = document.getElementById("telem-vessel-name");
+const typeEl   = document.getElementById("telem-vessel-type");
+const originEl = document.getElementById("telem-vessel-origin");
+const crewEl   = document.getElementById("stat-crew");
+const yearEl   = document.getElementById("stat-year");
+const statEl   = document.getElementById("stat-status");
+
+document.querySelectorAll(".ship-entry").forEach(entry=>{
+    entry.addEventListener("mouseenter", ()=>{
+        nameEl.textContent   = entry.dataset.name.toUpperCase();
+        typeEl.textContent   = entry.dataset.type;
+        originEl.textContent = "// " + entry.dataset.origin + " //";
+        crewEl.textContent   = entry.dataset.crew;
+        yearEl.textContent   = entry.dataset.year;
+        statEl.textContent   = entry.dataset.status;
+        statEl.style.color   = entry.dataset.status === "ACTIVE" ? "#8fff8a" : "#ff4a2b";
+    });
+    entry.addEventListener("mouseleave", ()=>{
+        nameEl.textContent   = "— — —";
+        typeEl.textContent   = "SELECT A VESSEL";
+        originEl.textContent = "// HOVER TO SCAN //";
+        crewEl.textContent   = "—";
+        yearEl.textContent   = "—";
+        statEl.textContent   = "—";
+        statEl.style.color   = "";
+    });
+    // ACCESS button navigation
+    entry.querySelector(".access-btn").addEventListener("click", ()=>{
+        window.location = entry.dataset.href;
+    });
 });
 
+/* ─── LIVE DATA FEED ─── */
+const feedEl = document.getElementById("feed-inner");
+const feedLines = [
+    "TELEMETRY NOMINAL — ALL VESSELS REPORTING",
+    "REG-001 :: SOYUZ :: SIGNAL STRENGTH 98%",
+    "REG-002 :: VON BRAUN :: SIGNAL STRENGTH 94%",
+    "REG-003 :: SHENZHOU :: SIGNAL STRENGTH 97%",
+    "REG-004 :: DISCOVERY ONE :: ARCHIVED — NO SIGNAL",
+    "REG-005 :: ISS :: SIGNAL STRENGTH 99%",
+    "REG-006 :: BURAN :: ARCHIVED — NO SIGNAL",
+    "UPLINK STABLE :: U.I.C. GRID ONLINE",
+    "WARNING: REG-004 REGISTRY PARTIALLY REDACTED",
+    "CHANNEL 7 BROADCAST ACTIVE",
+    "SECURE TUNNEL ESTABLISHED",
+    "MANIFEST INTEGRITY: 83%",
+];
+let feedIdx = 0;
+function pushFeed(){
+    const line = document.createElement("div");
+    line.textContent = feedLines[feedIdx % feedLines.length];
+    line.style.opacity = "0";
+    feedEl.appendChild(line);
+    feedIdx++;
+    setTimeout(()=>line.style.cssText += ";opacity:1;transition:opacity .4s;", 50);
+    // keep only last 6 lines
+    while(feedEl.children.length > 6){
+        feedEl.removeChild(feedEl.firstChild);
+    }
+}
+pushFeed();
+setInterval(pushFeed, 2200);
+
+/* ─── TERMINAL COMMAND ─── */
 const input = document.getElementById("cmd");
 input.addEventListener("keydown", e=>{
-  if(e.key !== "Enter") return;
-
-  const cmd = input.value.toLowerCase().trim();
-
-  switch(cmd){
-    case "home": window.location="index.html"; break;
-    case "ships": window.location="ships.html"; break;
-    case "stations": window.location="stations.html"; break;
-    case "about": window.location="about.html"; break;
-    case "games": window.location="games.html"; break;
-    case "contact": window.location="contact.html"; break;
-  }
-
-  input.value="";
+    if(e.key !== "Enter") return;
+    const cmd = input.value.toLowerCase().trim();
+    input.value = "";
+    const routes = {
+        home:"index.html", ships:"ships.html", stations:"stations.html",
+        about:"about.html", games:"games.html", contact:"contact.html"
+    };
+    if(routes[cmd]) window.location = routes[cmd];
 });
 </script>
 
