@@ -9,350 +9,354 @@
 
 <style>
 :root{
-  --amber:#FF9F07;
-  --amberBright:#FFC861;
-  --amberDim:#B36700;
-  --amberSoft:rgba(255,159,7,.15);
-  --amberMid:rgba(255,159,7,.25);
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --scanBlack:#0a0603;
 }
 
 *{box-sizing:border-box;}
-html,body{margin:0;height:100%;}
-body{
-  background:#050505;
-  color:var(--amber);
-  font-family:'Share Tech Mono', monospace;
-  overflow:hidden;
-}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-/* CRT FX */
-#amber{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle at center, rgba(255,159,7,.05), transparent 70%);
-  pointer-events:none;
-  z-index:1000;
+/* ─── BEZEL ─── */
+#bezel{
+    position:fixed;inset:0;
+    background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);
+    z-index:0;
 }
-
-#scanlines{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-  mix-blend-mode:overlay;
+#bezel::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
+    pointer-events:none;
 }
-
-@keyframes flicker{
-  0%{opacity:.15;}
-  50%{opacity:.07;}
-  100%{opacity:.15;}
+#bezel-label{
+    position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+    z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;
+    text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;
 }
+#brand-led{
+    position:fixed;bottom:16px;left:calc(50% - 200px);
+    width:6px;height:6px;border-radius:50%;
+    background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
+    animation:led-pulse 2.4s ease-in-out infinite;z-index:5;
+}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
+/* ─── SCREEN WRAP + FISHEYE ─── */
+#screen-wrap{
+    position:fixed;inset:22px;border-radius:48px/60px;background:#050505;
+    box-shadow:
+        0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,
+        0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);
+    overflow:hidden;transform-style:preserve-3d;isolation:isolate;
+}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
+
+/* CRT overlays */
+#glare{
+    position:absolute;inset:0;pointer-events:none;z-index:1200;
+    background:
+        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
+        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
+    mix-blend-mode:screen;
+}
 #vignette{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:999;
-  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.45) 85%,rgba(0,0,0,.85) 100%);
+    position:absolute;inset:0;pointer-events:none;z-index:1100;
+    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
+}
+#corners{
+    position:absolute;inset:0;pointer-events:none;z-index:1105;
+    background:
+        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
+}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);
+    animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;
+}
+#rgb-mask{
+    background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);
+    z-index:1250;mix-blend-mode:overlay;opacity:.6;
+}
+#roll{
+    background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);
+    z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;
+}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);
+    z-index:1150;mix-blend-mode:screen;
+}
+#poweron{
+    position:absolute;inset:0;background:#fff;z-index:2000;pointer-events:none;
+    animation:poweron 1.6s ease-out forwards;
+}
+@keyframes poweron{
+    0%{opacity:0;}5%{opacity:.9;}10%{opacity:.15;}
+    20%{transform:scaleY(.005);opacity:1;background:#fff;}
+    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
+    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
 }
 
-/* MAIN FRAME */
-#ui-shell{
-  position:fixed;
-  inset:20px;
-  border:2px solid var(--amber);
-  box-shadow:
-    0 0 25px rgba(255,159,7,.08),
-    inset 0 0 30px rgba(255,159,7,.03);
-  display:flex;
-  flex-direction:column;
-  background:rgba(0,0,0,.35);
+/* ─── PANEL BASE ─── */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.45);
+    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
+    box-shadow:
+        inset 0 0 30px rgba(255,159,7,.06),
+        inset 0 0 2px rgba(255,200,90,.25),
+        0 0 30px rgba(255,159,7,.08);
+    border-radius:6px;
+}
+.panel::before{
+    content:"";position:absolute;inset:8px;
+    border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;
+}
+.panel::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
+    opacity:.7;
 }
 
-/* INNER FRAME */
-#ui-shell::before{
-  content:"";
-  position:absolute;
-  inset:12px;
-  border:1px solid rgba(255,159,7,.15);
-  pointer-events:none;
-  z-index:2;
+/* ─── MAIN CONTAINER ─── */
+#crt-container{
+    position:absolute;inset:0;
+    display:flex;align-items:stretch;justify-content:space-between;
+    padding:44px 56px 70px;gap:28px;
+    transform-style:preserve-3d;transition:transform .1s ease-out;
+    z-index:2;
 }
 
-/* HEADER */
-#header{
-  height:64px;
-  border-bottom:1px solid var(--amberSoft);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 20px;
-  letter-spacing:.2em;
-  font-size:14px;
-  background:linear-gradient(to bottom, rgba(255,159,7,.05), transparent);
-  z-index:2;
+/* ─── LEFT — MAP BOX ─── */
+#map-box{
+    width:66%;
+    display:flex;flex-direction:column;
+    padding:22px;
+    min-width:0;
 }
-
-#header-left{
-  text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);
+#map-header{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:10px;margin-bottom:14px;
 }
-
-#header-right{
-  opacity:.65;
-  font-size:12px;
+#map-header h1{
+    margin:0;font-size:18px;letter-spacing:.26em;
+    text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);
 }
-
-/* MAP AREA */
-#map-wrap{
-  position:relative;
-  flex:1;
-  padding:16px;
-}
-
-#canvas-frame{
-  position:relative;
-  width:100%;
-  height:100%;
-  border:1px solid var(--amberSoft);
-  background:
-    radial-gradient(circle at center, rgba(255,159,7,.03), transparent 70%),
-    rgba(0,0,0,.55);
-  overflow:hidden;
-  box-shadow:
-    inset 0 0 25px rgba(255,159,7,.03);
-}
-
-canvas{
-  display:block;
-  width:100%;
-  height:100%;
-}
-
-/* HUD PANELS */
-.hud-panel{
-  position:absolute;
-  padding:10px 14px;
-  font-size:12px;
-  border:1px solid var(--amberSoft);
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(4px);
-  box-shadow:0 0 15px rgba(255,159,7,.04);
-  z-index:3;
-  line-height:1.6;
-}
-
-#controls{ top:20px; left:20px; }
-#legend{ top:20px; right:20px; text-align:right; }
-
-#legend .tag{
-  display:inline-block;
-  font-size:10px;
-  color:var(--amberBright);
-  letter-spacing:.2em;
-  padding:1px 6px;
-  border:1px solid rgba(255,159,7,.4);
-  margin-top:6px;
-  animation:tag-blink 1.8s steps(2) infinite;
+#map-header .tag{
+    font-size:11px;color:var(--amberBright);letter-spacing:.2em;
+    padding:2px 8px;border:1px solid rgba(255,159,7,.4);
+    animation:tag-blink 1.8s steps(2) infinite;
 }
 @keyframes tag-blink{50%{opacity:.35;}}
 
-/* focus readout, bottom-left */
-#focus-panel{
-  bottom:20px; left:20px;
-  min-width:190px;
+#canvas-frame{
+    position:relative;flex:1;min-height:0;
+    border:1px solid rgba(255,159,7,.28);
+    background:
+        radial-gradient(circle at center, rgba(255,159,7,.03), transparent 70%),
+        linear-gradient(180deg,rgba(255,159,7,.04),rgba(0,0,0,.35));
+    overflow:hidden;
 }
-#focus-name{
-  font-size:15px;
-  letter-spacing:.14em;
-  color:var(--amberBright);
-  text-shadow:0 0 6px rgba(255,159,7,.5);
-}
-#focus-sub{
-  font-size:11px;
-  opacity:.6;
-  margin-top:2px;
-}
-#focus-bar{
-  margin-top:8px;
-  height:2px;
-  background:rgba(255,159,7,.15);
-  position:relative;
-  overflow:hidden;
-}
-#focus-bar::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  width:40%;
-  background:var(--amber);
-  box-shadow:0 0 8px var(--amber);
-  animation:scan-bar 2.4s ease-in-out infinite;
-}
-@keyframes scan-bar{
-  0%{transform:translateX(-100%);}
-  100%{transform:translateX(250%);}
-}
+canvas{display:block;}
 
-/* speed panel bottom right */
-#speed-panel{
-  bottom:20px; right:20px;
-  text-align:right;
-}
-#speed-panel input[type=range]{
-  -webkit-appearance:none;
-  width:120px;
-  height:2px;
-  background:rgba(255,159,7,.3);
-  outline:none;
-  margin-top:8px;
-}
-#speed-panel input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:10px;height:10px;
-  background:var(--amber);
-  box-shadow:0 0 8px var(--amber);
-  cursor:pointer;
+#map-note{
+    margin-top:12px;font-size:11px;opacity:.55;letter-spacing:.05em;
 }
 
 /* Tooltip */
 #tooltip{
-  position:absolute;
-  pointer-events:none;
-  padding:10px 14px;
-  font-size:12px;
-  border:1px solid var(--amberSoft);
-  background:rgba(0,0,0,.88);
-  box-shadow:0 0 20px rgba(255,159,7,.12);
-  opacity:0;
-  transform:translateY(6px);
-  transition:.15s ease;
-  z-index:10;
-  white-space:nowrap;
+    position:absolute;pointer-events:none;
+    padding:8px 12px;font-size:11px;
+    border:1px solid rgba(255,159,7,.3);
+    background:rgba(0,0,0,.88);
+    box-shadow:0 0 20px rgba(255,159,7,.12);
+    opacity:0;transform:translateY(6px);transition:.15s ease;
+    z-index:10;white-space:nowrap;
 }
-#tooltip .tt-name{ color:var(--amberBright); letter-spacing:.14em; }
-#tooltip .tt-sub{ opacity:.55; font-size:10px; margin-top:2px; }
+#tooltip .tt-name{color:var(--amberBright);letter-spacing:.14em;}
+#tooltip .tt-sub{opacity:.55;font-size:10px;margin-top:2px;}
 
-/* CSS2D labels rendered by three.js */
 .body-label{
-  font-family:'Share Tech Mono', monospace;
-  font-size:11px;
-  color:rgba(255,159,7,.85);
-  text-shadow:0 0 6px rgba(255,159,7,.5);
-  letter-spacing:.12em;
-  pointer-events:none;
-  white-space:nowrap;
-  transform:translateY(6px);
+    font-family:'Share Tech Mono', monospace;
+    font-size:10px;color:rgba(255,159,7,.85);
+    text-shadow:0 0 6px rgba(255,159,7,.5);
+    letter-spacing:.12em;pointer-events:none;white-space:nowrap;
+    transform:translateY(6px);
 }
-.body-label.moon-label{
-  font-size:9px;
-  color:rgba(255,159,7,.6);
-  text-shadow:none;
+.body-label.moon-label{font-size:8px;color:rgba(255,159,7,.6);text-shadow:none;}
+
+/* ─── RIGHT — HUD BOX ─── */
+#hud-box{
+    width:32%;
+    display:flex;flex-direction:column;
+    padding:22px;
+    gap:16px;
+    overflow-y:auto;scrollbar-width:none;
+}
+#hud-box::-webkit-scrollbar{display:none;}
+#hud-header{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:10px;margin-bottom:4px;
+    font-size:12px;letter-spacing:.1em;
 }
 
-/* Footer */
-#footer{
-  height:34px;
-  border-top:1px solid var(--amberSoft);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 16px;
-  font-size:12px;
-  opacity:.7;
-  z-index:2;
+.hud-block{
+    border:1px solid rgba(255,159,7,.22);
+    background:linear-gradient(90deg,rgba(255,159,7,.03),rgba(0,0,0,.2));
+    padding:12px 14px;
+    font-size:11px;
+    line-height:1.7;
+}
+.hud-block .label{
+    color:var(--amberBright);letter-spacing:.16em;font-size:10px;opacity:.85;
+    margin-bottom:4px;
 }
 
-/* CORNER ACCENTS */
-.corner{
-  position:absolute;
-  width:28px;
-  height:28px;
-  border-color:var(--amber);
-  border-style:solid;
-  z-index:5;
-  pointer-events:none;
+#focus-name{
+    font-size:15px;letter-spacing:.14em;color:var(--amberBright);
+    text-shadow:0 0 6px rgba(255,159,7,.5);
 }
-.c1{top:-2px;left:-2px;border-width:3px 0 0 3px;}
-.c2{top:-2px;right:-2px;border-width:3px 3px 0 0;}
-.c3{bottom:-2px;left:-2px;border-width:0 0 3px 3px;}
-.c4{bottom:-2px;right:-2px;border-width:0 3px 3px 0;}
+#focus-sub{font-size:10px;opacity:.6;margin-top:2px;}
+.bar{
+    margin-top:8px;height:2px;background:rgba(255,159,7,.15);
+    position:relative;overflow:hidden;
+}
+.bar::after{
+    content:"";position:absolute;inset:0;width:40%;
+    background:var(--amber);box-shadow:0 0 8px var(--amber);
+    animation:scan-bar 2.4s ease-in-out infinite;
+}
+@keyframes scan-bar{0%{transform:translateX(-100%);}100%{transform:translateX(250%);}}
 
-/* loading veil */
-#boot{
-  position:fixed;inset:0;background:#050505;z-index:5000;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--amber);font-size:13px;letter-spacing:.3em;
-  transition:opacity .6s ease;
+#speed-slider{
+    -webkit-appearance:none;width:100%;height:2px;
+    background:rgba(255,159,7,.3);outline:none;margin-top:10px;
 }
-#boot span{ animation:tag-blink 1s steps(2) infinite; }
+#speed-slider::-webkit-slider-thumb{
+    -webkit-appearance:none;width:10px;height:10px;
+    background:var(--amber);box-shadow:0 0 8px var(--amber);cursor:pointer;
+}
+#speed-val{float:right;color:var(--amberBright);}
+
+/* clock / os corner text (like other pages) */
+#clock{position:absolute;top:16px;left:24px;font-size:11px;opacity:.55;z-index:6;letter-spacing:.08em;}
+#os{position:absolute;top:16px;right:24px;font-size:11px;opacity:.55;z-index:6;letter-spacing:.08em;}
+
+@media(max-width:900px){
+    #crt-container{flex-direction:column;padding:26px 20px;overflow-y:auto;}
+    #map-box,#hud-box{width:100%;}
+    #map-box{height:60vh;}
+    #screen-wrap{inset:12px;border-radius:32px/40px;}
+}
 </style>
 </head>
 
 <body>
 
-<div id="boot">INITIALIZING DEEP SPACE ARRAY<span>_</span></div>
+<!-- Fisheye SVG filter -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
-<div id="vignette"></div>
+<div id="bezel"></div>
 
-<div id="ui-shell">
+<div id="screen-wrap">
 
-<div class="corner c1"></div>
-<div class="corner c2"></div>
-<div class="corner c3"></div>
-<div class="corner c4"></div>
+    <div id="screen">
 
-<div id="header">
-<div id="header-left">SOLAR NAVIGATION ARRAY // 3D</div>
-<div id="header-right">UIC DEEP SPACE CARTOGRAPHY SYSTEM</div>
+        <div id="crt-container">
+
+            <!-- ═══════ LEFT: 3D NAV MAP ═══════ -->
+            <div id="map-box" class="panel">
+                <div id="map-header">
+                    <h1>SOLAR NAVIGATION ARRAY</h1>
+                    <span class="tag">LIVE</span>
+                </div>
+
+                <div id="canvas-frame">
+                    <div id="tooltip"><div class="tt-name"></div><div class="tt-sub"></div></div>
+                </div>
+
+                <div id="map-note">// NOTE: Drag to orbit, right-click drag to pan, scroll to zoom. Click a body to access its local map.</div>
+            </div>
+
+            <!-- ═══════ RIGHT: HUD ═══════ -->
+            <div id="hud-box" class="panel">
+                <div id="hud-header">
+                    <span>// NAV TELEMETRY</span>
+                    <span id="signal-hz">60.00Hz</span>
+                </div>
+
+                <div class="hud-block">
+                    <div class="label">CONTROLS</div>
+                    DRAG :: ORBIT CAMERA<br>
+                    RIGHT-DRAG :: PAN<br>
+                    SCROLL :: ZOOM
+                </div>
+
+                <div class="hud-block">
+                    <div class="label">TARGET LOCK</div>
+                    <div id="focus-name">— — —</div>
+                    <div id="focus-sub">// HOVER OR SELECT A BODY //</div>
+                    <div class="bar"></div>
+                </div>
+
+                <div class="hud-block">
+                    <div class="label">SIM SPEED</div>
+                    <span id="speed-val">0.05x</span>
+                    <input id="speed-slider" type="range" min="0.05" max="4" step="0.05" value="0.05">
+                </div>
+
+                <div class="hud-block" style="flex:1;overflow-y:auto;scrollbar-width:none;">
+                    <div class="label">SIGNAL LOG</div>
+                    <div id="feed-inner"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CRT overlays inside the screen (unwarped) -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="poweron"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4</div>
 </div>
 
-<div id="map-wrap">
-
-<div id="controls" class="hud-panel">
-DRAG TO ORBIT<br>
-RIGHT-DRAG TO PAN<br>
-SCROLL TO ZOOM
-</div>
-
-<div id="legend" class="hud-panel">
-CLICK PLANETS / MOONS<br>
-TO ACCESS LOCAL MAPS
-<div class="tag">LIVE FEED</div>
-</div>
-
-<div id="focus-panel" class="hud-panel">
-<div id="focus-name">— — —</div>
-<div id="focus-sub">// HOVER OR SELECT A BODY //</div>
-<div id="focus-bar"></div>
-</div>
-
-<div id="speed-panel" class="hud-panel">
-SIM SPEED
-<div><input id="speed-slider" type="range" min="0" max="4" step="0.05" value="1"></div>
-</div>
-
-<div id="canvas-frame">
-<div id="tooltip"><div class="tt-name"></div><div class="tt-sub"></div></div>
-</div>
-
-</div>
-
-<div id="footer">
-<div>U.I.C. ORBITAL MAPPING INTERFACE</div>
-<div>UIC OS v1.0.4</div>
-</div>
-
-</div>
+<div id="bezel-label">U.I.C. SYSTEMS • MODEL NR-88</div>
+<div id="brand-led"></div>
 
 <script type="importmap">
 {
@@ -363,13 +367,59 @@ SIM SPEED
 }
 </script>
 
+<script>
+/* ─── CLOCK + HZ ─── */
+const clock = document.getElementById("clock");
+const hz    = document.getElementById("signal-hz");
+function tickClock(){
+    const d = new Date(), pad = n=>n.toString().padStart(2,"0");
+    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    hz.textContent = (59.90 + Math.random()*.2).toFixed(2)+"Hz";
+}
+setInterval(tickClock,1000);
+tickClock();
+
+/* ─── CRT PARALLAX TILT (whole screen, not the 3D camera) ─── */
+const container = document.getElementById("crt-container");
+document.addEventListener("mousemove", e=>{
+    const x = (window.innerWidth/2  - e.clientX)/1400;
+    const y = (window.innerHeight/2 - e.clientY)/1400;
+    container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+},{passive:true});
+
+/* ─── SIGNAL LOG FEED ─── */
+const feedEl = document.getElementById("feed-inner");
+const feedLines = [
+    "UPLINK STABLE :: U.I.C. GRID ONLINE",
+    "TELEMETRY NOMINAL — ALL BODIES TRACKED",
+    "ORBIT SOLVER :: CONVERGED",
+    "SCANNING ECLIPTIC PLANE...",
+    "DEEP SPACE ARRAY :: SYNCED",
+    "SECURE TUNNEL ESTABLISHED",
+    "NAV BEACON SWEEP COMPLETE",
+    "MANIFEST INTEGRITY: 96%",
+];
+let feedIdx = 0;
+function pushFeed(){
+    const line = document.createElement("div");
+    line.style.opacity="0";
+    line.style.marginBottom="4px";
+    line.textContent = feedLines[feedIdx % feedLines.length];
+    feedEl.appendChild(line);
+    feedIdx++;
+    setTimeout(()=>line.style.cssText += ";opacity:.75;transition:opacity .4s;", 50);
+    while(feedEl.children.length > 6){ feedEl.removeChild(feedEl.firstChild); }
+}
+pushFeed();
+setInterval(pushFeed, 2600);
+</script>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 const AMBER = 0xFF9F07;
-const AMBER_BRIGHT = 0xFFC861;
 
 const frame = document.getElementById('canvas-frame');
 const tooltip = document.getElementById('tooltip');
@@ -378,18 +428,20 @@ const ttSub = tooltip.querySelector('.tt-sub');
 const focusName = document.getElementById('focus-name');
 const focusSub = document.getElementById('focus-sub');
 const speedSlider = document.getElementById('speed-slider');
-const boot = document.getElementById('boot');
+const speedVal = document.getElementById('speed-val');
 
 /* ---------- renderer / scene / camera ---------- */
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(50, frame.clientWidth/frame.clientHeight, 0.1, 5000);
-camera.position.set(0, 140, 280);
+camera.position.set(0, 120, 260);
 
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(frame.clientWidth, frame.clientHeight);
 renderer.setClearColor(0x000000, 0);
+renderer.domElement.style.position = 'absolute';
+renderer.domElement.style.inset = '0';
 frame.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -400,7 +452,10 @@ labelRenderer.domElement.style.left = '0';
 labelRenderer.domElement.style.pointerEvents = 'none';
 frame.appendChild(labelRenderer.domElement);
 
-const controls = new OrbitControls(camera, labelRenderer.domElement);
+/* IMPORTANT: controls must attach to the element that actually receives
+   pointer events (the WebGL canvas) — not the label layer, which has
+   pointer-events:none. This is what makes drag/pan/zoom work. */
+const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 20;
@@ -409,12 +464,14 @@ controls.screenSpacePanning = true;
 
 function resize(){
   const w = frame.clientWidth, h = frame.clientHeight;
+  if(w===0||h===0) return;
   camera.aspect = w/h;
   camera.updateProjectionMatrix();
   renderer.setSize(w,h);
   labelRenderer.setSize(w,h);
 }
 window.addEventListener('resize', resize);
+new ResizeObserver(resize).observe(frame);
 
 /* ---------- starfield ---------- */
 function buildStars(){
@@ -509,8 +566,8 @@ const moonData = [
   { parent:'jupiter', name:'Europa', r:.9,  orbit:9,  speed:3,  offset:1.5,link:'europa-map.html', info:'ICE-CRUSTED MOON' }
 ];
 
-const pivots = {};    // key -> orbit pivot (Object3D at sun, rotates)
-const bodies  = {};   // key -> { mesh, data, glow }
+const pivots = {};
+const bodies  = {};
 const clickable = [];
 
 bodyData.forEach(b=>{
@@ -522,11 +579,10 @@ bodyData.forEach(b=>{
   if(b.orbit > 0) addOrbitRing(b.orbit);
 
   const geo = new THREE.SphereGeometry(b.r, 32, 32);
-  const mat = new THREE.MeshBasicMaterial({ color:b.color, wireframe:false });
+  const mat = new THREE.MeshBasicMaterial({ color:b.color });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(b.orbit, 0, 0);
 
-  // wireframe overlay for that "tactical readout" look
   const wireGeo = new THREE.SphereGeometry(b.r*1.12, 12, 8);
   const wireMat = new THREE.MeshBasicMaterial({ color:AMBER, wireframe:true, transparent:true, opacity:.25 });
   mesh.add(new THREE.Mesh(wireGeo, wireMat));
@@ -541,12 +597,12 @@ bodyData.forEach(b=>{
     mesh.add(ringMesh);
   }
 
-  const label = makeLabel(b.name.toUpperCase(), b.key==='sun' ? null : null);
+  const label = makeLabel(b.name.toUpperCase());
   label.position.set(0, b.r+3, 0);
   mesh.add(label);
 
   pivot.add(mesh);
-  mesh.userData = { key:b.key, name:b.name, info:b.info, link:b.link, isMoon:false };
+  mesh.userData = { key:b.key, name:b.name, info:b.info, link:b.link };
   clickable.push(mesh);
   bodies[b.key] = { mesh, data:b, pivot };
 });
@@ -569,19 +625,15 @@ moonData.forEach(m=>{
   mesh.add(label);
 
   pivot.add(mesh);
-  mesh.userData = { key:m.name.toLowerCase(), name:m.name, info:m.info, link:m.link, isMoon:true };
+  mesh.userData = { key:m.name.toLowerCase(), name:m.name, info:m.info, link:m.link };
   clickable.push(mesh);
   moonPivots.push({ pivot, m });
 });
 
-/* Sun light + point glow already covered via basic material (unlit style keeps CRT flatness) */
-
 /* ---------- raycasting ---------- */
 const raycaster = new THREE.Raycaster();
-raycaster.params.Sprite = { threshold: 1 };
 const mouse = new THREE.Vector2();
-let hovered = null;
-let selected = null;
+let dragDistance = 0;
 
 function setPointer(e){
   const rect = renderer.domElement.getBoundingClientRect();
@@ -598,7 +650,6 @@ function pickBody(){
 renderer.domElement.addEventListener('mousemove', e=>{
   setPointer(e);
   const hit = pickBody();
-  hovered = hit;
   if(hit){
     tooltip.style.opacity = '1';
     tooltip.style.transform = 'translateY(0)';
@@ -614,10 +665,15 @@ renderer.domElement.addEventListener('mousemove', e=>{
   }
 });
 
-renderer.domElement.addEventListener('click', ()=>{
+/* distinguish a click (select/navigate) from a drag (orbit/pan) */
+let downX = 0, downY = 0;
+renderer.domElement.addEventListener('pointerdown', e=>{ downX=e.clientX; downY=e.clientY; });
+renderer.domElement.addEventListener('pointerup', e=>{
+  const moved = Math.hypot(e.clientX-downX, e.clientY-downY);
+  if(moved > 6) return; // was a drag, not a click
+  setPointer(e);
   const hit = pickBody();
   if(!hit) return;
-  selected = hit;
   focusName.textContent = hit.userData.name.toUpperCase();
   focusSub.textContent = '// ' + hit.userData.info + ' //';
   if(hit.userData.link){
@@ -626,8 +682,12 @@ renderer.domElement.addEventListener('click', ()=>{
 });
 
 /* ---------- simulation loop ---------- */
-let simSpeed = 1;
-speedSlider.addEventListener('input', ()=>{ simSpeed = parseFloat(speedSlider.value); });
+let simSpeed = parseFloat(speedSlider.value);
+speedSlider.addEventListener('input', ()=>{
+  simSpeed = parseFloat(speedSlider.value);
+  speedVal.textContent = simSpeed.toFixed(2)+'x';
+});
+speedVal.textContent = simSpeed.toFixed(2)+'x';
 
 let t = 0;
 function animate(){
@@ -646,8 +706,6 @@ function animate(){
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
-
-setTimeout(()=>{ boot.style.opacity = '0'; setTimeout(()=>boot.remove(), 650); }, 500);
 animate();
 </script>
 
