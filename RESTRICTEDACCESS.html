@@ -1,0 +1,1111 @@
+x<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. // RESTRICTED ACCESS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
+
+/* BEZEL / SCREEN / FISHEYE (shared shell) */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;transform-style:preserve-3d;isolation:isolate;}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
+#screen-scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
+#screen-scroll::-webkit-scrollbar{display:none;}
+
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.6;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);z-index:1150;mix-blend-mode:screen;}
+
+/* CONTAINER */
+#crt-container{padding:56px 60px 130px;transform-style:preserve-3d;transition:transform .1s ease-out;min-height:100%;position:relative;z-index:2;will-change:transform;}
+
+/* PANELS */
+.panel{position:relative;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);border-radius:6px;padding:22px;}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px;}
+.header-left h1{margin:0 0 6px 0;font-size:26px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.6),0 0 14px rgba(255,74,43,.3);}
+.header-left p{margin:0;opacity:.85;letter-spacing:.16em;font-size:12px;text-shadow:0 0 3px rgba(255,159,7,.5);}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.header-right .tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+.header-right .tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);animation:tag-blink 1.4s steps(2) infinite;}
+.header-right .tag.amber{border-color:rgba(255,159,7,.4);color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+@keyframes tag-blink{50%{opacity:.35;}}
+
+/* Progress rail */
+#progress-rail{margin:12px 0 34px;padding:14px 18px;border:1px solid rgba(255,74,43,.35);background:rgba(255,74,43,.05);display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:relative;overflow:hidden;}
+#progress-rail::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,74,43,.06) 0 8px,transparent 8px 18px);pointer-events:none;}
+#progress-rail .label{font-size:11px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+#progress-rail .dots{display:flex;gap:6px;flex-wrap:wrap;}
+#progress-rail .dot{width:22px;height:22px;border:1px solid rgba(255,74,43,.4);display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.1em;color:var(--red);opacity:.55;}
+#progress-rail .dot.done{border-color:var(--green);color:var(--green);background:rgba(143,255,138,.08);opacity:1;text-shadow:0 0 5px rgba(143,255,138,.5);box-shadow:0 0 8px rgba(143,255,138,.25);}
+#progress-rail .status{margin-left:auto;font-size:11px;letter-spacing:.24em;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+
+/* GATE (puzzle cell) */
+.gate{position:relative;margin-bottom:30px;padding:24px;border:2px solid rgba(255,74,43,.4);border-radius:6px;background:linear-gradient(180deg,rgba(255,74,43,.04),rgba(0,0,0,.35));box-shadow:inset 0 0 24px rgba(255,74,43,.05),0 0 24px rgba(255,74,43,.06);}
+.gate.solved{border-color:rgba(143,255,138,.35);background:linear-gradient(180deg,rgba(143,255,138,.03),rgba(0,0,0,.35));box-shadow:inset 0 0 24px rgba(143,255,138,.05),0 0 24px rgba(143,255,138,.07);}
+.gate.locked{opacity:.55;pointer-events:none;}
+.gate.locked::before{content:"◆ LOCKED — UNLOCK PREVIOUS GATE";position:absolute;top:12px;right:20px;font-size:11px;letter-spacing:.24em;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+
+.gate-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid rgba(255,74,43,.25);gap:10px;flex-wrap:wrap;}
+.gate.solved .gate-head{border-bottom-color:rgba(143,255,138,.3);}
+.gate-title{font-size:18px;letter-spacing:.24em;text-shadow:0 0 4px rgba(255,159,7,.6);color:var(--amberBright);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.gate-title .num{padding:2px 8px;border:1px solid rgba(255,74,43,.5);font-size:11px;color:var(--red);letter-spacing:.2em;text-shadow:0 0 4px rgba(255,74,43,.5);}
+.gate.solved .gate-title .num{border-color:rgba(143,255,138,.5);color:var(--green);text-shadow:0 0 4px rgba(143,255,138,.5);}
+.gate-status{font-size:11px;letter-spacing:.24em;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.gate.solved .gate-status{color:var(--green);text-shadow:0 0 4px rgba(143,255,138,.5);}
+
+.gate p{line-height:1.65;opacity:.94;text-shadow:0 0 2px rgba(255,159,7,.5);margin:0 0 12px 0;}
+.gate .hint{opacity:.7;font-size:12px;letter-spacing:.1em;font-style:italic;margin-top:8px;}
+.gate .clue{padding:12px 14px;border:1px dashed rgba(255,159,7,.35);background:rgba(255,159,7,.05);margin:10px 0;letter-spacing:.05em;text-shadow:0 0 4px rgba(255,159,7,.55);}
+.gate .clue.mono{font-family:'VT323',monospace;font-size:22px;letter-spacing:.24em;text-align:center;}
+
+.gate-input{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.gate-input input,.gate-input select{
+    background:rgba(255,159,7,.05);
+    border:1px solid var(--amber);
+    color:var(--amber);
+    padding:10px 14px;
+    font-family:inherit;
+    letter-spacing:.14em;
+    outline:none;
+    flex:1;
+    min-width:180px;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+    caret-color:var(--amberBright);
+}
+.gate-btn{padding:10px 18px;border:1px solid var(--amber);background:transparent;color:var(--amber);font-family:inherit;letter-spacing:.14em;cursor:pointer;transition:.2s ease;text-shadow:0 0 4px rgba(255,159,7,.5);position:relative;will-change:background,box-shadow,color;}
+.gate-btn::before{content:"";position:absolute;inset:-3px;border:1px solid rgba(255,159,7,.25);pointer-events:none;}
+.gate-btn:hover{background:rgba(255,159,7,.15);box-shadow:0 0 18px rgba(255,159,7,.25);color:var(--amberBright);}
+.gate-feedback{margin-top:10px;font-size:12px;letter-spacing:.14em;min-height:18px;}
+.gate-feedback.ok{color:var(--green);text-shadow:0 0 5px rgba(143,255,138,.5);}
+.gate-feedback.err{color:var(--red);text-shadow:0 0 5px rgba(255,74,43,.5);animation:err-shake .3s;}
+@keyframes err-shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+/* SECTION HEADING inside a gate */
+.gate .section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:8px;margin-bottom:14px;border-bottom:1px dashed rgba(255,159,7,.28);font-size:12px;letter-spacing:.28em;color:var(--amberBright);}
+
+/* MORSE display */
+.morse{font-family:'VT323',monospace;font-size:38px;letter-spacing:.35em;text-align:center;color:var(--amberBright);text-shadow:0 0 8px rgba(255,159,7,.6);padding:14px;background:rgba(255,159,7,.04);border:1px solid rgba(255,159,7,.3);}
+.morse-play{margin-top:12px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+
+/* CAESAR wheel */
+.wheel-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:10px 0;}
+.wheel-row label{font-size:11px;letter-spacing:.22em;opacity:.85;}
+.wheel-row input[type=range]{flex:1;min-width:220px;accent-color:var(--amber);}
+.wheel-row .out{padding:6px 10px;border:1px solid rgba(255,159,7,.35);background:rgba(255,159,7,.05);letter-spacing:.06em;font-family:'VT323',monospace;font-size:22px;min-width:200px;text-align:center;color:var(--amberBright);}
+
+/* BINARY */
+.binary{font-family:'VT323',monospace;font-size:22px;letter-spacing:.15em;background:rgba(255,159,7,.04);padding:14px;border:1px solid rgba(255,159,7,.3);white-space:pre-wrap;word-break:break-all;text-align:center;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);}
+
+/* FREQUENCY tuner */
+.freq-wrap{padding:12px;border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);margin-top:10px;}
+.freq-display{font-family:'VT323',monospace;font-size:38px;text-align:center;letter-spacing:.15em;color:var(--amberBright);text-shadow:0 0 10px rgba(255,159,7,.7);margin-bottom:10px;}
+.freq-meter{height:24px;position:relative;background:linear-gradient(90deg,rgba(255,74,43,.15),rgba(255,159,7,.15),rgba(143,255,138,.15),rgba(255,159,7,.15),rgba(255,74,43,.15));border:1px solid rgba(255,159,7,.35);overflow:hidden;margin-bottom:10px;}
+.freq-meter::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 1px,transparent 1px 20px);pointer-events:none;}
+.freq-needle{position:absolute;top:0;bottom:0;width:2px;background:var(--amberBright);box-shadow:0 0 8px var(--amber);transform:translateX(-50%);left:0%;transition:left .1s ease;}
+.freq-signal{margin-top:8px;font-size:12px;letter-spacing:.22em;text-align:center;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+.freq-signal.locked{color:var(--green);text-shadow:0 0 5px rgba(143,255,138,.5);}
+
+/* STAR MAP */
+.starmap{position:relative;width:100%;aspect-ratio:2/1;background:radial-gradient(ellipse at 50% 50%,rgba(20,10,0,.5),#000);border:1px solid rgba(255,159,7,.3);overflow:hidden;margin:8px 0;box-shadow:inset 0 0 24px rgba(255,159,7,.06);}
+.starmap .star{position:absolute;width:14px;height:14px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9) 20%,rgba(255,200,120,.4) 40%,transparent 70%);cursor:pointer;filter:drop-shadow(0 0 6px rgba(255,200,120,.6));transition:.2s ease;}
+.starmap .star:hover{transform:translate(-50%,-50%) scale(1.4);filter:drop-shadow(0 0 12px rgba(255,255,180,.9));}
+.starmap .star.on{background:radial-gradient(circle,var(--amberBright) 20%,var(--amber) 40%,transparent 70%);filter:drop-shadow(0 0 14px var(--amber));}
+.starmap .star .lbl{position:absolute;top:14px;left:14px;font-size:10px;letter-spacing:.14em;color:var(--amberBright);opacity:.75;text-shadow:0 0 4px rgba(255,159,7,.5);white-space:nowrap;pointer-events:none;}
+.starmap .path{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+.starmap .grid-bg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,159,7,.05) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,159,7,.05) 0 1px,transparent 1px 40px);pointer-events:none;}
+
+/* REDACTED DOCUMENT */
+.doc{padding:18px;border:1px dashed rgba(255,159,7,.35);background:rgba(255,159,7,.04);font-family:'VT323',monospace;font-size:20px;line-height:1.8;letter-spacing:.05em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.doc .redact{display:inline-block;background:#000;color:transparent;padding:0 4px;border-bottom:1px solid var(--amber);text-shadow:none;}
+.doc .fill{display:inline-block;min-width:110px;border-bottom:1px solid var(--amber);text-align:center;}
+.doc input.blank{background:transparent;border:none;border-bottom:1px solid var(--amber);color:var(--amberBright);font-family:'VT323',monospace;font-size:20px;letter-spacing:.08em;text-align:center;width:130px;outline:none;text-shadow:0 0 5px rgba(255,159,7,.6);caret-color:var(--amberBright);}
+
+/* CIRCUIT / NODE PUZZLE */
+.circuit{position:relative;width:100%;aspect-ratio:2/1;background:repeating-linear-gradient(0deg,rgba(255,159,7,.04) 0 1px,transparent 1px 32px),repeating-linear-gradient(90deg,rgba(255,159,7,.04) 0 1px,transparent 1px 32px),#050505;border:1px solid rgba(255,159,7,.3);overflow:hidden;box-shadow:inset 0 0 22px rgba(255,159,7,.06);margin:8px 0;}
+.circuit .node{position:absolute;width:44px;height:44px;transform:translate(-50%,-50%);border:2px solid var(--amber);background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--amberBright);font-family:'VT323',monospace;font-size:20px;cursor:pointer;box-shadow:0 0 10px rgba(255,159,7,.35);transition:.2s ease;}
+.circuit .node:hover{background:rgba(255,159,7,.15);}
+.circuit .node.active{background:var(--amber);color:#000;box-shadow:0 0 20px var(--amber);}
+.circuit .link{position:absolute;height:2px;background:var(--amberBright);box-shadow:0 0 6px var(--amber);transform-origin:0 50%;pointer-events:none;}
+
+/* COORDINATE PAD */
+.coord-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:280px;margin-top:10px;}
+.coord-pad button{padding:14px 0;border:1px solid var(--amber);background:rgba(255,159,7,.05);color:var(--amberBright);font-family:inherit;font-size:16px;cursor:pointer;text-shadow:0 0 4px rgba(255,159,7,.6);}
+.coord-pad button:hover{background:rgba(255,159,7,.15);}
+.coord-display{padding:12px 14px;border:1px solid rgba(255,159,7,.35);background:rgba(255,159,7,.05);font-family:'VT323',monospace;font-size:24px;letter-spacing:.15em;text-align:center;color:var(--amberBright);margin-top:8px;text-shadow:0 0 6px rgba(255,159,7,.6);}
+
+/* ANAGRAM */
+.anagram-tiles{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;justify-content:center;}
+.anagram-tiles .tile{padding:10px 14px;border:1px solid var(--amber);background:rgba(255,159,7,.06);font-family:'VT323',monospace;font-size:22px;letter-spacing:.1em;cursor:pointer;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);user-select:none;transition:.15s ease;min-width:36px;text-align:center;}
+.anagram-tiles .tile:hover{background:rgba(255,159,7,.15);transform:translateY(-2px);}
+.anagram-tiles .tile.used{opacity:.3;pointer-events:none;}
+.anagram-slots{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;justify-content:center;min-height:56px;padding:8px;border:1px dashed rgba(255,159,7,.28);background:rgba(255,159,7,.03);}
+.anagram-slots .slot{padding:10px 14px;border:1px solid var(--amberBright);background:rgba(255,159,7,.12);font-family:'VT323',monospace;font-size:22px;color:var(--amberBright);cursor:pointer;text-shadow:0 0 5px rgba(255,159,7,.6);min-width:36px;text-align:center;}
+
+/* HIDDEN PIXEL search */
+.pixel-hunt{position:relative;width:100%;aspect-ratio:2/1;background:linear-gradient(120deg,#0a0704,#1a0f06,#0a0704);border:1px solid rgba(255,159,7,.28);cursor:crosshair;overflow:hidden;box-shadow:inset 0 0 22px rgba(255,159,7,.05);}
+.pixel-hunt::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 3px),radial-gradient(circle at 33% 60%,rgba(255,159,7,.08),transparent 30%),radial-gradient(circle at 70% 40%,rgba(255,74,43,.08),transparent 30%);pointer-events:none;}
+.pixel-hunt .target{position:absolute;width:6px;height:6px;background:transparent;pointer-events:none;}
+.pixel-hunt .found{position:absolute;transform:translate(-50%,-50%);width:36px;height:36px;border:2px solid var(--green);border-radius:50%;pointer-events:none;box-shadow:0 0 14px var(--green);animation:found-pulse 1s ease infinite alternate;}
+@keyframes found-pulse{to{transform:translate(-50%,-50%) scale(1.15);}}
+
+/* CIPHER OVERLAY strip */
+.stripe{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;margin-top:8px;}
+.stripe .cell{height:22px;background:rgba(255,159,7,.08);border:1px solid rgba(255,159,7,.25);text-align:center;font-family:'VT323',monospace;font-size:16px;color:var(--amberBright);line-height:22px;}
+
+/* VAULT — final reveal */
+.vault{padding:26px;border:2px solid var(--red);background:radial-gradient(ellipse at 50% 30%,rgba(255,74,43,.1),rgba(0,0,0,.5));text-align:center;box-shadow:inset 0 0 40px rgba(255,74,43,.1),0 0 30px rgba(255,74,43,.15);position:relative;overflow:hidden;}
+.vault.opened{border-color:var(--green);background:radial-gradient(ellipse at 50% 30%,rgba(143,255,138,.08),rgba(0,0,0,.5));box-shadow:inset 0 0 40px rgba(143,255,138,.1),0 0 30px rgba(143,255,138,.15);}
+.vault-title{font-size:22px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 8px rgba(255,74,43,.6);margin-bottom:14px;}
+.vault.opened .vault-title{color:var(--green);text-shadow:0 0 8px rgba(143,255,138,.6);}
+.vault-body{opacity:.9;margin-bottom:16px;line-height:1.6;}
+.vault-code-input{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.vault-code-input input{width:44px;height:52px;text-align:center;font-family:'VT323',monospace;font-size:26px;background:rgba(255,159,7,.05);border:1px solid var(--amber);color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.6);outline:none;letter-spacing:0;caret-color:var(--amberBright);}
+.vault-code-input input:focus{background:rgba(255,159,7,.15);}
+.vault-open-btn{padding:12px 26px;border:1px solid var(--red);background:transparent;color:var(--red);font-family:inherit;letter-spacing:.22em;cursor:pointer;text-shadow:0 0 5px rgba(255,74,43,.5);position:relative;will-change:background,box-shadow,color;}
+.vault-open-btn::before{content:"";position:absolute;inset:-3px;border:1px solid rgba(255,74,43,.25);pointer-events:none;}
+.vault-open-btn:hover{background:rgba(255,74,43,.15);box-shadow:0 0 20px rgba(255,74,43,.3);}
+.vault.opened .vault-open-btn{border-color:var(--green);color:var(--green);}
+
+/* ARCHIVE reveal */
+#archive{display:none;margin-top:30px;}
+#archive.show{display:block;animation:archive-in 1s ease;}
+@keyframes archive-in{
+    0%{opacity:0;transform:translateY(20px) scale(.98);}
+    50%{opacity:1;}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.archive-file{padding:20px;margin-bottom:14px;border:1px solid rgba(143,255,138,.35);background:rgba(143,255,138,.03);position:relative;}
+.archive-file::before{content:"";position:absolute;top:0;left:0;width:24px;height:1px;background:var(--green);box-shadow:0 0 6px var(--green);}
+.archive-file::after{content:"";position:absolute;top:0;left:0;width:1px;height:24px;background:var(--green);box-shadow:0 0 6px var(--green);}
+.archive-file h3{margin:0 0 8px 0;color:var(--green);letter-spacing:.18em;text-shadow:0 0 5px rgba(143,255,138,.5);}
+.archive-file p{margin:0 0 8px 0;line-height:1.6;text-shadow:0 0 3px rgba(255,159,7,.4);}
+.archive-file .meta{font-size:10px;letter-spacing:.24em;opacity:.7;margin-top:8px;color:var(--amberBright);}
+
+/* TERMINAL BAR */
+#terminal-box{position:absolute;bottom:0;left:0;right:0;padding:14px 22px;display:flex;gap:12px;align-items:center;z-index:1003;border-top:2px solid rgba(255,74,43,.4);background:linear-gradient(180deg,rgba(255,74,43,.05),rgba(0,0,0,.55));box-shadow:0 -10px 20px rgba(0,0,0,.35),inset 0 0 20px rgba(255,74,43,.06);text-shadow:0 0 4px rgba(255,74,43,.5);}
+#terminal-box .chev{color:var(--red);animation:chev 1s steps(2) infinite;text-shadow:0 0 6px rgba(255,74,43,.7);}
+@keyframes chev{50%{opacity:.3;}}
+#terminal-box input{flex:1;background:none;border:none;outline:none;color:var(--amber);font-family:inherit;text-shadow:0 0 4px rgba(255,159,7,.6);caret-color:var(--amberBright);min-width:0;}
+#terminal-box .hint{font-size:11px;letter-spacing:.2em;opacity:.7;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+
+#os{position:absolute;bottom:68px;right:22px;font-size:12px;opacity:.8;z-index:1004;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+#clock{position:absolute;bottom:68px;left:22px;font-size:12px;opacity:.8;z-index:1004;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+
+/* Alert flash for wrong answers */
+#alert-flash{position:absolute;inset:0;background:rgba(255,74,43,.15);z-index:1150;pointer-events:none;opacity:0;transition:opacity .15s ease;}
+#alert-flash.on{opacity:1;}
+
+/* Warning overlay on load */
+#warn-overlay{position:absolute;inset:0;background:#000;z-index:6000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+#warn-overlay .box{border:2px solid var(--red);padding:34px 40px;max-width:700px;background:radial-gradient(circle at 50% 20%,rgba(255,74,43,.15),rgba(0,0,0,.5));box-shadow:0 0 40px rgba(255,74,43,.25),inset 0 0 40px rgba(255,74,43,.06);}
+#warn-overlay h2{margin:0 0 12px 0;font-size:32px;letter-spacing:.32em;color:var(--red);text-shadow:0 0 10px rgba(255,74,43,.6),0 0 24px rgba(255,74,43,.3);animation:warn-flicker .8s steps(3) infinite;}
+@keyframes warn-flicker{50%{opacity:.7;}}
+#warn-overlay p{opacity:.9;letter-spacing:.14em;line-height:1.7;margin:8px 0;}
+#warn-overlay .agree-btn{margin-top:24px;padding:14px 30px;border:1px solid var(--red);background:transparent;color:var(--red);font-family:inherit;letter-spacing:.24em;cursor:pointer;text-shadow:0 0 5px rgba(255,74,43,.5);}
+#warn-overlay .agree-btn:hover{background:rgba(255,74,43,.15);box-shadow:0 0 20px rgba(255,74,43,.3);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+    #crt-container{padding:30px 22px 120px;}
+    #screen-wrap{inset:12px;border-radius:32px/40px;}
+    .header-left h1{font-size:20px;letter-spacing:.2em;}
+}
+@media(max-width:500px){
+    body{font-size:13px;}
+    .gate{padding:16px;}
+    .header-left h1{font-size:16px;}
+    #terminal-box{padding:10px;}
+    .vault-code-input input{width:38px;height:44px;font-size:22px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Fisheye filter -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
+
+<div id="bezel"></div>
+
+<div id="screen-wrap">
+
+    <div id="screen">
+        <div id="screen-scroll">
+            <div id="crt-container">
+
+                <!-- HEADER -->
+                <div class="header panel">
+                    <div class="header-left">
+                        <h1>◤ RESTRICTED ACCESS ◥</h1>
+                        <p>U.I.C. INTERNAL — CLEARANCE LVL 4 REQUIRED — DO NOT DISCLOSE</p>
+                    </div>
+                    <div class="header-right">
+                        <span class="tag warn">SECURE</span>
+                        <span class="tag warn">TRACE ACTIVE</span>
+                        <span class="tag amber">CH.██</span>
+                    </div>
+                </div>
+
+                <!-- PROGRESS RAIL -->
+                <div id="progress-rail">
+                    <span class="label">// GATE PROGRESS</span>
+                    <div class="dots" id="progress-dots"></div>
+                    <span class="status" id="progress-text">0 / 10 UNLOCKED</span>
+                </div>
+
+                <!-- GATES will render here -->
+                <div id="gates"></div>
+
+                <!-- FINAL VAULT -->
+                <div class="vault panel" id="vault">
+                    <div class="vault-title">◈ SEALED FILE ARCHIVE ◈</div>
+                    <div class="vault-body">
+                        Assemble the 10 characters harvested from each cleared gate and enter them below.<br>
+                        <span style="opacity:.7;font-size:12px;letter-spacing:.24em;">// KEY GLYPHS APPEAR AS GATES ARE SOLVED //</span>
+                    </div>
+                    <div class="vault-code-input" id="vault-code"></div>
+                    <button class="vault-open-btn" id="vault-open">◤ OPEN ARCHIVE ◥</button>
+                    <div class="gate-feedback" id="vault-feedback"></div>
+                </div>
+
+                <!-- ARCHIVE (hidden until vault opens) -->
+                <div id="archive"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlays -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="alert-flash"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4 — SECURE MODE</div>
+
+    <!-- TERMINAL -->
+    <div id="terminal-box">
+        <span class="chev">&gt;</span>
+        <input id="cmd" autocomplete="off" placeholder="restricted terminal — type 'help'">
+        <span class="hint">HELP • RESET • BACK</span>
+    </div>
+
+    <!-- WARNING OVERLAY -->
+    <div id="warn-overlay">
+        <div class="box">
+            <h2>⚠ RESTRICTED ⚠</h2>
+            <p>You have accessed a sealed U.I.C. subsystem.</p>
+            <p>Ten authentication gates guard the archive beyond.<br>Each gate contributes one glyph to the final key.</p>
+            <p style="opacity:.7;font-size:11px;letter-spacing:.22em;margin-top:20px;">// UNAUTHORIZED ACCESS WILL BE LOGGED AND REPORTED //</p>
+            <button class="agree-btn" id="agree-btn">◤ PROCEED ◥</button>
+        </div>
+    </div>
+
+</div>
+
+<div id="bezel-label">FRACTURED • MODEL FR-77</div>
+<div id="brand-led"></div>
+
+<!-- SCRIPT WILL BE ADDED VIA EDIT -->
+<script id="main-script">
+/* =========================
+   FINAL KEY (assembled from 10 gates)
+   Change these to tie into your game lore.
+========================= */
+const FINAL_KEY = "VMDR198904";  // 10 glyphs total
+
+/* =========================
+   GATE DEFINITIONS
+   Each gate yields one glyph. The order of GATES[] matches FINAL_KEY[i].
+========================= */
+const GATES = [
+    {id:"morse",  title:"MORSE INTERCEPT",      short:"AUDIO SIGNAL"},
+    {id:"caesar", title:"ROTATION CIPHER",       short:"CAESAR WHEEL"},
+    {id:"binary", title:"BINARY TAPE",           short:"ASCII DECODE"},
+    {id:"freq",   title:"FREQUENCY LOCK",        short:"BAND TUNER"},
+    {id:"stars",  title:"STELLAR CARTOGRAPHY",   short:"CONSTELLATION"},
+    {id:"redact", title:"REDACTED DOSSIER",      short:"FILL THE BLANKS"},
+    {id:"circuit",title:"CIRCUIT TRACE",         short:"NODE PATH"},
+    {id:"pad",    title:"KEYPAD OVERRIDE",       short:"NUMERIC LOCK"},
+    {id:"anagram",title:"WORD REASSEMBLY",       short:"ANAGRAM"},
+    {id:"pixel",  title:"COVERT PIXEL",          short:"HIDDEN MARKER"},
+];
+
+const gateState = GATES.map(()=>({solved:false, glyph:""}));
+
+/* ========== HELPERS ========== */
+const gatesRoot = document.getElementById("gates");
+const dotsRow = document.getElementById("progress-dots");
+const progressText = document.getElementById("progress-text");
+const alertFlash = document.getElementById("alert-flash");
+
+function flashAlert(){
+    alertFlash.classList.add("on");
+    setTimeout(()=>alertFlash.classList.remove("on"),140);
+}
+
+function updateProgress(){
+    dotsRow.innerHTML = "";
+    let done = 0;
+    for(let i=0;i<GATES.length;i++){
+        const d = document.createElement("div");
+        d.className = "dot" + (gateState[i].solved ? " done" : "");
+        d.textContent = String(i+1).padStart(2,"0");
+        dotsRow.appendChild(d);
+        if(gateState[i].solved) done++;
+    }
+    progressText.textContent = `${done} / ${GATES.length} UNLOCKED`;
+    renderVaultInputs();
+}
+
+function markSolved(index, feedbackEl){
+    if(gateState[index].solved) return;
+    gateState[index].solved = true;
+    gateState[index].glyph = FINAL_KEY[index];
+
+    const gateEl = document.getElementById("gate-"+index);
+    gateEl.classList.add("solved");
+    gateEl.classList.remove("locked");
+    gateEl.querySelector(".gate-status").textContent = `◆ SOLVED — GLYPH: ${FINAL_KEY[index]}`;
+
+    if(feedbackEl){
+        feedbackEl.className = "gate-feedback ok";
+        feedbackEl.textContent = `[ACCEPTED] Glyph "${FINAL_KEY[index]}" transferred to vault.`;
+    }
+
+    /* Unlock next gate */
+    if(index+1 < GATES.length){
+        const next = document.getElementById("gate-"+(index+1));
+        if(next) next.classList.remove("locked");
+    }
+
+    updateProgress();
+}
+
+function fail(feedbackEl, msg){
+    flashAlert();
+    if(feedbackEl){
+        feedbackEl.className = "gate-feedback err";
+        feedbackEl.textContent = msg || "[REJECTED] Sequence invalid.";
+    }
+}
+
+/* ========== RENDER GATES ========== */
+function makeGate(i){
+    const g = GATES[i];
+    const el = document.createElement("div");
+    el.className = "gate panel" + (i===0 ? "" : " locked");
+    el.id = "gate-"+i;
+
+    el.innerHTML = `
+        <div class="gate-head">
+            <div class="gate-title">
+                <span class="num">GATE ${String(i+1).padStart(2,"0")}</span>
+                <span>${g.title}</span>
+            </div>
+            <div class="gate-status">◆ AWAITING INPUT</div>
+        </div>
+        <div class="gate-body" id="gate-body-${i}"></div>
+        <div class="gate-feedback" id="gate-feedback-${i}"></div>
+    `;
+
+    gatesRoot.appendChild(el);
+    return el.querySelector(".gate-body");
+}
+
+for(let i=0;i<GATES.length;i++) makeGate(i);
+
+/* ========== INDIVIDUAL PUZZLES ========== */
+
+/* Gate 1 — MORSE INTERCEPT: decode ...- . -. ..- ... = VENUS */
+(function(){
+    const body = document.getElementById("gate-body-0");
+    const fb = document.getElementById("gate-feedback-0");
+    body.innerHTML = `
+        <p>An intercepted transmission arrives on frequency 24.5 kHz. Decode the message.</p>
+        <div class="morse">...- &nbsp; . &nbsp; -. &nbsp; ..- &nbsp; ...</div>
+        <p class="hint">Reference: International Morse Code. The signal is a single word.</p>
+        <div class="morse-play">
+            <button class="gate-btn" id="morse-play">▶ REPLAY SIGNAL</button>
+            <button class="gate-btn" id="morse-slow">◐ SLOW</button>
+        </div>
+        <div class="gate-input">
+            <input id="morse-in" placeholder="DECODED WORD" maxlength="12" autocomplete="off">
+            <button class="gate-btn" id="morse-submit">SUBMIT</button>
+        </div>
+    `;
+
+    /* Simple WebAudio Morse beeper */
+    let ctx = null;
+    function beep(dur){
+        if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.value = 700;
+        g.gain.value = 0.15;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        setTimeout(()=>{ o.stop(); },dur);
+    }
+    async function play(unit){
+        const seq = "...- / . / -. / ..- / ...";
+        for(const ch of seq){
+            if(ch==="."){ beep(unit); await new Promise(r=>setTimeout(r,unit+unit*0.6)); }
+            else if(ch==="-"){ beep(unit*3); await new Promise(r=>setTimeout(r,unit*3+unit*0.6)); }
+            else if(ch===" "){ await new Promise(r=>setTimeout(r,unit*1.4)); }
+            else if(ch==="/"){ await new Promise(r=>setTimeout(r,unit*2.5)); }
+        }
+    }
+
+    document.getElementById("morse-play").onclick = ()=>play(90);
+    document.getElementById("morse-slow").onclick = ()=>play(180);
+    document.getElementById("morse-submit").onclick = ()=>{
+        const v = document.getElementById("morse-in").value.trim().toUpperCase();
+        if(v === "VENUS") markSolved(0,fb);
+        else fail(fb,"[REJECTED] Signal does not match. Retry.");
+    };
+})();
+
+/* Gate 2 — CAESAR WHEEL: ciphertext PDUV → shift 3 → MARS */
+(function(){
+    const body = document.getElementById("gate-body-1");
+    const fb = document.getElementById("gate-feedback-1");
+    const CIPHER = "PDUV";
+    body.innerHTML = `
+        <p>Ciphertext recovered from Vault B. Rotate the wheel until plaintext resolves.</p>
+        <div class="clue mono">CIPHER :: ${CIPHER}</div>
+        <div class="wheel-row">
+            <label>SHIFT ::</label>
+            <input type="range" id="caesar-shift" min="0" max="25" value="0">
+            <div class="out" id="caesar-out">${CIPHER}</div>
+        </div>
+        <div class="gate-input">
+            <input id="caesar-in" placeholder="PLAINTEXT" maxlength="12" autocomplete="off">
+            <button class="gate-btn" id="caesar-submit">SUBMIT</button>
+        </div>
+        <p class="hint">Wheel decrements each character. Watch for a word.</p>
+    `;
+    const slider = document.getElementById("caesar-shift");
+    const out = document.getElementById("caesar-out");
+    function decode(s,shift){
+        return s.split("").map(c=>{
+            const code = c.charCodeAt(0);
+            if(code>=65 && code<=90){
+                return String.fromCharCode(((code-65-shift+26)%26)+65);
+            }
+            return c;
+        }).join("");
+    }
+    slider.oninput = ()=>{ out.textContent = decode(CIPHER, +slider.value); };
+    document.getElementById("caesar-submit").onclick = ()=>{
+        const v = document.getElementById("caesar-in").value.trim().toUpperCase();
+        if(v === "MARS") markSolved(1,fb);
+        else fail(fb,"[REJECTED] Plaintext incorrect.");
+    };
+})();
+
+/* Gate 3 — BINARY: 01000100 01000101 01000101 01010000 = "DEEP" */
+(function(){
+    const body = document.getElementById("gate-body-2");
+    const fb = document.getElementById("gate-feedback-2");
+    body.innerHTML = `
+        <p>A paper tape from a station teletype. Translate the 8-bit words.</p>
+        <div class="binary">01000100 &nbsp; 01000101 &nbsp; 01000101 &nbsp; 01010000</div>
+        <p class="hint">Standard ASCII. 4 characters. Enter as one uppercase word.</p>
+        <div class="gate-input">
+            <input id="bin-in" placeholder="ASCII DECODE" maxlength="12" autocomplete="off">
+            <button class="gate-btn" id="bin-submit">SUBMIT</button>
+        </div>
+    `;
+    document.getElementById("bin-submit").onclick = ()=>{
+        const v = document.getElementById("bin-in").value.trim().toUpperCase();
+        if(v === "DEEP") markSolved(2,fb);
+        else fail(fb,"[REJECTED] Decode mismatch.");
+    };
+})();
+
+/* Gate 4 — FREQUENCY LOCK: tune slider (0–200) to 137, ±1 tolerance */
+(function(){
+    const body = document.getElementById("gate-body-3");
+    const fb = document.getElementById("gate-feedback-3");
+    body.innerHTML = `
+        <p>Sweep the receiver until you find the carrier. When the meter locks, transmission clears.</p>
+        <div class="freq-wrap">
+            <div class="freq-display" id="freq-display">██.██ MHz</div>
+            <div class="freq-meter"><div class="freq-needle" id="freq-needle"></div></div>
+            <input type="range" id="freq-slider" min="0" max="200" value="0" style="width:100%;accent-color:var(--amber);">
+            <div class="freq-signal" id="freq-signal">◆ NO CARRIER</div>
+        </div>
+        <div class="gate-input" style="display:none;" id="freq-input-row">
+            <input id="freq-in" placeholder="TRANSMISSION" maxlength="24" autocomplete="off">
+            <button class="gate-btn" id="freq-submit">SUBMIT</button>
+        </div>
+        <p class="hint">The clue text once said the target was near <b>one-thirty-seven point zero</b>.</p>
+    `;
+    const slider = document.getElementById("freq-slider");
+    const display = document.getElementById("freq-display");
+    const needle = document.getElementById("freq-needle");
+    const signal = document.getElementById("freq-signal");
+    const inputRow = document.getElementById("freq-input-row");
+    const TARGET = 137;
+    slider.oninput = ()=>{
+        const v = +slider.value;
+        display.textContent = (v/10).toFixed(2) + " MHz";
+        needle.style.left = (v/2) + "%";
+        if(Math.abs(v - TARGET) <= 1){
+            signal.textContent = "◆ CARRIER LOCKED — MESSAGE: 'HOLLOW ORBIT'";
+            signal.classList.add("locked");
+            inputRow.style.display = "flex";
+        }else{
+            signal.textContent = "◆ NO CARRIER";
+            signal.classList.remove("locked");
+            inputRow.style.display = "none";
+        }
+    };
+    document.getElementById("freq-submit").onclick = ()=>{
+        const v = document.getElementById("freq-in").value.trim().toUpperCase();
+        if(v === "HOLLOW ORBIT" || v === "HOLLOWORBIT") markSolved(3,fb);
+        else fail(fb,"[REJECTED] Transmission mistranscribed.");
+    };
+})();
+
+/* Gate 5 — STAR MAP: click 5 named stars in a specific order */
+(function(){
+    const body = document.getElementById("gate-body-4");
+    const fb = document.getElementById("gate-feedback-4");
+    body.innerHTML = `
+        <p>Trace a covert constellation by clicking stars in this order:</p>
+        <div class="clue mono">CAELUM → NOVA → ARDENT → LUX → TERMINUS</div>
+        <div class="starmap" id="starmap"><div class="grid-bg"></div><svg class="path" id="star-path"></svg></div>
+        <div style="text-align:right;margin-top:6px;"><button class="gate-btn" id="star-reset">↺ RESET TRACE</button></div>
+    `;
+    const map = document.getElementById("starmap");
+    const svgPath = document.getElementById("star-path");
+    /* 8 stars — 5 required in order, 3 decoys */
+    const stars = [
+        {name:"CAELUM",   x:10, y:70, req:1},
+        {name:"HALCYON",  x:22, y:30, req:0},
+        {name:"NOVA",     x:35, y:55, req:2},
+        {name:"ARDENT",   x:52, y:20, req:3},
+        {name:"VESPER",   x:60, y:80, req:0},
+        {name:"LUX",      x:72, y:38, req:4},
+        {name:"IGNIS",    x:82, y:70, req:0},
+        {name:"TERMINUS", x:90, y:20, req:5},
+    ];
+    let clickOrder = [];
+
+    function render(){
+        map.querySelectorAll(".star").forEach(n=>n.remove());
+        stars.forEach((s,i)=>{
+            const d = document.createElement("div");
+            d.className = "star";
+            d.style.left = s.x+"%";
+            d.style.top = s.y+"%";
+            const lbl = document.createElement("span");
+            lbl.className = "lbl";
+            lbl.textContent = s.name;
+            d.appendChild(lbl);
+            d.onclick = ()=>onClick(i);
+            if(clickOrder.includes(i)) d.classList.add("on");
+            map.appendChild(d);
+        });
+        /* draw path lines between clicked stars */
+        const w = map.clientWidth, h = map.clientHeight;
+        svgPath.setAttribute("viewBox",`0 0 ${w} ${h}`);
+        svgPath.innerHTML = "";
+        for(let k=1;k<clickOrder.length;k++){
+            const a = stars[clickOrder[k-1]];
+            const b = stars[clickOrder[k]];
+            const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+            line.setAttribute("x1",a.x*w/100);
+            line.setAttribute("y1",a.y*h/100);
+            line.setAttribute("x2",b.x*w/100);
+            line.setAttribute("y2",b.y*h/100);
+            line.setAttribute("stroke","#FFC861");
+            line.setAttribute("stroke-width","2");
+            line.setAttribute("stroke-opacity",".7");
+            line.setAttribute("filter","drop-shadow(0 0 4px #FF9F07)");
+            svgPath.appendChild(line);
+        }
+    }
+    function onClick(i){
+        const expected = clickOrder.length + 1;
+        if(stars[i].req === expected){
+            clickOrder.push(i);
+            render();
+            if(clickOrder.length === 5){
+                markSolved(4,fb);
+            }
+        }else{
+            fail(fb,`[REJECTED] Star "${stars[i].name}" not next in trace. Reset and try again.`);
+            clickOrder = [];
+            render();
+        }
+    }
+    document.getElementById("star-reset").onclick = ()=>{ clickOrder=[]; render(); fb.textContent=""; fb.className="gate-feedback"; };
+    render();
+    window.addEventListener("resize", ()=>render());
+})();
+
+/* Gate 6 — REDACTED DOSSIER: 3 blanks to fill */
+(function(){
+    const body = document.getElementById("gate-body-5");
+    const fb = document.getElementById("gate-feedback-5");
+    body.innerHTML = `
+        <p>Reconstruct a suppressed field report using contextual clues.</p>
+        <div class="doc">
+            OPERATION <span class="redact">SUNSPOT</span> — YEAR <input class="blank" id="rd-1" placeholder="YEAR" autocomplete="off">.<br>
+            SUBJECT LOCATED ON THE SURFACE OF <input class="blank" id="rd-2" placeholder="PLANET" autocomplete="off">, ISOLATED AT THE <span class="redact">VMDR</span> RAIL SITE.<br>
+            EVACUATION NOTICE ISSUED VIA CHANNEL <input class="blank" id="rd-3" placeholder="NUMBER" autocomplete="off"> DURING COMMS BLACKOUT.<br>
+            <span style="opacity:.7;font-size:14px;">// AUTHORIZED — DIRECTOR STEIN, U.I.C. //</span>
+        </div>
+        <p class="hint">
+            Cross-reference the game dossier: year of setting, planetary surface, and comms channel (single digit). If unsure, review the Iron Frontier project file.
+        </p>
+        <div class="gate-input">
+            <button class="gate-btn" id="rd-submit">SUBMIT</button>
+        </div>
+    `;
+    document.getElementById("rd-submit").onclick = ()=>{
+        const y = document.getElementById("rd-1").value.trim();
+        const p = document.getElementById("rd-2").value.trim().toUpperCase();
+        const c = document.getElementById("rd-3").value.trim();
+        if(y === "1989" && p === "VENUS" && c === "7"){
+            markSolved(5,fb);
+        }else{
+            fail(fb,"[REJECTED] Dossier does not match archive record.");
+        }
+    };
+})();
+
+/* Gate 7 — CIRCUIT TRACE: activate nodes in order 1→2→3→4→5 (visible), but must follow correct path */
+(function(){
+    const body = document.getElementById("gate-body-6");
+    const fb = document.getElementById("gate-feedback-6");
+    body.innerHTML = `
+        <p>The relay board has been shuffled. Activate the correct trace path — start at IN, end at OUT.</p>
+        <div class="clue">Correct path (by label): <b>IN → α → γ → δ → OUT</b> &nbsp; // decoys β and ε are traps.</div>
+        <div class="circuit" id="circuit"></div>
+        <div style="text-align:right;margin-top:6px;"><button class="gate-btn" id="ct-reset">↺ RESET PATH</button></div>
+    `;
+    const nodes = [
+        {id:"IN", x:6,  y:50, seq:1},
+        {id:"α",  x:26, y:30, seq:2},
+        {id:"β",  x:26, y:70, seq:0},
+        {id:"γ",  x:50, y:50, seq:3},
+        {id:"ε",  x:70, y:80, seq:0},
+        {id:"δ",  x:74, y:24, seq:4},
+        {id:"OUT",x:94, y:50, seq:5},
+    ];
+    const circuit = document.getElementById("circuit");
+    let path = [];
+
+    function render(){
+        circuit.querySelectorAll(".node,.link").forEach(n=>n.remove());
+        nodes.forEach((n,idx)=>{
+            const d = document.createElement("div");
+            d.className = "node" + (path.includes(idx) ? " active" : "");
+            d.style.left = n.x+"%";
+            d.style.top = n.y+"%";
+            d.textContent = n.id;
+            d.onclick = ()=>onClick(idx);
+            circuit.appendChild(d);
+        });
+        /* draw links */
+        for(let k=1;k<path.length;k++){
+            const a = nodes[path[k-1]], b = nodes[path[k]];
+            const w = circuit.clientWidth, h = circuit.clientHeight;
+            const ax = a.x*w/100, ay = a.y*h/100;
+            const bx = b.x*w/100, by = b.y*h/100;
+            const dx = bx-ax, dy = by-ay;
+            const len = Math.sqrt(dx*dx+dy*dy);
+            const ang = Math.atan2(dy,dx)*180/Math.PI;
+            const l = document.createElement("div");
+            l.className = "link";
+            l.style.left = ax+"px";
+            l.style.top = ay+"px";
+            l.style.width = len+"px";
+            l.style.transform = `rotate(${ang}deg)`;
+            circuit.appendChild(l);
+        }
+    }
+    function onClick(i){
+        const expected = path.length + 1;
+        if(nodes[i].seq === expected){
+            path.push(i);
+            render();
+            if(path.length === 5){
+                markSolved(6,fb);
+            }
+        }else{
+            fail(fb,`[REJECTED] Node "${nodes[i].id}" broke the trace. Path reset.`);
+            path = [];
+            render();
+        }
+    }
+    document.getElementById("ct-reset").onclick = ()=>{ path=[]; render(); fb.textContent=""; fb.className="gate-feedback"; };
+    render();
+    window.addEventListener("resize",()=>render());
+})();
+
+/* Gate 8 — KEYPAD OVERRIDE: enter 4-digit code (derived from clue) */
+(function(){
+    const body = document.getElementById("gate-body-7");
+    const fb = document.getElementById("gate-feedback-7");
+    body.innerHTML = `
+        <p>Bypass panel found in maintenance shaft. Assemble the launch date of Sputnik-1.</p>
+        <div class="clue">
+            "The first steel wanderer left Baikonur in year <b>19?7</b> on the <b>04</b>th day of the <b>10</b>th month."<br>
+            <span style="opacity:.7;">// Format: DDMM</span>
+        </div>
+        <div class="coord-display" id="coord-display">- - - -</div>
+        <div class="coord-pad" id="coord-pad"></div>
+        <div class="gate-input" style="margin-top:12px;">
+            <button class="gate-btn" id="coord-submit">◈ TRANSMIT</button>
+            <button class="gate-btn" id="coord-clear">↺ CLEAR</button>
+        </div>
+    `;
+    const pad = document.getElementById("coord-pad");
+    const disp = document.getElementById("coord-display");
+    let entered = "";
+    const keys = ["1","2","3","4","5","6","7","8","9","*","0","#"];
+    keys.forEach(k=>{
+        const b = document.createElement("button");
+        b.textContent = k;
+        b.onclick = ()=>{
+            if(k==="*" || k==="#") return;
+            if(entered.length < 4){
+                entered += k;
+                disp.textContent = entered.padEnd(4,"-").split("").join(" ");
+            }
+        };
+        pad.appendChild(b);
+    });
+    document.getElementById("coord-clear").onclick = ()=>{
+        entered = "";
+        disp.textContent = "- - - -";
+    };
+    document.getElementById("coord-submit").onclick = ()=>{
+        if(entered === "0410") markSolved(7,fb);
+        else fail(fb,"[REJECTED] Override code invalid.");
+    };
+})();
+
+/* Gate 9 — WORD REASSEMBLY: rearrange letters of "COSMONAUT" from a scramble */
+(function(){
+    const body = document.getElementById("gate-body-8");
+    const fb = document.getElementById("gate-feedback-8");
+    body.innerHTML = `
+        <p>An operative's field name is scrambled in the payroll ledger. Reassemble it.</p>
+        <div class="clue">Anagram source: <b>N U T C S A O O M</b></div>
+        <div class="anagram-slots" id="ana-slots"></div>
+        <div class="anagram-tiles" id="ana-tiles"></div>
+        <div class="gate-input">
+            <button class="gate-btn" id="ana-submit">SUBMIT</button>
+            <button class="gate-btn" id="ana-clear">↺ CLEAR</button>
+        </div>
+        <p class="hint">The word describes the operator's profession. 9 letters.</p>
+    `;
+    const source = ["N","U","T","C","S","A","O","O","M"];
+    const tiles = document.getElementById("ana-tiles");
+    const slots = document.getElementById("ana-slots");
+    let placed = []; // {letter, tileIdx}
+
+    function renderTiles(){
+        tiles.innerHTML = "";
+        source.forEach((ch,idx)=>{
+            const t = document.createElement("div");
+            t.className = "tile" + (placed.find(p=>p.tileIdx===idx) ? " used" : "");
+            t.textContent = ch;
+            t.onclick = ()=>{
+                if(placed.length >= source.length) return;
+                if(placed.find(p=>p.tileIdx===idx)) return;
+                placed.push({letter:ch, tileIdx:idx});
+                renderAll();
+            };
+            tiles.appendChild(t);
+        });
+    }
+    function renderSlots(){
+        slots.innerHTML = "";
+        placed.forEach((p,i)=>{
+            const s = document.createElement("div");
+            s.className = "slot";
+            s.textContent = p.letter;
+            s.title = "click to remove";
+            s.onclick = ()=>{
+                placed.splice(i,1);
+                renderAll();
+            };
+            slots.appendChild(s);
+        });
+        if(placed.length === 0){
+            slots.innerHTML = `<div style="opacity:.5;align-self:center;letter-spacing:.24em;">// PLACE TILES HERE //</div>`;
+        }
+    }
+    function renderAll(){ renderTiles(); renderSlots(); }
+
+    document.getElementById("ana-clear").onclick = ()=>{ placed=[]; renderAll(); fb.textContent=""; fb.className="gate-feedback"; };
+    document.getElementById("ana-submit").onclick = ()=>{
+        const word = placed.map(p=>p.letter).join("");
+        if(word === "COSMONAUT") markSolved(8,fb);
+        else fail(fb,"[REJECTED] Not a valid ledger entry.");
+    };
+    renderAll();
+})();
+
+/* Gate 10 — COVERT PIXEL: hidden single-pixel target; click within 24px radius */
+(function(){
+    const body = document.getElementById("gate-body-9");
+    const fb = document.getElementById("gate-feedback-9");
+    body.innerHTML = `
+        <p>A staff photo was altered by an internal courier. One pixel differs from the surroundings — locate and mark it.</p>
+        <div class="pixel-hunt" id="pixel-hunt">
+            <div class="target" id="pixel-target" style="left:64%;top:38%;"></div>
+        </div>
+        <div class="gate-input">
+            <button class="gate-btn" id="pixel-scan">◈ SCAN CROSSHAIR</button>
+            <span style="opacity:.7;font-size:12px;letter-spacing:.14em;align-self:center;">// TIP: EYE-LEVEL, RIGHT-CENTER //</span>
+        </div>
+        <p class="hint">Zoom your display if needed. The pixel is faint amber.</p>
+    `;
+    const hunt = document.getElementById("pixel-hunt");
+    const target = document.getElementById("pixel-target");
+    /* draw a faint amber dot at the target location */
+    target.style.background = "rgba(255,159,7,.35)";
+    target.style.boxShadow = "0 0 3px rgba(255,159,7,.5)";
+
+    let scanMode = false;
+    document.getElementById("pixel-scan").onclick = ()=>{
+        scanMode = true;
+        hunt.style.cursor = "crosshair";
+        fb.className = "gate-feedback";
+        fb.textContent = "// SCAN MODE ACTIVE — CLICK THE PIXEL //";
+    };
+
+    hunt.onclick = (e)=>{
+        if(!scanMode) return;
+        const rect = hunt.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const tx = rect.width * 0.64;
+        const ty = rect.height * 0.38;
+        const d = Math.sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty));
+        if(d < 24){
+            /* found */
+            const marker = document.createElement("div");
+            marker.className = "found";
+            marker.style.left = (tx/rect.width*100)+"%";
+            marker.style.top = (ty/rect.height*100)+"%";
+            hunt.appendChild(marker);
+            markSolved(9,fb);
+            scanMode = false;
+        }else{
+            fail(fb,"[REJECTED] Miss. Recalibrate optics.");
+        }
+    };
+})();
+
+/* ========== VAULT ========== */
+const vaultCode = document.getElementById("vault-code");
+const vaultFeedback = document.getElementById("vault-feedback");
+const vaultEl = document.getElementById("vault");
+
+function renderVaultInputs(){
+    vaultCode.innerHTML = "";
+    for(let i=0;i<FINAL_KEY.length;i++){
+        const inp = document.createElement("input");
+        inp.maxLength = 1;
+        inp.dataset.i = i;
+        if(gateState[i].solved){
+            inp.value = FINAL_KEY[i];
+            inp.readOnly = true;
+            inp.style.borderColor = "var(--green)";
+            inp.style.color = "var(--green)";
+        }
+        inp.oninput = (e)=>{
+            e.target.value = e.target.value.toUpperCase();
+            const idx = +e.target.dataset.i;
+            const next = vaultCode.querySelector(`input[data-i="${idx+1}"]`);
+            if(e.target.value && next && !next.readOnly) next.focus();
+        };
+        inp.onkeydown = (e)=>{
+            if(e.key === "Backspace" && !e.target.value){
+                const idx = +e.target.dataset.i;
+                const prev = vaultCode.querySelector(`input[data-i="${idx-1}"]`);
+                if(prev && !prev.readOnly) prev.focus();
+            }
+        };
+        vaultCode.appendChild(inp);
+    }
+}
+
+document.getElementById("vault-open").onclick = ()=>{
+    const entered = Array.from(vaultCode.querySelectorAll("input")).map(i=>i.value.toUpperCase()).join("");
+    if(entered === FINAL_KEY){
+        vaultEl.classList.add("opened");
+        vaultFeedback.className = "gate-feedback ok";
+        vaultFeedback.textContent = "◆ SEAL BROKEN — ARCHIVE UNSEALED";
+        revealArchive();
+    }else{
+        flashAlert();
+        vaultFeedback.className = "gate-feedback err";
+        vaultFeedback.textContent = "◆ SEAL HOLDS — KEY MISMATCH";
+    }
+};
+
+function revealArchive(){
+    const arc = document.getElementById("archive");
+    arc.innerHTML = `
+        <div class="section-heading" style="color:var(--green);border-color:rgba(143,255,138,.4);">
+            <span>// TOP SECRET ARCHIVE // AUTHENTICATED</span>
+            <span>FILE.TS-01</span>
+        </div>
+
+        <div class="archive-file">
+            <h3>◤ MEMO — DIRECTOR STEIN → INTERNAL // 1989.04.09</h3>
+            <p>
+                The V.M.D.R. project on Venus has been operating under a false directive.
+                The rail was never intended for cargo. Read Appendix C.
+            </p>
+            <div class="meta">CLEARANCE :: LVL 4 // DECRYPTED :: ${new Date().toISOString().split('T')[0]}</div>
+        </div>
+
+        <div class="archive-file">
+            <h3>◤ APPENDIX C — HOLLOW ORBIT</h3>
+            <p>
+                Operation HOLLOW ORBIT was authorized under U.I.C. council seal in 1985.
+                Purpose: relocate all sensitive personnel off-solar prior to phase-2 disclosure.
+                The Iron Frontier subjects were not evacuated because they were never on the manifest.
+            </p>
+            <div class="meta">STATUS :: ACTIVE // COMPARTMENTALIZATION :: MAXIMUM</div>
+        </div>
+
+        <div class="archive-file">
+            <h3>◤ FIELD REPORT — OPERATIVE COSMONAUT-07</h3>
+            <p>
+                Ambient radiation at rail-site B is nominal. Second cosmonaut integrity: <b>UNKNOWN</b>.
+                The floating islands hum on a resonance not accounted for in Council telemetry.
+                Recommend immediate reversal of transit protocol MARS→VENUS. If Council refuses, cross-reference the Sunspot ledger.
+            </p>
+            <div class="meta">TRANSMISSION LOG :: 1989.04.12 :: CHANNEL 7</div>
+        </div>
+
+        <div class="archive-file">
+            <h3>◤ REDACTED — DO NOT DISCLOSE</h3>
+            <p>
+                <span class="redact" style="background:#000;color:transparent;padding:0 40px;">██████████████████████████████████████████████████████</span>
+                — the sixth is not what it appears —
+                <span class="redact" style="background:#000;color:transparent;padding:0 40px;">██████████████████████████████████████████████████████</span>
+            </p>
+            <div class="meta">NEXT :: FOLLOW THE COSMONAUT'S TRANSMISSION LOG</div>
+        </div>
+
+        <p style="text-align:center;opacity:.75;letter-spacing:.24em;margin-top:20px;">
+            // END OF ARCHIVE — CROSS-REFERENCE WITH IN-GAME EVIDENCE //
+        </p>
+    `;
+    arc.classList.add("show");
+    setTimeout(()=>arc.scrollIntoView({behavior:"smooth",block:"start"}), 300);
+}
+
+/* ========== TERMINAL ========== */
+const cmdInput = document.getElementById("cmd");
+cmdInput.addEventListener("keydown", e=>{
+    if(e.key !== "Enter") return;
+    const v = cmdInput.value.trim().toLowerCase();
+    cmdInput.value = "";
+    if(v === "help"){
+        alert("Restricted terminal — commands:\n\nHELP  — this message\nRESET — clears all gate progress\nBACK  — return to main terminal");
+    }else if(v === "reset"){
+        if(confirm("Reset all gate progress?")){
+            for(let i=0;i<gateState.length;i++) gateState[i].solved = false;
+            gatesRoot.innerHTML = "";
+            location.reload();
+        }
+    }else if(v === "back"){
+        window.location = "terminal.html";
+    }else if(v){
+        flashAlert();
+    }
+});
+
+/* ========== CRT TILT (rAF-throttled) ========== */
+const container = document.getElementById("crt-container");
+const clock = document.getElementById("clock");
+let tiltPending=false,lastX=innerWidth/2,lastY=innerHeight/2;
+function scheduleTilt(){
+    if(tiltPending) return;
+    tiltPending=true;
+    requestAnimationFrame(()=>{
+        const rx=(innerHeight/2-lastY)/1400, ry=(innerWidth/2-lastX)/1400;
+        container.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
+        tiltPending=false;
+    });
+}
+document.addEventListener("mousemove",e=>{lastX=e.clientX;lastY=e.clientY;scheduleTilt();},{passive:true});
+document.addEventListener("touchmove",e=>{const t=e.touches[0];lastX=t.clientX;lastY=t.clientY;scheduleTilt();},{passive:true});
+
+function tickClock(){
+    const d=new Date(),pad=n=>n.toString().padStart(2,"0");
+    clock.textContent=`SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(tickClock,1000); tickClock();
+
+/* ========== WARN OVERLAY ========== */
+document.getElementById("agree-btn").onclick = ()=>{
+    document.getElementById("warn-overlay").style.transition="opacity .5s ease";
+    document.getElementById("warn-overlay").style.opacity="0";
+    setTimeout(()=>document.getElementById("warn-overlay").remove(),500);
+};
+
+updateProgress();
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
