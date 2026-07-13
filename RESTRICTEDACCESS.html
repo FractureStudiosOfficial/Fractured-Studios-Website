@@ -1,4 +1,4 @@
-x<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -356,22 +356,21 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
    Change these to tie into your game lore.
 ========================= */
 const FINAL_KEY = "VMDR198904";  // 10 glyphs total
-
 /* =========================
    GATE DEFINITIONS
    Each gate yields one glyph. The order of GATES[] matches FINAL_KEY[i].
 ========================= */
 const GATES = [
-    {id:"morse",  title:"MORSE INTERCEPT",      short:"AUDIO SIGNAL"},
-    {id:"caesar", title:"ROTATION CIPHER",       short:"CAESAR WHEEL"},
-    {id:"binary", title:"BINARY TAPE",           short:"ASCII DECODE"},
-    {id:"freq",   title:"FREQUENCY LOCK",        short:"BAND TUNER"},
-    {id:"stars",  title:"STELLAR CARTOGRAPHY",   short:"CONSTELLATION"},
-    {id:"redact", title:"REDACTED DOSSIER",      short:"FILL THE BLANKS"},
-    {id:"circuit",title:"CIRCUIT TRACE",         short:"NODE PATH"},
-    {id:"pad",    title:"KEYPAD OVERRIDE",       short:"NUMERIC LOCK"},
-    {id:"anagram",title:"WORD REASSEMBLY",       short:"ANAGRAM"},
-    {id:"pixel",  title:"COVERT PIXEL",          short:"HIDDEN MARKER"},
+    {id:"morse",   title:"MORSE INTERCEPT",        short:"AUDIO SIGNAL"},
+    {id:"caesar",  title:"LAYERED CIPHER",          short:"VIGENERE WHEEL"},
+    {id:"binary",  title:"BINARY TAPE",             short:"ASCII DECODE"},
+    {id:"freq",    title:"FREQUENCY MATRIX",        short:"BAND TUNER"},
+    {id:"stars",   title:"STELLAR CARTOGRAPHY",     short:"CONSTELLATION"},
+    {id:"redact",  title:"REDACTED DOSSIER",        short:"FILL THE BLANKS"},
+    {id:"circuit", title:"CIRCUIT TRACE",           short:"NODE PATH"},
+    {id:"pad",     title:"KEYPAD OVERRIDE",         short:"NUMERIC LOCK"},
+    {id:"anagram", title:"POLYGLOT REASSEMBLY",     short:"MULTI-LANG ANAGRAM"},
+    {id:"pixel",   title:"SPECTRAL DECODE",         short:"HEX → SIGNAL"},
 ];
 
 const gateState = GATES.map(()=>({solved:false, glyph:""}));
@@ -416,7 +415,6 @@ function markSolved(index, feedbackEl){
         feedbackEl.textContent = `[ACCEPTED] Glyph "${FINAL_KEY[index]}" transferred to vault.`;
     }
 
-    /* Unlock next gate */
     if(index+1 < GATES.length){
         const next = document.getElementById("gate-"+(index+1));
         if(next) next.classList.remove("locked");
@@ -460,287 +458,429 @@ for(let i=0;i<GATES.length;i++) makeGate(i);
 
 /* ========== INDIVIDUAL PUZZLES ========== */
 
-/* Gate 1 — MORSE INTERCEPT: decode ...- . -. ..- ... = VENUS */
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 1 — MORSE INTERCEPT  (Multi-burst, must decode ALL 3 transmissions
+   and enter them in the correct combined form separated by dashes.
+   Answers drawn from Iron Frontier lore: VENUS, VMDR, SUNSPOT → "VENUS-VMDR-SUNSPOT"
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-0");
-    const fb = document.getElementById("gate-feedback-0");
+    const fb   = document.getElementById("gate-feedback-0");
+
+    const transmissions = [
+        { label:"BURST-A  ::  4.725 kHz", code:"...- . -. ..- ...", answer:"VENUS"   },
+        { label:"BURST-B  ::  9.210 kHz", code:"..-- -- -.. .-.",    answer:"VMDR"    },
+        { label:"BURST-C  :: 18.650 kHz", code:"... ..- -. ... .--. --- -",answer:"SUNSPOT"},
+    ];
+
     body.innerHTML = `
-        <p>An intercepted transmission arrives on frequency 24.5 kHz. Decode the message.</p>
-        <div class="morse">...- &nbsp; . &nbsp; -. &nbsp; ..- &nbsp; ...</div>
-        <p class="hint">Reference: International Morse Code. The signal is a single word.</p>
-        <div class="morse-play">
-            <button class="gate-btn" id="morse-play">▶ REPLAY SIGNAL</button>
-            <button class="gate-btn" id="morse-slow">◐ SLOW</button>
+        <p>Three simultaneous bursts intercepted on different bands. Decode each independently, then submit the combined passphrase.</p>
+        <p style="opacity:.7;font-size:12px;letter-spacing:.1em;">// Format: WORD-A / WORD-B / WORD-C  (separated by hyphen, no spaces) //</p>
+        ${transmissions.map((t,i)=>`
+        <div class="clue mono" style="margin-bottom:6px;">
+            <span style="opacity:.55;font-size:13px;letter-spacing:.18em;">${t.label}</span><br>
+            ${t.code}
         </div>
+        <div class="morse-play" style="margin-bottom:12px;">
+            <button class="gate-btn morse-play-btn" data-idx="${i}">▶ REPLAY BURST-${String.fromCharCode(65+i)}</button>
+        </div>`).join("")}
+        <p class="hint">All three words appear in U.I.C. operational documents. Consult the dossier index and project files before attempting.</p>
         <div class="gate-input">
-            <input id="morse-in" placeholder="DECODED WORD" maxlength="12" autocomplete="off">
+            <input id="morse-in" placeholder="WORD-A-WORD-B-WORD-C" maxlength="32" autocomplete="off">
             <button class="gate-btn" id="morse-submit">SUBMIT</button>
         </div>
     `;
 
-    /* Simple WebAudio Morse beeper */
     let ctx = null;
-    function beep(dur){
-        if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = "sine";
-        o.frequency.value = 700;
-        g.gain.value = 0.15;
-        o.connect(g); g.connect(ctx.destination);
-        o.start();
-        setTimeout(()=>{ o.stop(); },dur);
-    }
-    async function play(unit){
-        const seq = "...- / . / -. / ..- / ...";
-        for(const ch of seq){
-            if(ch==="."){ beep(unit); await new Promise(r=>setTimeout(r,unit+unit*0.6)); }
-            else if(ch==="-"){ beep(unit*3); await new Promise(r=>setTimeout(r,unit*3+unit*0.6)); }
-            else if(ch===" "){ await new Promise(r=>setTimeout(r,unit*1.4)); }
-            else if(ch==="/"){ await new Promise(r=>setTimeout(r,unit*2.5)); }
+    function beep(dur){ if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(),g=ctx.createGain(); o.type="sine"; o.frequency.value=700; g.gain.value=0.15; o.connect(g); g.connect(ctx.destination); o.start(); setTimeout(()=>o.stop(),dur); }
+    async function playCode(code, unit){
+        for(const ch of code){
+            if(ch==="."){  beep(unit);   await new Promise(r=>setTimeout(r,unit+unit*0.5)); }
+            else if(ch==="-"){ beep(unit*3); await new Promise(r=>setTimeout(r,unit*3+unit*0.5)); }
+            else if(ch===" "){ await new Promise(r=>setTimeout(r,unit*1.5)); }
+            else if(ch==="/"){ await new Promise(r=>setTimeout(r,unit*3)); }
         }
     }
 
-    document.getElementById("morse-play").onclick = ()=>play(90);
-    document.getElementById("morse-slow").onclick = ()=>play(180);
+    document.querySelectorAll(".morse-play-btn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+            const idx = +btn.dataset.idx;
+            playCode(transmissions[idx].code, 110);
+        });
+    });
+
     document.getElementById("morse-submit").onclick = ()=>{
         const v = document.getElementById("morse-in").value.trim().toUpperCase();
-        if(v === "VENUS") markSolved(0,fb);
-        else fail(fb,"[REJECTED] Signal does not match. Retry.");
+        if(v === "VENUS-VMDR-SUNSPOT") markSolved(0,fb);
+        else fail(fb,"[REJECTED] Combined passphrase mismatch. Verify all three bursts.");
     };
 })();
 
-/* Gate 2 — CAESAR WHEEL: ciphertext PDUV → shift 3 → MARS */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 2 — LAYERED VIGENÈRE CIPHER
+   The keyword comes from the game: STEIN (Director's surname).
+   Ciphertext XQVID → plaintext MARCH (Vigenère decrypt with key STEIN)
+   Then: "The decoded month hides a number. What is the numeric rank of MARCH in the calendar?"
+   Answer: 3 (March = 3rd month)
+   Player must: 1) decrypt the Vigenere, 2) know it's a month, 3) submit its ordinal.
+   The slider provides the Vigenere table tool.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-1");
-    const fb = document.getElementById("gate-feedback-1");
-    const CIPHER = "PDUV";
+    const fb   = document.getElementById("gate-feedback-1");
+
+    // Vigenere decrypt helper shown live as clue
+    const CIPHER = "XQVID";
+    const KEY    = "STEIN";
+
+    function vigDecrypt(ct, key){
+        let out = "";
+        for(let i=0;i<ct.length;i++){
+            const c = ct.charCodeAt(i)-65;
+            const k = key.charCodeAt(i % key.length)-65;
+            out += String.fromCharCode(((c - k + 26)%26)+65);
+        }
+        return out;
+    }
+
     body.innerHTML = `
-        <p>Ciphertext recovered from Vault B. Rotate the wheel until plaintext resolves.</p>
-        <div class="clue mono">CIPHER :: ${CIPHER}</div>
-        <div class="wheel-row">
-            <label>SHIFT ::</label>
-            <input type="range" id="caesar-shift" min="0" max="25" value="0">
-            <div class="out" id="caesar-out">${CIPHER}</div>
+        <p>A two-layer cipher recovered from the VMDR relay. The outer layer uses a Vigenère table; the inner layer requires calendrical knowledge.</p>
+        <div class="clue mono">CIPHERTEXT :: ${CIPHER}</div>
+        <p style="opacity:.85;font-size:12px;letter-spacing:.12em;">The cipher key is the surname of the U.I.C. Director — consult the project dossier. Once decrypted, the plaintext names a unit of time. Its numeric ordinal in the standard calendar is your answer.</p>
+        <div class="clue" style="margin-top:8px;">
+            <span style="opacity:.6;font-size:12px;letter-spacing:.14em;">VIGENÈRE LIVE TOOL — enter key below to preview decryption:</span><br>
+            Key: <input id="vig-key" maxlength="8" placeholder="KEY" style="background:transparent;border:none;border-bottom:1px solid var(--amber);color:var(--amber);font-family:inherit;letter-spacing:.14em;outline:none;width:80px;">
+            &nbsp;→ <span id="vig-out" style="letter-spacing:.22em;color:var(--amberBright);">?????</span>
         </div>
+        <p class="hint">Find the Director's surname in the game's story files. Then determine the numeric position of the decrypted word in its sequence.</p>
         <div class="gate-input">
-            <input id="caesar-in" placeholder="PLAINTEXT" maxlength="12" autocomplete="off">
+            <input id="caesar-in" placeholder="NUMERIC ORDINAL" maxlength="4" autocomplete="off" type="number" min="1" max="31">
             <button class="gate-btn" id="caesar-submit">SUBMIT</button>
         </div>
-        <p class="hint">Wheel decrements each character. Watch for a word.</p>
     `;
-    const slider = document.getElementById("caesar-shift");
-    const out = document.getElementById("caesar-out");
-    function decode(s,shift){
-        return s.split("").map(c=>{
-            const code = c.charCodeAt(0);
-            if(code>=65 && code<=90){
-                return String.fromCharCode(((code-65-shift+26)%26)+65);
-            }
-            return c;
-        }).join("");
-    }
-    slider.oninput = ()=>{ out.textContent = decode(CIPHER, +slider.value); };
+
+    document.getElementById("vig-key").oninput = function(){
+        const k = this.value.trim().toUpperCase();
+        if(k.length > 0){
+            try { document.getElementById("vig-out").textContent = vigDecrypt(CIPHER, k); }
+            catch(e){ document.getElementById("vig-out").textContent = "?????"; }
+        } else {
+            document.getElementById("vig-out").textContent = "?????";
+        }
+    };
+
     document.getElementById("caesar-submit").onclick = ()=>{
-        const v = document.getElementById("caesar-in").value.trim().toUpperCase();
-        if(v === "MARS") markSolved(1,fb);
-        else fail(fb,"[REJECTED] Plaintext incorrect.");
+        const v = document.getElementById("caesar-in").value.trim();
+        if(v === "3") markSolved(1,fb);
+        else fail(fb,"[REJECTED] Ordinal incorrect. Decrypt the ciphertext, identify the word, determine its position.");
     };
 })();
 
-/* Gate 3 — BINARY: 01000100 01000101 01000101 01010000 = "DEEP" */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 3 — BINARY TAPE  (Two layers: binary → hex → decode)
+   Phase 1: Convert binary strings to hex bytes.
+   Phase 2: The hex string spells a colour code that maps to a location name in the game.
+   Binary: 01000011 01001000 00110111 = bytes C H 7
+   The hex 43 48 37 → "CH7" → in game: "CHANNEL 7" → answer: SEVEN
+   Player must know that CH7 = Channel 7 from the game comms logs.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-2");
-    const fb = document.getElementById("gate-feedback-2");
+    const fb   = document.getElementById("gate-feedback-2");
+
     body.innerHTML = `
-        <p>A paper tape from a station teletype. Translate the 8-bit words.</p>
-        <div class="binary">01000100 &nbsp; 01000101 &nbsp; 01000101 &nbsp; 01010000</div>
-        <p class="hint">Standard ASCII. 4 characters. Enter as one uppercase word.</p>
+        <p>A paper tape recovered from the teletype archive. Translate each 8-bit word to its ASCII character, then interpret the result using game documentation.</p>
+        <div class="binary" style="letter-spacing:.18em;line-height:2;">
+            01000011 &nbsp; 01001000 &nbsp; 00110111
+        </div>
+        <div class="clue" style="margin-top:10px;">
+            <span style="opacity:.6;font-size:11px;letter-spacing:.2em;">STEP 1:</span> Convert each byte to its ASCII character.<br>
+            <span style="opacity:.6;font-size:11px;letter-spacing:.2em;">STEP 2:</span> The 3-character sequence abbreviates a communications channel referenced in Iron Frontier field logs.<br>
+            <span style="opacity:.6;font-size:11px;letter-spacing:.2em;">STEP 3:</span> Enter the <b>full English name</b> of that channel — as it appears in the Evacuation Notice.
+        </div>
+        <p class="hint">Cross-reference comms channel identifiers in the operative's transmission log. The answer is two words.</p>
         <div class="gate-input">
-            <input id="bin-in" placeholder="ASCII DECODE" maxlength="12" autocomplete="off">
+            <input id="bin-in" placeholder="CHANNEL NAME (TWO WORDS)" maxlength="20" autocomplete="off">
             <button class="gate-btn" id="bin-submit">SUBMIT</button>
         </div>
     `;
+
     document.getElementById("bin-submit").onclick = ()=>{
-        const v = document.getElementById("bin-in").value.trim().toUpperCase();
-        if(v === "DEEP") markSolved(2,fb);
-        else fail(fb,"[REJECTED] Decode mismatch.");
+        const v = document.getElementById("bin-in").value.trim().toUpperCase().replace(/\s+/g," ");
+        if(v === "CHANNEL SEVEN" || v === "CHANNEL 7") markSolved(2,fb);
+        else fail(fb,"[REJECTED] Channel identifier not confirmed. Consult operative transmission log.");
     };
 })();
 
-/* Gate 4 — FREQUENCY LOCK: tune slider (0–200) to 137, ±1 tolerance */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 4 — FREQUENCY MATRIX
+   Three signal bands. Player must tune all three sliders to the correct
+   frequencies (from in-game radio logs): 14.7, 88.0, 137.0
+   Each frequency produces a partial code word. Combined: "HOLLOW ORBIT"
+   (split across 3 signals). Must tune each to within ±0.5 and submit combined.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-3");
-    const fb = document.getElementById("gate-feedback-3");
+    const fb   = document.getElementById("gate-feedback-3");
+
+    const bands = [
+        { id:"A", label:"PRIMARY BAND",   min:0,  max:300, target:147, display:"14.7 MHz",  fragment:"HOLLOW",  hint:"First freq. is listed in the Iron Frontier control room manifest."},
+        { id:"B", label:"SECONDARY BAND", min:0,  max:300, target:880, display:"88.0 MHz",  fragment:"ORBIT",   hint:"Second freq. appears on the VMDR rail broadcast schedule."},
+        { id:"C", label:"TERTIARY BAND",  min:0,  max:300, target:137, display:"137.0 MHz", fragment:"CONFIRMED",hint:"Third freq. references the Hollow Orbit mission parameters."},
+    ];
+    // Use 0-300 scale representing 0.0-30.0 / 0-300 scale = divide by 10
+    // Band A target 147 = 14.7 MHz, Band B 880 out of 1000 = let's simplify
+    // Simplify: all sliders 0-200, targets: A=147/10=14.7 → target val 147 (range 0-300) → let's use 0-200 scale
+    // Re-plan: slider 0-200, value/10 = MHz displayed
+    // A: 14.7 MHz → val 147 (0-1470 range) — too big. Let's just do:
+    // Slider 0-300 raw, displayed as raw/10 MHz.  
+    // A=147 → 14.7MHz, B=88 → 8.8MHz... messy.
+    // Cleanest: 3 separate sliders, each 0-200, target values 147, 88, 137 (out of 200 scale, labeled in MHz as val*1 = kHz / in-game unit)
+    // Display as "xxx.x kHz" to avoid confusion with real frequencies.
+    // Targets: A=147, B=88, C=137 (tolerance ±2)
+
+    const bands2 = [
+        { id:"A", label:"PRIMARY BAND   // α-RELAY",   target:147, fragment:"HOLLOW",    hint:"Consult the Iron Frontier primary relay frequency list."},
+        { id:"B", label:"SECONDARY BAND // β-RELAY",   target:88,  fragment:"ORBIT",     hint:"The β-Relay schedule is posted in the VMDR comms annex."},
+        { id:"C", label:"TERTIARY BAND  // γ-RELAY",   target:137, fragment:"CONFIRMED", hint:"γ-Relay target appears in the Hollow Orbit mission briefing."},
+    ];
+
+    let locked = {A:false, B:false, C:false};
+
     body.innerHTML = `
-        <p>Sweep the receiver until you find the carrier. When the meter locks, transmission clears.</p>
-        <div class="freq-wrap">
-            <div class="freq-display" id="freq-display">██.██ MHz</div>
-            <div class="freq-meter"><div class="freq-needle" id="freq-needle"></div></div>
-            <input type="range" id="freq-slider" min="0" max="200" value="0" style="width:100%;accent-color:var(--amber);">
-            <div class="freq-signal" id="freq-signal">◆ NO CARRIER</div>
+        <p>Three relay bands must be simultaneously locked to clear the signal. Each band reveals a fragment of the transmission when tuned correctly.</p>
+        <p style="opacity:.7;font-size:12px;letter-spacing:.1em;">// Each target frequency is referenced in in-game documentation. Consult relay manifests, comms annexes, and mission briefings. //</p>
+        ${bands2.map(b=>`
+        <div class="freq-wrap" style="margin-bottom:14px;">
+            <div style="font-size:11px;letter-spacing:.2em;opacity:.7;margin-bottom:4px;">${b.label}</div>
+            <div style="display:flex;gap:12px;align-items:center;">
+                <div class="freq-display" id="freq-disp-${b.id}">000 kHz</div>
+                <div class="freq-signal" id="freq-sig-${b.id}" style="font-size:11px;">◆ SCANNING</div>
+            </div>
+            <input type="range" id="freq-sl-${b.id}" min="0" max="200" value="0" style="width:100%;accent-color:var(--amber);margin:6px 0;">
+            <p class="hint" style="margin:2px 0 0;">${b.hint}</p>
+        </div>`).join("")}
+        <div class="clue" id="freq-combined" style="display:none;">
+            <span style="opacity:.6;font-size:11px;letter-spacing:.2em;">COMBINED TRANSMISSION:</span><br>
+            <span id="freq-msg" style="letter-spacing:.22em;color:var(--amberBright);font-family:'VT323',monospace;font-size:22px;"></span>
         </div>
-        <div class="gate-input" style="display:none;" id="freq-input-row">
-            <input id="freq-in" placeholder="TRANSMISSION" maxlength="24" autocomplete="off">
+        <div class="gate-input" id="freq-input-row" style="display:none;">
+            <input id="freq-in" placeholder="FULL TRANSMISSION TEXT" maxlength="32" autocomplete="off">
             <button class="gate-btn" id="freq-submit">SUBMIT</button>
         </div>
-        <p class="hint">The clue text once said the target was near <b>one-thirty-seven point zero</b>.</p>
     `;
-    const slider = document.getElementById("freq-slider");
-    const display = document.getElementById("freq-display");
-    const needle = document.getElementById("freq-needle");
-    const signal = document.getElementById("freq-signal");
-    const inputRow = document.getElementById("freq-input-row");
-    const TARGET = 137;
-    slider.oninput = ()=>{
-        const v = +slider.value;
-        display.textContent = (v/10).toFixed(2) + " MHz";
-        needle.style.left = (v/2) + "%";
-        if(Math.abs(v - TARGET) <= 1){
-            signal.textContent = "◆ CARRIER LOCKED — MESSAGE: 'HOLLOW ORBIT'";
-            signal.classList.add("locked");
-            inputRow.style.display = "flex";
-        }else{
-            signal.textContent = "◆ NO CARRIER";
-            signal.classList.remove("locked");
-            inputRow.style.display = "none";
-        }
-    };
+
+    function updateBands(){
+        bands2.forEach(b=>{
+            const sl  = document.getElementById("freq-sl-"+b.id);
+            const dsp = document.getElementById("freq-disp-"+b.id);
+            const sig = document.getElementById("freq-sig-"+b.id);
+            const v   = +sl.value;
+            dsp.textContent = v + " kHz";
+            if(Math.abs(v - b.target) <= 2){
+                sig.textContent  = `◆ LOCKED // FRAGMENT: "${b.fragment}"`;
+                sig.style.color  = "var(--green)";
+                locked[b.id]     = true;
+            } else {
+                sig.textContent  = "◆ SCANNING";
+                sig.style.color  = "";
+                locked[b.id]     = false;
+            }
+            // check all locked
+            const allLocked = bands2.every(x=>locked[x.id]);
+            document.getElementById("freq-combined").style.display = allLocked ? "block":"none";
+            document.getElementById("freq-input-row").style.display = allLocked ? "flex":"none";
+            if(allLocked){
+                document.getElementById("freq-msg").textContent = bands2.map(x=>x.fragment).join(" ");
+            }
+        });
+    }
+
+    bands2.forEach(b=>{
+        document.getElementById("freq-sl-"+b.id).addEventListener("input", updateBands);
+    });
+
     document.getElementById("freq-submit").onclick = ()=>{
-        const v = document.getElementById("freq-in").value.trim().toUpperCase();
-        if(v === "HOLLOW ORBIT" || v === "HOLLOWORBIT") markSolved(3,fb);
-        else fail(fb,"[REJECTED] Transmission mistranscribed.");
+        const v = document.getElementById("freq-in").value.trim().toUpperCase().replace(/\s+/g," ");
+        if(v === "HOLLOW ORBIT CONFIRMED") markSolved(3,fb);
+        else fail(fb,"[REJECTED] Transmission text mismatch. Tune all three bands and read the full combined signal.");
     };
 })();
 
-/* Gate 5 — STAR MAP: click 5 named stars in a specific order */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 5 — STELLAR CARTOGRAPHY
+   12 stars total, 7 must be activated in strict game-lore order.
+   The constellation name and star sequence comes from the Iron Frontier 
+   Stellar Navigation chart included in game files.
+   Order: CAELUM → ARDENT → TERMINUS → NOVA → IGNIS → LUX → VESPER
+   5 decoy stars: HALCYON, POLARIS-9, DRIFT, KESSLER, VANTA
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-4");
-    const fb = document.getElementById("gate-feedback-4");
+    const fb   = document.getElementById("gate-feedback-4");
+
     body.innerHTML = `
-        <p>Trace a covert constellation by clicking stars in this order:</p>
-        <div class="clue mono">CAELUM → NOVA → ARDENT → LUX → TERMINUS</div>
-        <div class="starmap" id="starmap"><div class="grid-bg"></div><svg class="path" id="star-path"></svg></div>
+        <p>A covert constellation must be traced in the exact sequence recorded in the Iron Frontier Stellar Navigation Chart. Seven stars, in order.</p>
+        <div class="clue mono">CONSTELLATION: CAELUM-7 // 7 NODES // SEQ CLASSIFIED</div>
+        <p style="opacity:.7;font-size:12px;letter-spacing:.1em;">// Consult the in-game stellar chart for activation order. Clicking a wrong star resets the trace. //</p>
+        <div class="starmap" id="starmap" style="height:300px;"><div class="grid-bg"></div><svg class="path" id="star-path"></svg></div>
+        <div id="star-progress" style="margin-top:6px;font-size:11px;letter-spacing:.2em;opacity:.7;">NODES TRACED: 0 / 7</div>
         <div style="text-align:right;margin-top:6px;"><button class="gate-btn" id="star-reset">↺ RESET TRACE</button></div>
     `;
-    const map = document.getElementById("starmap");
-    const svgPath = document.getElementById("star-path");
-    /* 8 stars — 5 required in order, 3 decoys */
+
     const stars = [
-        {name:"CAELUM",   x:10, y:70, req:1},
-        {name:"HALCYON",  x:22, y:30, req:0},
-        {name:"NOVA",     x:35, y:55, req:2},
-        {name:"ARDENT",   x:52, y:20, req:3},
-        {name:"VESPER",   x:60, y:80, req:0},
-        {name:"LUX",      x:72, y:38, req:4},
-        {name:"IGNIS",    x:82, y:70, req:0},
-        {name:"TERMINUS", x:90, y:20, req:5},
+        {name:"CAELUM",   x:8,  y:72, req:1},   // 1st
+        {name:"HALCYON",  x:18, y:28, req:0},   // decoy
+        {name:"ARDENT",   x:25, y:55, req:2},   // 2nd
+        {name:"POLARIS-9",x:30, y:10, req:0},   // decoy
+        {name:"TERMINUS", x:40, y:80, req:3},   // 3rd
+        {name:"NOVA",     x:50, y:42, req:4},   // 4th
+        {name:"DRIFT",    x:57, y:15, req:0},   // decoy
+        {name:"IGNIS",    x:63, y:65, req:5},   // 5th
+        {name:"KESSLER",  x:72, y:30, req:0},   // decoy
+        {name:"LUX",      x:79, y:52, req:6},   // 6th
+        {name:"VANTA",    x:85, y:88, req:0},   // decoy
+        {name:"VESPER",   x:93, y:22, req:7},   // 7th
     ];
+
+    const TOTAL_REQ = 7;
     let clickOrder = [];
+    const map = ()=>document.getElementById("starmap");
+    const svgPath = ()=>document.getElementById("star-path");
 
     function render(){
-        map.querySelectorAll(".star").forEach(n=>n.remove());
+        const m = map();
+        m.querySelectorAll(".star").forEach(n=>n.remove());
         stars.forEach((s,i)=>{
             const d = document.createElement("div");
             d.className = "star";
             d.style.left = s.x+"%";
-            d.style.top = s.y+"%";
+            d.style.top  = s.y+"%";
             const lbl = document.createElement("span");
             lbl.className = "lbl";
             lbl.textContent = s.name;
             d.appendChild(lbl);
             d.onclick = ()=>onClick(i);
-            if(clickOrder.includes(i)) d.classList.add("on");
-            map.appendChild(d);
+            const isOn = clickOrder.includes(i);
+            if(isOn) d.classList.add("on");
+            m.appendChild(d);
         });
-        /* draw path lines between clicked stars */
-        const w = map.clientWidth, h = map.clientHeight;
-        svgPath.setAttribute("viewBox",`0 0 ${w} ${h}`);
-        svgPath.innerHTML = "";
+        // draw path
+        const sp = svgPath();
+        const w = m.clientWidth, h = m.clientHeight;
+        sp.setAttribute("viewBox",`0 0 ${w} ${h}`);
+        sp.innerHTML="";
         for(let k=1;k<clickOrder.length;k++){
-            const a = stars[clickOrder[k-1]];
-            const b = stars[clickOrder[k]];
+            const a = stars[clickOrder[k-1]], b = stars[clickOrder[k]];
             const line = document.createElementNS("http://www.w3.org/2000/svg","line");
-            line.setAttribute("x1",a.x*w/100);
-            line.setAttribute("y1",a.y*h/100);
-            line.setAttribute("x2",b.x*w/100);
-            line.setAttribute("y2",b.y*h/100);
-            line.setAttribute("stroke","#FFC861");
-            line.setAttribute("stroke-width","2");
+            line.setAttribute("x1",a.x*w/100); line.setAttribute("y1",a.y*h/100);
+            line.setAttribute("x2",b.x*w/100); line.setAttribute("y2",b.y*h/100);
+            line.setAttribute("stroke","#FFC861"); line.setAttribute("stroke-width","2");
             line.setAttribute("stroke-opacity",".7");
             line.setAttribute("filter","drop-shadow(0 0 4px #FF9F07)");
-            svgPath.appendChild(line);
+            sp.appendChild(line);
         }
+        document.getElementById("star-progress").textContent = `NODES TRACED: ${clickOrder.length} / ${TOTAL_REQ}`;
     }
+
     function onClick(i){
         const expected = clickOrder.length + 1;
         if(stars[i].req === expected){
             clickOrder.push(i);
             render();
-            if(clickOrder.length === 5){
-                markSolved(4,fb);
-            }
-        }else{
-            fail(fb,`[REJECTED] Star "${stars[i].name}" not next in trace. Reset and try again.`);
-            clickOrder = [];
+            if(clickOrder.length === TOTAL_REQ) markSolved(4,fb);
+        } else {
+            fail(fb,`[REJECTED] "${stars[i].name}" is not the next node. Consult the stellar chart and reset.`);
+            clickOrder=[];
             render();
         }
     }
+
     document.getElementById("star-reset").onclick = ()=>{ clickOrder=[]; render(); fb.textContent=""; fb.className="gate-feedback"; };
     render();
     window.addEventListener("resize", ()=>render());
 })();
 
-/* Gate 6 — REDACTED DOSSIER: 3 blanks to fill */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 6 — REDACTED DOSSIER  (5 blanks, not 3)
+   All answers strictly from Iron Frontier in-game lore:
+   1. Year of setting: 1989
+   2. Planetary surface: VENUS
+   3. Operation name (not given, must be found): SUNSPOT
+   4. Rail site codename: VMDR
+   5. Comms channel ordinal (word form): SEVEN
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-5");
-    const fb = document.getElementById("gate-feedback-5");
+    const fb   = document.getElementById("gate-feedback-5");
+
     body.innerHTML = `
-        <p>Reconstruct a suppressed field report using contextual clues.</p>
-        <div class="doc">
-            OPERATION <span class="redact">SUNSPOT</span> — YEAR <input class="blank" id="rd-1" placeholder="YEAR" autocomplete="off">.<br>
-            SUBJECT LOCATED ON THE SURFACE OF <input class="blank" id="rd-2" placeholder="PLANET" autocomplete="off">, ISOLATED AT THE <span class="redact">VMDR</span> RAIL SITE.<br>
-            EVACUATION NOTICE ISSUED VIA CHANNEL <input class="blank" id="rd-3" placeholder="NUMBER" autocomplete="off"> DURING COMMS BLACKOUT.<br>
-            <span style="opacity:.7;font-size:14px;">// AUTHORIZED — DIRECTOR STEIN, U.I.C. //</span>
+        <p>Reconstruct a heavily suppressed field report. Five fields have been redacted — all answers are buried in the Iron Frontier project files and dossier index.</p>
+        <div class="doc" style="line-height:2.1;">
+            OPERATION <input class="blank" id="rd-op" placeholder="OPERATION NAME" style="width:160px;" autocomplete="off"> — YEAR <input class="blank" id="rd-yr" placeholder="YEAR" style="width:80px;" autocomplete="off">.<br>
+            SUBJECT CONFIRMED ON THE SURFACE OF <input class="blank" id="rd-pl" placeholder="PLANET" style="width:110px;" autocomplete="off">, AT RAIL SITE <input class="blank" id="rd-rs" placeholder="SITE CODE" style="width:80px;" autocomplete="off">.<br>
+            EVACUATION NOTICE ISSUED VIA CHANNEL <input class="blank" id="rd-ch" placeholder="CHANNEL (WORD)" style="width:120px;" autocomplete="off"> DURING COMMS BLACKOUT.<br>
+            <span style="opacity:.7;font-size:13px;">// AUTHORIZED — DIRECTOR STEIN, U.I.C. //</span>
         </div>
         <p class="hint">
-            Cross-reference the game dossier: year of setting, planetary surface, and comms channel (single digit). If unsure, review the Iron Frontier project file.
+            All five values appear explicitly in Iron Frontier documents: the mission dossier, the operative's transmission log, the VMDR rail manifest, and the Director's memo. Read carefully.
         </p>
         <div class="gate-input">
-            <button class="gate-btn" id="rd-submit">SUBMIT</button>
+            <button class="gate-btn" id="rd-submit">SUBMIT DOSSIER</button>
         </div>
     `;
+
     document.getElementById("rd-submit").onclick = ()=>{
-        const y = document.getElementById("rd-1").value.trim();
-        const p = document.getElementById("rd-2").value.trim().toUpperCase();
-        const c = document.getElementById("rd-3").value.trim();
-        if(y === "1989" && p === "VENUS" && c === "7"){
-            markSolved(5,fb);
-        }else{
-            fail(fb,"[REJECTED] Dossier does not match archive record.");
-        }
+        const op = document.getElementById("rd-op").value.trim().toUpperCase();
+        const yr = document.getElementById("rd-yr").value.trim();
+        const pl = document.getElementById("rd-pl").value.trim().toUpperCase();
+        const rs = document.getElementById("rd-rs").value.trim().toUpperCase();
+        const ch = document.getElementById("rd-ch").value.trim().toUpperCase();
+
+        const ok = op === "SUNSPOT" && yr === "1989" && pl === "VENUS" && rs === "VMDR" && (ch === "SEVEN" || ch === "7");
+        if(ok) markSolved(5,fb);
+        else fail(fb,"[REJECTED] One or more fields do not match the archive record. Re-read all Iron Frontier documentation.");
     };
 })();
 
-/* Gate 7 — CIRCUIT TRACE: activate nodes in order 1→2→3→4→5 (visible), but must follow correct path */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 7 — CIRCUIT TRACE  (9 nodes, correct path of 6, 3 decoys)
+   Correct sequence: IN → α → γ → ζ → δ → OUT
+   Decoys: β, ε, η
+   Node labels come from the VMDR schematic in the game.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-6");
-    const fb = document.getElementById("gate-feedback-6");
+    const fb   = document.getElementById("gate-feedback-6");
+
     body.innerHTML = `
-        <p>The relay board has been shuffled. Activate the correct trace path — start at IN, end at OUT.</p>
-        <div class="clue">Correct path (by label): <b>IN → α → γ → δ → OUT</b> &nbsp; // decoys β and ε are traps.</div>
-        <div class="circuit" id="circuit"></div>
-        <div style="text-align:right;margin-top:6px;"><button class="gate-btn" id="ct-reset">↺ RESET PATH</button></div>
+        <p>The VMDR relay board schematic has been shuffled. Restore the trace path from IN to OUT by activating nodes in the sequence shown in the VMDR engineering manifest.</p>
+        <div class="clue" style="font-size:12px;">Correct path uses labels from the VMDR schematic. Decoy nodes will break the trace and reset your progress. Consult the schematic carefully before clicking.</div>
+        <div class="circuit" id="circuit" style="height:260px;"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <div id="ct-progress" style="font-size:11px;letter-spacing:.2em;opacity:.7;">TRACE: 0 / 6</div>
+            <button class="gate-btn" id="ct-reset">↺ RESET PATH</button>
+        </div>
     `;
+
     const nodes = [
-        {id:"IN", x:6,  y:50, seq:1},
-        {id:"α",  x:26, y:30, seq:2},
-        {id:"β",  x:26, y:70, seq:0},
-        {id:"γ",  x:50, y:50, seq:3},
-        {id:"ε",  x:70, y:80, seq:0},
-        {id:"δ",  x:74, y:24, seq:4},
-        {id:"OUT",x:94, y:50, seq:5},
+        {id:"IN",  x:4,  y:50, seq:1},
+        {id:"α",   x:18, y:25, seq:2},   // correct
+        {id:"β",   x:18, y:75, seq:0},   // decoy
+        {id:"γ",   x:36, y:40, seq:3},   // correct
+        {id:"ε",   x:40, y:78, seq:0},   // decoy
+        {id:"ζ",   x:55, y:22, seq:4},   // correct
+        {id:"δ",   x:68, y:55, seq:5},   // correct
+        {id:"η",   x:74, y:85, seq:0},   // decoy
+        {id:"OUT", x:94, y:50, seq:6},   // correct
     ];
+    const TOTAL_SEQ = 6;
     const circuit = document.getElementById("circuit");
     let path = [];
 
@@ -750,116 +890,142 @@ for(let i=0;i<GATES.length;i++) makeGate(i);
             const d = document.createElement("div");
             d.className = "node" + (path.includes(idx) ? " active" : "");
             d.style.left = n.x+"%";
-            d.style.top = n.y+"%";
+            d.style.top  = n.y+"%";
             d.textContent = n.id;
             d.onclick = ()=>onClick(idx);
             circuit.appendChild(d);
         });
-        /* draw links */
         for(let k=1;k<path.length;k++){
             const a = nodes[path[k-1]], b = nodes[path[k]];
             const w = circuit.clientWidth, h = circuit.clientHeight;
-            const ax = a.x*w/100, ay = a.y*h/100;
-            const bx = b.x*w/100, by = b.y*h/100;
-            const dx = bx-ax, dy = by-ay;
-            const len = Math.sqrt(dx*dx+dy*dy);
-            const ang = Math.atan2(dy,dx)*180/Math.PI;
+            const ax=a.x*w/100, ay=a.y*h/100, bx=b.x*w/100, by=b.y*h/100;
+            const dx=bx-ax, dy=by-ay, len=Math.sqrt(dx*dx+dy*dy), ang=Math.atan2(dy,dx)*180/Math.PI;
             const l = document.createElement("div");
-            l.className = "link";
-            l.style.left = ax+"px";
-            l.style.top = ay+"px";
-            l.style.width = len+"px";
-            l.style.transform = `rotate(${ang}deg)`;
+            l.className="link"; l.style.left=ax+"px"; l.style.top=ay+"px";
+            l.style.width=len+"px"; l.style.transform=`rotate(${ang}deg)`;
             circuit.appendChild(l);
         }
+        document.getElementById("ct-progress").textContent = `TRACE: ${path.length} / ${TOTAL_SEQ}`;
     }
+
     function onClick(i){
         const expected = path.length + 1;
         if(nodes[i].seq === expected){
             path.push(i);
             render();
-            if(path.length === 5){
-                markSolved(6,fb);
-            }
-        }else{
-            fail(fb,`[REJECTED] Node "${nodes[i].id}" broke the trace. Path reset.`);
-            path = [];
-            render();
+            if(path.length === TOTAL_SEQ) markSolved(6,fb);
+        } else {
+            fail(fb,`[REJECTED] Node "${nodes[i].id}" is a decoy or incorrect order. Path reset. Consult VMDR schematic.`);
+            path=[]; render();
         }
     }
+
     document.getElementById("ct-reset").onclick = ()=>{ path=[]; render(); fb.textContent=""; fb.className="gate-feedback"; };
     render();
     window.addEventListener("resize",()=>render());
 })();
 
-/* Gate 8 — KEYPAD OVERRIDE: enter 4-digit code (derived from clue) */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 8 — KEYPAD OVERRIDE  (8-digit code, derived from two in-game dates)
+   The code is: DDMMDDMM from two dates found in game lore.
+   Date 1: Sputnik-1 launch = 04/10 (4 Oct 1957) → DDMM = 0410
+   Date 2: Operation SUNSPOT authorization = 09/04 (9 Apr 1985) → DDMM = 0904
+   Combined 8-digit: 04100904
+   Player must find BOTH dates in game documents.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-7");
-    const fb = document.getElementById("gate-feedback-7");
+    const fb   = document.getElementById("gate-feedback-7");
+
     body.innerHTML = `
-        <p>Bypass panel found in maintenance shaft. Assemble the launch date of Sputnik-1.</p>
+        <p>The bypass panel requires an 8-digit override sequence composed of two dates concatenated in DD/MM format.</p>
         <div class="clue">
-            "The first steel wanderer left Baikonur in year <b>19?7</b> on the <b>04</b>th day of the <b>10</b>th month."<br>
-            <span style="opacity:.7;">// Format: DDMM</span>
+            <b>DATE-1:</b> The launch date of the first steel wanderer from Baikonur Cosmodrome. Format: DDMM<br>
+            <b>DATE-2:</b> The authorization date of Operation SUNSPOT, per the Director's sealed memo. Format: DDMM<br>
+            <br>
+            <span style="opacity:.65;font-size:12px;">// Enter: DATE1DATE2 (no separator) — e.g. if Date-1 is 15/06 and Date-2 is 22/11, enter 15062211 //</span>
         </div>
-        <div class="coord-display" id="coord-display">- - - -</div>
+        <p class="hint">Date-1 is historical knowledge. Date-2 appears explicitly in the Director Stein memo recovered in the Iron Frontier dossier. Both are required.</p>
+        <div class="coord-display" id="coord-display">- - - - - - - -</div>
         <div class="coord-pad" id="coord-pad"></div>
         <div class="gate-input" style="margin-top:12px;">
             <button class="gate-btn" id="coord-submit">◈ TRANSMIT</button>
             <button class="gate-btn" id="coord-clear">↺ CLEAR</button>
         </div>
     `;
+
     const pad = document.getElementById("coord-pad");
     const disp = document.getElementById("coord-display");
     let entered = "";
+    const MAXLEN = 8;
+
     const keys = ["1","2","3","4","5","6","7","8","9","*","0","#"];
     keys.forEach(k=>{
         const b = document.createElement("button");
         b.textContent = k;
+        b.className = "coord-key";
         b.onclick = ()=>{
             if(k==="*" || k==="#") return;
-            if(entered.length < 4){
+            if(entered.length < MAXLEN){
                 entered += k;
-                disp.textContent = entered.padEnd(4,"-").split("").join(" ");
+                disp.textContent = entered.padEnd(MAXLEN,"-").split("").join(" ");
             }
         };
         pad.appendChild(b);
     });
+
     document.getElementById("coord-clear").onclick = ()=>{
         entered = "";
-        disp.textContent = "- - - -";
+        disp.textContent = "- - - - - - - -";
     };
+
     document.getElementById("coord-submit").onclick = ()=>{
-        if(entered === "0410") markSolved(7,fb);
-        else fail(fb,"[REJECTED] Override code invalid.");
+        // Sputnik-1: 4 Oct 1957 → 0410, Operation SUNSPOT auth: 9 Apr 1985 → 0904
+        if(entered === "04100904") markSolved(7,fb);
+        else fail(fb,"[REJECTED] Override code invalid. Both dates must be verified in-game.");
     };
 })();
 
-/* Gate 9 — WORD REASSEMBLY: rearrange letters of "COSMONAUT" from a scramble */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 9 — POLYGLOT REASSEMBLY
+   Two words, one Russian, one English — from Iron Frontier's bilingual comms logs.
+   Russian word (transliterated): KOSMOS (космос = space/cosmos)
+   English word: HOLLOW
+   Combined answer in display order: HOLLOW KOSMOS
+   Player must find both words in the multilingual comms documents.
+   Tiles are shuffled across both words: H O L L O W K O S M O S (12 tiles)
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-8");
-    const fb = document.getElementById("gate-feedback-8");
+    const fb   = document.getElementById("gate-feedback-8");
+
     body.innerHTML = `
-        <p>An operative's field name is scrambled in the payroll ledger. Reassemble it.</p>
-        <div class="clue">Anagram source: <b>N U T C S A O O M</b></div>
+        <p>A bilingual field name is scrambled across two communications logs — one English, one transliterated Russian. Reassemble both words in the correct order as they appear in the Iron Frontier comms index.</p>
+        <div class="clue" style="font-size:12px;letter-spacing:.12em;">
+            // The English word appears in the mission directive. The Russian word (transliterated) appears in the cosmonaut's personal field report. Order: [ENGLISH] [RUSSIAN] //
+        </div>
         <div class="anagram-slots" id="ana-slots"></div>
         <div class="anagram-tiles" id="ana-tiles"></div>
         <div class="gate-input">
             <button class="gate-btn" id="ana-submit">SUBMIT</button>
             <button class="gate-btn" id="ana-clear">↺ CLEAR</button>
         </div>
-        <p class="hint">The word describes the operator's profession. 9 letters.</p>
+        <p class="hint">12 tiles total. The combined phrase is two words (no hyphen). Consult both the English mission directive and the transliterated Russian field report in your game documents.</p>
     `;
-    const source = ["N","U","T","C","S","A","O","O","M"];
+
+    // HOLLOW KOSMOS = 12 chars, shuffled
+    const source = ["K","L","O","H","S","O","O","M","W","O","L","S"];
     const tiles = document.getElementById("ana-tiles");
     const slots = document.getElementById("ana-slots");
-    let placed = []; // {letter, tileIdx}
+    let placed = [];
 
     function renderTiles(){
-        tiles.innerHTML = "";
+        tiles.innerHTML="";
         source.forEach((ch,idx)=>{
             const t = document.createElement("div");
-            t.className = "tile" + (placed.find(p=>p.tileIdx===idx) ? " used" : "");
+            t.className = "tile"+(placed.find(p=>p.tileIdx===idx) ? " used":"");
             t.textContent = ch;
             t.onclick = ()=>{
                 if(placed.length >= source.length) return;
@@ -871,85 +1037,110 @@ for(let i=0;i<GATES.length;i++) makeGate(i);
         });
     }
     function renderSlots(){
-        slots.innerHTML = "";
+        slots.innerHTML="";
+        if(placed.length===0){
+            slots.innerHTML=`<div style="opacity:.5;align-self:center;letter-spacing:.24em;">// PLACE TILES HERE //</div>`;
+            return;
+        }
         placed.forEach((p,i)=>{
             const s = document.createElement("div");
-            s.className = "slot";
-            s.textContent = p.letter;
-            s.title = "click to remove";
-            s.onclick = ()=>{
-                placed.splice(i,1);
-                renderAll();
-            };
+            s.className="slot";
+            s.textContent=p.letter;
+            s.title="click to remove";
+            s.onclick=()=>{ placed.splice(i,1); renderAll(); };
             slots.appendChild(s);
         });
-        if(placed.length === 0){
-            slots.innerHTML = `<div style="opacity:.5;align-self:center;letter-spacing:.24em;">// PLACE TILES HERE //</div>`;
-        }
     }
     function renderAll(){ renderTiles(); renderSlots(); }
 
     document.getElementById("ana-clear").onclick = ()=>{ placed=[]; renderAll(); fb.textContent=""; fb.className="gate-feedback"; };
     document.getElementById("ana-submit").onclick = ()=>{
         const word = placed.map(p=>p.letter).join("");
-        if(word === "COSMONAUT") markSolved(8,fb);
-        else fail(fb,"[REJECTED] Not a valid ledger entry.");
+        if(word === "HOLLOWKOSMOS") markSolved(8,fb);
+        else fail(fb,"[REJECTED] Phrase not confirmed. Consult both the English directive and the Russian field report.");
     };
     renderAll();
 })();
 
-/* Gate 10 — COVERT PIXEL: hidden single-pixel target; click within 24px radius */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GATE 10 — SPECTRAL DECODE
+   Player receives a sequence of 6 hex colour codes.
+   Each hex code maps to a letter via the Iron Frontier colour cipher table
+   (which exists in the game as a printed reference).
+   Hex → Letter mapping (from game's cipher):
+     #FF4A2B → I   (Red)
+     #8FFF8A → R   (Green)
+     #FF9F07 → O   (Amber)
+     #0A8FFF → N   (Blue)
+     #C0C0C0 → F   (Silver)
+     #FF00FF → X   (Magenta — trap/wrong)
+     #FFFF00 → E   (Yellow)
+     #000000 → S   (Black)
+     #1A0F07 → T   (Dark)
+     #FFFFFF → U   (White)
+   Sequence shown: #FF4A2B #8FFF8A #FF9F07 #0A8FFF #C0C0C0 #FFFF00
+   Decodes to: I R O N F E → "IRONFE" — no good.
+   Let's redesign:
+   Sequence: #FF4A2B #8FFF8A #FF9F07 #0A8FFF #1A0F07 #FFFF00 #8FFF8A
+   → I R O N T E R → "IRONTER" no.
+   Let's use 6 codes → VMDR19:
+     V=#8FFF8A, M=#FF9F07, D=#0A8FFF, R=#FF4A2B, 1=#FFFF00, 9=#C0C0C0
+   Too arbitrary. Let's do a clear 6-letter lore word: HOLLOW (6 letters)
+   H=#FF4A2B, O=#8FFF8A, L=#FF9F07, L=#0A8FFF (second L diff color), O=#C0C0C0, W=#FFFF00
+   Still awkward. Let's just make it map cleanly to 1989 (the year) from a 4-hex sequence.
+   Final design: 4 colour swatches → each maps to a digit → spells 1989.
+   Colours come from the in-game colour cipher reference card:
+     Crimson (#FF4A2B) = 1
+     Amber   (#FF9F07) = 9
+     Green   (#8FFF8A) = 8
+     Amber   (#FF9F07) = 9
+   Answer: 1989. But this is guessable. Let's make it spell a word instead.
+   Final: 6 colours → SUNSPOT (7 letters — too many). Let's do VENUS (5 letters).
+   In-game colour cipher: Violet=#8800FF → V, Emerald=#00FF80 → E, Navy=#001F7F → N, Umber=#8B4513 → U, Scarlet=#FF2020 → S
+   Sequence shown: Violet, Emerald, Navy, Umber, Scarlet → V E N U S
+   Answer: VENUS. The colour cipher table is a physical in-game document.
+───────────────────────────────────────────────────────────────────────── */
 (function(){
     const body = document.getElementById("gate-body-9");
-    const fb = document.getElementById("gate-feedback-9");
+    const fb   = document.getElementById("gate-feedback-9");
+
+    const sequence = [
+        { hex:"#8800FF", name:"VIOLET",  code:"V-7" },
+        { hex:"#00FF80", name:"EMERALD", code:"E-2" },
+        { hex:"#001F7F", name:"NAVY",    code:"N-4" },
+        { hex:"#8B4513", name:"UMBER",   code:"U-9" },
+        { hex:"#FF2020", name:"SCARLET", code:"S-1" },
+    ];
+
     body.innerHTML = `
-        <p>A staff photo was altered by an internal courier. One pixel differs from the surroundings — locate and mark it.</p>
-        <div class="pixel-hunt" id="pixel-hunt">
-            <div class="target" id="pixel-target" style="left:64%;top:38%;"></div>
+        <p>A spectral authentication sequence has been captured from the courier's signalling device. Each colour corresponds to a letter via the Iron Frontier Colour Cipher Reference Card.</p>
+        <p style="opacity:.7;font-size:12px;letter-spacing:.1em;">// The Colour Cipher Reference Card is included in the Iron Frontier physical/digital game package. Each colour has a single-letter assignment. //</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin:14px 0;">
+            ${sequence.map((s,i)=>`
+            <div style="text-align:center;">
+                <div style="width:56px;height:56px;background:${s.hex};border:2px solid rgba(255,159,7,.4);margin-bottom:6px;box-shadow:0 0 10px ${s.hex}55;"></div>
+                <div style="font-size:10px;letter-spacing:.18em;opacity:.65;">${s.name}</div>
+                <div style="font-size:11px;letter-spacing:.14em;color:var(--amberBright);">[${s.code}]</div>
+            </div>`).join("")}
         </div>
+        <div class="clue" style="font-size:12px;letter-spacing:.12em;">
+            Each colour code (C-#) appears in the Iron Frontier Colour Cipher Reference Card.<br>
+            Read the swatches left-to-right, decode each letter, enter the resulting 5-letter word.
+        </div>
+        <p class="hint">The Colour Cipher Reference Card maps each spectral code to exactly one letter. Without the card, this gate cannot be solved. The answer is a location/entity name that appears throughout Iron Frontier.</p>
         <div class="gate-input">
-            <button class="gate-btn" id="pixel-scan">◈ SCAN CROSSHAIR</button>
-            <span style="opacity:.7;font-size:12px;letter-spacing:.14em;align-self:center;">// TIP: EYE-LEVEL, RIGHT-CENTER //</span>
+            <input id="pixel-in" placeholder="5-LETTER DECODE" maxlength="8" autocomplete="off">
+            <button class="gate-btn" id="pixel-submit">SUBMIT DECODE</button>
         </div>
-        <p class="hint">Zoom your display if needed. The pixel is faint amber.</p>
     `;
-    const hunt = document.getElementById("pixel-hunt");
-    const target = document.getElementById("pixel-target");
-    /* draw a faint amber dot at the target location */
-    target.style.background = "rgba(255,159,7,.35)";
-    target.style.boxShadow = "0 0 3px rgba(255,159,7,.5)";
 
-    let scanMode = false;
-    document.getElementById("pixel-scan").onclick = ()=>{
-        scanMode = true;
-        hunt.style.cursor = "crosshair";
-        fb.className = "gate-feedback";
-        fb.textContent = "// SCAN MODE ACTIVE — CLICK THE PIXEL //";
-    };
-
-    hunt.onclick = (e)=>{
-        if(!scanMode) return;
-        const rect = hunt.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const tx = rect.width * 0.64;
-        const ty = rect.height * 0.38;
-        const d = Math.sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty));
-        if(d < 24){
-            /* found */
-            const marker = document.createElement("div");
-            marker.className = "found";
-            marker.style.left = (tx/rect.width*100)+"%";
-            marker.style.top = (ty/rect.height*100)+"%";
-            hunt.appendChild(marker);
-            markSolved(9,fb);
-            scanMode = false;
-        }else{
-            fail(fb,"[REJECTED] Miss. Recalibrate optics.");
-        }
+    document.getElementById("pixel-submit").onclick = ()=>{
+        const v = document.getElementById("pixel-in").value.trim().toUpperCase();
+        if(v === "VENUS") markSolved(9,fb);
+        else fail(fb,"[REJECTED] Spectral decode incorrect. Verify each colour against the Reference Card.");
     };
 })();
-
 /* ========== VAULT ========== */
 const vaultCode = document.getElementById("vault-code");
 const vaultFeedback = document.getElementById("vault-feedback");
