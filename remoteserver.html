@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. // CRAWLSPACE — NODE ACCESS</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
+
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;isolation:isolate;}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
+
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.55;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
+
+.screen-layer{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;}
+.hidden{display:none !important;}
+
+/* ============ CONNECT SCREEN ============ */
+#connect-inner{margin:auto;max-width:640px;width:90%;text-align:center;padding:38px 40px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.55));box-shadow:inset 0 0 30px rgba(255,159,7,.06),0 0 40px rgba(0,0,0,.7);position:relative;}
+#connect-inner::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
+.cs-title{font-size:34px;letter-spacing:.32em;color:var(--red);text-shadow:0 0 8px rgba(255,74,43,.55),0 0 20px rgba(255,74,43,.25);margin-bottom:8px;}
+.cs-sub{font-size:12px;letter-spacing:.28em;color:var(--amberBright);opacity:.85;margin-bottom:26px;}
+.cs-lines{text-align:left;display:inline-block;font-size:12px;letter-spacing:.16em;color:var(--amberBright);margin-bottom:22px;line-height:1.9;text-shadow:0 0 4px rgba(255,159,7,.4);}
+.cs-lines .cs-line{padding-left:18px;position:relative;}
+.cs-lines .cs-line::before{content:"▸";position:absolute;left:0;color:var(--red);}
+.cs-prompt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(255,159,7,.35);background:rgba(255,159,7,.05);font-size:14px;letter-spacing:.14em;}
+.cs-prompt .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+.cs-prompt .pfx{color:var(--red);letter-spacing:.2em;font-size:12px;}
+@keyframes chev{50%{opacity:.35;}}
+.cs-prompt input{flex:1;background:transparent;border:none;outline:none;font:inherit;color:var(--amber);letter-spacing:.16em;caret-color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+.cs-status{margin-top:12px;font-size:11px;letter-spacing:.22em;color:var(--amberBright);opacity:.85;min-height:1em;}
+.cs-status.err{color:var(--red);text-shadow:0 0 5px rgba(255,74,43,.4);}
+.cs-status.ok{color:var(--green);text-shadow:0 0 5px rgba(143,255,138,.4);}
+.cs-hint{margin-top:16px;font-size:10px;letter-spacing:.22em;color:var(--amberBright);opacity:.55;}
+.cs-hint .k{color:var(--red);}
+
+/* ============ SESSION SCREEN ============ */
+#node-bar{margin:22px 26px 12px;padding:10px 14px;border:1px solid rgba(255,159,7,.4);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.nb-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.nb-left .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:led-pulse 1.6s ease-in-out infinite;}
+.nb-addr{font-size:14px;letter-spacing:.22em;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);}
+.nb-name{font-size:11px;letter-spacing:.24em;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);padding-left:14px;border-left:1px dashed rgba(255,159,7,.3);}
+.nb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+.tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+.tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);animation:tag-blink 1.4s steps(2) infinite;}
+@keyframes tag-blink{50%{opacity:.35;}}
+
+#node-body{flex:1;display:grid;grid-template-columns:340px 1fr;gap:16px;margin:0 26px 12px;min-height:0;}
+@media(max-width:1000px){#node-body{grid-template-columns:1fr;}}
+
+.panel{position:relative;padding:16px 18px 18px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));box-shadow:inset 0 0 24px rgba(255,159,7,.05),0 0 24px rgba(255,159,7,.06);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;z-index:0;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 12px no-repeat;opacity:.7;z-index:0;}
+.panel > *{position:relative;z-index:1;}
+.panel-head{display:flex;align-items:center;gap:10px;padding:0 0 10px;margin-bottom:12px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.panel-head .tick{color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+.panel-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:13px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.panel-head .badge{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+
+.motd{padding:8px 10px;margin-bottom:10px;font-size:11px;letter-spacing:.14em;line-height:1.55;background:rgba(255,74,43,.06);border:1px dashed rgba(255,74,43,.3);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.35);}
+.motd:empty{display:none;}
+
+/* File list */
+#file-list{flex:1;overflow-y:auto;scrollbar-width:none;padding-right:4px;}
+#file-list::-webkit-scrollbar{display:none;}
+.file-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:4px;border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);cursor:pointer;font-size:12px;letter-spacing:.12em;gap:8px;transition:background .1s,border-color .1s,color .1s;}
+.file-row:hover{background:rgba(255,159,7,.12);border-color:rgba(255,159,7,.5);color:var(--amberBright);}
+.file-row.active{background:rgba(255,74,43,.10);border-color:rgba(255,74,43,.45);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.file-row .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-row .fico{color:var(--red);width:22px;text-align:center;}
+.file-row .fsize{font-size:10px;letter-spacing:.18em;color:var(--amberBright);opacity:.65;flex-shrink:0;}
+.file-row.locked .fname::after,.file-row.encrypted .fname::after,.file-row.corrupt .fname::after,.file-row.fragmented .fname::after,.file-row.perm .fname::after{margin-left:6px;font-size:10px;opacity:.85;}
+.file-row.locked .fname::after{content:"🔒";}
+.file-row.encrypted .fname::after{content:"◈";color:var(--red);}
+.file-row.corrupt .fname::after{content:"⚠";color:var(--red);}
+.file-row.fragmented .fname::after{content:"◇";color:var(--amberBright);}
+.file-row.perm .fname::after{content:"✗";color:var(--red);}
+
+/* Viewer */
+.view-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 18px;padding:8px 10px;margin-bottom:10px;border:1px dashed rgba(255,159,7,.25);background:rgba(0,0,0,.35);font-size:10px;letter-spacing:.16em;}
+.view-meta > div{display:flex;flex-direction:column;gap:2px;}
+.view-meta .k{color:var(--red);letter-spacing:.24em;font-size:9px;}
+.view-meta .v{color:var(--amberBright);text-shadow:0 0 3px rgba(255,159,7,.4);}
+@media(max-width:900px){.view-meta{grid-template-columns:repeat(2,1fr);}}
+
+.viewer{flex:1;overflow-y:auto;padding:14px 16px;border:1px solid rgba(255,159,7,.22);background:rgba(0,0,0,.45);font-size:13px;letter-spacing:.06em;line-height:1.7;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;}
+.viewer::-webkit-scrollbar{width:8px;}
+.viewer::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+.viewer-empty{text-align:center;color:var(--red);letter-spacing:.24em;font-size:11px;padding:24px;opacity:.75;}
+
+/* Locked / password gate */
+.gate-view{padding:26px;text-align:center;}
+.gate-view .icon{font-size:38px;color:var(--red);text-shadow:0 0 12px rgba(255,74,43,.5);margin-bottom:10px;}
+.gate-view .msg{font-size:13px;letter-spacing:.22em;color:var(--amberBright);margin-bottom:20px;}
+.gate-view input{font:inherit;padding:8px 12px;background:rgba(255,159,7,.06);border:1px solid rgba(255,74,43,.4);color:var(--amber);outline:none;letter-spacing:.16em;width:280px;max-width:80%;text-align:center;text-shadow:0 0 3px rgba(255,159,7,.4);}
+.gate-view input:focus{border-color:var(--red);background:rgba(255,74,43,.1);}
+.gate-view button{margin-left:8px;font:inherit;padding:8px 14px;background:rgba(255,74,43,.1);border:1px solid rgba(255,74,43,.5);color:var(--red);letter-spacing:.2em;cursor:pointer;font-size:11px;}
+.gate-view button:hover{background:rgba(255,74,43,.22);color:#ffd0c1;}
+.gate-view .err{color:var(--red);font-size:11px;letter-spacing:.2em;margin-top:12px;min-height:1em;}
+.gate-view .fragments{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.gate-view .frag-chip{padding:5px 9px;font-size:10px;letter-spacing:.2em;border:1px solid rgba(255,159,7,.35);color:var(--amberBright);opacity:.7;}
+.gate-view .frag-chip.have{color:var(--green);border-color:rgba(143,255,138,.5);opacity:1;}
+
+/* File type styles */
+.viewer.txt{font-family:'VT323',monospace;font-size:17px;line-height:1.55;letter-spacing:.02em;white-space:pre-wrap;color:var(--amberBright);}
+.viewer.log{font-family:'Share Tech Mono',monospace;font-size:12px;white-space:pre-wrap;color:var(--amber);}
+.viewer.log .lvl-info{color:var(--amberBright);}
+.viewer.log .lvl-warn{color:#ffb14a;}
+.viewer.log .lvl-err {color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+
+.viewer.corrupted{white-space:pre-wrap;font-family:'VT323',monospace;font-size:16px;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.viewer.corrupted .redact{background:#3a0f04;color:#3a0f04;user-select:none;}
+.viewer.corrupted .redact:hover{color:var(--red);}
+.viewer.corrupted .clean{color:var(--amberBright);}
+
+.viewer.hex{font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.55;white-space:pre;color:var(--amberBright);}
+.viewer.hex .addr{color:var(--red);}
+.viewer.hex .ascii{color:var(--amber);opacity:.85;}
+
+.viewer.img{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;}
+.viewer.img img{max-width:100%;max-height:60vh;image-rendering:pixelated;filter:sepia(.3) hue-rotate(-15deg) saturate(1.4) brightness(.95);border:1px solid rgba(255,159,7,.4);}
+.viewer.img .caption{font-size:11px;letter-spacing:.2em;color:var(--amberBright);opacity:.75;text-align:center;}
+
+.viewer.vid{display:flex;flex-direction:column;gap:12px;padding:16px;}
+.viewer.vid iframe,.viewer.vid video{width:100%;aspect-ratio:16/9;border:1px solid rgba(255,159,7,.4);background:#000;}
+.viewer.vid .caption{font-size:11px;letter-spacing:.16em;color:var(--amberBright);opacity:.85;}
+
+.viewer.audio{padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;}
+.viewer.audio audio{width:100%;filter:hue-rotate(-30deg) sepia(.4);}
+.viewer.audio .caption{font-size:11px;letter-spacing:.18em;color:var(--amberBright);opacity:.85;text-align:center;}
+.viewer.audio .wave{width:100%;height:60px;background:repeating-linear-gradient(90deg,rgba(255,159,7,.35) 0 1px,transparent 1px 3px);opacity:.6;}
+
+.viewer.image-ascii pre{font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1;color:var(--amberBright);white-space:pre;letter-spacing:0;}
+
+.viewer.dossier{white-space:normal;line-height:1.7;font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:.06em;}
+.viewer.dossier h3{color:var(--red);letter-spacing:.28em;font-size:13px;font-weight:400;margin:6px 0 8px;padding-bottom:6px;border-bottom:1px dashed rgba(255,74,43,.35);}
+.viewer.dossier .field{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px dotted rgba(255,159,7,.15);}
+.viewer.dossier .field .k{color:var(--amberBright);letter-spacing:.2em;opacity:.85;font-size:12px;}
+.viewer.dossier .field .v{color:var(--amber);text-shadow:0 0 3px rgba(255,159,7,.4);}
+.viewer.dossier .body{margin-top:14px;padding:10px 12px;background:rgba(255,159,7,.04);border:1px dashed rgba(255,159,7,.25);white-space:pre-wrap;}
+.viewer.dossier .redact{background:#000;color:#000;padding:0 4px;user-select:none;}
+.viewer.dossier .redact:hover{color:var(--red);}
+
+.viewer.frag{padding:22px;}
+.viewer.frag .frag-title{color:var(--red);letter-spacing:.24em;font-size:12px;margin-bottom:10px;}
+.viewer.frag .frag-body{padding:14px;background:rgba(255,159,7,.05);border:1px dashed rgba(255,159,7,.3);white-space:pre-wrap;font-family:'VT323',monospace;font-size:16px;line-height:1.5;color:var(--amberBright);}
+.viewer.frag .missing{margin-top:16px;padding:10px 12px;background:rgba(255,74,43,.06);border:1px dashed rgba(255,74,43,.4);color:var(--red);font-size:11px;letter-spacing:.2em;}
+
+/* ============ TERMINAL BAR ============ */
+#term-frame{margin:0 26px 12px;padding:12px 14px;border:1px solid rgba(255,159,7,.4);background:rgba(0,0,0,.55);max-height:180px;display:flex;flex-direction:column;gap:6px;}
+#term-scroll{flex:1;overflow-y:auto;font-size:12px;letter-spacing:.08em;line-height:1.5;max-height:130px;color:var(--amber);scrollbar-width:none;}
+#term-scroll::-webkit-scrollbar{display:none;}
+#term-scroll .ln{padding:1px 0;}
+#term-scroll .ln.err{color:var(--red);}
+#term-scroll .ln.ok{color:var(--green);}
+#term-scroll .ln.info{color:var(--amberBright);}
+#term-prompt{display:flex;gap:8px;align-items:center;padding-top:6px;border-top:1px dashed rgba(255,159,7,.28);}
+#term-prompt .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+#term-prompt input{flex:1;background:transparent;border:none;outline:none;font:inherit;color:var(--amber);letter-spacing:.12em;caret-color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.4);}
+
+/* ============ FOOTER ============ */
+#foot-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 26px 22px;padding-top:10px;border-top:1px dashed rgba(255,159,7,.25);}
+.tool-btn{font-family:inherit;font-size:11px;letter-spacing:.22em;padding:7px 12px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.4);color:var(--amberBright);cursor:pointer;text-shadow:0 0 4px rgba(255,159,7,.4);transition:background .12s,color .12s,border-color .12s;}
+.tool-btn:hover{background:rgba(255,159,7,.16);color:#fff2c1;border-color:var(--amberBright);}
+.foot-note{margin-left:auto;font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.55;}
+
+/* Fragment overlay */
+#frag-overlay{position:absolute;inset:0;z-index:1400;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:30px;}
+#frag-overlay .box{max-width:640px;width:100%;padding:26px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.6));position:relative;}
+#frag-overlay h2{color:var(--red);letter-spacing:.28em;font-size:16px;margin:0 0 14px;font-weight:400;}
+#frag-overlay .list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;}
+#frag-overlay .frag-item{padding:8px 10px;border:1px dashed rgba(255,159,7,.3);background:rgba(255,159,7,.04);font-size:12px;letter-spacing:.06em;color:var(--amberBright);}
+#frag-overlay .frag-item .code{color:var(--red);font-weight:400;letter-spacing:.18em;margin-right:8px;}
+#frag-overlay .close{position:absolute;top:12px;right:14px;background:none;border:1px solid rgba(255,74,43,.5);color:var(--red);padding:4px 10px;cursor:pointer;letter-spacing:.2em;font-size:11px;}
+#frag-overlay .close:hover{background:rgba(255,74,43,.15);}
+#frag-overlay.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div id="bezel"></div>
+<div id="bezel-label">FRACTURED</div>
+<div id="brand-led"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="fisheye" x="-10%" y="-10%" width="120%" height="120%">
+        <feImage xlink:href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='100%25' stop-color='rgb(255,255,255)'/></radialGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/></svg>" result="disp"/>
+        <feDisplacementMap in="SourceGraphic" in2="disp" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+</svg>
+
+<div id="screen-wrap">
+    <div id="screen">
+
+        <!-- CONNECT SCREEN -->
+        <div id="connect-screen" class="screen-layer">
+            <div id="connect-inner">
+                <div class="cs-title">// CRAWLSPACE</div>
+                <div class="cs-sub">DISTRIBUTED NODE MESH — ACCESS TERMINAL</div>
+                <div class="cs-lines">
+                    <div class="cs-line">NETWORK LINK :: ESTABLISHED</div>
+                    <div class="cs-line">HANDSHAKE   :: NEGOTIATED</div>
+                    <div class="cs-line">DIRECTORY   :: LOADED (<span id="server-count">--</span> NODES)</div>
+                </div>
+                <div class="cs-prompt">
+                    <span class="chev">&gt;</span>
+                    <span class="pfx">CONNECT NODE ::</span>
+                    <input id="connect-input" placeholder="e.g. 23.117.44.9" autofocus autocomplete="off"/>
+                </div>
+                <div id="connect-status" class="cs-status">// AWAITING ADDRESS //</div>
+                <div class="cs-hint">TIP :: type <span class="k">SCAN</span> for a partial directory · <span class="k">HELP</span> for command list</div>
+            </div>
+        </div>
+
+        <!-- MAIN NODE SESSION -->
+        <div id="session-screen" class="screen-layer hidden">
+
+            <!-- Header bar -->
+            <div id="node-bar">
+                <div class="nb-left">
+                    <span class="dot"></span>
+                    <span class="nb-addr" id="nb-addr">--</span>
+                    <span class="nb-name" id="nb-name">--</span>
+                </div>
+                <div class="nb-right">
+                    <span class="tag amber" id="nb-latency">-- ms</span>
+                    <span class="tag amber" id="nb-user">GUEST</span>
+                    <span class="tag warn">SIG BR-4</span>
+                    <button class="tool-btn" id="btn-disconnect">◂ DISCONNECT</button>
+                </div>
+            </div>
+
+            <!-- Body: file list + viewer -->
+            <div id="node-body">
+
+                <!-- Directory panel -->
+                <div id="dir-panel" class="panel">
+                    <div class="panel-head">
+                        <span class="tick">◆</span>
+                        <span class="ttl">DIRECTORY</span>
+                        <span class="badge" id="dir-count">-- FILES</span>
+                    </div>
+                    <div id="motd" class="motd"></div>
+                    <div id="file-list"></div>
+                </div>
+
+                <!-- Viewer panel -->
+                <div id="view-panel" class="panel">
+                    <div class="panel-head">
+                        <span class="tick">◆</span>
+                        <span class="ttl" id="view-title">-- NO FILE OPEN --</span>
+                        <span class="badge" id="view-badge">--</span>
+                    </div>
+                    <div id="view-meta" class="view-meta hidden"></div>
+                    <div id="viewer" class="viewer">
+                        <div class="viewer-empty">// SELECT A FILE //</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Terminal / command bar -->
+            <div id="term-frame">
+                <div id="term-scroll"></div>
+                <div id="term-prompt">
+                    <span class="chev">&gt;</span>
+                    <input id="term-input" placeholder="type HELP for commands" autocomplete="off"/>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div id="foot-bar">
+                <button class="tool-btn" id="btn-terminal">◂ BACK TO TERMINAL</button>
+                <button class="tool-btn" id="btn-fragments">◆ FRAGMENTS (<span id="frag-count">0</span>)</button>
+                <div class="foot-note">CRAWLSPACE v0.4.9 · UNAUTH ACCESS PROHIBITED · SIGINT MAY LOG THIS SESSION</div>
+            </div>
+
+        </div>
+
+        <!-- CRT overlays -->
+        <div id="glare"></div>
+        <div id="amber-tint"></div>
+        <div id="rgb-mask"></div>
+        <div id="roll"></div>
+        <div id="scanlines"></div>
+        <div id="vignette"></div>
+        <div id="corners"></div>
+
+    </div>
+</div>
+
+<script id="server-defs">
+/* =====================================================================
+   CRAWLSPACE :: MODULAR SERVER DEFINITIONS
+   ---------------------------------------------------------------------
+   Each SERVERS entry = one accessible node on the network.
+   Copy the entire { ... } block below and rename `addr` to spawn a new
+   node with completely independent files.
+
+   HOW TO ADD/EDIT A FILE:
+     - Add a new item to `files:` array.
+     - `state` values:
+         0 = UNLOCKED           (readable immediately)
+         1 = PASSWORD LOCKED    (requires `password`)
+         2 = ENCRYPTED          (requires all `fragments` collected)
+         3 = CORRUPTED          (partially readable — auto-redacted)
+         4 = FRAGMENTED         (needs sibling fragments to assemble)
+         5 = PERMISSION DENIED  (requires `clearance` >= file.clearance)
+     - `type` values:
+         'txt'      = plain text (edit `content` directly)
+         'log'      = terminal log; content is array of lines, each
+                      "[LVL] text" — INFO / WARN / ERR
+         'dossier'  = structured personnel dossier; `data` object
+         'hex'      = hex dump of an arbitrary byte string in `content`
+         'image'    = static image (data URI, external URL or base64)
+         'ascii'    = ASCII art (pre)
+         'video'    = MP4 or YouTube embed (autoplay muted)
+         'audio'    = mp3/ogg with visual waveform decoration
+         'frag'     = a *fragment* item; adds a code to user's inventory
+                      when opened.  `code` is the shard identifier.
+         'corrupt'  = special garbled content with hidden clean spans
+
+   TO MAKE A NEW SERVER: copy the whole braces below, change:
+       addr, name, motd, files
+   Everything else (the shell, the parser, the terminal) is handled
+   outside this data block. YOU ONLY EDIT THIS BLOCK.
+===================================================================== */
+
+const SERVERS = [
+
+/* ========================= TEMPLATE ==========================
+{
+    addr: '0.0.0.0',
+    name: 'NODE NAME',
+    motd: '// message of the day (short)',
+    latency: 40,                 // simulated ping ms
+    clearance: 0,                // user clearance required to enter
+    files: [
+        {name:'readme.txt', type:'txt', state:0, content:'plain text here'},
+        {name:'locked.txt', type:'txt', state:1, password:'OPENSESAME', content:'behind lock'},
+        {name:'enc.txt',    type:'txt', state:2, fragments:['A','B'], content:'behind encryption'},
+    ]
+},
+=============================================================== */
+
+/* ------------- NODE :: SUPPLY DEPOT (start here) ------------- */
+{
+    addr: '10.0.0.1',
+    name: 'UIC PUBLIC INDEX',
+    motd: '// Welcome to the UIC public index node. Files here are declassified.\n// For deeper access, connect to Fleet-side nodes with proper clearance.',
+    latency: 24,
+    clearance: 0,
+    files: [
+        {name:'README.TXT', type:'txt', state:0,
+            content:
+`UIC PUBLIC INDEX NODE 10.0.0.1
+================================
+
+Welcome, operator.
+
+This is a public information node for the Union of Iron Colonies.
+Only unclassified material is hosted here.  For deeper archives,
+use the KNOWN NODES section below or type SCAN in the terminal.
+
+KNOWN NODES:
+    23.117.44.9    FLEET LOGISTICS CACHE
+    198.53.44.7    HELLAS BASIN OUTPOST
+    77.44.19.30    DEIMOS RELAY (RESTRICTED)
+    89.207.11.4    KRAKEN MARE DEEP LISTEN
+    221.7.7.7      FRACTURED FOUNDATION (UNSANCTIONED)
+
+Standard commands: HELP, LS, CAT <file>, OPEN <file>, DC.
+`
+        },
+        {name:'FLEET.TXT', type:'txt', state:0,
+            content:
+`UIC FLEET COMPOSITION — PUBLIC ROSTER
+
+Class I  — IRONHAWK  · escort frigate  · 8 ships in service
+Class II — IRONBIRD  · troop lifter    · 14 ships in service
+Class III — VAULT    · cargo hauler    · 3 ships in service
+Class IV — MEDEVAC   · med transport   · 2 ships in service
+Class V  — BLACKBIRD · covert insert   · [REDACTED]
+`
+        },
+        {name:'GLOSSARY.TXT', type:'txt', state:0,
+            content:
+`UIC GLOSSARY (PUBLIC)
+
+Bravo-4         classified traffic clearance
+Cosmonaut       any UIC deep-space specialist
+CRT             cathode-ray terminal (this device)
+DELTA-V         maneuver budget in m/s
+HELLAS          primary Mars settlement basin
+IRONWORK        colloquial for Union armed forces
+KRAKEN MARE     methane sea on Titan
+SIGINT          signal intelligence
+UIC             Union of Iron Colonies
+`
+        },
+        {name:'RECRUITMENT.TXT', type:'txt', state:0,
+            content:
+`>>> IRON RECRUITMENT — POSTED 1989.02.14 <<<
+
+We are hiring:
+    - Marine riflemen (Terran-born, 3G tolerant)
+    - Reactor techs (grade 4+ certification)
+    - Cryobot operators (any prior deep-sea experience welcome)
+    - Comms operators (Bravo-4 clearance eligible)
+
+Contact: recruitment@uic.iron
+Or visit any Fleet office in Hellas Basin.
+Bonus: 12,000 Kx signing for combat trades.
+`
+        },
+        {name:'PATCH_NOTES.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.11 :: crawlspace v0.4.8 → v0.4.9 rolled to public',
+                '[INFO] added: node discovery via SCAN keyword',
+                '[INFO] added: fragment inventory (see FRAGMENTS button)',
+                '[WARN] deprecated: legacy password hash format (do not use)',
+                '[INFO] Bravo-4 traffic now routed through backup 89.207.11.4',
+                '[ERR ] failed to reach 221.7.7.7 (blocked by fleet gateway)',
+                '[INFO] index rebuilt — 5 nodes visible from public tier',
+            ]
+        },
+        {name:'PROMO_TRAILER.VID', type:'video', state:0,
+            src:'https://www.youtube.com/embed/dQw4w9WgXcQ',
+            caption:'// UIC recruitment promo — 1989 edit — 2:14'
+        },
+    ]
+},
+
+/* ------------- NODE :: FLEET LOGISTICS CACHE ----------------- */
+{
+    addr: '23.117.44.9',
+    name: 'FLEET LOGISTICS CACHE',
+    motd: '// FLEET LOGISTICS SUB-NET. All access is logged. Clearance BR-2+ recommended.',
+    latency: 62,
+    clearance: 0,
+    files: [
+        {name:'MANIFEST_44C.TXT', type:'txt', state:0,
+            content:
+`MANIFEST 44-CHARLIE (SEALED)
+Origin :: CERES SUB-BELT ALPHA
+Destination :: MARS FLEET, HELLAS DOCK 12
+Custody Seal :: BRAVO-NINE-NINE
+
+    - 12.4t  refined copper billet
+    - 8.1t   tantalum (grade A)
+    - 1x     crate S-114  [CONTENTS CLASSIFIED — DO NOT OPEN]
+    - 4x     medical kits, standard
+    - 900L   nitrogen tetroxide (fuel)
+
+Ref: shipping order QF-441-2C-89.
+`
+        },
+        {name:'FUEL_CONSUMPTION.LOG', type:'log', state:0,
+            content:[
+                '[INFO] burn 891A — LEO circularization — 340 m/s',
+                '[INFO] burn 891B — trans-Mars injection — 3610 m/s',
+                '[WARN] mass ratio near vehicle limit — reserve 6%',
+                '[INFO] burn 891C — mid-course correction — 22 m/s',
+                '[INFO] arrival — Mars orbit capture — 720 m/s',
+                '[INFO] TOTAL BUDGET USED :: 4692 m/s',
+                '[INFO] TOTAL BUDGET RESERVE :: 380 m/s',
+            ]
+        },
+        {name:'CREW_ROSTER.DOSSIER', type:'dossier', state:1, password:'IRONBIRD',
+            data:{
+                title:'PERSONNEL DOSSIER — CAPT. R. VOSS',
+                fields:{
+                    'CALLSIGN'   : 'IRONBIRD-04 · MASTER',
+                    'RANK'       : 'CAPTAIN (O-6)',
+                    'D.O.B.'     : '1954-04-19',
+                    'BIRTHPLACE' : 'BASTOGNE, TERRAN EARTH',
+                    'CLEARANCE'  : 'BRAVO-3',
+                    'DEPLOY'     : 'MARS FRONT, ROTATION 14',
+                    'STATUS'     : 'ACTIVE',
+                },
+                body:
+`Captain Voss is a career line officer with combat experience in the
+Belt Insurgency (1979–1983) and the Ganymede Blockade (1984).  He is
+qualified on IRONHAWK, IRONBIRD, and Class-V (waivered).  Voss has
+been recommended for promotion to O-7 pending completion of his
+current Mars rotation.  See annex II for medical psychiatric.
+
+Note: Voss has requested transfer to the ██████████ program on
+three separate occasions.  All requests denied per Fleet directive
+89-DELTA-3.  Voss is unaware his transfer requests are being
+reviewed by ██████████████████████.  See annex IV.`,
+            }
+        },
+        {name:'SHIPYARD.HEX', type:'hex', state:0,
+            content:'SHIPYARD BUILD RECORD 1989.03.14 :: 12 hulls active :: 3 pending :: 1 QUARANTINE HOLD.'
+        },
+        {name:'CRATE_S114.TXT', type:'txt', state:5, clearance:3,
+            content:
+`CRATE S-114 :: TRUE CONTENTS
+============================
+1x titanium canister, sealed  (radiotracers detected)
+1x fragment recovered from KRAKEN MARE — mass 4.4kg
+1x hand-annotated notebook, author COSMONAUT-07
+
+Handling:  full biohazard III.  Refuse dockworkers access.
+Consignment override authorized by DIRECTOR STEIN personally.`
+        },
+        {name:'DEPOT_MAP.IMG', type:'ascii', state:0,
+            content:
+`  +——————————————————————————————————————+
+  |  DOCK-01 [IRONBIRD-04]   |  DOCK-02  |
+  |==========================|===========|
+  |  FUEL LOX      FUEL LH2  |  CRATES   |
+  |    []            []      |  [S-114]* |
+  |==========================|===========|
+  |  DOCK-03 [pending]       |  BAY-A    |
+  |==========================|===========|
+  |  CATWALK    ~~~~~~~~     |  ELV-1    |
+  +——————————————————————————————————————+
+                                * QUARANTINE`
+        },
+    ]
+},
+
+/* ------------- NODE :: HELLAS BASIN OUTPOST ------------------ */
+{
+    addr: '198.53.44.7',
+    name: 'HELLAS BASIN OUTPOST',
+    motd: '// Hellas Basin surface node. Sandstorm advisory in effect. Comm windows 04:00-06:00 UTC.',
+    latency: 148,
+    clearance: 1,
+    files: [
+        {name:'WEATHER.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.14 05:00 :: dust density 0.82 tau, wind 32 km/h N',
+                '[INFO] 1989.03.14 08:00 :: dust density 1.10 tau, wind 44 km/h NE',
+                '[WARN] cyclonic system tracking NE — visibility 3 km',
+                '[WARN] surface EVA holds recommended after 14:00',
+                '[INFO] 1989.03.14 20:00 :: storm at Amenthes crossing east limb',
+                '[ERR ] anemometer at outpost-3 has failed — replaced 21:14',
+                '[INFO] 1989.03.15 04:00 :: cleared, dust 0.5 tau, wind 12 km/h',
+            ]
+        },
+        {name:'FIELD_REPORT.TXT', type:'txt', state:0,
+            content:
+`HELLAS OUTPOST — FIELD REPORT
+
+Habitat rings A, B, and C nominal.
+Ring D ventilation lag persists — under investigation.
+Greenhouse yield down 8% this cycle due to solar filter aging.
+Two new personnel arrived on IRONBIRD-04 rotation.
+Body count from Site FRONT-ONE incident: 3 confirmed.
+Requesting additional medical from Fleet on next window.
+`
+        },
+        {name:'COSMONAUT07_LOG.TXT', type:'txt', state:1, password:'HOLLOW ORBIT',
+            content:
+`FIELD JOURNAL — COSMONAUT-07 (T. GRISHIN)
+=========================================
+ENTRY 41
+    Descent bore reached 11.4 km on Europa cryo mission.  Signal from
+    beneath the ice is not natural.  Pattern repeats every 23 minutes.
+    Not a periodicity of any known geologic process.
+
+ENTRY 44
+    The pattern responded to our sonar ping.  Repeat: it RESPONDED.
+    I have logged this at three separate frequencies.  Confirmation
+    beyond doubt.  Command has told me to cease and desist.  I have
+    not.
+
+ENTRY 51
+    They pulled me out.  I don't understand.  I'm on Deimos now,
+    waiting for a black flight home.  The bore is sealed.
+
+ENTRY 54
+    Someone was in my quarters.  My journal was moved.  I hid this
+    disk in the maintenance duct.  If you're reading this — good.
+    They are burying Kraken Mare, and they don't want anyone to
+    know what's beneath the ice.
+
+    — T.G., 1989.03.15
+`
+        },
+        {name:'GRAINYPHOTO.IMG', type:'image', state:0,
+            src:'data:image/svg+xml;utf8,' + encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'>
+                    <defs>
+                        <radialGradient id='sky' cx='50%' cy='30%' r='70%'>
+                            <stop offset='0%' stop-color='#3a1c05'/>
+                            <stop offset='100%' stop-color='#0d0602'/>
+                        </radialGradient>
+                    </defs>
+                    <rect width='100%' height='100%' fill='url(#sky)'/>
+                    <path d='M0 260 Q160 220 320 240 T640 235 L640 400 L0 400 Z' fill='#5c2a10'/>
+                    <path d='M0 300 Q160 270 320 290 T640 285 L640 400 L0 400 Z' fill='#3d1b08'/>
+                    <circle cx='120' cy='120' r='30' fill='#c96b2f' opacity='.7'/>
+                    <rect x='250' y='210' width='120' height='60' fill='#1a0c04' stroke='#c96b2f'/>
+                    <rect x='260' y='220' width='20' height='20' fill='#ff9f07' opacity='.7'/>
+                    <rect x='290' y='220' width='20' height='20' fill='#ff9f07' opacity='.4'/>
+                    <rect x='320' y='220' width='20' height='20' fill='#ff9f07' opacity='.7'/>
+                    <path d='M370 230 L440 240 L440 260 L370 250 Z' fill='#c96b2f'/>
+                    <text x='320' y='390' text-anchor='middle' font-family='monospace' font-size='11' fill='#ffb14a' opacity='.7'>HELLAS BASIN · HABITAT RING C · 1989.03.14</text>
+                </svg>`
+            ),
+            caption:'// HELLAS BASIN — HABITAT RING C — 1989.03.14 · digital exposure'
+        },
+        {name:'AIR_QUALITY.HEX', type:'hex', state:0,
+            content:'O2 20.8% N2 78.1% Ar 0.9% CO2 0.04% NOTE: trace methane 12ppb near ring D vent (source unknown).'
+        },
+        {name:'SHARD_A.FRAG', type:'frag', state:0,
+            code:'A',
+            fragTitle:'SHARD A — HELLAS OUTPOST',
+            content:
+`SHARD A of 3 — recovered from Hellas Basin outpost.
+Passphrase glyph :: HOLLOW
+
+Combine with SHARD B and SHARD C to reveal DIRECTOR STEIN'S
+personal cipher key.
+`
+        },
+    ]
+},
+
+/* ------------- NODE :: DEIMOS RELAY (RESTRICTED) ------------- */
+{
+    addr: '77.44.19.30',
+    name: 'DEIMOS RELAY',
+    motd: '⚠ RESTRICTED NODE ⚠ — Access is monitored by Fleet SIGINT.',
+    latency: 220,
+    clearance: 0,
+    files: [
+        {name:'DECK_LOG.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.15 11:14 :: relay awake — normal traffic',
+                '[INFO] 1989.03.15 11:19 :: intercept from COSMONAUT-07',
+                '[WARN] 1989.03.15 11:20 :: signal loss — cause unknown',
+                '[ERR ] 1989.03.15 11:23 :: bearer 04-alpha lost',
+                '[ERR ] 1989.03.15 11:23 :: COSMONAUT-07 telemetry: NULL',
+                '[INFO] 1989.03.15 11:25 :: SAR profile initiated',
+                '[ERR ] 1989.03.15 11:30 :: fleet override — SAR aborted',
+                '[WARN] 1989.03.15 11:31 :: incident sealed, brief only',
+            ]
+        },
+        {name:'INTERCEPT_1108.AUD', type:'audio', state:0,
+            src:'',   // no external audio — use synthesized/static caption
+            caption:'// AUDIO CORRUPTED — synthesized static · 41 seconds · Cosmonaut-07 final transmission'
+        },
+        {name:'SHARD_B.FRAG', type:'frag', state:2, fragments:['A'],
+            code:'B',
+            fragTitle:'SHARD B — DEIMOS RELAY',
+            content:
+`SHARD B of 3 — recovered from Deimos Relay archives.
+Passphrase glyph :: ORBIT
+
+Combine with SHARD A and SHARD C.  Together they form the
+Director's personal cipher used on 89.207.11.4.
+`
+        },
+        {name:'ORBIT_TRACES.HEX', type:'hex', state:3,
+            content:'Cosmonaut-07 pod: last confirmed pos ██████ ± ██ km — vector ██████ ██████ — mass drop 41.2kg — telemetry cut at ██:██:██ — cause: ██████████ ██████.'
+        },
+        {name:'SAR_MEMO.TXT', type:'txt', state:1, password:'ZERO SEVEN',
+            content:
+`MEMORANDUM — 1989.03.16 — SAR ABORT
+FROM :: DIR. STEIN, OFFICE OF THE DIRECTOR
+TO   :: DEIMOS RELAY, DUTY OFFICER
+
+The search-and-rescue profile for Cosmonaut-07 is HEREBY ABORTED.
+
+Do not initiate further transponder queries.  Do not accept
+inbound traffic on the standard SAR frequencies.  Do not
+attempt to recover the pod.  Any personnel who violate this
+directive will face immediate transfer and full loss of
+clearance.
+
+This decision is FINAL.
+
+The Cosmonaut is now the responsibility of the ██████████████
+program.
+
+— K. STEIN, DIRECTOR
+`
+        },
+    ]
+},
+
+/* ------------- NODE :: KRAKEN MARE DEEP LISTEN --------------- */
+{
+    addr: '89.207.11.4',
+    name: 'KRAKEN MARE DEEP LISTEN',
+    motd: '// TITAN · KRAKEN MARE HYDROPHONE ARRAY. All traffic BR-4 encrypted.',
+    latency: 480,
+    clearance: 0,
+    files: [
+        {name:'DEEP_LISTEN.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.15 05:32 :: array online, 6 hydrophones nominal',
+                '[WARN] 1989.03.15 05:55 :: anomalous return, quadrant 9',
+                '[WARN] 1989.03.15 06:18 :: same return, 23m interval — repeats',
+                '[INFO] 1989.03.15 06:41 :: cross-referenced with Cosmonaut-07 log',
+                '[ERR ] 1989.03.15 07:04 :: HP-3 offline — reason unknown',
+                '[ERR ] 1989.03.15 07:04 :: HP-5 offline — reason unknown',
+                '[WARN] 1989.03.15 07:12 :: something is beneath the array',
+                '[INFO] 1989.03.15 07:23 :: sending distress on band SIX',
+            ]
+        },
+        {name:'ANNEX_III.TXT', type:'txt', state:2, fragments:['A','B','C'],
+            content:
+`ANNEX III — DIRECTOR STEIN'S PRIVATE ADDENDUM
+=============================================
+The findings of the Cosmonaut-07 team are confirmed.
+The signal beneath the Kraken Mare ice is NOT of any origin
+catalogued by the Union or the Foundation.
+
+Recovered fragment mass:  4.4 kg (see Crate S-114)
+Composition:              non-standard silicate lattice
+Isotope ratio:            impossible under known geology
+Response to sonar:        yes — measured latency 41ms constant
+Response to voice band:   yes — modulated response, glyphic
+
+We are not the first.  Something else is already listening.
+
+Continued Operation HOLLOW ORBIT is CRITICAL.  We must
+determine intent before disclosure of any kind.
+
+This annex will be destroyed if the vault code (VMDR198904)
+is invoked more than three times.
+
+— K.S.
+`
+        },
+        {name:'SHARD_C.FRAG', type:'frag', state:1, password:'KRAKEN',
+            code:'C',
+            fragTitle:'SHARD C — KRAKEN MARE',
+            content:
+`SHARD C of 3 — recovered from Kraken Mare deep-listen node.
+Passphrase glyph :: 1989
+
+With SHARD A + SHARD B + SHARD C, Annex III becomes
+readable at this node.
+`
+        },
+        {name:'HYDROPHONE_3.AUD', type:'audio', state:0,
+            src:'',
+            caption:'// HYDROPHONE 3 · KRAKEN MARE · signal beneath the ice · repeats every 23 min'
+        },
+        {name:'ARRAY_LAYOUT.IMG', type:'ascii', state:0,
+            content:
+`     KRAKEN MARE HYDROPHONE ARRAY (top view)
+
+              N
+              |
+        HP-1  HP-2
+          \\   /
+           \\ /
+    HP-3 —— × —— HP-4       (× = ANOMALY point)
+           / \\
+          /   \\
+        HP-5  HP-6
+              |
+              S
+    HP-3 and HP-5 offline as of 1989.03.15.
+    Anomaly bearing 041° from array center.`
+        },
+        {name:'SEALED_LOOP.VID', type:'video', state:5, clearance:4,
+            src:'https://www.youtube.com/embed/dQw4w9WgXcQ',
+            caption:'// BR-4 sealed loop · not for public dissemination'
+        },
+    ]
+},
+
+/* ------------- NODE :: FRACTURED FOUNDATION (rogue) ---------- */
+{
+    addr: '221.7.7.7',
+    name: 'FRACTURED FOUNDATION',
+    motd: '// UNSANCTIONED NODE. If you can read this, welcome to the resistance.',
+    latency: 940,
+    clearance: 0,
+    files: [
+        {name:'MANIFESTO.TXT', type:'txt', state:0,
+            content:
+`THE FRACTURED FOUNDATION MANIFESTO
+==================================
+
+The Union of Iron Colonies claims to speak for all humans off Earth.
+It does not speak for us.
+
+The Council of Nine, on behalf of the outer colonies, hereby
+withdraws from the Union effective immediately.  We do not
+recognize the authority of Fleet Command in Fractured space.
+
+What was buried at Kraken Mare belongs to no flag, no company,
+no director.  We will not surrender the truth.
+
+Broadcast on any band that will carry it.
+
+— THE COUNCIL OF NINE
+`
+        },
+        {name:'CALL_TO_ARMS.TXT', type:'txt', state:0,
+            content:
+`If you have skills, we can use them.
+If you have information, we will protect it.
+If you have doubts, we can answer them.
+
+Contact via any node with the address 221.7.7.7.
+Password to speak with a runner: BENEATH THE ICE.
+`
+        },
+        {name:'STEIN_FILE.CORRUPT', type:'corrupt', state:3,
+            content:
+`SUBJECT :: K. STEIN, DIRECTOR
+==============================
+Born ████ in ██████████, Terran Earth.
+Youngest ████████ in Fleet history at ██ years old.
+Directed ██████████ program 1979–1984.
+Suspected involvement in ██████████ incident (Ganymede).
+Personal cipher :: ██████████
+Vault code :: <clean>VMDR198904</clean>
+Estimated body count :: <clean>219</clean>
+Preferred call sign :: RAVEN
+`
+        },
+        {name:'DECRYPTED_INTERCEPT.TXT', type:'txt', state:1, password:'BENEATH THE ICE',
+            content:
+`INTERCEPTED FROM FLEET COMMS — TIMESTAMP 1989.03.16
+====================================================
+FLT-CMD  :: All units, we have confirmation that Cosmonaut-07 is
+            in Fractured hands.
+FLT-CMD  :: Recovery is authorized.  Package must not reach any
+            civilian archive.
+IRONBIRD :: Copy.  How close is the package to going public?
+FLT-CMD  :: Too close.  Move now.
+FLT-CMD  :: If we cannot retrieve, we sanitize.
+IRONBIRD :: Understood.  Ironbird Zero-Four proceeding.
+FLT-CMD  :: Do not let them read the annex.
+`
+        },
+        {name:'PORTRAIT.IMG', type:'image', state:0,
+            src:'data:image/svg+xml;utf8,' + encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'>
+                    <rect width='100%' height='100%' fill='#0d0602'/>
+                    <ellipse cx='200' cy='190' rx='90' ry='120' fill='#3d1b08'/>
+                    <ellipse cx='200' cy='190' rx='80' ry='110' fill='#5c2a10'/>
+                    <circle cx='170' cy='170' r='8' fill='#0d0602'/>
+                    <circle cx='230' cy='170' r='8' fill='#0d0602'/>
+                    <path d='M170 230 Q200 250 230 230' stroke='#0d0602' stroke-width='2' fill='none'/>
+                    <path d='M120 300 Q200 340 280 300 L280 500 L120 500 Z' fill='#3d1b08'/>
+                    <text x='200' y='470' text-anchor='middle' font-family='monospace' font-size='13' fill='#c96b2f'>UNKNOWN OPERATIVE · FF-ROSTER</text>
+                </svg>`
+            ),
+            caption:'// FRACTURED FOUNDATION operative — unnamed — captured on Deimos elevator'
+        },
+        {name:'CALL_SIGN_LOOKUP.HEX', type:'hex', state:0,
+            content:'RAVEN=STEIN K. · WOLF=VOSS R. · HALO=GRISHIN T. · PYRE=[REDACTED] · TIDE=[REDACTED]'
+        },
+    ]
+},
+
+];
+</script>
+
+<script id="main-script">
+/* PLACEHOLDER_SCRIPT */
+</script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
