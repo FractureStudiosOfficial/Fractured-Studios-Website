@@ -3,266 +3,758 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. Systems | Communications</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
+<title>U.I.C. // COMMS INTERCEPT</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
 }
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-/* CRT */
-#amber { position:fixed; inset:0; background:rgba(255,159,7,.04); pointer-events:none; }
-#scanlines {
-  position:fixed; inset:0;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 5px,
-    transparent 9px
-  );
-  animation:flicker .12s infinite;
-}
-@keyframes flicker {0%{opacity:.15}50%{opacity:.07}100%{opacity:.15}}
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
-#container { padding:30px; }
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;isolation:isolate;}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
+#screen-scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
+#screen-scroll::-webkit-scrollbar{display:none;}
 
-h1 { text-align:center; }
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.55;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
 
-/* STATION LIST */
-#stations {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(250px,1fr));
-  gap:15px;
-  margin-bottom:20px;
-}
+#crt-container{padding:44px 52px 90px;min-height:100%;position:relative;z-index:2;}
 
-.station {
-  border:1px solid rgba(255,159,7,.2);
-  padding:15px;
-  cursor:pointer;
-  background:rgba(0,0,0,.3);
-  transition:.2s;
-}
+/* HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.header-left h1{margin:0 0 6px 0;font-size:26px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.6),0 0 14px rgba(255,74,43,.3);}
+.header-left p{margin:0;opacity:.85;letter-spacing:.16em;font-size:12px;}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+.tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);animation:tag-blink 1.4s steps(2) infinite;}
+@keyframes tag-blink{50%{opacity:.35;}}
 
-.station:hover {
-  background:rgba(255,159,7,.1);
-}
+/* Marquee */
+.marquee{overflow:hidden;border-top:1px dashed rgba(255,159,7,.35);border-bottom:1px dashed rgba(255,159,7,.35);margin-bottom:20px;padding:6px 0;font-size:11px;letter-spacing:.22em;color:var(--amberBright);opacity:.85;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.marquee-inner{display:flex;gap:40px;white-space:nowrap;animation:marq 32s linear infinite;}
+@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-.station-title {
-  font-size:1.1em;
-  margin-bottom:5px;
-}
+/* Panels */
+.panel{position:relative;padding:18px 20px 22px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);border-radius:6px;margin-bottom:22px;}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
+.panel-head{display:flex;align-items:center;gap:12px;padding:0 0 12px;margin-bottom:14px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.panel-head .tick{color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
+.panel-head .ttl{color:var(--amberBright);letter-spacing:.24em;text-shadow:0 0 4px rgba(255,159,7,.6);font-size:14px;flex:1;}
+.panel-head .badge{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
 
-.status {
-  font-size:0.8em;
-  opacity:.7;
-}
+/* DIAL / WATERFALL */
+.dial-panel{padding:16px 20px 20px;}
+.dial-wrap{position:relative;background:#08060a;border:1px solid rgba(255,159,7,.3);overflow:hidden;height:150px;}
+#waterfall{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;}
+.dial-ticks{position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.65));display:flex;justify-content:space-between;padding:0 4px;pointer-events:none;}
+.dial-ticks span{font-size:9px;color:var(--amberBright);letter-spacing:.14em;opacity:.7;align-self:flex-end;padding-bottom:3px;text-shadow:0 0 4px rgba(255,159,7,.4);}
+.dial-cursor{position:absolute;top:0;bottom:0;width:2px;background:var(--red);box-shadow:0 0 12px var(--red),0 0 24px rgba(255,74,43,.5);pointer-events:none;transition:left .08s ease-out;}
+.dial-cursor::before,.dial-cursor::after{content:"";position:absolute;left:-4px;width:10px;height:6px;background:var(--red);clip-path:polygon(50% 100%,0 0,100% 0);}
+.dial-cursor::before{top:0;}
+.dial-cursor::after{bottom:0;transform:scaleY(-1);}
 
-/* INFO PANEL */
-#info {
-  border:1px solid rgba(255,159,7,.2);
-  padding:15px;
-  margin-bottom:20px;
-  min-height:100px;
-}
+.dial-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;}
+.dial-controls input[type=range]{flex:1;min-width:200px;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(90deg,rgba(255,159,7,.15),rgba(255,159,7,.55));outline:none;}
+.dial-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--amberBright);border:1px solid #ffec9c;box-shadow:0 0 8px rgba(255,159,7,.7);cursor:pointer;}
+.dial-controls input[type=range]::-moz-range-thumb{width:14px;height:14px;background:var(--amberBright);border:1px solid #ffec9c;box-shadow:0 0 8px rgba(255,159,7,.7);cursor:pointer;border-radius:0;}
+.signal-meter{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.18em;color:var(--amberBright);}
+.signal-meter .k{color:var(--red);}
+.meter-bar{width:120px;height:8px;background:rgba(255,159,7,.08);border:1px solid rgba(255,159,7,.3);position:relative;overflow:hidden;}
+.meter-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8b3a10,#ff9f07,#ffd48a);box-shadow:0 0 8px rgba(255,159,7,.5);transition:width .1s;}
 
-/* LOGS */
-#logs {
-  border:1px solid rgba(255,159,7,.2);
-  padding:10px;
-  height:150px;
-  overflow-y:auto;
-  font-size:12px;
-}
+/* TWO-COL LAYOUT */
+.two-col{display:grid;grid-template-columns:340px 1fr;gap:22px;margin-bottom:22px;}
+@media(max-width:1100px){.two-col{grid-template-columns:1fr;}}
 
-.log-line { opacity:.8; margin-bottom:3px; }
+/* FILTER ROW */
+.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.filter-btn{font-family:inherit;font-size:10px;letter-spacing:.2em;padding:5px 10px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.3);color:var(--amberBright);cursor:pointer;text-shadow:0 0 3px rgba(255,159,7,.4);}
+.filter-btn:hover{background:rgba(255,159,7,.14);}
+.filter-btn.active{background:rgba(255,74,43,.15);border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
 
-/* TERMINAL */
-#terminal {
-  border-top:1px solid rgba(255,159,7,.2);
-  padding:10px;
-  position:sticky;
-  bottom:0;
-  background:#000;
-}
+/* INTERCEPT LIST */
+#intercept-list{max-height:520px;overflow-y:auto;scrollbar-width:none;padding-right:4px;}
+#intercept-list::-webkit-scrollbar{display:none;}
+.intercept{position:relative;padding:10px 12px;margin-bottom:8px;border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);cursor:pointer;transition:background .12s,border-color .12s;}
+.intercept:hover{background:rgba(255,159,7,.08);border-color:rgba(255,159,7,.5);}
+.intercept.active{background:rgba(255,74,43,.10);border-color:rgba(255,74,43,.5);}
+.intercept .ic-top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.2em;margin-bottom:5px;color:var(--amberBright);opacity:.75;}
+.intercept .ic-title{font-size:13px;letter-spacing:.14em;color:var(--amber);margin-bottom:4px;text-shadow:0 0 3px rgba(255,159,7,.4);}
+.intercept .ic-meta{font-size:10px;letter-spacing:.18em;color:var(--amberBright);opacity:.7;display:flex;gap:12px;flex-wrap:wrap;}
+.intercept.pri{border-left:3px solid var(--amber);}
+.intercept.anom{border-left:3px solid var(--red);}
+.intercept.anom .ic-title{color:var(--red);text-shadow:0 0 3px rgba(255,74,43,.5);}
+.intercept.enc .ic-title::after{content:" 🔒";}
+.intercept .ic-dot{position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber);}
+.intercept.anom .ic-dot{background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse-red 1.2s ease-in-out infinite;}
+@keyframes pulse-red{0%,100%{opacity:.6;}50%{opacity:1;}}
 
-#cmd {
-  width:100%;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-}
+/* PLAYBACK */
+.pb-meta{margin-bottom:14px;}
+.pb-title{font-size:16px;letter-spacing:.2em;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);padding-bottom:10px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.25);}
+.pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 20px;font-size:11px;letter-spacing:.14em;}
+.pb-grid > div{display:flex;flex-direction:column;gap:2px;}
+.pb-grid .k{color:var(--red);letter-spacing:.22em;font-size:10px;}
+@media(max-width:900px){.pb-grid{grid-template-columns:repeat(2,1fr);}}
 
-/* LOCK */
-#lock {
-  position:fixed;
-  inset:0;
-  background:#000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
+.pb-waveform{position:relative;border:1px solid rgba(255,159,7,.3);background:#040406;height:80px;margin:10px 0;}
+#wave{position:absolute;inset:0;width:100%;height:100%;}
+.wave-cursor{position:absolute;top:0;bottom:0;width:1px;background:var(--red);box-shadow:0 0 8px var(--red);left:0;pointer-events:none;}
 
-#lock-box {
-  border:1px solid rgba(255,159,7,.3);
-  padding:30px;
-  text-align:center;
-}
+.pb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.pb-time{font-size:11px;letter-spacing:.18em;color:var(--amberBright);}
+.pb-transcript{max-height:280px;overflow-y:auto;padding:12px 14px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.4);font-size:12px;letter-spacing:.08em;line-height:1.7;scrollbar-width:none;}
+.pb-transcript::-webkit-scrollbar{display:none;}
+.pb-transcript .ts-line{opacity:.35;transition:opacity .18s,color .18s;padding:2px 0;}
+.pb-transcript .ts-line.on{opacity:1;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+.pb-transcript .ts-empty{color:var(--red);letter-spacing:.24em;font-size:11px;text-align:center;padding:18px;text-shadow:0 0 4px rgba(255,74,43,.4);}
+.pb-transcript .ts-line .speaker{color:var(--red);margin-right:8px;font-size:11px;letter-spacing:.18em;text-shadow:0 0 3px rgba(255,74,43,.4);}
+.pb-transcript .ts-line .redact{background:#000;color:#000;padding:0 3px;text-shadow:none;user-select:none;}
+.pb-transcript .ts-line .redact:hover{color:var(--red);}
+.pb-transcript .ts-line.static{color:var(--amberDim);font-style:italic;font-size:11px;letter-spacing:.14em;}
+.pb-transcript .ts-line.encrypted{font-family:'VT323',monospace;color:var(--red);letter-spacing:.05em;font-size:14px;}
 
-#lock input {
-  background:transparent;
-  border:none;
-  border-bottom:1px solid rgba(255,159,7,.3);
-  color:#FF9F07;
-  outline:none;
-}
-
-#error {
-  color:red;
-  font-size:12px;
-  opacity:0;
-}
+/* Footer */
+.footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:14px;border-top:1px dashed rgba(255,159,7,.3);}
+.tool-btn{font-family:inherit;font-size:11px;letter-spacing:.22em;padding:8px 14px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.4);color:var(--amberBright);cursor:pointer;text-shadow:0 0 4px rgba(255,159,7,.5);transition:background .12s,color .12s,border-color .12s;}
+.tool-btn:hover{background:rgba(255,159,7,.16);color:#fff2c1;border-color:var(--amberBright);}
+.footer-note{margin-left:auto;font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.6;}
 </style>
 </head>
-
 <body>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
+<div id="bezel"></div>
+<div id="bezel-label">FRACTURED</div>
+<div id="brand-led"></div>
 
-<!-- LOCK -->
-<div id="lock">
-  <div id="lock-box">
-    <div>[ COMMUNICATIONS ACCESS ]</div><br>
-    <span>></span>
-    <input id="pass" type="password">
-    <div id="error">INVALID CODE</div>
-  </div>
-</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="fisheye" x="-10%" y="-10%" width="120%" height="120%">
+        <feImage xlink:href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='100%25' stop-color='rgb(255,255,255)'/></radialGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/></svg>" result="disp"/>
+        <feDisplacementMap in="SourceGraphic" in2="disp" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+</svg>
 
-<div id="container">
+<div id="screen-wrap">
+    <div id="screen">
+        <div id="screen-scroll">
+            <div id="crt-container">
 
-<h1>Communications Network</h1>
+                <div class="header">
+                    <div class="header-left">
+                        <h1>// COMMS INTERCEPT</h1>
+                        <p>SIGNAL INTELLIGENCE UNIT — CH.07</p>
+                    </div>
+                    <div class="header-right">
+                        <span class="tag amber" id="strength">SIG 87%</span>
+                        <span class="tag warn">LIVE</span>
+                        <span class="tag amber" id="clock">--:--:--</span>
+                    </div>
+                </div>
 
-<div id="stations"></div>
+                <!-- MARQUEE -->
+                <div class="marquee">
+                    <div class="marquee-inner">
+                        <span>▸ SIGINT UPLINK ACTIVE ▸ MONITORING 3.5MHz — 3.2GHz ▸ 14 CATALOGUED CHANNELS ▸ 6 FLAGGED ANOMALIES ▸ ENCRYPTED PACKETS AWAITING KEY ▸ AUTHORIZATION LEVEL BRAVO-4 ▸</span>
+                        <span>▸ SIGINT UPLINK ACTIVE ▸ MONITORING 3.5MHz — 3.2GHz ▸ 14 CATALOGUED CHANNELS ▸ 6 FLAGGED ANOMALIES ▸ ENCRYPTED PACKETS AWAITING KEY ▸ AUTHORIZATION LEVEL BRAVO-4 ▸</span>
+                    </div>
+                </div>
 
-<div id="info">Select a station to view transmission data...</div>
+                <!-- WATERFALL / DIAL -->
+                <div class="panel dial-panel">
+                    <div class="panel-head">
+                        <span class="tick">◆</span>
+                        <span class="ttl">FREQUENCY DIAL</span>
+                        <span class="badge" id="freq-badge">-- MHz</span>
+                    </div>
+                    <div class="dial-wrap">
+                        <canvas id="waterfall" width="800" height="120"></canvas>
+                        <div class="dial-ticks" id="dial-ticks"></div>
+                        <div class="dial-cursor" id="dial-cursor"></div>
+                    </div>
+                    <div class="dial-controls">
+                        <input type="range" id="freq" min="0" max="1000" value="240"/>
+                        <button class="tool-btn" id="btn-sweep">◆ AUTO-SWEEP</button>
+                        <button class="tool-btn" id="btn-play">▶ MONITOR</button>
+                        <div class="signal-meter">
+                            <span class="k">SNR</span>
+                            <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+                            <span id="snr-val">--dB</span>
+                        </div>
+                    </div>
+                </div>
 
-<div id="logs"></div>
+                <!-- MAIN LAYOUT -->
+                <div class="two-col">
 
-</div>
+                    <!-- LEFT: intercept list -->
+                    <div class="panel list-panel">
+                        <div class="panel-head">
+                            <span class="tick">◆</span>
+                            <span class="ttl">INTERCEPT LOG</span>
+                            <span class="badge">14 / 14</span>
+                        </div>
+                        <div class="filter-row">
+                            <button class="filter-btn active" data-filter="ALL">ALL</button>
+                            <button class="filter-btn" data-filter="ROUTINE">ROUTINE</button>
+                            <button class="filter-btn" data-filter="PRIORITY">PRIORITY</button>
+                            <button class="filter-btn" data-filter="ANOMALY">◆ ANOMALY</button>
+                            <button class="filter-btn" data-filter="ENCRYPTED">🔒 ENC</button>
+                        </div>
+                        <div id="intercept-list"></div>
+                    </div>
 
-<div id="terminal">
-<input id="cmd" placeholder="Enter command...">
+                    <!-- RIGHT: playback -->
+                    <div class="panel play-panel">
+                        <div class="panel-head">
+                            <span class="tick">◆</span>
+                            <span class="ttl">PLAYBACK</span>
+                            <span class="badge" id="pb-badge">--</span>
+                        </div>
+                        <div id="pb-meta" class="pb-meta">
+                            <div class="pb-title" id="pb-title">-- SELECT TRANSMISSION --</div>
+                            <div class="pb-grid">
+                                <div><span class="k">TIMESTAMP</span><span id="pb-ts">--</span></div>
+                                <div><span class="k">FREQUENCY</span><span id="pb-freq">--</span></div>
+                                <div><span class="k">CALLSIGN</span><span id="pb-call">--</span></div>
+                                <div><span class="k">ORIGIN</span><span id="pb-origin">--</span></div>
+                                <div><span class="k">TARGET</span><span id="pb-target">--</span></div>
+                                <div><span class="k">CLASS</span><span id="pb-class">--</span></div>
+                            </div>
+                        </div>
+                        <div class="pb-waveform">
+                            <canvas id="wave" width="640" height="80"></canvas>
+                            <div class="wave-cursor" id="wave-cursor"></div>
+                        </div>
+                        <div class="pb-controls">
+                            <button class="tool-btn" id="pb-play">▶ PLAY</button>
+                            <button class="tool-btn" id="pb-stop">■ STOP</button>
+                            <span class="pb-time"><span id="pb-elapsed">0:00</span> / <span id="pb-total">0:00</span></span>
+                            <button class="tool-btn" id="pb-decrypt" style="display:none;">🔒 DECRYPT</button>
+                        </div>
+                        <div class="pb-transcript" id="pb-transcript">
+                            <div class="ts-empty">// AWAITING SELECTION //</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="footer">
+                    <button class="tool-btn" id="btn-terminal">◂ BACK TO TERMINAL</button>
+                    <button class="tool-btn" id="btn-map">◂ SOL CHART</button>
+                    <div class="footer-note">All intercepts declassified for training use. Level Bravo-4 clearance required for encrypted packets.</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="glare"></div>
+        <div id="amber-tint"></div>
+        <div id="rgb-mask"></div>
+        <div id="roll"></div>
+        <div id="scanlines"></div>
+        <div id="vignette"></div>
+        <div id="corners"></div>
+    </div>
 </div>
 
 <script>
-/* 🔧 EASY EDIT STATIONS HERE */
-const stations = [
-  { name:"Earth Command", location:"Earth Orbit", status:"ONLINE" },
-  { name:"Alpha Lunar Station", location:"Moon Orbit", status:"ONLINE" },
-  { name:"Mars Outpost", location:"Mars Surface", status:"DELAYED" },
-  { name:"Titan Relay", location:"Saturn - Titan", status:"ONLINE" },
-  { name:"Europa Research Hub", location:"Jupiter - Europa", status:"INTERFERENCE" },
-  { name:"Deep Space Array", location:"Kuiper Belt", status:"WEAK SIGNAL" }
+/* =========================================================
+   COMMS INTERCEPT — SIGINT console
+========================================================= */
+const $ = id => document.getElementById(id);
+
+/* Live clock */
+setInterval(()=>{
+    const d=new Date();
+    $('clock').textContent=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+':'+String(d.getUTCSeconds()).padStart(2,'0')+'Z';
+},1000);
+
+/* ---------- INTERCEPT DATABASE ---------- */
+// freq is in MHz. Class: ROUTINE / PRIORITY / ANOMALY. enc=true means encrypted.
+const LOG = [
+    {id:'TX-1001', freq:118.4,  ts:'1989-03-14 06:12:07', callsign:'IRONBIRD-04', origin:'CIS LUNA',    target:'HQ LEO',        class_:'ROUTINE',  enc:false,
+        title:'ROUTINE STATUS PING',
+        lines:[
+            {who:'IRONBIRD-04', text:'IRONBIRD Zero-Four to HAWKEYE, comm check, over.'},
+            {who:'HAWKEYE',    text:'HAWKEYE reads Ironbird Zero-Four five by five, over.'},
+            {who:'IRONBIRD-04', text:'Roger. Delta-vee reserve at 84 percent. Continuing profile.'},
+            {who:'HAWKEYE',    text:'Acknowledged. Nominal telemetry received. HAWKEYE out.'},
+        ]},
+
+    {id:'TX-1017', freq:243.0,  ts:'1989-03-14 09:44:52', callsign:'HELLAS CTRL', origin:'MARS SURFACE', target:'FLEET',        class_:'ROUTINE',  enc:false,
+        title:'HELLAS BASIN WEATHER',
+        lines:[
+            {who:'HELLAS CTRL', text:'All incoming, Hellas Control. Dust density 0.8 tau. Visibility three klicks.'},
+            {who:'HELLAS CTRL', text:'Cyclonic system tracking north-east across Amenthes. ETA six hours.'},
+            {who:'HELLAS CTRL', text:'Recommend surface EVA hold until further advisory.'},
+        ]},
+
+    {id:'TX-1032', freq:305.7,  ts:'1989-03-14 12:03:19', callsign:'PROBE-K12',  origin:'EUROPA',       target:'HQ LEO',        class_:'PRIORITY', enc:false,
+        title:'CRYOBOT TELEMETRY REPORT',
+        lines:[
+            {who:'PROBE-K12', text:'Cryobot descent nominal. Ice column density anomaly at 11.4 km depth.'},
+            {who:'PROBE-K12', text:'Thermal signature 0.4K above baseline detected in profile.'},
+            {who:'PROBE-K12', text:'Continuing bore. Sample cache 24 percent full.'},
+            {who:'PROBE-K12', text:'Awaiting instruction on secondary sonar sweep.'},
+        ]},
+
+    {id:'TX-1045', freq:401.2,  ts:'1989-03-14 14:29:00', callsign:'PHOBOS-STATION-1', origin:'PHOBOS', target:'MARS ORBIT',    class_:'ROUTINE',  enc:false,
+        title:'SHIFT ROTATION',
+        lines:[
+            {who:'PHOBOS-1', text:'Foxtrot shift stood down at fourteen hundred station time.'},
+            {who:'PHOBOS-1', text:'Golf shift on deck, all posts manned.'},
+            {who:'PHOBOS-1', text:'Environmentals nominal. Ore yield twelve tonnes for the cycle.'},
+        ]},
+
+    {id:'TX-1063', freq:1420.4, ts:'1989-03-14 18:47:33', callsign:'——UNKNOWN——',origin:'UNCATALOGUED', target:'——',            class_:'ANOMALY',  enc:false,
+        title:'HYDROGEN-LINE ANOMALY',
+        lines:[
+            {who:'STATIC',       text:'[carrier tone — 3.2 seconds]', static:true},
+            {who:'??????',       text:'...they are listening beneath the ice...'},
+            {who:'STATIC',       text:'[burst noise — 1.1 seconds]', static:true},
+            {who:'??????',       text:'...HOLLOW ORBIT is not the objective...'},
+            {who:'STATIC',       text:'[signal terminates]', static:true},
+        ]},
+
+    {id:'TX-1071', freq:2201.5, ts:'1989-03-15 02:11:04', callsign:'FLT-CMD',    origin:'HQ LEO',       target:'ALL SHIPS',     class_:'PRIORITY', enc:false,
+        title:'FLEET-WIDE ADVISORY',
+        lines:[
+            {who:'FLT-CMD', text:'To all vessels, this is Fleet Command, priority traffic follows.'},
+            {who:'FLT-CMD', text:'Effective immediately, all Bravo-4 traffic on channel <span class="redact">████</span> is suspended.'},
+            {who:'FLT-CMD', text:'Reroute critical assets to backup <span class="redact">████</span>.'},
+            {who:'FLT-CMD', text:'Confirmation required within one orbital period. Fleet Command out.'},
+        ]},
+
+    {id:'TX-1084', freq:2540.8, ts:'1989-03-15 05:32:17', callsign:'TITAN-DEEP', origin:'TITAN',        target:'HQ LEO',        class_:'ANOMALY',  enc:true,
+        title:'ENCRYPTED PACKET — KRAKEN MARE',
+        lines:[
+            {who:'CIPHER', encrypted:true, text:'█▓▒░  0x4E45 0xD1A0 0xEF83 0xCC12  ░▒▓█'},
+            {who:'CIPHER', encrypted:true, text:'█▓▒░  0xB4A9 0x7CE3 0x88F0 0x2F51  ░▒▓█'},
+            {who:'CIPHER', encrypted:true, text:'█▓▒░  KEY REQUIRED  —  BRAVO-4 CLR ░▒▓█'},
+        ],
+        decrypted:[
+            {who:'TITAN-DEEP', text:'Deep-listen array intercepted anomalous returns from Kraken Mare, quadrant nine.'},
+            {who:'TITAN-DEEP', text:'Pattern is non-natural. Repeats every twenty-three minutes.'},
+            {who:'TITAN-DEEP', text:'Cross-reference matches Cosmonaut-07 field report annex three.'},
+            {who:'TITAN-DEEP', text:'Requesting authorization to deploy hydrophone drone array.'},
+        ]},
+
+    {id:'TX-1092', freq:2867.3, ts:'1989-03-15 08:04:52', callsign:'CARGO-VAULT',origin:'BELT',         target:'MARS FLEET',    class_:'ROUTINE',  enc:false,
+        title:'CARGO MANIFEST HANDOFF',
+        lines:[
+            {who:'CARGO-VAULT', text:'Ceres Sub-Belt Alpha, this is Vault. Reading you clear.'},
+            {who:'CARGO-VAULT', text:'Transferring manifest 44-Charlie to Mars Fleet uplink.'},
+            {who:'CARGO-VAULT', text:'Copper, refined tantalum, and one classified crate.'},
+            {who:'CARGO-VAULT', text:'Chain of custody sealed, seal-code Bravo-Nine-Nine.'},
+        ]},
+
+    {id:'TX-1108', freq:1090.2, ts:'1989-03-15 11:19:28', callsign:'DEIMOS-OPS', origin:'DEIMOS',       target:'MARS ORBIT',    class_:'PRIORITY', enc:false,
+        title:'COSMONAUT-07 LAST TRANSMISSION',
+        lines:[
+            {who:'DEIMOS-OPS',  text:'Timestamp mark, this is Deimos Ops relaying an intercept.'},
+            {who:'COSMONAUT-07',text:'Deimos, Cosmonaut Zero-Seven. I have contact.'},
+            {who:'COSMONAUT-07',text:'I say again, I have <span class="redact">████████</span> contact at bearing <span class="redact">██</span> mark <span class="redact">██</span>.'},
+            {who:'COSMONAUT-07',text:'It\'s not one of ours. Repeat: it is not one of ours.'},
+            {who:'STATIC',      text:'[transmission cuts to carrier]', static:true},
+            {who:'DEIMOS-OPS',  text:'Zero-Seven, Deimos, respond. Zero-Seven, Deimos, respond.'},
+            {who:'DEIMOS-OPS',  text:'No return. Marking last known coordinates. Deimos out.'},
+        ]},
+
+    {id:'TX-1120', freq:1755.0, ts:'1989-03-15 14:52:41', callsign:'SUPPLY-19',  origin:'MOON DEPOT',   target:'MARS TRANSIT',  class_:'ROUTINE',  enc:false,
+        title:'PROPELLANT TRANSFER',
+        lines:[
+            {who:'SUPPLY-19', text:'Mars transit convoy, Supply One-Niner, ready for LOX transfer.'},
+            {who:'SUPPLY-19', text:'Bay two open. Approach vector confirmed.'},
+            {who:'SUPPLY-19', text:'Umbilical seated. Flowing propellant at seven hundred kilos per minute.'},
+        ]},
+
+    {id:'TX-1136', freq:3025.8, ts:'1989-03-15 20:07:14', callsign:'——UNKNOWN——',origin:'DEEP SPACE',   target:'——',            class_:'ANOMALY',  enc:false,
+        title:'NUMBERS STATION — GLYPH SEQUENCE',
+        lines:[
+            {who:'NARRATOR', text:'...one... zero... four... one... zero...'},
+            {who:'STATIC',   text:'[chime — three tones]', static:true},
+            {who:'NARRATOR', text:'...one... nine... eight... nine...'},
+            {who:'STATIC',   text:'[chime — three tones]', static:true},
+            {who:'NARRATOR', text:'...seven... zero... zero... end message...'},
+            {who:'STATIC',   text:'[carrier terminates]', static:true},
+        ]},
+
+    {id:'TX-1149', freq:912.6,  ts:'1989-03-16 02:44:03', callsign:'BLACKBIRD-9',origin:'CLASSIFIED',   target:'CLASSIFIED',    class_:'ANOMALY',  enc:true,
+        title:'ENCRYPTED — BLACKBIRD SORTIE',
+        lines:[
+            {who:'CIPHER', encrypted:true, text:'▓░ 0x03AA 0xFE21 0x77CC 0x1900 ░▓'},
+            {who:'CIPHER', encrypted:true, text:'▓░ 0x88C4 0xDD01 0x5561 0x0F42 ░▓'},
+            {who:'CIPHER', encrypted:true, text:'▓░ KEY REQUIRED — LEVEL BLACK ░▓'},
+        ],
+        decrypted:[
+            {who:'BLACKBIRD-9', text:'Objective package acquired. Extraction on schedule.'},
+            {who:'BLACKBIRD-9', text:'One hostile contact vaporized. No survivors on scene.'},
+            {who:'BLACKBIRD-9', text:'Package will be delivered to <span class="redact">██████████</span> facility.'},
+            {who:'BLACKBIRD-9', text:'Burn logs are to be scrubbed at debrief.'},
+        ]},
+
+    {id:'TX-1163', freq:150.9,  ts:'1989-03-16 06:15:39', callsign:'MED-EVAC-2', origin:'MARS ORBIT',   target:'HQ LEO',        class_:'PRIORITY', enc:false,
+        title:'CASUALTY REPORT',
+        lines:[
+            {who:'MED-EVAC-2', text:'Casualty report follows.'},
+            {who:'MED-EVAC-2', text:'Three walking wounded, one critical from Phobos ore incident.'},
+            {who:'MED-EVAC-2', text:'ETA to Earth-orbit facility, four days, six hours.'},
+            {who:'MED-EVAC-2', text:'Requesting priority docking clearance on arrival.'},
+        ]},
+
+    {id:'TX-1178', freq:88.5,   ts:'1989-03-16 09:32:12', callsign:'FRACTURED-1',origin:'UNKNOWN',      target:'BROADCAST',     class_:'ANOMALY',  enc:false,
+        title:'FRACTURED FOUNDATION BROADCAST',
+        lines:[
+            {who:'F.FOUND', text:'To all who can hear this — the Foundation stands.'},
+            {who:'F.FOUND', text:'The Council of Nine has withdrawn from the Union of Iron Colonies.'},
+            {who:'F.FOUND', text:'We do not recognize the authority of the Fleet in Fractured space.'},
+            {who:'F.FOUND', text:'What was buried at Kraken Mare belongs to no flag.'},
+            {who:'STATIC',  text:'[carrier holds — 41 seconds]', static:true},
+        ]},
 ];
 
-/* PASSWORD */
-const lock = document.getElementById("lock");
-const pass = document.getElementById("pass");
-const err = document.getElementById("error");
+/* ---------- RENDER LIST ---------- */
+const listEl = $('intercept-list');
+let currentFilter = 'ALL';
 
-pass.focus();
-
-pass.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    if(pass.value==="uic-742"){
-      lock.style.display="none";
-    } else {
-      err.style.opacity=1;
-      pass.value="";
-      setTimeout(()=>err.style.opacity=0,1000);
-    }
-  }
+function renderList(){
+    listEl.innerHTML = '';
+    const filtered = LOG.filter(l=>{
+        if(currentFilter==='ALL') return true;
+        if(currentFilter==='ENCRYPTED') return l.enc;
+        return l.class_ === currentFilter;
+    });
+    filtered.forEach(l=>{
+        const el = document.createElement('div');
+        el.className = 'intercept';
+        if(l.class_==='PRIORITY') el.classList.add('pri');
+        if(l.class_==='ANOMALY')  el.classList.add('anom');
+        if(l.enc) el.classList.add('enc');
+        el.innerHTML = `
+            <div class="ic-dot"></div>
+            <div class="ic-top">
+                <span>${l.id}</span>
+                <span>${l.class_}</span>
+            </div>
+            <div class="ic-title">${l.title}</div>
+            <div class="ic-meta">
+                <span>${l.freq.toFixed(1)} MHz</span>
+                <span>${l.callsign}</span>
+                <span>${l.ts.slice(11)}</span>
+            </div>
+        `;
+        el.addEventListener('click', ()=>loadIntercept(l.id));
+        listEl.appendChild(el);
+    });
+}
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderList();
+    });
 });
+renderList();
 
-/* GENERATE STATIONS */
-const container = document.getElementById("stations");
-const info = document.getElementById("info");
+/* ---------- FREQUENCY DIAL ---------- */
+const freqEl = $('freq');
+const cursorEl = $('dial-cursor');
+const badgeEl = $('freq-badge');
+const meterFill = $('meter-fill');
+const snrEl = $('snr-val');
+const strengthEl = $('strength');
 
-stations.forEach(station=>{
-  const div = document.createElement("div");
-  div.className="station";
+const FREQ_MIN = 30;    // MHz
+const FREQ_MAX = 3200;  // MHz
 
-  div.innerHTML = `
-    <div class="station-title">${station.name}</div>
-    <div class="status">${station.status}</div>
-  `;
+function sliderToFreq(v){
+    // logarithmic-ish
+    const t = v/1000;
+    return FREQ_MIN * Math.pow(FREQ_MAX/FREQ_MIN, t);
+}
+function freqToSlider(f){
+    const t = Math.log(f/FREQ_MIN) / Math.log(FREQ_MAX/FREQ_MIN);
+    return Math.round(t*1000);
+}
+function updateDial(){
+    const f = sliderToFreq(+freqEl.value);
+    cursorEl.style.left = (freqEl.value/1000*100) + '%';
+    badgeEl.textContent = f.toFixed(1)+' MHz';
+    // proximity to nearest cataloged intercept
+    let best = 9e9;
+    LOG.forEach(l=>{
+        const df = Math.abs(l.freq - f);
+        if(df < best) best = df;
+    });
+    const snr = Math.max(0, 30 - Math.log10(1+best)*10);
+    meterFill.style.width = (snr/30*100) + '%';
+    snrEl.textContent = snr.toFixed(1)+'dB';
+    strengthEl.textContent = 'SIG ' + Math.round(snr/30*100) + '%';
+}
+freqEl.addEventListener('input', updateDial);
 
-  div.onclick = ()=>{
-    const signal = Math.floor(Math.random()*40)+60;
-    const delay = Math.floor(Math.random()*10);
-
-    info.innerHTML = `
-      <b>${station.name}</b><br>
-      Location: ${station.location}<br>
-      Status: ${station.status}<br>
-      Signal Strength: ${signal}%<br>
-      Transmission Delay: ${delay}s<br>
-      Last Contact: ${Math.floor(Math.random()*5)}m ago
-    `;
-  };
-
-  container.appendChild(div);
-});
-
-/* LOG SYSTEM */
-const logs = document.getElementById("logs");
-
-function addLog(){
-  const msgs = [
-    "PING SENT",
-    "DATA RECEIVED",
-    "SIGNAL STABLE",
-    "TRANSMISSION ROUTED",
-    "INTERFERENCE DETECTED",
-    "RELAY ONLINE"
-  ];
-
-  const div = document.createElement("div");
-  div.className="log-line";
-  div.textContent = "> " + msgs[Math.floor(Math.random()*msgs.length)];
-  logs.prepend(div);
+/* Tick marks */
+const ticksEl = $('dial-ticks');
+for(let i=0;i<=10;i++){
+    const s = document.createElement('span');
+    const f = sliderToFreq(i*100);
+    s.textContent = f>=1000 ? (f/1000).toFixed(1)+'G' : Math.round(f)+'M';
+    ticksEl.appendChild(s);
 }
 
-setInterval(addLog, 1500);
+/* ---------- WATERFALL CANVAS ---------- */
+const wf = $('waterfall');
+const wfCtx = wf.getContext('2d');
+function drawWaterfallLine(){
+    // scroll up
+    const img = wfCtx.getImageData(0, 0, wf.width, wf.height-1);
+    wfCtx.putImageData(img, 0, 1);
+    // new line at top with noise + peaks at cataloged freqs
+    const w = wf.width;
+    const line = wfCtx.createImageData(w, 1);
+    for(let x=0;x<w;x++){
+        // baseline noise
+        let intensity = 0.10 + Math.random()*0.10;
+        const f = sliderToFreq(x/w*1000);
+        LOG.forEach(l=>{
+            const df = Math.abs(l.freq - f) / f;
+            if(df < 0.02){
+                const bump = Math.max(0, 0.02 - df) / 0.02;
+                intensity += bump * (l.class_==='ANOMALY' ? 0.9 : 0.7);
+            }
+        });
+        // cursor line brighter
+        const cx = (+freqEl.value/1000)*w;
+        if(Math.abs(x - cx) < 1.5) intensity = Math.min(1, intensity+0.5);
+        intensity = Math.min(1, intensity + (Math.random()-0.5)*0.05);
+        const r = Math.round(255 * intensity);
+        const g = Math.round(160 * intensity);
+        const b = Math.round(30  * intensity);
+        line.data[x*4]   = r;
+        line.data[x*4+1] = g;
+        line.data[x*4+2] = b;
+        line.data[x*4+3] = 255;
+    }
+    wfCtx.putImageData(line, 0, 0);
+}
+setInterval(drawWaterfallLine, 55);
+updateDial();
 
-/* TERMINAL */
-const cmd = document.getElementById("cmd");
-
-cmd.addEventListener("keydown", e=>{
-  if(e.key!=="Enter") return;
-
-  const c = cmd.value.toLowerCase();
-
-  switch(c){
-    case "home": window.location="index.html"; break;
-    case "users": window.location="users.html"; break;
-    case "about": window.location="about.html"; break;
-  }
-
-  cmd.value="";
+/* ---------- AUTO-SWEEP ---------- */
+let sweeping=false, sweepDir=1;
+$('btn-sweep').addEventListener('click', ()=>{
+    sweeping = !sweeping;
+    $('btn-sweep').textContent = sweeping ? '■ STOP SWEEP' : '◆ AUTO-SWEEP';
+    $('btn-sweep').classList.toggle('active', sweeping);
 });
+setInterval(()=>{
+    if(!sweeping) return;
+    let v = +freqEl.value + sweepDir*3;
+    if(v>=1000){v=1000;sweepDir=-1;}
+    if(v<=0){v=0;sweepDir=1;}
+    freqEl.value = v;
+    updateDial();
+    // auto-select nearest intercept if very close
+    const f = sliderToFreq(v);
+    const near = LOG.find(l=>Math.abs(l.freq-f) < f*0.003);
+    if(near && current?.id !== near.id){
+        loadIntercept(near.id);
+    }
+},80);
+
+$('btn-play').addEventListener('click', ()=>{
+    // snap to nearest
+    const f = sliderToFreq(+freqEl.value);
+    let best=null, bd=9e9;
+    LOG.forEach(l=>{
+        const d = Math.abs(l.freq-f);
+        if(d<bd){bd=d; best=l;}
+    });
+    if(best){
+        freqEl.value = freqToSlider(best.freq);
+        updateDial();
+        loadIntercept(best.id);
+    }
+});
+
+/* ---------- PLAYBACK ---------- */
+let current = null;
+let playTimer = null;
+let playAudioCtx = null;
+let playStart = 0;
+let playDuration = 0;
+let playPaused = true;
+
+function stopPlayback(){
+    if(playTimer){cancelAnimationFrame(playTimer); playTimer=null;}
+    playPaused = true;
+    $('pb-play').textContent = '▶ PLAY';
+    document.querySelectorAll('#pb-transcript .ts-line').forEach(el=>el.classList.remove('on'));
+    $('wave-cursor').style.left = '0%';
+    $('pb-elapsed').textContent = '0:00';
+}
+
+function fmtSec(s){
+    const m = Math.floor(s/60), r = Math.floor(s%60);
+    return m+':'+String(r).padStart(2,'0');
+}
+
+function loadIntercept(id){
+    const l = LOG.find(x=>x.id===id);
+    if(!l) return;
+    stopPlayback();
+    current = l;
+    document.querySelectorAll('.intercept').forEach(el=>el.classList.remove('active'));
+    // mark active
+    const idx = LOG.filter(x=>{
+        if(currentFilter==='ALL') return true;
+        if(currentFilter==='ENCRYPTED') return x.enc;
+        return x.class_ === currentFilter;
+    }).indexOf(l);
+    if(idx>=0){
+        listEl.children[idx]?.classList.add('active');
+    }
+
+    $('pb-badge').textContent = l.id;
+    $('pb-title').textContent = l.title;
+    $('pb-ts').textContent = l.ts;
+    $('pb-freq').textContent = l.freq.toFixed(1)+' MHz';
+    $('pb-call').textContent = l.callsign;
+    $('pb-origin').textContent = l.origin;
+    $('pb-target').textContent = l.target;
+    $('pb-class').textContent = l.class_ + (l.enc ? ' / ENC' : '');
+    $('pb-decrypt').style.display = l.enc ? 'inline-block' : 'none';
+    $('pb-decrypt').textContent = l.enc ? '🔒 DECRYPT' : '';
+
+    renderTranscript(l, l.enc && !l._decrypted);
+    // Duration: ~3s per line
+    playDuration = (l._decrypted ? l.decrypted : l.lines).length * 3;
+    $('pb-total').textContent = fmtSec(playDuration);
+    drawWaveform();
+    // Snap dial
+    freqEl.value = freqToSlider(l.freq);
+    updateDial();
+}
+
+function renderTranscript(l, encrypted){
+    const box = $('pb-transcript');
+    box.innerHTML = '';
+    const lines = encrypted ? l.lines : (l._decrypted ? l.decrypted : l.lines);
+    lines.forEach((line, i)=>{
+        const el = document.createElement('div');
+        el.className = 'ts-line';
+        if(line.static)   el.classList.add('static');
+        if(line.encrypted)el.classList.add('encrypted');
+        el.dataset.i = i;
+        el.innerHTML = `<span class="speaker">${line.who}::</span>${line.text}`;
+        box.appendChild(el);
+    });
+}
+
+$('pb-decrypt').addEventListener('click', ()=>{
+    if(!current) return;
+    if(!current.enc) return;
+    current._decrypted = true;
+    renderTranscript(current, false);
+    $('pb-decrypt').textContent = '✓ DECRYPTED';
+    $('pb-decrypt').style.color = 'var(--green)';
+    playDuration = current.decrypted.length * 3;
+    $('pb-total').textContent = fmtSec(playDuration);
+    drawWaveform();
+});
+
+/* WAVEFORM CANVAS */
+const wave = $('wave');
+const wCtx = wave.getContext('2d');
+function drawWaveform(){
+    if(!current) return;
+    const w = wave.width, h = wave.height;
+    wCtx.clearRect(0,0,w,h);
+    wCtx.strokeStyle = 'rgba(255,159,7,.85)';
+    wCtx.lineWidth = 1;
+    wCtx.beginPath();
+    // deterministic pseudo-random from id
+    let seed = 0;
+    for(const c of current.id) seed = (seed*31 + c.charCodeAt(0)) & 0xffffff;
+    function rnd(){ seed = (seed*9301 + 49297) & 0xffffff; return (seed/0xffffff); }
+    for(let x=0;x<w;x++){
+        const t = x/w;
+        // envelope by line position
+        const lines = current._decrypted ? current.decrypted : current.lines;
+        const li = Math.floor(t*lines.length);
+        const line = lines[Math.min(li, lines.length-1)];
+        let amp = line?.static ? 0.15 : 0.55;
+        if(line?.encrypted) amp = 0.9;
+        const v = (Math.sin(x*0.15)+Math.sin(x*0.42+seed)+Math.sin(x*0.7-seed*0.3))/3;
+        const noise = (rnd()-0.5)*0.35;
+        const y = h/2 + (v*0.6 + noise) * amp * h/2;
+        if(x===0) wCtx.moveTo(x,y); else wCtx.lineTo(x,y);
+    }
+    wCtx.stroke();
+    // center line
+    wCtx.strokeStyle = 'rgba(255,74,43,.25)';
+    wCtx.beginPath(); wCtx.moveTo(0,h/2); wCtx.lineTo(w,h/2); wCtx.stroke();
+}
+
+/* PLAY */
+$('pb-play').addEventListener('click', ()=>{
+    if(!current) return;
+    if(playPaused){
+        playPaused = false;
+        playStart = performance.now();
+        $('pb-play').textContent = '⏸ PAUSE';
+        tickPlay();
+    } else {
+        stopPlayback();
+    }
+});
+$('pb-stop').addEventListener('click', stopPlayback);
+
+function tickPlay(){
+    if(playPaused) return;
+    const elapsed = (performance.now() - playStart)/1000;
+    if(elapsed >= playDuration){
+        stopPlayback();
+        return;
+    }
+    const lines = current._decrypted ? current.decrypted : current.lines;
+    const activeIdx = Math.floor(elapsed / 3);
+    document.querySelectorAll('#pb-transcript .ts-line').forEach(el=>{
+        el.classList.toggle('on', +el.dataset.i <= activeIdx);
+    });
+    $('wave-cursor').style.left = (elapsed/playDuration*100)+'%';
+    $('pb-elapsed').textContent = fmtSec(elapsed);
+    playTimer = requestAnimationFrame(tickPlay);
+}
+
+/* Footer nav */
+$('btn-terminal').addEventListener('click', ()=>{ window.location.href='terminal.html'; });
+$('btn-map').addEventListener('click', ()=>{ window.location.href='solarmap.html'; });
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
