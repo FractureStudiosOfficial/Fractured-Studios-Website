@@ -24,7 +24,7 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 @keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
 #screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;isolation:isolate;}
-#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
+#screen{position:absolute;inset:0;overflow:hidden;}
 
 #glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
 #vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
@@ -887,9 +887,512 @@ FLT-CMD  :: Do not let them read the annex.
 </script>
 
 <script id="main-script">
-/* PLACEHOLDER_SCRIPT */
+/* =====================================================================
+   CRAWLSPACE :: MAIN RUNTIME
+   This block handles the connect screen, node session, terminal, viewers,
+   password gates, fragment inventory, and clearance checks.
+   YOU SHOULDN'T NEED TO EDIT THIS BLOCK — add content in `SERVERS` above.
+===================================================================== */
+
+const $ = id => document.getElementById(id);
+
+// State the user has accumulated
+const state = {
+    node: null,          // currently connected server object
+    activeFile: null,    // currently open file
+    inventory: new Set(),// collected fragment codes
+    clearance: 0,        // user clearance (elevated by commands / discoveries)
+    user: 'GUEST',
+};
+
+/* -------- Connect screen -------- */
+$('server-count').textContent = SERVERS.length;
+const ci = $('connect-input');
+const cs = $('connect-status');
+
+function setStatus(el, msg, cls){
+    el.className = 'cs-status ' + (cls || '');
+    el.textContent = msg;
+}
+
+ci.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter') return;
+    const raw = ci.value.trim().toUpperCase();
+    if(!raw) return;
+    if(raw === 'HELP'){
+        setStatus(cs, 'COMMANDS :: <IP> · SCAN · HELP · WHOAMI · SUDO <PW>');
+        return;
+    }
+    if(raw === 'SCAN'){
+        setStatus(cs, 'DIRECTORY :: ' + SERVERS.map(s=>s.addr).join(' · '));
+        return;
+    }
+    if(raw === 'WHOAMI'){
+        setStatus(cs, 'USER :: '+state.user+'  · CLEARANCE :: '+state.clearance);
+        return;
+    }
+    if(raw.startsWith('SUDO ')){
+        const pw = raw.slice(5).trim();
+        if(pw === 'RAVEN 1989'){ state.clearance = 4; state.user='K.STEIN'; setStatus(cs,'✓ ELEVATED — CLEARANCE 4 (RAVEN)', 'ok'); return; }
+        if(pw === 'WOLF 1989'){ state.clearance = 3; state.user='R.VOSS'; setStatus(cs,'✓ ELEVATED — CLEARANCE 3 (WOLF)', 'ok'); return; }
+        if(pw === 'HALO 1989'){ state.clearance = 2; state.user='T.GRISHIN'; setStatus(cs,'✓ ELEVATED — CLEARANCE 2 (HALO)', 'ok'); return; }
+        setStatus(cs, '△ SUDO REJECTED', 'err');
+        return;
+    }
+    const addr = raw.toLowerCase();
+    const srv = SERVERS.find(s=>s.addr.toLowerCase() === addr);
+    if(!srv){
+        setStatus(cs, '△ NO ROUTE TO HOST :: '+raw, 'err');
+        return;
+    }
+    if(srv.clearance && state.clearance < srv.clearance){
+        setStatus(cs, '△ CLEARANCE INSUFFICIENT (need '+srv.clearance+' — you have '+state.clearance+')', 'err');
+        return;
+    }
+    setStatus(cs, '✓ HANDSHAKE... ROUTING... LATENCY '+srv.latency+'ms', 'ok');
+    setTimeout(()=>connectTo(srv), Math.min(srv.latency, 800));
+});
+ci.focus();
+
+/* -------- Connect / disconnect a node -------- */
+function connectTo(srv){
+    state.node = srv;
+    state.activeFile = null;
+    $('connect-screen').classList.add('hidden');
+    $('session-screen').classList.remove('hidden');
+    $('nb-addr').textContent = srv.addr;
+    $('nb-name').textContent = srv.name;
+    $('nb-latency').textContent = srv.latency + ' ms';
+    $('nb-user').textContent = state.user + ' · CLR ' + state.clearance;
+    $('motd').textContent = srv.motd || '';
+    $('dir-count').textContent = srv.files.length + ' FILES';
+    renderFileList();
+    resetViewer();
+    termWrite('CONNECTED :: '+srv.addr+' ('+srv.name+')', 'ok');
+    termWrite('type HELP for commands, LS for directory', 'info');
+    $('term-input').focus();
+}
+
+$('btn-disconnect').addEventListener('click', ()=>disconnect());
+
+function disconnect(){
+    state.node = null;
+    state.activeFile = null;
+    $('session-screen').classList.add('hidden');
+    $('connect-screen').classList.remove('hidden');
+    ci.value = '';
+    ci.focus();
+    setStatus(cs, '// DISCONNECTED — SELECT NEXT NODE //');
+}
+
+/* -------- File list rendering -------- */
+function iconFor(f){
+    switch(f.type){
+        case 'txt':     return '≡';
+        case 'log':     return '▤';
+        case 'dossier': return '☰';
+        case 'hex':     return '⧉';
+        case 'image':   return '▩';
+        case 'ascii':   return '⌘';
+        case 'video':   return '►';
+        case 'audio':   return '♪';
+        case 'frag':    return '◇';
+        case 'corrupt': return '⚠';
+        default:        return '?';
+    }
+}
+function stateClass(f){
+    switch(f.state){
+        case 1: return 'locked';
+        case 2: return 'encrypted';
+        case 3: return 'corrupt';
+        case 4: return 'fragmented';
+        case 5: return 'perm';
+        default:return '';
+    }
+}
+function pseudoSize(f){
+    // Deterministic pseudo size from name so files look plausible
+    let s=0; for(const c of f.name) s = (s*33+c.charCodeAt(0)) & 0xffff;
+    const bytes = 200 + (s % 8000);
+    if(bytes < 1024) return bytes+' B';
+    return (bytes/1024).toFixed(1)+' K';
+}
+function renderFileList(){
+    const list = $('file-list');
+    list.innerHTML = '';
+    state.node.files.forEach((f,i)=>{
+        const row = document.createElement('div');
+        row.className = 'file-row ' + stateClass(f);
+        row.dataset.i = i;
+        row.innerHTML = `
+            <span class="fico">${iconFor(f)}</span>
+            <span class="fname">${f.name}</span>
+            <span class="fsize">${pseudoSize(f)}</span>
+        `;
+        row.addEventListener('click', ()=>openFile(i));
+        list.appendChild(row);
+    });
+}
+
+function markActive(i){
+    document.querySelectorAll('.file-row').forEach(r=>r.classList.toggle('active', +r.dataset.i === i));
+}
+
+/* -------- Viewer -------- */
+function resetViewer(){
+    $('view-title').textContent = '-- NO FILE OPEN --';
+    $('view-badge').textContent = '--';
+    $('view-meta').classList.add('hidden');
+    const v = $('viewer');
+    v.className = 'viewer';
+    v.innerHTML = '<div class="viewer-empty">// SELECT A FILE //</div>';
+}
+
+function openFile(i){
+    const f = state.node.files[i];
+    if(!f) return;
+    state.activeFile = i;
+    markActive(i);
+
+    $('view-title').textContent = f.name;
+    $('view-badge').textContent = f.type.toUpperCase() + ' · S' + f.state;
+    // Meta strip
+    $('view-meta').classList.remove('hidden');
+    $('view-meta').innerHTML = `
+        <div><span class="k">NODE</span><span class="v">${state.node.addr}</span></div>
+        <div><span class="k">TYPE</span><span class="v">${f.type.toUpperCase()}</span></div>
+        <div><span class="k">STATE</span><span class="v">${stateLabel(f.state)}</span></div>
+        <div><span class="k">SIZE</span><span class="v">${pseudoSize(f)}</span></div>
+    `;
+
+    // Gate checks first (state 1/2/4/5)
+    if(f.state === 5){
+        // Permission — needs clearance
+        if(state.clearance < (f.clearance||0)){
+            renderPermGate(f);
+            return;
+        }
+    }
+    if(f.state === 1){
+        if(!f._unlocked){
+            renderPasswordGate(f);
+            return;
+        }
+    }
+    if(f.state === 2){
+        const need = (f.fragments||[]);
+        const missing = need.filter(c=>!state.inventory.has(c));
+        if(missing.length){
+            renderFragmentGate(f, need, missing);
+            return;
+        }
+    }
+    if(f.state === 4){
+        const need = (f.fragments||[]);
+        const missing = need.filter(c=>!state.inventory.has(c));
+        if(missing.length){
+            renderFragmentGate(f, need, missing, /*fragmented*/true);
+            return;
+        }
+    }
+
+    // Render actual content by type
+    renderContent(f);
+}
+
+function stateLabel(s){
+    return ['UNLOCKED','LOCKED','ENCRYPTED','CORRUPT','FRAGMENTED','PERM.DENY'][s] || '?';
+}
+
+/* -------- Content renderers -------- */
+function renderContent(f){
+    const v = $('viewer');
+    v.className = 'viewer';
+
+    if(f.type === 'txt'){
+        v.classList.add('txt');
+        v.textContent = f.content || '';
+    }
+    else if(f.type === 'log'){
+        v.classList.add('log');
+        const lines = (f.content||[]).map(l=>{
+            const m = l.match(/^\[(INFO|WARN|ERR )\]\s*(.*)$/);
+            if(m){
+                const lvl = m[1].trim();
+                return `<span class="lvl-${lvl.toLowerCase().replace(' ','')}">[${m[1]}] ${escapeHTML(m[2])}</span>`;
+            }
+            return escapeHTML(l);
+        });
+        v.innerHTML = lines.join('\n');
+    }
+    else if(f.type === 'dossier'){
+        v.classList.add('dossier');
+        const d = f.data || {};
+        let html = `<h3>${d.title||f.name}</h3>`;
+        for(const [k,val] of Object.entries(d.fields||{})){
+            html += `<div class="field"><span class="k">${k}</span><span class="v">${val}</span></div>`;
+        }
+        if(d.body) html += `<div class="body">${processInline(d.body)}</div>`;
+        v.innerHTML = html;
+    }
+    else if(f.type === 'hex'){
+        v.classList.add('hex');
+        v.innerHTML = hexDump(f.content || '');
+    }
+    else if(f.type === 'image'){
+        v.classList.add('img');
+        v.innerHTML = `<img src="${f.src}" alt="${f.name}"/><div class="caption">${f.caption||f.name}</div>`;
+    }
+    else if(f.type === 'ascii'){
+        v.classList.add('image-ascii');
+        v.innerHTML = `<pre>${escapeHTML(f.content||'')}</pre>`;
+    }
+    else if(f.type === 'video'){
+        v.classList.add('vid');
+        const isEmbed = /youtube|vimeo/.test(f.src||'');
+        const player = isEmbed
+            ? `<iframe src="${f.src}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
+            : `<video src="${f.src}" controls></video>`;
+        v.innerHTML = `${player}<div class="caption">${f.caption||f.name}</div>`;
+    }
+    else if(f.type === 'audio'){
+        v.classList.add('audio');
+        const player = f.src
+            ? `<audio src="${f.src}" controls></audio>`
+            : `<audio controls></audio>`;
+        v.innerHTML = `<div class="wave"></div>${player}<div class="caption">${f.caption||f.name}</div>`;
+    }
+    else if(f.type === 'corrupt'){
+        v.classList.add('corrupted');
+        // Split by clean/redact spans in raw content
+        v.innerHTML = f.content
+            .replace(/<clean>(.*?)<\/clean>/g, '<span class="clean">$1</span>')
+            // Wrap remaining consecutive █ blocks with redact spans (already inline)
+            ;
+    }
+    else if(f.type === 'frag'){
+        v.classList.add('frag');
+        const alreadyHave = state.inventory.has(f.code);
+        state.inventory.add(f.code);
+        updateFragCount();
+        v.innerHTML = `
+            <div class="frag-title">◇ FRAGMENT ACQUIRED — SHARD ${f.code}</div>
+            <div class="frag-body">${escapeHTML(f.content||'')}</div>
+            ${alreadyHave ? '' : '<div style="margin-top:14px;color:var(--green);font-size:11px;letter-spacing:.24em;">// ADDED TO INVENTORY //</div>'}
+        `;
+        termWrite('FRAGMENT SHARD-'+f.code+' added to inventory', 'ok');
+    }
+    else {
+        v.textContent = '[UNKNOWN FILE TYPE :: '+f.type+']';
+    }
+}
+
+/* -------- Gates -------- */
+function renderPasswordGate(f){
+    const v = $('viewer');
+    v.className = 'viewer';
+    v.innerHTML = `
+        <div class="gate-view">
+            <div class="icon">🔒</div>
+            <div class="msg">FILE IS PASSWORD LOCKED — ENTER KEY</div>
+            <input type="text" id="pw-input" placeholder="passphrase" autocomplete="off"/>
+            <button id="pw-submit">UNLOCK</button>
+            <div class="err" id="pw-err"></div>
+        </div>
+    `;
+    const inp = document.getElementById('pw-input');
+    const err = document.getElementById('pw-err');
+    inp.focus();
+    function attempt(){
+        const val = inp.value.trim();
+        if(val.toUpperCase() === (f.password||'').toUpperCase()){
+            f._unlocked = true;
+            termWrite('UNLOCKED :: '+f.name, 'ok');
+            renderContent(f);
+        } else {
+            err.textContent = '△ INCORRECT KEY';
+            inp.value = '';
+            inp.focus();
+        }
+    }
+    document.getElementById('pw-submit').addEventListener('click', attempt);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') attempt(); });
+}
+
+function renderFragmentGate(f, need, missing, isFragmented){
+    const v = $('viewer');
+    v.className = 'viewer';
+    const chips = need.map(c=>{
+        const have = state.inventory.has(c);
+        return `<span class="frag-chip ${have?'have':''}">${have?'✓':'◇'} SHARD ${c}</span>`;
+    }).join('');
+    v.innerHTML = `
+        <div class="gate-view">
+            <div class="icon">${isFragmented?'◇':'◈'}</div>
+            <div class="msg">${isFragmented?'FILE IS FRAGMENTED — GATHER ALL SHARDS':'FILE IS ENCRYPTED — REQUIRES ALL SHARDS'}</div>
+            <div class="fragments">${chips}</div>
+            <div class="err">MISSING :: ${missing.map(c=>'SHARD '+c).join(' · ')}</div>
+        </div>
+    `;
+}
+
+function renderPermGate(f){
+    const v = $('viewer');
+    v.className = 'viewer';
+    v.innerHTML = `
+        <div class="gate-view">
+            <div class="icon">✗</div>
+            <div class="msg">PERMISSION DENIED — CLEARANCE ${f.clearance||0} REQUIRED</div>
+            <div class="err">YOUR CLEARANCE :: ${state.clearance}</div>
+        </div>
+    `;
+    termWrite('PERM DENY :: '+f.name+' (need CLR '+f.clearance+')', 'err');
+}
+
+/* -------- Terminal (command bar) -------- */
+const termScroll = $('term-scroll');
+const termInput = $('term-input');
+
+function termWrite(text, cls){
+    const l = document.createElement('div');
+    l.className = 'ln ' + (cls||'');
+    l.innerHTML = escapeHTML(text);
+    termScroll.appendChild(l);
+    termScroll.scrollTop = termScroll.scrollHeight;
+}
+
+termInput.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter') return;
+    const raw = termInput.value.trim();
+    if(!raw) return;
+    termWrite('> '+raw);
+    termInput.value = '';
+    handleCommand(raw);
+});
+
+function handleCommand(raw){
+    const parts = raw.split(/\s+/);
+    const cmd = parts[0].toUpperCase();
+    const rest = parts.slice(1).join(' ');
+    switch(cmd){
+        case 'HELP':
+            termWrite('COMMANDS ::');
+            termWrite('  LS                 list files');
+            termWrite('  CAT <file>         open file (also OPEN)');
+            termWrite('  OPEN <file>');
+            termWrite('  UNLOCK <file> <pw> supply password for locked file');
+            termWrite('  DC                 disconnect and return to router');
+            termWrite('  FRAGMENTS          show shard inventory');
+            termWrite('  WHOAMI             show user + clearance');
+            termWrite('  SUDO <pw>          elevate clearance');
+            termWrite('  CLEAR              clear terminal');
+            break;
+        case 'LS':
+            state.node.files.forEach(f=>{
+                termWrite('  '+iconFor(f)+' '+f.name+'    ['+stateLabel(f.state)+']');
+            });
+            break;
+        case 'CAT':
+        case 'OPEN': {
+            const target = rest.trim().toUpperCase();
+            const i = state.node.files.findIndex(f=>f.name.toUpperCase()===target);
+            if(i<0){ termWrite('△ FILE NOT FOUND', 'err'); break; }
+            openFile(i);
+            break;
+        }
+        case 'UNLOCK': {
+            const first = parts[1] || '';
+            const pw = parts.slice(2).join(' ');
+            const f = state.node.files.find(x=>x.name.toUpperCase()===first.toUpperCase());
+            if(!f){ termWrite('△ FILE NOT FOUND', 'err'); break; }
+            if(f.state !== 1){ termWrite('△ FILE NOT PASSWORD-LOCKED', 'err'); break; }
+            if(pw.toUpperCase() === (f.password||'').toUpperCase()){
+                f._unlocked = true;
+                termWrite('✓ UNLOCKED :: '+f.name, 'ok');
+                openFile(state.node.files.indexOf(f));
+            } else termWrite('△ WRONG KEY', 'err');
+            break;
+        }
+        case 'DC': disconnect(); break;
+        case 'FRAGMENTS': showFragments(); break;
+        case 'WHOAMI': termWrite('USER='+state.user+' · CLR='+state.clearance+' · SHARDS='+[...state.inventory].join(',')); break;
+        case 'SUDO': {
+            const pw = rest.toUpperCase();
+            if(pw==='RAVEN 1989'){ state.clearance=4; state.user='K.STEIN'; termWrite('✓ ELEVATED — CLR 4 (RAVEN)','ok'); refreshBar(); break; }
+            if(pw==='WOLF 1989'){  state.clearance=3; state.user='R.VOSS';  termWrite('✓ ELEVATED — CLR 3 (WOLF)','ok');  refreshBar(); break; }
+            if(pw==='HALO 1989'){  state.clearance=2; state.user='T.GRISHIN';termWrite('✓ ELEVATED — CLR 2 (HALO)','ok');  refreshBar(); break; }
+            termWrite('△ SUDO REJECTED','err');
+            break;
+        }
+        case 'CLEAR': termScroll.innerHTML=''; break;
+        default: termWrite('△ UNKNOWN COMMAND — TYPE HELP','err');
+    }
+}
+
+function refreshBar(){
+    $('nb-user').textContent = state.user + ' · CLR ' + state.clearance;
+}
+
+/* -------- Fragment inventory overlay -------- */
+function showFragments(){
+    const shards = [...state.inventory];
+    let existing = document.getElementById('frag-overlay');
+    if(existing) existing.remove();
+    const ov = document.createElement('div');
+    ov.id = 'frag-overlay';
+    let items = '';
+    if(shards.length){
+        shards.forEach(c=>{
+            items += `<div class="frag-item"><span class="code">SHARD ${c}</span> — recovered · slot into any encrypted file that requires it</div>`;
+        });
+    } else {
+        items = '<div class="frag-item">// NO SHARDS RECOVERED — LOCATE .FRAG FILES IN THE NETWORK //</div>';
+    }
+    ov.innerHTML = `
+        <div class="box">
+            <button class="close">CLOSE ×</button>
+            <h2>◇ FRAGMENT INVENTORY (${shards.length})</h2>
+            <div class="list">${items}</div>
+        </div>
+    `;
+    document.body.appendChild(ov);
+    ov.querySelector('.close').addEventListener('click', ()=>ov.remove());
+    ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+}
+$('btn-fragments').addEventListener('click', showFragments);
+function updateFragCount(){ $('frag-count').textContent = state.inventory.size; }
+
+/* -------- Helpers -------- */
+function escapeHTML(s){
+    return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+}
+function processInline(s){
+    // Keep block redaction spans in text (already HTML); preserve line breaks
+    return String(s).replace(/\n/g,'<br>');
+}
+function hexDump(str){
+    const b = new TextEncoder().encode(String(str));
+    let out = '';
+    for(let i=0;i<b.length;i+=16){
+        const addr = i.toString(16).padStart(8,'0').toUpperCase();
+        let hex='', asc='';
+        for(let j=0;j<16;j++){
+            if(i+j<b.length){
+                hex += b[i+j].toString(16).padStart(2,'0').toUpperCase()+' ';
+                const c = b[i+j];
+                asc += (c>=32 && c<127) ? String.fromCharCode(c) : '.';
+            } else { hex += '   '; asc += ' '; }
+        }
+        out += `<span class="addr">${addr}</span>  ${hex}  <span class="ascii">${escapeHTML(asc)}</span>\n`;
+    }
+    return out;
+}
+
+/* -------- Footer nav -------- */
+$('btn-terminal').addEventListener('click', ()=>{ window.location.href='terminal.html'; });
 </script>
 
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
