@@ -200,6 +200,36 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 #frag-overlay .close{position:absolute;top:12px;right:14px;background:none;border:1px solid rgba(255,74,43,.5);color:var(--red);padding:4px 10px;cursor:pointer;letter-spacing:.2em;font-size:11px;}
 #frag-overlay .close:hover{background:rgba(255,74,43,.15);}
 #frag-overlay.hidden{display:none;}
+
+/* ============ LOGIN SCREEN ============ */
+#login-inner{margin:auto;max-width:640px;width:90%;text-align:center;padding:38px 40px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.55));box-shadow:inset 0 0 30px rgba(255,159,7,.06),0 0 40px rgba(0,0,0,.7);position:relative;}
+#login-inner::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
+.login-field{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(255,159,7,.35);background:rgba(255,159,7,.05);font-size:14px;letter-spacing:.14em;margin-bottom:10px;}
+.login-field .pfx{color:var(--red);letter-spacing:.2em;font-size:11px;min-width:110px;text-align:left;}
+.login-field input{flex:1;background:transparent;border:none;outline:none;font:inherit;color:var(--amber);letter-spacing:.16em;caret-color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
+#login-submit{margin-top:8px;font:inherit;padding:10px 22px;background:rgba(255,74,43,.1);border:1px solid rgba(255,74,43,.55);color:var(--red);letter-spacing:.24em;font-size:12px;cursor:pointer;}
+#login-submit:hover{background:rgba(255,74,43,.22);color:#ffd0c1;}
+
+/* ============ CLEARANCE REQUEST OVERLAY ============ */
+#req-overlay{position:absolute;inset:0;z-index:1400;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:30px;}
+#req-overlay .box{max-width:560px;width:100%;padding:26px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.6));position:relative;}
+#req-overlay h2{color:var(--red);letter-spacing:.28em;font-size:15px;margin:0 0 16px;font-weight:400;}
+#req-overlay label{display:block;text-align:left;font-size:10px;letter-spacing:.24em;color:var(--amberBright);margin:10px 0 4px;}
+#req-overlay input,#req-overlay select{width:100%;font:inherit;background:rgba(255,159,7,.05);color:var(--amber);border:1px solid rgba(255,159,7,.35);padding:8px 10px;letter-spacing:.14em;outline:none;}
+#req-overlay input:focus,#req-overlay select:focus{border-color:var(--red);}
+#req-overlay .close{position:absolute;top:12px;right:14px;background:none;border:1px solid rgba(255,74,43,.5);color:var(--red);padding:4px 10px;cursor:pointer;letter-spacing:.2em;font-size:11px;}
+#req-overlay .close:hover{background:rgba(255,74,43,.15);}
+#req-overlay.hidden{display:none;}
+#req-overlay .req-status{margin-top:14px;font-size:11px;letter-spacing:.22em;color:var(--amberBright);min-height:1em;}
+#req-overlay .req-status.err{color:var(--red);}
+#req-overlay .req-status.ok{color:var(--green);text-shadow:0 0 5px rgba(143,255,138,.4);}
+#req-overlay .actions{display:flex;gap:8px;margin-top:14px;}
+#req-overlay .actions button{flex:1;font:inherit;padding:9px 12px;background:rgba(255,74,43,.1);border:1px solid rgba(255,74,43,.5);color:var(--red);letter-spacing:.2em;cursor:pointer;font-size:11px;}
+#req-overlay .actions button:hover{background:rgba(255,74,43,.2);color:#ffd0c1;}
+#req-overlay .note{margin-top:14px;padding:8px 10px;font-size:10px;letter-spacing:.18em;color:var(--amberBright);opacity:.65;border:1px dashed rgba(255,159,7,.25);line-height:1.6;}
+.tag.nation-us{border-color:rgba(94,167,255,.55);color:#8fc0ff;text-shadow:0 0 4px rgba(94,167,255,.4);}
+.tag.nation-su{border-color:rgba(255,74,43,.55);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.tag.nation-cn{border-color:rgba(255,215,0,.55);color:#ffd54a;text-shadow:0 0 4px rgba(255,215,0,.4);}
 </style>
 </head>
 <body>
@@ -218,8 +248,32 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 <div id="screen-wrap">
     <div id="screen">
 
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen" class="screen-layer">
+            <div id="login-inner">
+                <div class="cs-title">// U.I.C. AUTH</div>
+                <div class="cs-sub">OPERATOR PROFILE LOGIN — CRAWLSPACE ACCESS TERMINAL</div>
+                <div class="cs-lines">
+                    <div class="cs-line">TERMINAL   :: HANDSHAKE COMPLETE</div>
+                    <div class="cs-line">TIER GATE  :: OPERATOR PROFILE REQUIRED</div>
+                    <div class="cs-line">SESSION    :: UNAUTHENTICATED</div>
+                </div>
+                <div class="login-field">
+                    <span class="pfx">PROFILE ID ::</span>
+                    <input id="login-user" placeholder="e.g. J.MANISTON" autocomplete="off" autofocus/>
+                </div>
+                <div class="login-field">
+                    <span class="pfx">ACCESS KEY ::</span>
+                    <input id="login-pass" type="password" placeholder="passphrase" autocomplete="off"/>
+                </div>
+                <button id="login-submit">▸ AUTHENTICATE</button>
+                <div id="login-status" class="cs-status">// AWAITING CREDENTIALS //</div>
+                <div class="cs-hint">TIP :: type <span class="k">GUEST</span> / <span class="k">GUEST</span> for a public-tier session</div>
+            </div>
+        </div>
+
         <!-- CONNECT SCREEN -->
-        <div id="connect-screen" class="screen-layer">
+        <div id="connect-screen" class="screen-layer hidden">
             <div id="connect-inner">
                 <div class="cs-title">// CRAWLSPACE</div>
                 <div class="cs-sub">DISTRIBUTED NODE MESH — ACCESS TERMINAL</div>
@@ -251,7 +305,10 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                 <div class="nb-right">
                     <span class="tag amber" id="nb-latency">-- ms</span>
                     <span class="tag amber" id="nb-user">GUEST</span>
+                    <span class="tag" id="nb-nation">NATION --</span>
                     <span class="tag warn">SIG BR-4</span>
+                    <button class="tool-btn" id="btn-request">▸ REQUEST CLR</button>
+                    <button class="tool-btn" id="btn-logout">◂ LOGOUT</button>
                     <button class="tool-btn" id="btn-disconnect">◂ DISCONNECT</button>
                 </div>
             </div>
@@ -375,7 +432,9 @@ const SERVERS = [
     name: 'U.I.C. PUBLIC INDEX',
     motd: '// Welcome to the U.I.C. public index node..\n// Access to both Soviet, American, and Chinese systems is dependent on U.I.C. clearence access and nationality clearance.',
     latency: 24,
-    clearance: 0,
+    server: 0,          // 0 = neutral / U.I.C. public
+    clearance: 0,       // UIC clearance required
+    nationClearance: 0, // nation-specific clearance required (0=none)
     files: [
         {name:'README.TXT', type:'txt', state:0,
             content:
@@ -390,11 +449,13 @@ Only public material is hosted here.  To find a specific server, you must know s
 (Note. The public address index is currently not fully integrated, minimal address's found.)
 
 KNOWN NODES:
-    23.117.44.9    SOVIET SHIP ROSTER
-    198.53.44.7    MARS ARCADIA SETTLEMENT
-    77.44.19.30    DEIMOS & PHOBOS MAGNETOSPHERE SITES
-    89.207.11.4    PUBLIC USA MISSION INDEX
-    221.7.7.7      
+    23.117.44.9    SOVIET SHIP ROSTER          [SERVER 2 · SOV]
+    198.53.44.7    MARS ARCADIA SETTLEMENT     [SERVER 0 · JOINT]
+    77.44.19.30    DEIMOS & PHOBOS RELAY       [SERVER 2 · SOV]
+    89.207.11.4    USSF MISSION INDEX / TITAN  [SERVER 1 · USA]
+    148.11.2.19    USSF ARCADIA COMMAND        [SERVER 1 · USA]
+    58.14.9.22     CNSA TIANGONG-VII COMMAND   [SERVER 3 · CHN]
+    221.7.7.7
 
 Standard commands: HELP, LS, CAT <file>, OPEN <file>, DC.
 `
@@ -460,10 +521,12 @@ Bonus: $12,000  signing for combat trades.
 /* ------------- NODE :: FLEET LOGISTICS CACHE ----------------- */
 {
     addr: '23.117.44.9',
-    name: 'Soviet Ship RosterE',
-    motd: '// FLEET LOGISTICS SUB-NET. All access is logged. Clearance BR-2+ recommended.',
+    name: 'Soviet Ship Roster',
+    motd: '// СOВETСКИЙ FLEET LOGISTICS SUB-NET. All access is logged. Clearance BR-2+ recommended.',
     latency: 62,
-    clearance: 0,
+    server: 2,          // 2 = Soviet server
+    clearance: 1,
+    nationClearance: 2,
     files: [
         {name:'MANIFEST_44C.TXT', type:'txt', state:0,
             content:
@@ -552,9 +615,11 @@ Consignment override authorized by DIRECTOR STEIN personally.`
 {
     addr: '198.53.44.7',
     name: 'HELLAS BASIN OUTPOST',
-    motd: '// Hellas Basin surface node. Sandstorm advisory in effect. Comm windows 04:00-06:00 UTC.',
+    motd: '// Hellas Basin surface node — joint Arcadia settlement. Sandstorm advisory in effect. Comm windows 04:00-06:00 UTC.',
     latency: 148,
+    server: 0,          // 0 = joint / public colony
     clearance: 1,
+    nationClearance: 0,
     files: [
         {name:'WEATHER.LOG', type:'log', state:0,
             content:[
@@ -651,9 +716,11 @@ personal cipher key.
 {
     addr: '77.44.19.30',
     name: 'DEIMOS RELAY',
-    motd: '⚠ RESTRICTED NODE ⚠ — Access is monitored by Fleet SIGINT.',
+    motd: '⚠ RESTRICTED SOVIET NODE ⚠ — Access is monitored by Fleet SIGINT. ССКЛ BR-3+ ONLY.',
     latency: 220,
-    clearance: 0,
+    server: 2,
+    clearance: 2,
+    nationClearance: 3,
     files: [
         {name:'DECK_LOG.LOG', type:'log', state:0,
             content:[
@@ -713,10 +780,12 @@ program.
 /* ------------- NODE :: KRAKEN MARE DEEP LISTEN --------------- */
 {
     addr: '89.207.11.4',
-    name: 'KRAKEN MARE DEEP LISTEN',
-    motd: '// TITAN · KRAKEN MARE HYDROPHONE ARRAY. All traffic BR-4 encrypted.',
+    name: 'USSF MISSION INDEX / KRAKEN MARE DEEP LISTEN',
+    motd: '// USSF ORBITAL COMMAND · TITAN · KRAKEN MARE HYDROPHONE ARRAY. All traffic BR-4 encrypted. AMERICAN CLR 3+.',
     latency: 480,
-    clearance: 0,
+    server: 1,
+    clearance: 2,
+    nationClearance: 3,
     files: [
         {name:'DEEP_LISTEN.LOG', type:'log', state:0,
             content:[
@@ -795,13 +864,136 @@ readable at this node.
     ]
 },
 
+/* ------------- NODE :: CNSA TIANGONG COMMAND (Chinese) ------- */
+{
+    addr: '58.14.9.22',
+    name: 'CNSA TIANGONG-VII COMMAND',
+    motd: '// 中华航天局 · TIANGONG-VII ORBITAL COMMAND · 天宫指挥. CN CLR 2+ REQUIRED.',
+    latency: 310,
+    server: 3,
+    clearance: 2,
+    nationClearance: 2,
+    files: [
+        {name:'ROSTER_2189.TXT', type:'txt', state:0,
+            content:
+`天宫-VII COMMAND ROSTER — 1989.03
+================================
+COMMANDER  :: GEN. W. ZHAO       (CN CLR 5 · UIC CLR 4)
+DEPUTY     :: COL. L. CHEN       (CN CLR 4 · UIC CLR 3)
+CHIEF ENG. :: DR. H. LI          (CN CLR 3 · UIC CLR 2)
+FLT SURG.  :: MAJ. Y. WANG       (CN CLR 3 · UIC CLR 2)
+TAIKONAUT  :: LT. R. SUN         (CN CLR 2 · UIC CLR 2)
+`
+        },
+        {name:'MOONBASE_QUEQIAO.TXT', type:'txt', state:0,
+            content:
+`鹊桥 MOONBASE · FAR-SIDE OPERATIONS SUMMARY
+
+Habitat rings 1-3 nominal. Ring 4 pressurization pending.
+Radio-quiet zone maintained; SETI array observing anomaly bearing 041°
+consistent with Kraken Mare hydrophone data (see joint intel share).
+Next launch window: 1989.04.02.
+`
+        },
+        {name:'JOINT_INTEL.LOG', type:'log', state:1, password:'DRAGON RISE',
+            content:[
+                '[INFO] 1989.03.14 :: intel share w/ USSF re: KRAKEN MARE anomaly',
+                '[WARN] 1989.03.14 :: Soviet Fleet declined intel exchange',
+                '[INFO] 1989.03.15 :: signal decoded, glyphic modulation — see annex',
+                '[ERR ] 1989.03.16 :: courier lost between Tiangong and Arcadia',
+                '[WARN] 1989.03.16 :: 5th Bureau flagging Soviet SIGINT intercept',
+            ]
+        },
+        {name:'ANNEX_DRAGON.TXT', type:'txt', state:5, clearance:4,
+            content:
+`ANNEX DRAGON — CNSA INTERNAL
+============================
+The signal beneath the Kraken Mare ice is not Soviet, not American, not ours.
+Response glyph translated by Bureau 5 linguists as a cardinal ordinal.
+Recommendation: propose Sino-American back-channel; exclude Soviet Fleet
+until Director Stein's role in Cosmonaut-07's disappearance is clarified.
+
+— W. ZHAO, GEN. CNSA
+`
+        },
+        {name:'SHIPYARD_JIUQUAN.HEX', type:'hex', state:0,
+            content:'JIUQUAN ORBITAL YARD :: 4 hulls in production · 2 heavy-lift · 1 crewed lunar transfer · status nominal.'
+        },
+    ]
+},
+
+/* ------------- NODE :: USSF ARCADIA (American HQ) ------------ */
+{
+    addr: '148.11.2.19',
+    name: 'USSF ARCADIA COMMAND',
+    motd: '// UNITED STATES SPACE FORCE · ARCADIA PLANITIA CMD · US CLR 3+ REQUIRED.',
+    latency: 120,
+    server: 1,
+    clearance: 2,
+    nationClearance: 3,
+    files: [
+        {name:'ROSTER_APPD.TXT', type:'txt', state:0,
+            content:
+`ARCADIA PLANITIA COMMAND ROSTER — 1989.03
+=========================================
+GEN. CMDR   :: GEN. F. HALSTEAD    (US CLR 5 · UIC CLR 4)
+XO          :: COL. J. MANISTON    (US CLR 4 · UIC CLR 3)
+APPD CHIEF  :: MAJ. D. TORRES      (US CLR 3 · UIC CLR 2)
+FLT SURG.   :: CAPT. E. NGUYEN     (US CLR 3 · UIC CLR 2)
+PILOT       :: LT. K. WEBB         (US CLR 2 · UIC CLR 2)
+`
+        },
+        {name:'MANISTON_ORDERS.TXT', type:'txt', state:1, password:'BLUEHAWK',
+            content:
+`ORDERS — COL. J. MANISTON, XO
+=============================
+FROM :: GEN. HALSTEAD
+TO   :: COL. J. MANISTON
+
+Colonel — the Soviet incident on Deimos is not our problem officially,
+but the intel it points to is. Coordinate with CNSA (channel: DRAGON RISE)
+on the Kraken Mare signal. Under NO circumstances allow Fleet SIGINT
+to intercept our back-channel to Tiangong.
+
+If Stein moves against our people at Hellas, we respond in kind.
+
+— HALSTEAD, GEN. USSF
+`
+        },
+        {name:'APPD_INCIDENT.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.14 :: APPD patrol 3 discovered unclaimed pod, sector 7',
+                '[WARN] 1989.03.14 :: pod ident tag scrubbed — possible Fractured',
+                '[INFO] 1989.03.15 :: forensics recovered partial cipher',
+                '[WARN] 1989.03.15 :: Soviet observer requested access — DENIED',
+                '[INFO] 1989.03.16 :: cipher matched to STEIN personal key',
+            ]
+        },
+        {name:'FLEET_TICKLE.TXT', type:'txt', state:5, clearance:4,
+            content:
+`CLASSIFIED — USSF OFFICE OF NAVAL INTEL
+========================================
+Ongoing collection on Soviet Director K. STEIN.
+Pattern: three unattributed transfers to Fractured accounts.
+Amounts: $4.1M, $2.7M, $6.9M interstellar credits.
+Recommendation: prepare a leak package. Escrow with Foundation.
+`
+        },
+        {name:'PATCH_2019.HEX', type:'hex', state:0,
+            content:'USSF NETWORK PATCH 2019 :: IPv7 rollout complete for arcadia-net · legacy IPv6 sunset 1989.04.'
+        },
+    ]
+},
+
 /* ------------- NODE :: FRACTURED FOUNDATION (rogue) ---------- */
 {
     addr: '221.7.7.7',
     name: 'FRACTURED FOUNDATION',
     motd: '// UNSANCTIONED NODE. If you can read this, welcome to the resistance.',
     latency: 940,
+    server: 0,
     clearance: 0,
+    nationClearance: 0,
     files: [
         {name:'MANIFESTO.TXT', type:'txt', state:0,
             content:
@@ -896,31 +1088,126 @@ FLT-CMD  :: Do not let them read the annex.
 
 const $ = id => document.getElementById(id);
 
+/* =====================================================================
+   OPERATOR PROFILES — the login table.
+   Each entry:
+       id          uppercase login used at the terminal
+       display     shown in header bar
+       password    passphrase for that operator
+       nation      1 = American   2 = Soviet   3 = Chinese   0 = neutral
+       uicClr      Universal Interstellar Computers clearance (0..5)
+       nationClr   nation-specific clearance (0..5)
+       role        cosmetic label
+   J.MANISTON is intentionally high-but-not-top (nation 4 / UIC 3).
+   Directors (STEIN, ZHAO, HALSTEAD) sit at the top for their nation.
+===================================================================== */
+const PROFILES = {
+    /* --- Public / neutral --- */
+    'GUEST':      {display:'GUEST',       password:'GUEST',       nation:0, uicClr:0, nationClr:0, role:'PUBLIC OPERATOR'},
+
+    /* --- American (nation = 1) --- */
+    'J.MANISTON': {display:'COL. J.MANISTON', password:'ARCADIA89',   nation:1, uicClr:3, nationClr:4, role:'USSF ARCADIA XO'},
+    'F.HALSTEAD': {display:'GEN. F.HALSTEAD', password:'BLUEEAGLE',   nation:1, uicClr:4, nationClr:5, role:'USSF ARCADIA COMMANDER'},
+    'D.TORRES':   {display:'MAJ. D.TORRES',   password:'REDROCK',     nation:1, uicClr:2, nationClr:3, role:'APPD CHIEF'},
+    'K.WEBB':     {display:'LT. K.WEBB',      password:'JETSTREAM',   nation:1, uicClr:2, nationClr:2, role:'USSF PILOT'},
+
+    /* --- Soviet (nation = 2) --- */
+    'K.STEIN':    {display:'DIR. K.STEIN',    password:'RAVEN1989',   nation:2, uicClr:4, nationClr:5, role:'FLEET DIRECTOR'},
+    'R.VOSS':     {display:'CAPT. R.VOSS',    password:'IRONBIRD',    nation:2, uicClr:3, nationClr:4, role:'FLEET CAPTAIN'},
+    'T.GRISHIN':  {display:'COSM. T.GRISHIN', password:'HOLLOWORBIT', nation:2, uicClr:2, nationClr:3, role:'COSMONAUT-07'},
+    'N.KOVALEV':  {display:'LT. N.KOVALEV',   password:'BALTIC',      nation:2, uicClr:2, nationClr:2, role:'ССКЛ RELAY OFFICER'},
+
+    /* --- Chinese (nation = 3) --- */
+    'W.ZHAO':     {display:'GEN. W.ZHAO',     password:'DRAGONRISE',  nation:3, uicClr:4, nationClr:5, role:'CNSA TIANGONG COMMANDER'},
+    'L.CHEN':     {display:'COL. L.CHEN',     password:'JADEGATE',    nation:3, uicClr:3, nationClr:4, role:'CNSA DEPUTY'},
+    'H.LI':       {display:'DR. H.LI',        password:'LOTUS',       nation:3, uicClr:2, nationClr:3, role:'CNSA CHIEF ENGINEER'},
+    'R.SUN':      {display:'LT. R.SUN',       password:'REDLANTERN',  nation:3, uicClr:2, nationClr:2, role:'TAIKONAUT'},
+};
+
+const NATION_LABEL = {0:'NEUTRAL', 1:'AMERICAN', 2:'SOVIET', 3:'CHINESE'};
+const NATION_CSS   = {0:'',       1:'nation-us',2:'nation-su',3:'nation-cn'};
+
+/* U.I.C. BACKDOOR :: entered in the REQUEST CLEARANCE dialog's "request-from" field.
+   Grants the requested UIC clearance level silently. This is an in-fiction
+   backdoor for the game — nothing "real" happens. */
+const UIC_BACKDOOR = '71440229';
+
 // State the user has accumulated
 const state = {
     node: null,          // currently connected server object
     activeFile: null,    // currently open file
     inventory: new Set(),// collected fragment codes
-    clearance: 0,        // user clearance (elevated by commands / discoveries)
+    clearance: 0,        // UIC clearance
+    nationClr: 0,       // nation-specific clearance
+    nation: 0,          // 0/1/2/3
     user: 'GUEST',
+    profileId: 'GUEST',
+    pendingRequests: [],
 };
+
+/* -------- Login screen -------- */
+const loginUser = $('login-user');
+const loginPass = $('login-pass');
+const loginStatus = $('login-status');
+
+function attemptLogin(){
+    const id = (loginUser.value || '').trim().toUpperCase();
+    const pw = (loginPass.value || '').trim();
+    if(!id || !pw){
+        setStatus(loginStatus, '△ PROFILE ID AND KEY REQUIRED', 'err');
+        return;
+    }
+    const p = PROFILES[id];
+    if(!p || p.password.toUpperCase() !== pw.toUpperCase()){
+        setStatus(loginStatus, '△ AUTHENTICATION FAILED', 'err');
+        return;
+    }
+    state.user      = p.display;
+    state.profileId = id;
+    state.nation    = p.nation;
+    state.clearance = p.uicClr;
+    state.nationClr = p.nationClr;
+    setStatus(loginStatus, '✓ WELCOME, '+p.display+' — '+p.role, 'ok');
+    setTimeout(()=>{
+        $('login-screen').classList.add('hidden');
+        $('connect-screen').classList.remove('hidden');
+        ci.focus();
+        setStatus(cs, '// LOGGED IN AS '+p.display+' — NATION '+NATION_LABEL[p.nation]+' · UIC '+p.uicClr+' · NAT '+p.nationClr+' //', 'ok');
+    }, 550);
+}
+
+$('login-submit').addEventListener('click', attemptLogin);
+loginUser.addEventListener('keydown', e=>{ if(e.key==='Enter'){ loginPass.focus(); } });
+loginPass.addEventListener('keydown', e=>{ if(e.key==='Enter') attemptLogin(); });
+
+function logout(){
+    state.user='GUEST'; state.profileId='GUEST';
+    state.nation=0; state.clearance=0; state.nationClr=0;
+    state.node=null; state.activeFile=null;
+    state.pendingRequests=[];
+    $('session-screen').classList.add('hidden');
+    $('connect-screen').classList.add('hidden');
+    $('login-screen').classList.remove('hidden');
+    loginUser.value=''; loginPass.value=''; loginUser.focus();
+    setStatus(loginStatus, '// SESSION TERMINATED //');
+}
+
+function setStatus(el, msg, cls){
+    el.className = (el.id==='login-status' ? 'cs-status ' : 'cs-status ') + (cls || '');
+    el.textContent = msg;
+}
 
 /* -------- Connect screen -------- */
 $('server-count').textContent = SERVERS.length;
 const ci = $('connect-input');
 const cs = $('connect-status');
 
-function setStatus(el, msg, cls){
-    el.className = 'cs-status ' + (cls || '');
-    el.textContent = msg;
-}
-
 ci.addEventListener('keydown', e=>{
     if(e.key !== 'Enter') return;
     const raw = ci.value.trim().toUpperCase();
     if(!raw) return;
     if(raw === 'HELP'){
-        setStatus(cs, 'COMMANDS :: <IP> · SCAN · HELP · WHOAMI · SUDO <PW>');
+        setStatus(cs, 'COMMANDS :: <IP> · SCAN · HELP · WHOAMI · LOGOUT');
         return;
     }
     if(raw === 'SCAN'){
@@ -928,31 +1215,51 @@ ci.addEventListener('keydown', e=>{
         return;
     }
     if(raw === 'WHOAMI'){
-        setStatus(cs, 'USER :: '+state.user+'  · CLEARANCE :: '+state.clearance);
+        setStatus(cs, 'USER :: '+state.user+' · NATION :: '+NATION_LABEL[state.nation]+' · UIC :: '+state.clearance+' · NAT :: '+state.nationClr);
         return;
     }
-    if(raw.startsWith('SUDO ')){
-        const pw = raw.slice(5).trim();
-        if(pw === 'RAVEN 1989'){ state.clearance = 4; state.user='K.STEIN'; setStatus(cs,'✓ ELEVATED — CLEARANCE 4 (RAVEN)', 'ok'); return; }
-        if(pw === 'WOLF 1989'){ state.clearance = 3; state.user='R.VOSS'; setStatus(cs,'✓ ELEVATED — CLEARANCE 3 (WOLF)', 'ok'); return; }
-        if(pw === 'HALO 1989'){ state.clearance = 2; state.user='T.GRISHIN'; setStatus(cs,'✓ ELEVATED — CLEARANCE 2 (HALO)', 'ok'); return; }
-        setStatus(cs, '△ SUDO REJECTED', 'err');
-        return;
-    }
+    if(raw === 'LOGOUT'){ logout(); return; }
     const addr = raw.toLowerCase();
     const srv = SERVERS.find(s=>s.addr.toLowerCase() === addr);
     if(!srv){
         setStatus(cs, '△ NO ROUTE TO HOST :: '+raw, 'err');
         return;
     }
-    if(srv.clearance && state.clearance < srv.clearance){
-        setStatus(cs, '△ CLEARANCE INSUFFICIENT (need '+srv.clearance+' — you have '+state.clearance+')', 'err');
+    const gate = checkAccess(srv);
+    if(!gate.ok){
+        setStatus(cs, '△ '+gate.reason, 'err');
         return;
     }
     setStatus(cs, '✓ HANDSHAKE... ROUTING... LATENCY '+srv.latency+'ms', 'ok');
     setTimeout(()=>connectTo(srv), Math.min(srv.latency, 800));
 });
-ci.focus();
+// don't auto-focus connect input until login is done
+
+/* Check whether the current profile can enter a given server. */
+function checkAccess(srv){
+    // server === 0 is neutral / open to any nation
+    if(srv.server && srv.server !== state.nation && state.nation !== 0){
+        // A profile belonging to a different nation can attempt access
+        // ONLY if they have SATISFIED the UIC clearance requirement AND
+        // meet a stiff nationClearance threshold. Otherwise blocked.
+        if(state.clearance < (srv.clearance||0) + 1){
+            return {ok:false, reason:'FOREIGN NATION NODE ('+NATION_LABEL[srv.server]+') — INSUFFICIENT UIC CLR ('+state.clearance+'/'+((srv.clearance||0)+1)+')'};
+        }
+    }
+    if(srv.server === 0 && state.nation !== 0){
+        // neutral servers open
+    }
+    if((srv.clearance||0) > state.clearance){
+        return {ok:false, reason:'UIC CLR INSUFFICIENT (need '+srv.clearance+' — you have '+state.clearance+')'};
+    }
+    // National clearance only enforced when profile is of the same nation OR the node is that nation's
+    if((srv.nationClearance||0) > 0 && srv.server && srv.server === state.nation){
+        if(state.nationClr < srv.nationClearance){
+            return {ok:false, reason:NATION_LABEL[srv.server]+' CLR INSUFFICIENT (need '+srv.nationClearance+' — you have '+state.nationClr+')'};
+        }
+    }
+    return {ok:true};
+}
 
 /* -------- Connect / disconnect a node -------- */
 function connectTo(srv){
@@ -963,7 +1270,10 @@ function connectTo(srv){
     $('nb-addr').textContent = srv.addr;
     $('nb-name').textContent = srv.name;
     $('nb-latency').textContent = srv.latency + ' ms';
-    $('nb-user').textContent = state.user + ' · CLR ' + state.clearance;
+    $('nb-user').textContent = state.user + ' · UIC ' + state.clearance;
+    const natEl = $('nb-nation');
+    natEl.className = 'tag ' + (NATION_CSS[state.nation]||'');
+    natEl.textContent = NATION_LABEL[state.nation] + ' · NAT ' + state.nationClr;
     $('motd').textContent = srv.motd || '';
     $('dir-count').textContent = srv.files.length + ' FILES';
     renderFileList();
@@ -1285,7 +1595,8 @@ function handleCommand(raw){
             termWrite('  DC                 disconnect and return to router');
             termWrite('  FRAGMENTS          show shard inventory');
             termWrite('  WHOAMI             show user + clearance');
-            termWrite('  SUDO <pw>          elevate clearance');
+            termWrite('  REQUEST            open clearance request panel');
+            termWrite('  LOGOUT             end session, back to login');
             termWrite('  CLEAR              clear terminal');
             break;
         case 'LS':
@@ -1316,23 +1627,90 @@ function handleCommand(raw){
         }
         case 'DC': disconnect(); break;
         case 'FRAGMENTS': showFragments(); break;
-        case 'WHOAMI': termWrite('USER='+state.user+' · CLR='+state.clearance+' · SHARDS='+[...state.inventory].join(',')); break;
-        case 'SUDO': {
-            const pw = rest.toUpperCase();
-            if(pw==='RAVEN 1989'){ state.clearance=4; state.user='K.STEIN'; termWrite('✓ ELEVATED — CLR 4 (RAVEN)','ok'); refreshBar(); break; }
-            if(pw==='WOLF 1989'){  state.clearance=3; state.user='R.VOSS';  termWrite('✓ ELEVATED — CLR 3 (WOLF)','ok');  refreshBar(); break; }
-            if(pw==='HALO 1989'){  state.clearance=2; state.user='T.GRISHIN';termWrite('✓ ELEVATED — CLR 2 (HALO)','ok');  refreshBar(); break; }
-            termWrite('△ SUDO REJECTED','err');
-            break;
-        }
+        case 'WHOAMI': termWrite('USER='+state.user+' · NATION='+NATION_LABEL[state.nation]+' · UIC='+state.clearance+' · NAT='+state.nationClr+' · SHARDS='+[...state.inventory].join(',')); break;
+        case 'REQUEST': showRequestOverlay(); break;
+        case 'LOGOUT': logout(); break;
         case 'CLEAR': termScroll.innerHTML=''; break;
         default: termWrite('△ UNKNOWN COMMAND — TYPE HELP','err');
     }
 }
 
 function refreshBar(){
-    $('nb-user').textContent = state.user + ' · CLR ' + state.clearance;
+    $('nb-user').textContent = state.user + ' · UIC ' + state.clearance;
+    const natEl = $('nb-nation');
+    if(natEl){
+        natEl.className = 'tag ' + (NATION_CSS[state.nation]||'');
+        natEl.textContent = NATION_LABEL[state.nation] + ' · NAT ' + state.nationClr;
+    }
 }
+
+/* -------- Clearance request overlay --------
+   Normally files a "pending" request (informational only — in-fiction).
+   BUT: if the "REQUEST FROM" field is set to the UIC backdoor number,
+   the requested UIC clearance level is granted silently. */
+function showRequestOverlay(){
+    let existing = document.getElementById('req-overlay');
+    if(existing) existing.remove();
+    const ov = document.createElement('div');
+    ov.id = 'req-overlay';
+    ov.innerHTML = `
+        <div class="box">
+            <button class="close">CLOSE ×</button>
+            <h2>▸ REQUEST HIGHER CLEARANCE</h2>
+            <label>REQUEST FROM (name or authority ID)</label>
+            <input id="req-from" placeholder="e.g. DIR. K.STEIN"/>
+            <label>REQUESTED UIC CLEARANCE (0-5)</label>
+            <select id="req-level">
+                <option value="1">1 — BASIC</option>
+                <option value="2">2 — RESTRICTED</option>
+                <option value="3" selected>3 — CONFIDENTIAL</option>
+                <option value="4">4 — SECRET</option>
+                <option value="5">5 — DIRECTORATE</option>
+            </select>
+            <label>JUSTIFICATION (optional)</label>
+            <input id="req-reason" placeholder="e.g. audit of shipping manifest 44-CHARLIE"/>
+            <div class="actions">
+                <button id="req-submit">▸ SUBMIT REQUEST</button>
+            </div>
+            <div class="req-status" id="req-status">// awaiting submission //</div>
+            <div class="note">
+                Standard requests are queued for the named authority's review — no immediate effect. Pending requests can be reviewed by the U.I.C. Office of Clearance.
+            </div>
+        </div>
+    `;
+    document.body.appendChild(ov);
+    const status = ov.querySelector('#req-status');
+    ov.querySelector('.close').addEventListener('click', ()=>ov.remove());
+    ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+    ov.querySelector('#req-submit').addEventListener('click', ()=>{
+        const fromRaw = ov.querySelector('#req-from').value.trim();
+        const from = fromRaw.toUpperCase();
+        const lvl = parseInt(ov.querySelector('#req-level').value, 10);
+        const reason = ov.querySelector('#req-reason').value.trim();
+        if(!from){
+            status.className='req-status err';
+            status.textContent='△ REQUEST FROM FIELD REQUIRED';
+            return;
+        }
+        // Backdoor: the "from" field is the numeric UIC backdoor.
+        if(fromRaw.replace(/[^0-9]/g,'') === UIC_BACKDOOR){
+            state.clearance = Math.max(state.clearance, lvl);
+            refreshBar();
+            status.className='req-status ok';
+            status.textContent='✓ UIC OFFICE OVERRIDE ACCEPTED — UIC CLR SET TO '+lvl;
+            termWrite('◆ UIC OFFICE OVERRIDE — clearance set to '+lvl, 'ok');
+            return;
+        }
+        // Otherwise: normal pending request.
+        state.pendingRequests.push({from:fromRaw, level:lvl, reason, ts:new Date().toISOString()});
+        status.className='req-status ok';
+        status.textContent='✓ REQUEST QUEUED — pending review by '+fromRaw+' (level '+lvl+')';
+        termWrite('▸ REQUEST QUEUED :: from='+fromRaw+' level='+lvl, 'info');
+    });
+    ov.querySelector('#req-from').focus();
+}
+$('btn-request').addEventListener('click', showRequestOverlay);
+$('btn-logout').addEventListener('click', logout);
 
 /* -------- Fragment inventory overlay -------- */
 function showFragments(){
@@ -1393,6 +1771,7 @@ function hexDump(str){
 $('btn-terminal').addEventListener('click', ()=>{ window.location.href='terminal.html'; });
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
