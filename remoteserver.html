@@ -372,87 +372,81 @@ const SERVERS = [
 /* ------------- NODE :: SUPPLY DEPOT (start here) ------------- */
 {
     addr: '10.0.0.1',
-    name: 'UIC PUBLIC INDEX',
-    motd: '// Welcome to the UIC public index node. Files here are declassified.\n// For deeper access, connect to Fleet-side nodes with proper clearance.',
+    name: 'U.I.C. PUBLIC INDEX',
+    motd: '// Welcome to the U.I.C. public index node..\n// Access to both Soviet, American, and Chinese systems is dependent on U.I.C. clearence access and nationality clearance.',
     latency: 24,
     clearance: 0,
     files: [
         {name:'README.TXT', type:'txt', state:0,
             content:
-`UIC PUBLIC INDEX NODE 10.0.0.1
+`U.I.C. PUBLIC INDEX NODE 10.0.0.1
 ================================
 
 Welcome, operator.
 
-This is a public information node for the Union of Iron Colonies.
-Only unclassified material is hosted here.  For deeper archives,
-use the KNOWN NODES section below or type SCAN in the terminal.
+This is a public information node created and upheld by Universal Interstellar Computers to provide access and interplanetary communication
+Only public material is hosted here.  To find a specific server,
+you must know said server IPv7 or IPv8 address. IPv5 and IPv6 addresses are officially depricated. If you are using these addresses please request an updated address for your server.
 
 KNOWN NODES:
-    23.117.44.9    FLEET LOGISTICS CACHE
-    198.53.44.7    HELLAS BASIN OUTPOST
-    77.44.19.30    DEIMOS RELAY (RESTRICTED)
-    89.207.11.4    KRAKEN MARE DEEP LISTEN
-    221.7.7.7      FRACTURED FOUNDATION (UNSANCTIONED)
+    23.117.44.9    SOVIET SHIP ROSTER
+    198.53.44.7    MARS ARCADIA SETTLEMENT
+    77.44.19.30    DEIMOS & PHOBOS MAGNETOSPHERE SITES
+    89.207.11.4    PUBLIC USA MISSION INDEX
+    221.7.7.7      
 
 Standard commands: HELP, LS, CAT <file>, OPEN <file>, DC.
 `
         },
-        {name:'FLEET.TXT', type:'txt', state:0,
+        {name:'RELAY.TXT', type:'txt', state:0,
             content:
-`UIC FLEET COMPOSITION — PUBLIC ROSTER
+`U.I.C. Communication Relay — PUBLIC ROSTER
 
-Class I  — IRONHAWK  · escort frigate  · 8 ships in service
-Class II — IRONBIRD  · troop lifter    · 14 ships in service
-Class III — VAULT    · cargo hauler    · 3 ships in service
-Class IV — MEDEVAC   · med transport   · 2 ships in service
-Class V  — BLACKBIRD · covert insert   · [REDACTED]
+EARTH TO MARS · E-M-NETWORK ·  88 Relays currently in Mars-Sun L4-L5 points and Earth-Sun L4-L5 points · Status: Connection Nominal
+VENUS TO EARTH · E-V-NETWORK · 78 Relays currently in Venus-Sun L1-L2 points and 57 in Venus-Sun L4-L5 points · Status: Connection Nominal
+MERCURY TO EARTH · E-M-NETWORK · 57 Relays in Venus-Sun L4-L5 points, for optimal connection and minimal relay failure · Status: Connection Nominal
+JUPITER TO EARTH · E-J-NETWORK · 17 Relays currently in Jupiter-Sun L4-L5 points · Status: Connection Nominal, Network deployment in progress
+SATURN TO EARTH · E-S-NETWORK · 7 Relays currently in Saturn-Sun L4-L5 points · Status: Connection offline, Network deployment in development and progress
 `
         },
         {name:'GLOSSARY.TXT', type:'txt', state:0,
             content:
-`UIC GLOSSARY (PUBLIC)
+`U.I.C. GLOSSARY (PUBLIC)
 
-Bravo-4         classified traffic clearance
-Cosmonaut       any UIC deep-space specialist
-CRT             cathode-ray terminal (this device)
-DELTA-V         maneuver budget in m/s
-HELLAS          primary Mars settlement basin
-IRONWORK        colloquial for Union armed forces
-KRAKEN MARE     methane sea on Titan
-SIGINT          signal intelligence
-UIC             Union of Iron Colonies
+
+Welcome all Astronauts, Cosmonauts, Taikonauts, or any other personal joining interplanetary operations. This is a basic glossary to settle into your new future.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+U.I.C.         Universal Interstellar Computers
+USSF           United States Space Force
+ССКЛ (SSKL)    Soviet Union Space Command
+Kretchet-MKV   Soviet's most recent Kretchet space suit, MKV (Modified Computer, Venetian) capable of withstanding the surface pressure, heat, and acidity of Venus
+Arcadia        Primary Mars Settlement
+FIV            The Soviet Venus settlement, the Floating Islands of Venus (FIV)
 `
         },
         {name:'RECRUITMENT.TXT', type:'txt', state:0,
             content:
-`>>> IRON RECRUITMENT — POSTED 1989.02.14 <<<
+`>>> United States Extraterrestrial Recruitments — POSTED 1989.02.14 <<<
 
-We are hiring:
-    - Marine riflemen (Terran-born, 3G tolerant)
-    - Reactor techs (grade 4+ certification)
-    - Cryobot operators (any prior deep-sea experience welcome)
-    - Comms operators (Bravo-4 clearance eligible)
+Want to explore beyond the earth? NASA and the USSF are hiring:
+    - Arcadia Planitia Police Department (APPD) - Must be capable of managing 3-4 G's, and previous police or military experience
 
 Contact: recruitment@uic.iron
-Or visit any Fleet office in Hellas Basin.
-Bonus: 12,000 Kx signing for combat trades.
+Or visit any Federal Government building
+Bonus: $12,000  signing for combat trades.
 `
         },
         {name:'PATCH_NOTES.LOG', type:'log', state:0,
             content:[
                 '[INFO] 1989.03.11 :: crawlspace v0.4.8 → v0.4.9 rolled to public',
                 '[INFO] added: node discovery via SCAN keyword',
-                '[INFO] added: fragment inventory (see FRAGMENTS button)',
-                '[WARN] deprecated: legacy password hash format (do not use)',
-                '[INFO] Bravo-4 traffic now routed through backup 89.207.11.4',
-                '[ERR ] failed to reach 221.7.7.7 (blocked by fleet gateway)',
-                '[INFO] index rebuilt — 5 nodes visible from public tier',
+                '[INFO] added: fragment system (Developer note: We kept having issues where the light transmissions would mis fire and send fragmented files. Until we can fix the misfiring issue we are implementing this as a temporary fix) (see FRAGMENTS button)',
+                '[WARN] deprecated: legacy password hash format (do not use, will cause computer crash)',
+                '[INFO] Mission Index is now routed to the updated IPv7 address, 89.207.11.4',
+                '[ERR ] failed to reach 221.7.7.7 (Relay misfiring issue, attempting to mitigate )',
+                '[INFO] index rebuilt — 5 nodes visible from public tier. (Developer Note: This is incorrect, the public index should be in the 100s. Bulk address updating has had multiple issues, and for some reason isnt being detected by the index)',
             ]
-        },
-        {name:'PROMO_TRAILER.VID', type:'video', state:0,
-            src:'https://www.youtube.com/embed/dQw4w9WgXcQ',
-            caption:'// UIC recruitment promo — 1989 edit — 2:14'
         },
     ]
 },
