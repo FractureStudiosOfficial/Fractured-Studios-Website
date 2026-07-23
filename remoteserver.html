@@ -449,12 +449,10 @@ Only public material is hosted here.  To find a specific server, you must know s
 (Note. The public address index is currently not fully integrated, minimal address's found.)
 
 KNOWN NODES:
-    23.117.44.9    SOVIET SHIP ROSTER          [SERVER 2 · SOV]
-    198.53.44.7    MARS ARCADIA SETTLEMENT     [SERVER 0 · JOINT]
-    77.44.19.30    DEIMOS & PHOBOS RELAY       [SERVER 2 · SOV]
-    89.207.11.4    USSF MISSION INDEX / TITAN  [SERVER 1 · USA]
-    148.11.2.19    USSF ARCADIA COMMAND        [SERVER 1 · USA]
-    58.14.9.22     CNSA TIANGONG-VII COMMAND   [SERVER 3 · CHN]
+    23.117.44.9    SOVIET SHIP ROSTER
+    198.53.44.7    MARS ARCADIA SETTLEMENT
+    77.44.19.30    DEIMOS & PHOBOS MAGNETOSPHERE SITES
+    89.207.11.4    PUBLIC USA MISSION INDEX
     221.7.7.7
 
 Standard commands: HELP, LS, CAT <file>, OPEN <file>, DC.
@@ -518,559 +516,513 @@ Bonus: $12,000  signing for combat trades.
     ]
 },
 
-/* ------------- NODE :: FLEET LOGISTICS CACHE ----------------- */
+/* ------------- NODE :: UIC RELAY OPS (comms company) --------- */
 {
-    addr: '23.117.44.9',
-    name: 'Soviet Ship Roster',
-    motd: '// СOВETСКИЙ FLEET LOGISTICS SUB-NET. All access is logged. Clearance BR-2+ recommended.',
-    latency: 62,
-    server: 2,          // 2 = Soviet server
-    clearance: 1,
-    nationClearance: 2,
-    files: [
-        {name:'MANIFEST_44C.TXT', type:'txt', state:0,
-            content:
-`MANIFEST 44-CHARLIE (SEALED)
-Origin :: CERES SUB-BELT ALPHA
-Destination :: MARS FLEET, HELLAS DOCK 12
-Custody Seal :: BRAVO-NINE-NINE
-
-    - 12.4t  refined copper billet
-    - 8.1t   tantalum (grade A)
-    - 1x     crate S-114  [CONTENTS CLASSIFIED — DO NOT OPEN]
-    - 4x     medical kits, standard
-    - 900L   nitrogen tetroxide (fuel)
-
-Ref: shipping order QF-441-2C-89.
-`
-        },
-        {name:'FUEL_CONSUMPTION.LOG', type:'log', state:0,
-            content:[
-                '[INFO] burn 891A — LEO circularization — 340 m/s',
-                '[INFO] burn 891B — trans-Mars injection — 3610 m/s',
-                '[WARN] mass ratio near vehicle limit — reserve 6%',
-                '[INFO] burn 891C — mid-course correction — 22 m/s',
-                '[INFO] arrival — Mars orbit capture — 720 m/s',
-                '[INFO] TOTAL BUDGET USED :: 4692 m/s',
-                '[INFO] TOTAL BUDGET RESERVE :: 380 m/s',
-            ]
-        },
-        {name:'CREW_ROSTER.DOSSIER', type:'dossier', state:1, password:'IRONBIRD',
-            data:{
-                title:'PERSONNEL DOSSIER — CAPT. R. VOSS',
-                fields:{
-                    'CALLSIGN'   : 'IRONBIRD-04 · MASTER',
-                    'RANK'       : 'CAPTAIN (O-6)',
-                    'D.O.B.'     : '1954-04-19',
-                    'BIRTHPLACE' : 'BASTOGNE, TERRAN EARTH',
-                    'CLEARANCE'  : 'BRAVO-3',
-                    'DEPLOY'     : 'MARS FRONT, ROTATION 14',
-                    'STATUS'     : 'ACTIVE',
-                },
-                body:
-`Captain Voss is a career line officer with combat experience in the
-Belt Insurgency (1979–1983) and the Ganymede Blockade (1984).  He is
-qualified on IRONHAWK, IRONBIRD, and Class-V (waivered).  Voss has
-been recommended for promotion to O-7 pending completion of his
-current Mars rotation.  See annex II for medical psychiatric.
-
-Note: Voss has requested transfer to the ██████████ program on
-three separate occasions.  All requests denied per Fleet directive
-89-DELTA-3.  Voss is unaware his transfer requests are being
-reviewed by ██████████████████████.  See annex IV.`,
-            }
-        },
-        {name:'SHIPYARD.HEX', type:'hex', state:0,
-            content:'SHIPYARD BUILD RECORD 1989.03.14 :: 12 hulls active :: 3 pending :: 1 QUARANTINE HOLD.'
-        },
-        {name:'CRATE_S114.TXT', type:'txt', state:5, clearance:3,
-            content:
-`CRATE S-114 :: TRUE CONTENTS
-============================
-1x titanium canister, sealed  (radiotracers detected)
-1x fragment recovered from KRAKEN MARE — mass 4.4kg
-1x hand-annotated notebook, author COSMONAUT-07
-
-Handling:  full biohazard III.  Refuse dockworkers access.
-Consignment override authorized by DIRECTOR STEIN personally.`
-        },
-        {name:'DEPOT_MAP.IMG', type:'ascii', state:0,
-            content:
-`  +——————————————————————————————————————+
-  |  DOCK-01 [IRONBIRD-04]   |  DOCK-02  |
-  |==========================|===========|
-  |  FUEL LOX      FUEL LH2  |  CRATES   |
-  |    []            []      |  [S-114]* |
-  |==========================|===========|
-  |  DOCK-03 [pending]       |  BAY-A    |
-  |==========================|===========|
-  |  CATWALK    ~~~~~~~~     |  ELV-1    |
-  +——————————————————————————————————————+
-                                * QUARANTINE`
-        },
-    ]
-},
-
-/* ------------- NODE :: HELLAS BASIN OUTPOST ------------------ */
-{
-    addr: '198.53.44.7',
-    name: 'HELLAS BASIN OUTPOST',
-    motd: '// Hellas Basin surface node — joint Arcadia settlement. Sandstorm advisory in effect. Comm windows 04:00-06:00 UTC.',
-    latency: 148,
-    server: 0,          // 0 = joint / public colony
+    addr: '12.4.88.1',
+    name: 'U.I.C. RELAY OPS',
+    motd: '// Universal Interstellar Computers · relay operations backbone. Nominal traffic.',
+    latency: 40,
+    server: 0,
     clearance: 1,
     nationClearance: 0,
     files: [
-        {name:'WEATHER.LOG', type:'log', state:0,
+        {name:'RELAY_STATUS.LOG', type:'log', state:0,
             content:[
-                '[INFO] 1989.03.14 05:00 :: dust density 0.82 tau, wind 32 km/h N',
-                '[INFO] 1989.03.14 08:00 :: dust density 1.10 tau, wind 44 km/h NE',
-                '[WARN] cyclonic system tracking NE — visibility 3 km',
-                '[WARN] surface EVA holds recommended after 14:00',
-                '[INFO] 1989.03.14 20:00 :: storm at Amenthes crossing east limb',
-                '[ERR ] anemometer at outpost-3 has failed — replaced 21:14',
-                '[INFO] 1989.03.15 04:00 :: cleared, dust 0.5 tau, wind 12 km/h',
+                '[INFO] Earth-Sun L4 relay cluster :: 44 nodes online, 0 in maintenance',
+                '[INFO] Mars-Sun L5 relay cluster :: 41 nodes online, 3 rotating out',
+                '[INFO] Venus-Sun L1 relay cluster :: 40 nodes online, 2 attitude drift',
+                '[WARN] Jupiter-Sun L4 :: 15/17 nodes — 2 offline pending replacement',
+                '[INFO] mean round-trip Earth<->Mars :: 6.3 min (nominal)',
+                '[INFO] mean round-trip Earth<->Venus :: 4.1 min (nominal)',
+                '[WARN] Saturn cluster :: still under deployment. Do not route production traffic.',
             ]
         },
-        {name:'FIELD_REPORT.TXT', type:'txt', state:0,
+        {name:'PRICING_PUBLIC.TXT', type:'txt', state:0,
             content:
-`HELLAS OUTPOST — FIELD REPORT
+`U.I.C. STANDARD SERVICE TIERS
+=============================
+TIER 1 — RESIDENTIAL   :: text + voice, best-effort routing
+TIER 2 — COMMERCIAL    :: guaranteed bandwidth, file transfer
+TIER 3 — INSTITUTIONAL :: leased channel, SLA 99.5%
+TIER 4 — GOVERNMENT    :: dedicated relay pair, custody logs
+TIER 5 — DIRECTORATE   :: point-to-point, no intermediate cache
 
-Habitat rings A, B, and C nominal.
-Ring D ventilation lag persists — under investigation.
-Greenhouse yield down 8% this cycle due to solar filter aging.
-Two new personnel arrived on IRONBIRD-04 rotation.
-Body count from Site FRONT-ONE incident: 3 confirmed.
-Requesting additional medical from Fleet on next window.
+Contact any U.I.C. field office for provisioning. All tiers subject
+to interplanetary delay; U.I.C. does not warrant against speed of light.
 `
         },
-        {name:'COSMONAUT07_LOG.TXT', type:'txt', state:1, password:'HOLLOW ORBIT',
+        {name:'FIELD_CREW_ROSTER.TXT', type:'txt', state:1, password:'HEAVISIDE',
             content:
-`FIELD JOURNAL — COSMONAUT-07 (T. GRISHIN)
-=========================================
-ENTRY 41
-    Descent bore reached 11.4 km on Europa cryo mission.  Signal from
-    beneath the ice is not natural.  Pattern repeats every 23 minutes.
-    Not a periodicity of any known geologic process.
+`U.I.C. FIELD CREW — L4/L5 ROTATION 1989.Q1
+==========================================
+CREW-01 EARTH-SUN L4   :: LEAD ENG. R. OKAFOR      · shift A
+CREW-02 EARTH-SUN L5   :: LEAD ENG. P. LINDQVIST   · shift B
+CREW-07 MARS-SUN L4    :: LEAD ENG. D. AMARO       · shift A
+CREW-11 VENUS-SUN L1   :: LEAD ENG. J. MANISTON *  · seconded
+CREW-14 JUPITER-SUN L4 :: LEAD ENG. S. AL-RASHID   · shift A
 
-ENTRY 44
-    The pattern responded to our sonar ping.  Repeat: it RESPONDED.
-    I have logged this at three separate frequencies.  Confirmation
-    beyond doubt.  Command has told me to cease and desist.  I have
-    not.
-
-ENTRY 51
-    They pulled me out.  I don't understand.  I'm on Deimos now,
-    waiting for a black flight home.  The bore is sealed.
-
-ENTRY 54
-    Someone was in my quarters.  My journal was moved.  I hid this
-    disk in the maintenance duct.  If you're reading this — good.
-    They are burying Kraken Mare, and they don't want anyone to
-    know what's beneath the ice.
-
-    — T.G., 1989.03.15
+* J. Maniston is on academic secondment from the Venetian
+  Mass Driver Project. He rotates back to FIV-3 on 1989.04.10.
 `
         },
-        {name:'GRAINYPHOTO.IMG', type:'image', state:0,
-            src:'data:image/svg+xml;utf8,' + encodeURIComponent(
-                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 400'>
-                    <defs>
-                        <radialGradient id='sky' cx='50%' cy='30%' r='70%'>
-                            <stop offset='0%' stop-color='#3a1c05'/>
-                            <stop offset='100%' stop-color='#0d0602'/>
-                        </radialGradient>
-                    </defs>
-                    <rect width='100%' height='100%' fill='url(#sky)'/>
-                    <path d='M0 260 Q160 220 320 240 T640 235 L640 400 L0 400 Z' fill='#5c2a10'/>
-                    <path d='M0 300 Q160 270 320 290 T640 285 L640 400 L0 400 Z' fill='#3d1b08'/>
-                    <circle cx='120' cy='120' r='30' fill='#c96b2f' opacity='.7'/>
-                    <rect x='250' y='210' width='120' height='60' fill='#1a0c04' stroke='#c96b2f'/>
-                    <rect x='260' y='220' width='20' height='20' fill='#ff9f07' opacity='.7'/>
-                    <rect x='290' y='220' width='20' height='20' fill='#ff9f07' opacity='.4'/>
-                    <rect x='320' y='220' width='20' height='20' fill='#ff9f07' opacity='.7'/>
-                    <path d='M370 230 L440 240 L440 260 L370 250 Z' fill='#c96b2f'/>
-                    <text x='320' y='390' text-anchor='middle' font-family='monospace' font-size='11' fill='#ffb14a' opacity='.7'>HELLAS BASIN · HABITAT RING C · 1989.03.14</text>
-                </svg>`
-            ),
-            caption:'// HELLAS BASIN — HABITAT RING C — 1989.03.14 · digital exposure'
+        {name:'RELAY_HARDWARE.HEX', type:'hex', state:0,
+            content:'U.I.C. RELAY MK-VII :: 2.4m parabolic · 40W X-band uplink · 4x phased-array downlink · onboard buffer 128GB · sun-shield MLI 22 layer.'
         },
-        {name:'AIR_QUALITY.HEX', type:'hex', state:0,
-            content:'O2 20.8% N2 78.1% Ar 0.9% CO2 0.04% NOTE: trace methane 12ppb near ring D vent (source unknown).'
-        },
-        {name:'SHARD_A.FRAG', type:'frag', state:0,
-            code:'A',
-            fragTitle:'SHARD A — HELLAS OUTPOST',
-            content:
-`SHARD A of 3 — recovered from Hellas Basin outpost.
-Passphrase glyph :: HOLLOW
+    ]
+},
 
-Combine with SHARD B and SHARD C to reveal DIRECTOR STEIN'S
-personal cipher key.
+/* ------------- NODE :: FIV-3 VENUS (Maniston work node) ------ */
+{
+    addr: '198.53.44.7',
+    name: 'FIV-3 :: FLOATING ISLAND VENUS 3',
+    motd: '// FIV-3 · Floating Island of Venus, atmospheric station · 54 km altitude · Venetian Mass Driver Project.',
+    latency: 148,
+    server: 0,
+    clearance: 1,
+    nationClearance: 0,
+    files: [
+        {name:'READ_ME_FIRST.TXT', type:'txt', state:0,
+            content:
+`FIV-3 STATION README
+====================
+Welcome to Floating Island Venus 3.
+
+FIV-3 is the third pressurized aerostat in the FIV chain, riding the
+50-54km cloud deck where Venusian atmospheric pressure and temperature
+are Earth-like. Envelope is nitrogen/oxygen at ambient (breathable
+gas is lift gas — no separate lifting cell needed).
+
+FIV-3 is a joint Soviet-anchored civil station under U.I.C. neutral
+telecom coverage. Do NOT open the outer hull. Do NOT untether from
+the ropes without a supervisor sign-off.
+
+    - Envelope pressure    :: 100.4 kPa
+    - Envelope temperature :: 24.1 C
+    - Outside temperature  :: 68 C (nominal for this altitude)
+    - Outside pressure     :: 101 kPa
+    - Sulfuric acid PPM    :: 42 (within Kretchet-MKV tolerance)
+`
+        },
+        {name:'ROPE_NETWORK.TXT', type:'txt', state:0,
+            content:
+`THE ROPES — FIV INTER-STATION TETHER NETWORK
+============================================
+The Ropes are the shared kevlar-composite tether lines linking FIV-1
+through FIV-5. They carry:
+
+    - two power lines (48 kV DC)
+    - one U.I.C. fiber trunk (128 pair)
+    - one water/waste return
+    - one crew-transit rail (rated 4 personnel / capsule)
+
+Do not clip in to a rope without confirming envelope drift. Rope-3-to-4
+has been slack since the January storm; use rope-2-to-4 as detour.
+
+Rope tension monitors are on channel 4 of the station intercom.
+`
+        },
+        {name:'MASS_DRIVER_BRIEF.TXT', type:'txt', state:0,
+            content:
+`VENETIAN MASS DRIVER PROJECT — PUBLIC BRIEF
+===========================================
+Lead PI      :: DR. JAMES MANISTON
+Co-PI        :: [REDACTED]
+Site         :: FIV-3, north ridge module
+Funding      :: Interagency (US NSF + Soviet AN + private grants)
+
+GOAL
+    Demonstrate a low-power electromagnetic mass driver capable of
+    lifting cargo pods from the FIV altitude into circular Venusian
+    orbit. Long-term, this platform is the FIRST STEP of a proposed
+    Venusian terraforming architecture: bulk-lift atmospheric CO2
+    into space for chemical processing and return the reduced-carbon
+    residue as breathable oxygen.
+
+STATUS
+    Phase 1 (proof of concept, 400kg pod, sub-orbital) complete.
+    Phase 2 (2t pod, circular orbit) scheduled for 1989.Q3.
+
+Public inquiries: mass-driver@fiv3.uic
+`
+        },
+        {name:'MANISTON_LAB_NOTES.TXT', type:'txt', state:1, password:'KRETCHET',
+            content:
+`LAB NOTEBOOK — DR. J. MANISTON — FIV-3
+======================================
+1989.03.02
+    Rail alignment finished on section 4. Sag under thermal load
+    within predicted envelope. Co-PI still off-station; comms
+    routed via U.I.C. TIER-4 to their location (not disclosed).
+
+1989.03.07
+    Sulfuric aerosol infiltration in bay 2. Kretchet-MKV suits
+    handled it. Envelope patch team out for 3 hours.
+
+1989.03.11
+    Pod C-14 test fire nominal. Delta-v 7.05 km/s (predicted 7.02).
+    Co-PI's remote review flagged an armature harmonic at 41 Hz.
+    I don't hear it in my data but they insist. Will re-check.
+
+1989.03.15
+    Co-PI has asked, again, that no photos of them, their location,
+    or their handwriting appear in shared filings. I have complied.
+    They have earned it.
+`
+        },
+        {name:'CO_PI_MEMO.TXT', type:'txt', state:5, clearance:3,
+            content:
+`INTERNAL MEMO — CO-PI CORRESPONDENCE
+====================================
+FROM :: [REDACTED]
+TO   :: J. MANISTON
+
+James —
+
+The armature harmonic at 41 Hz is not instrumental. Check the
+grounding on the return rail. If the harmonic persists after a
+clean re-ground, we have a much bigger problem than a bad sensor.
+
+Do not put this in the shared notebook. I will call you on the
+TIER-4 channel at the usual time.
+
+— [REDACTED]
+`
+        },
+        {name:'FIV3_LAYOUT.IMG', type:'ascii', state:0,
+            content:
+`   FIV-3  ::  top-down schematic  (not to scale)
+
+     +———————————————— ENVELOPE (N2/O2) ————————————————+
+     |                                                    |
+     |  [HAB-A]     [HAB-B]     [MASS DRIVER RAIL]        |
+     |    |           |          =========>               |
+     |    +---- CORRIDOR --------+                        |
+     |                           |                        |
+     |  [GALLEY]   [ENG]      [PAD-C14]  (pod loader)     |
+     |                                                    |
+     +————————————————————————————————————————————————————+
+              |         |         |         |
+           ROPE-2    ROPE-3    ROPE-4    ROPE-5
+             |         |         |         |
+           FIV-2     FIV-2     FIV-4     FIV-5
+                     (slack)`
+        },
+    ]
+},
+
+/* ------------- NODE :: USA LUNAR BASE (Sea of Tranquillity) -- */
+{
+    addr: '89.207.11.4',
+    name: 'BASE TRANQUILLITY :: US LUNAR OUTPOST',
+    motd: '// USA lunar outpost, Sea of Tranquillity. Comm windows continuous via UIC L4 relay pair.',
+    latency: 92,
+    server: 1,
+    clearance: 2,
+    nationClearance: 3,
+    files: [
+        {name:'ROSTER_TRANQ.TXT', type:'txt', state:0,
+            content:
+`BASE TRANQUILLITY :: ROSTER 1989.03
+===================================
+CMDR      :: COL. F. HALSTEAD    (US CLR 4 · UIC CLR 4)
+XO        :: MAJ. E. NGUYEN      (US CLR 4 · UIC CLR 3)
+CHIEF ENG :: DR. K. WEBB         (US CLR 3 · UIC CLR 2)
+FLT SURG. :: MAJ. D. TORRES      (US CLR 3 · UIC CLR 2)
+CIV. LIAISON :: DR. J. MANISTON  (guest, transient)
+`
+        },
+        {name:'ORION_DEPARTURES.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.02 :: ORION-VII departed Tranq. pad B — dest. Europa (long-haul)',
+                '[INFO] 1989.03.02 :: pulse count 214 / no anomalies / cargo manifest sealed',
+                '[INFO] 1989.03.14 :: ORION-VIII stacked at pad B — dest. Europa, launch 1989.04.03',
+                '[WARN] 1989.03.14 :: seismograph note — pad B shows anomalous return echo, no cause found',
+                '[INFO] 1989.03.15 :: pulse-plate refurbishment on ORION-V complete',
+            ]
+        },
+        {name:'ORION_BRIEF.TXT', type:'txt', state:0,
+            content:
+`ORION DRIVE — OPERATIONAL BRIEF (unclassified)
+==============================================
+The Orion-class heavy pusher uses sequential low-yield fission
+pulse charges detonated against a pusher plate. Ejected mass
+provides delta-v of 30-40 km/s over a mission, enabling direct
+trajectories to the outer moons in weeks rather than months.
+
+Launched exclusively from the far side of the Moon or from lunar
+pads with a Van Allen-lee trajectory to keep fallout off Earth.
+`
+        },
+        {name:'PAD_B_ANOMALY.TXT', type:'txt', state:1, password:'PUSHER PLATE',
+            content:
+`INCIDENT REPORT — PAD B SEISMIC ECHO
+====================================
+DATE :: 1989.03.14
+AUTHOR :: DR. K. WEBB
+
+Following ORION-VIII stack completion, the pad-B seismograph
+recorded a low-amplitude return pulse ~41 Hz that does not
+match the standard settling profile. The pulse repeats at
+irregular intervals but only when personnel are present on
+the pad.
+
+Rechecked instrumentation twice. Confirmed not a sensor artifact.
+Recommend routing next long-haul telemetry through UIC TIER-4
+until we understand what we are measuring.
+
+— WEBB
+`
+        },
+        {name:'EUROPA_MANIFEST.TXT', type:'txt', state:5, clearance:4,
+            content:
+`ORION-VIII CARGO MANIFEST (SEALED)
+==================================
+Destination :: EUROPA · SITE 2 · sub-surface hab
+Payload mass :: 41.4 t
+
+    - 1x prefab hab shell (18 t)
+    - 4x pressure suits, extended cold rating
+    - 6x deep-ice drill bits, replacement
+    - 2x superconducting magnetometer racks
+    - 1x sealed instrument crate, contents by PI only
+    - 12 mo. crew consumables (4 crew)
+
+Handling :: instrument crate is not to be opened at Tranquillity.
+Custody is transferred at Europa-2 airlock.
+`
+        },
+        {name:'BASE_LAYOUT.IMG', type:'ascii', state:0,
+            content:
+`  BASE TRANQUILLITY (top view)
+
+    [HAB-A]==[HAB-B]==[GALLEY]
+       |                |
+    [MED]            [ENG]
+       |                |
+    [AIRLOCK-1]     [AIRLOCK-2]
+                    /       \\
+              [PAD-A]     [PAD-B]  (Orion stack)
 `
         },
     ]
 },
 
-/* ------------- NODE :: DEIMOS RELAY (RESTRICTED) ------------- */
+/* ------------- NODE :: SOVIET LUNAR BASE (Mare Ingenii) ------ */
 {
-    addr: '77.44.19.30',
-    name: 'DEIMOS RELAY',
-    motd: '⚠ RESTRICTED SOVIET NODE ⚠ — Access is monitored by Fleet SIGINT. ССКЛ BR-3+ ONLY.',
-    latency: 220,
+    addr: '23.117.44.9',
+    name: 'ZVEZDA-3 :: SOVIET LUNAR OUTPOST',
+    motd: '// Советская лунная база · Mare Ingenii · far-side. All incoming traffic UIC-mediated.',
+    latency: 118,
     server: 2,
     clearance: 2,
     nationClearance: 3,
     files: [
-        {name:'DECK_LOG.LOG', type:'log', state:0,
-            content:[
-                '[INFO] 1989.03.15 11:14 :: relay awake — normal traffic',
-                '[INFO] 1989.03.15 11:19 :: intercept from COSMONAUT-07',
-                '[WARN] 1989.03.15 11:20 :: signal loss — cause unknown',
-                '[ERR ] 1989.03.15 11:23 :: bearer 04-alpha lost',
-                '[ERR ] 1989.03.15 11:23 :: COSMONAUT-07 telemetry: NULL',
-                '[INFO] 1989.03.15 11:25 :: SAR profile initiated',
-                '[ERR ] 1989.03.15 11:30 :: fleet override — SAR aborted',
-                '[WARN] 1989.03.15 11:31 :: incident sealed, brief only',
-            ]
-        },
-        {name:'INTERCEPT_1108.AUD', type:'audio', state:0,
-            src:'',   // no external audio — use synthesized/static caption
-            caption:'// AUDIO CORRUPTED — synthesized static · 41 seconds · Cosmonaut-07 final transmission'
-        },
-        {name:'SHARD_B.FRAG', type:'frag', state:2, fragments:['A'],
-            code:'B',
-            fragTitle:'SHARD B — DEIMOS RELAY',
+        {name:'ROSTER_ZVEZDA.TXT', type:'txt', state:0,
             content:
-`SHARD B of 3 — recovered from Deimos Relay archives.
-Passphrase glyph :: ORBIT
-
-Combine with SHARD A and SHARD C.  Together they form the
-Director's personal cipher used on 89.207.11.4.
+`БАЗА ЗВЕЗДА-3 :: ROSTER 1989.03
+================================
+KOMANDIR   :: POLK. K. STEIN        (SU CLR 4 · UIC CLR 4)
+ZAM. KOM.  :: KAP. R. VOSS          (SU CLR 4 · UIC CLR 3)
+ENGINEER   :: LT. N. KOVALEV        (SU CLR 3 · UIC CLR 2)
+DOCTOR     :: KAP. Y. SOROKINA      (SU CLR 3 · UIC CLR 2)
+COSMONAUT  :: LT. T. GRISHIN        (SU CLR 2 · UIC CLR 2)
 `
         },
-        {name:'ORBIT_TRACES.HEX', type:'hex', state:3,
-            content:'Cosmonaut-07 pod: last confirmed pos ██████ ± ██ km — vector ██████ ██████ — mass drop 41.2kg — telemetry cut at ██:██:██ — cause: ██████████ ██████.'
-        },
-        {name:'SAR_MEMO.TXT', type:'txt', state:1, password:'ZERO SEVEN',
-            content:
-`MEMORANDUM — 1989.03.16 — SAR ABORT
-FROM :: DIR. STEIN, OFFICE OF THE DIRECTOR
-TO   :: DEIMOS RELAY, DUTY OFFICER
-
-The search-and-rescue profile for Cosmonaut-07 is HEREBY ABORTED.
-
-Do not initiate further transponder queries.  Do not accept
-inbound traffic on the standard SAR frequencies.  Do not
-attempt to recover the pod.  Any personnel who violate this
-directive will face immediate transfer and full loss of
-clearance.
-
-This decision is FINAL.
-
-The Cosmonaut is now the responsibility of the ██████████████
-program.
-
-— K. STEIN, DIRECTOR
-`
-        },
-    ]
-},
-
-/* ------------- NODE :: KRAKEN MARE DEEP LISTEN --------------- */
-{
-    addr: '89.207.11.4',
-    name: 'USSF MISSION INDEX / KRAKEN MARE DEEP LISTEN',
-    motd: '// USSF ORBITAL COMMAND · TITAN · KRAKEN MARE HYDROPHONE ARRAY. All traffic BR-4 encrypted. AMERICAN CLR 3+.',
-    latency: 480,
-    server: 1,
-    clearance: 2,
-    nationClearance: 3,
-    files: [
-        {name:'DEEP_LISTEN.LOG', type:'log', state:0,
+        {name:'FUEL_INVENTORY.LOG', type:'log', state:0,
             content:[
-                '[INFO] 1989.03.15 05:32 :: array online, 6 hydrophones nominal',
-                '[WARN] 1989.03.15 05:55 :: anomalous return, quadrant 9',
-                '[WARN] 1989.03.15 06:18 :: same return, 23m interval — repeats',
-                '[INFO] 1989.03.15 06:41 :: cross-referenced with Cosmonaut-07 log',
-                '[ERR ] 1989.03.15 07:04 :: HP-3 offline — reason unknown',
-                '[ERR ] 1989.03.15 07:04 :: HP-5 offline — reason unknown',
-                '[WARN] 1989.03.15 07:12 :: something is beneath the array',
-                '[INFO] 1989.03.15 07:23 :: sending distress on band SIX',
+                '[INFO] LH2 reserve :: 82.4 t (nominal)',
+                '[INFO] LOX reserve :: 411 t (nominal)',
+                '[INFO] Orion pulse units :: 214 stored (rated far-side launch only)',
+                '[WARN] pulse unit storage vault :: humidity 62% — desiccant scheduled',
+                '[INFO] Kretchet-MKIV suits :: 12 serviceable, 2 in refurb',
             ]
         },
-        {name:'ANNEX_III.TXT', type:'txt', state:2, fragments:['A','B','C'],
+        {name:'ORION_ZVEZDA.TXT', type:'txt', state:0,
             content:
-`ANNEX III — DIRECTOR STEIN'S PRIVATE ADDENDUM
-=============================================
-The findings of the Cosmonaut-07 team are confirmed.
-The signal beneath the Kraken Mare ice is NOT of any origin
-catalogued by the Union or the Foundation.
+`ZVEZDA ORION OPERATIONS
+=======================
+Far-side pads permit Orion-class launches out of Earth line-of-sight.
+Current campaign: heavy resupply run to EUROPA SITE 1 via
+Orion-class SEVER-4 (Север-4). Departure window 1989.04.11.
 
-Recovered fragment mass:  4.4 kg (see Crate S-114)
-Composition:              non-standard silicate lattice
-Isotope ratio:            impossible under known geology
-Response to sonar:        yes — measured latency 41ms constant
-Response to voice band:   yes — modulated response, glyphic
+Payload is being staged in vault-B; do not attempt to inspect.
+Custody chain is direct from POLK. STEIN's office.
+`
+        },
+        {name:'STEIN_MEMO.TXT', type:'txt', state:1, password:'IRONBIRD',
+            content:
+`MEMO — POLK. K. STEIN, KOMANDIR ZVEZDA-3
+========================================
+TO :: R. VOSS, ZAM. KOM.
 
-We are not the first.  Something else is already listening.
+Roman —
 
-Continued Operation HOLLOW ORBIT is CRITICAL.  We must
-determine intent before disclosure of any kind.
+Route the next Europa uplink through the U.I.C. TIER-4 channel
+directly. Do not let the general staff channel see it. The team
+at Site 1 has again asked for authorization to extend the drill
+past the design depth. I have again said no.
 
-This annex will be destroyed if the vault code (VMDR198904)
-is invoked more than three times.
+Voss, they are hearing the same 41 Hz return on their instruments
+that Tranquillity flagged. That is not a Soviet problem or an
+American problem. Get me a clean line to Maniston on FIV-3.
 
 — K.S.
 `
         },
-        {name:'SHARD_C.FRAG', type:'frag', state:1, password:'KRAKEN',
-            code:'C',
-            fragTitle:'SHARD C — KRAKEN MARE',
+        {name:'EUROPA_SITE1_STATUS.TXT', type:'txt', state:5, clearance:4,
             content:
-`SHARD C of 3 — recovered from Kraken Mare deep-listen node.
-Passphrase glyph :: 1989
+`EUROPA SITE 1 — STATUS 1989.03.15
+=================================
+Crew count       :: 6, all nominal
+Drill depth      :: 9.8 km (design limit 10 km)
+Ambient noise    :: 41 Hz return pulse, INTERMITTENT
+Correlation      :: pulse appears only when crew is in the module
+                    with the drill string. Absent overnight.
 
-With SHARD A + SHARD B + SHARD C, Annex III becomes
-readable at this node.
+The chief engineer has requested we sedate one crew member and
+repeat the measurement. Request DENIED pending directorate review.
+
+— posted by K. STEIN
 `
         },
-        {name:'HYDROPHONE_3.AUD', type:'audio', state:0,
-            src:'',
-            caption:'// HYDROPHONE 3 · KRAKEN MARE · signal beneath the ice · repeats every 23 min'
-        },
-        {name:'ARRAY_LAYOUT.IMG', type:'ascii', state:0,
+        {name:'ZVEZDA_MAP.IMG', type:'ascii', state:0,
             content:
-`     KRAKEN MARE HYDROPHONE ARRAY (top view)
+`   ZVEZDA-3 (Mare Ingenii, far side)
 
-              N
-              |
-        HP-1  HP-2
-          \\   /
-           \\ /
-    HP-3 —— × —— HP-4       (× = ANOMALY point)
-           / \\
-          /   \\
-        HP-5  HP-6
-              |
-              S
-    HP-3 and HP-5 offline as of 1989.03.15.
-    Anomaly bearing 041° from array center.`
-        },
-        {name:'SEALED_LOOP.VID', type:'video', state:5, clearance:4,
-            src:'https://www.youtube.com/embed/dQw4w9WgXcQ',
-            caption:'// BR-4 sealed loop · not for public dissemination'
+   [HAB-1]==[HAB-2]==[GALLEY]
+      |                 |
+   [MED]             [ENG]
+      |                 |
+   [AIRLOCK]       [VAULT-B]
+                      |
+                   [PAD FAR-1]  (Orion stack, Sever-4)
+`
         },
     ]
 },
 
-/* ------------- NODE :: CNSA TIANGONG COMMAND (Chinese) ------- */
+/* ------------- NODE :: EUROPA SITE 2 (subtle thread) --------- */
 {
-    addr: '58.14.9.22',
-    name: 'CNSA TIANGONG-VII COMMAND',
-    motd: '// 中华航天局 · TIANGONG-VII ORBITAL COMMAND · 天宫指挥. CN CLR 2+ REQUIRED.',
-    latency: 310,
-    server: 3,
-    clearance: 2,
-    nationClearance: 2,
-    files: [
-        {name:'ROSTER_2189.TXT', type:'txt', state:0,
-            content:
-`天宫-VII COMMAND ROSTER — 1989.03
-================================
-COMMANDER  :: GEN. W. ZHAO       (CN CLR 5 · UIC CLR 4)
-DEPUTY     :: COL. L. CHEN       (CN CLR 4 · UIC CLR 3)
-CHIEF ENG. :: DR. H. LI          (CN CLR 3 · UIC CLR 2)
-FLT SURG.  :: MAJ. Y. WANG       (CN CLR 3 · UIC CLR 2)
-TAIKONAUT  :: LT. R. SUN         (CN CLR 2 · UIC CLR 2)
-`
-        },
-        {name:'MOONBASE_QUEQIAO.TXT', type:'txt', state:0,
-            content:
-`鹊桥 MOONBASE · FAR-SIDE OPERATIONS SUMMARY
-
-Habitat rings 1-3 nominal. Ring 4 pressurization pending.
-Radio-quiet zone maintained; SETI array observing anomaly bearing 041°
-consistent with Kraken Mare hydrophone data (see joint intel share).
-Next launch window: 1989.04.02.
-`
-        },
-        {name:'JOINT_INTEL.LOG', type:'log', state:1, password:'DRAGON RISE',
-            content:[
-                '[INFO] 1989.03.14 :: intel share w/ USSF re: KRAKEN MARE anomaly',
-                '[WARN] 1989.03.14 :: Soviet Fleet declined intel exchange',
-                '[INFO] 1989.03.15 :: signal decoded, glyphic modulation — see annex',
-                '[ERR ] 1989.03.16 :: courier lost between Tiangong and Arcadia',
-                '[WARN] 1989.03.16 :: 5th Bureau flagging Soviet SIGINT intercept',
-            ]
-        },
-        {name:'ANNEX_DRAGON.TXT', type:'txt', state:5, clearance:4,
-            content:
-`ANNEX DRAGON — CNSA INTERNAL
-============================
-The signal beneath the Kraken Mare ice is not Soviet, not American, not ours.
-Response glyph translated by Bureau 5 linguists as a cardinal ordinal.
-Recommendation: propose Sino-American back-channel; exclude Soviet Fleet
-until Director Stein's role in Cosmonaut-07's disappearance is clarified.
-
-— W. ZHAO, GEN. CNSA
-`
-        },
-        {name:'SHIPYARD_JIUQUAN.HEX', type:'hex', state:0,
-            content:'JIUQUAN ORBITAL YARD :: 4 hulls in production · 2 heavy-lift · 1 crewed lunar transfer · status nominal.'
-        },
-    ]
-},
-
-/* ------------- NODE :: USSF ARCADIA (American HQ) ------------ */
-{
-    addr: '148.11.2.19',
-    name: 'USSF ARCADIA COMMAND',
-    motd: '// UNITED STATES SPACE FORCE · ARCADIA PLANITIA CMD · US CLR 3+ REQUIRED.',
-    latency: 120,
-    server: 1,
-    clearance: 2,
-    nationClearance: 3,
-    files: [
-        {name:'ROSTER_APPD.TXT', type:'txt', state:0,
-            content:
-`ARCADIA PLANITIA COMMAND ROSTER — 1989.03
-=========================================
-GEN. CMDR   :: GEN. F. HALSTEAD    (US CLR 5 · UIC CLR 4)
-XO          :: COL. J. MANISTON    (US CLR 4 · UIC CLR 3)
-APPD CHIEF  :: MAJ. D. TORRES      (US CLR 3 · UIC CLR 2)
-FLT SURG.   :: CAPT. E. NGUYEN     (US CLR 3 · UIC CLR 2)
-PILOT       :: LT. K. WEBB         (US CLR 2 · UIC CLR 2)
-`
-        },
-        {name:'MANISTON_ORDERS.TXT', type:'txt', state:1, password:'BLUEHAWK',
-            content:
-`ORDERS — COL. J. MANISTON, XO
-=============================
-FROM :: GEN. HALSTEAD
-TO   :: COL. J. MANISTON
-
-Colonel — the Soviet incident on Deimos is not our problem officially,
-but the intel it points to is. Coordinate with CNSA (channel: DRAGON RISE)
-on the Kraken Mare signal. Under NO circumstances allow Fleet SIGINT
-to intercept our back-channel to Tiangong.
-
-If Stein moves against our people at Hellas, we respond in kind.
-
-— HALSTEAD, GEN. USSF
-`
-        },
-        {name:'APPD_INCIDENT.LOG', type:'log', state:0,
-            content:[
-                '[INFO] 1989.03.14 :: APPD patrol 3 discovered unclaimed pod, sector 7',
-                '[WARN] 1989.03.14 :: pod ident tag scrubbed — possible Fractured',
-                '[INFO] 1989.03.15 :: forensics recovered partial cipher',
-                '[WARN] 1989.03.15 :: Soviet observer requested access — DENIED',
-                '[INFO] 1989.03.16 :: cipher matched to STEIN personal key',
-            ]
-        },
-        {name:'FLEET_TICKLE.TXT', type:'txt', state:5, clearance:4,
-            content:
-`CLASSIFIED — USSF OFFICE OF NAVAL INTEL
-========================================
-Ongoing collection on Soviet Director K. STEIN.
-Pattern: three unattributed transfers to Fractured accounts.
-Amounts: $4.1M, $2.7M, $6.9M interstellar credits.
-Recommendation: prepare a leak package. Escrow with Foundation.
-`
-        },
-        {name:'PATCH_2019.HEX', type:'hex', state:0,
-            content:'USSF NETWORK PATCH 2019 :: IPv7 rollout complete for arcadia-net · legacy IPv6 sunset 1989.04.'
-        },
-    ]
-},
-
-/* ------------- NODE :: FRACTURED FOUNDATION (rogue) ---------- */
-{
-    addr: '221.7.7.7',
-    name: 'FRACTURED FOUNDATION',
-    motd: '// UNSANCTIONED NODE. If you can read this, welcome to the resistance.',
-    latency: 940,
+    addr: '77.44.19.30',
+    name: 'EUROPA SITE 2 :: SUB-ICE HAB',
+    motd: '// Joint civilian research station · sub-ice hab, southern trailing hemisphere · comm window narrow.',
+    latency: 420,
     server: 0,
-    clearance: 0,
+    clearance: 3,
     nationClearance: 0,
     files: [
-        {name:'MANIFESTO.TXT', type:'txt', state:0,
+        {name:'STATION_LOG.LOG', type:'log', state:0,
+            content:[
+                '[INFO] 1989.03.10 :: hab pressurized, crew of 4 nominal',
+                '[INFO] 1989.03.11 :: drill string at 6.4 km ice depth, coring nominal',
+                '[INFO] 1989.03.12 :: EEG telemetry (crew wellness) baseline logged',
+                '[WARN] 1989.03.13 :: crew EEG shows unusual coherence during rest cycles',
+                '[INFO] 1989.03.14 :: drill string at 8.1 km, no aquatic breach yet',
+                '[WARN] 1989.03.14 :: 41 Hz return echo again — same as Tranq. and Zvezda',
+                '[INFO] 1989.03.15 :: shift rotation, crew reports vivid shared dream. anecdotal.',
+            ]
+        },
+        {name:'CREW_NOTES.TXT', type:'txt', state:0,
             content:
-`THE FRACTURED FOUNDATION MANIFESTO
+`CREW NOTES — EUROPA SITE 2
+==========================
+1989.03.13 (SORENSON)
+    Slept well. Odd — I dreamed the drill was humming a chord.
+    A minor triad, low. Two of the others said the same thing at
+    breakfast without me mentioning it. We laughed it off.
+
+1989.03.14 (PARK)
+    The instruments picked up a 41 Hz return again. This is the
+    third night. It only happens while we are asleep in the same
+    hab module. When we split up between modules it stops.
+
+1989.03.15 (SORENSON)
+    We asked the base doc to run EEG on all four of us during rest.
+    Baseline was normal for individuals. During rest, though, the
+    peaks line up. Alpha and low gamma bands, all four of us,
+    within 4 Hz of each other. Doc says that is not supposed to
+    happen without shared sensory input.
+`
+        },
+        {name:'DRILL_REPORT.TXT', type:'txt', state:1, password:'ICE CORE',
+            content:
+`DRILL REPORT — SITE 2 — 1989.03.15
 ==================================
+Depth        :: 8.1 km (design 10 km)
+Ice temp     :: -142 C at head, -98 C at collar
+Return pulse :: 41 Hz, constant amplitude, no known instrument source
+Aquatic layer:: not yet breached, estimate 1.9 km more
 
-The Union of Iron Colonies claims to speak for all humans off Earth.
-It does not speak for us.
+The pulse is not an artifact of the drill motor (verified: stopping
+the motor does not stop the pulse). It is not a seismic response of
+the ice (verified: the shape is wrong for elastic return). It is not
+a UIC relay bleed (verified: UIC confirmed nothing in that band).
 
-The Council of Nine, on behalf of the outer colonies, hereby
-withdraws from the Union effective immediately.  We do not
-recognize the authority of Fleet Command in Fractured space.
+We do not know what it is. We are documenting and continuing.
 
-What was buried at Kraken Mare belongs to no flag, no company,
-no director.  We will not surrender the truth.
-
-Broadcast on any band that will carry it.
-
-— THE COUNCIL OF NINE
+— P. SORENSON, LEAD
 `
         },
-        {name:'CALL_TO_ARMS.TXT', type:'txt', state:0,
+        {name:'EEG_CORRELATION.TXT', type:'txt', state:2, fragments:['A','B'],
             content:
-`If you have skills, we can use them.
-If you have information, we will protect it.
-If you have doubts, we can answer them.
+`EEG CORRELATION STUDY — EUROPA SITE 2
+=====================================
+Subjects  :: 4 (crew, informed consent)
+Method    :: 32-channel EEG, sleep cycles, 7 consecutive nights
+Result    :: mean pairwise phase-lag index rises from 0.12 (waking,
+             baseline) to 0.81 during shared rest in module A. That
+             is a phase-locking value far above any published waking
+             or sleeping baseline.
 
-Contact via any node with the address 221.7.7.7.
-Password to speak with a runner: BENEATH THE ICE.
+The effect is present ONLY in module A, ONLY during rest, and
+ONLY when the 41 Hz return pulse is being recorded at the drill.
+
+We are not claiming causality. We are asking the question.
+
+If measurement is what collapses a quantum system into a definite
+state, and if measurement requires an observer, then what happens
+to a signal in an ice column that has never been observed?
+
+We are noting, only, that the pulse begins when we begin listening.
+And that we four listen, apparently, together.
+
+— P. SORENSON
 `
         },
-        {name:'STEIN_FILE.CORRUPT', type:'corrupt', state:3,
+        {name:'SHARD_A.FRAG', type:'frag', state:0,
+            code:'A',
+            fragTitle:'SHARD A — EUROPA SITE 2 (crew log)',
             content:
-`SUBJECT :: K. STEIN, DIRECTOR
-==============================
-Born ████ in ██████████, Terran Earth.
-Youngest ████████ in Fleet history at ██ years old.
-Directed ██████████ program 1979–1984.
-Suspected involvement in ██████████ incident (Ganymede).
-Personal cipher :: ██████████
-Vault code :: <clean>VMDR198904</clean>
-Estimated body count :: <clean>219</clean>
-Preferred call sign :: RAVEN
+`SHARD A of 2. Recovered from crew journal.
+Phrase glyph :: LISTEN
 `
         },
-        {name:'DECRYPTED_INTERCEPT.TXT', type:'txt', state:1, password:'BENEATH THE ICE',
+        {name:'SHARD_B.FRAG', type:'frag', state:1, password:'SORENSON',
+            code:'B',
+            fragTitle:'SHARD B — EUROPA SITE 2 (drill log)',
             content:
-`INTERCEPTED FROM FLEET COMMS — TIMESTAMP 1989.03.16
-====================================================
-FLT-CMD  :: All units, we have confirmation that Cosmonaut-07 is
-            in Fractured hands.
-FLT-CMD  :: Recovery is authorized.  Package must not reach any
-            civilian archive.
-IRONBIRD :: Copy.  How close is the package to going public?
-FLT-CMD  :: Too close.  Move now.
-FLT-CMD  :: If we cannot retrieve, we sanitize.
-IRONBIRD :: Understood.  Ironbird Zero-Four proceeding.
-FLT-CMD  :: Do not let them read the annex.
+`SHARD B of 2. Recovered from drill-head telemetry archive.
+Phrase glyph :: TOGETHER
 `
         },
-        {name:'PORTRAIT.IMG', type:'image', state:0,
-            src:'data:image/svg+xml;utf8,' + encodeURIComponent(
-                `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'>
-                    <rect width='100%' height='100%' fill='#0d0602'/>
-                    <ellipse cx='200' cy='190' rx='90' ry='120' fill='#3d1b08'/>
-                    <ellipse cx='200' cy='190' rx='80' ry='110' fill='#5c2a10'/>
-                    <circle cx='170' cy='170' r='8' fill='#0d0602'/>
-                    <circle cx='230' cy='170' r='8' fill='#0d0602'/>
-                    <path d='M170 230 Q200 250 230 230' stroke='#0d0602' stroke-width='2' fill='none'/>
-                    <path d='M120 300 Q200 340 280 300 L280 500 L120 500 Z' fill='#3d1b08'/>
-                    <text x='200' y='470' text-anchor='middle' font-family='monospace' font-size='13' fill='#c96b2f'>UNKNOWN OPERATIVE · FF-ROSTER</text>
-                </svg>`
-            ),
-            caption:'// FRACTURED FOUNDATION operative — unnamed — captured on Deimos elevator'
-        },
-        {name:'CALL_SIGN_LOOKUP.HEX', type:'hex', state:0,
-            content:'RAVEN=STEIN K. · WOLF=VOSS R. · HALO=GRISHIN T. · PYRE=[REDACTED] · TIDE=[REDACTED]'
+        {name:'SITE2_LAYOUT.IMG', type:'ascii', state:0,
+            content:
+`  EUROPA SITE 2 (side view)
+
+    ============  ice surface  ============
+         ||
+         ||   <-- drill string, 8.1 km
+         ||
+         ||
+    +====##====+
+    |  HAB-A   |   (sub-ice pressurized module)
+    |  HAB-B   |
+    +==========+
+    |  DRILL   |
+    |  HEAD    |
+    +==========+
+             ...  (still 1.9 km to aquatic layer)
+`
         },
     ]
 },
@@ -1103,25 +1055,27 @@ const $ = id => document.getElementById(id);
 ===================================================================== */
 const PROFILES = {
     /* --- Public / neutral --- */
-    'GUEST':      {display:'GUEST',       password:'GUEST',       nation:0, uicClr:0, nationClr:0, role:'PUBLIC OPERATOR'},
+    'GUEST':      {display:'GUEST',              password:'GUEST',      nation:0, uicClr:0, nationClr:0, role:'PUBLIC OPERATOR'},
+
+    /* --- Civilian / U.I.C. staff (neutral, nation = 0) --- */
+    'J.MANISTON': {display:'DR. J. MANISTON',    password:'MASSDRIVER', nation:1, uicClr:3, nationClr:2, role:'FIV-3 MASS DRIVER PROJECT LEAD'},
+    'R.OKAFOR':   {display:'ENG. R. OKAFOR',     password:'HEAVISIDE',  nation:0, uicClr:3, nationClr:0, role:'U.I.C. RELAY LEAD, EARTH-SUN L4'},
+    'S.ALRASHID': {display:'ENG. S. AL-RASHID',  password:'CARRIER',    nation:0, uicClr:3, nationClr:0, role:'U.I.C. RELAY LEAD, JUPITER-SUN L4'},
 
     /* --- American (nation = 1) --- */
-    'J.MANISTON': {display:'COL. J.MANISTON', password:'ARCADIA89',   nation:1, uicClr:3, nationClr:4, role:'USSF ARCADIA XO'},
-    'F.HALSTEAD': {display:'GEN. F.HALSTEAD', password:'BLUEEAGLE',   nation:1, uicClr:4, nationClr:5, role:'USSF ARCADIA COMMANDER'},
-    'D.TORRES':   {display:'MAJ. D.TORRES',   password:'REDROCK',     nation:1, uicClr:2, nationClr:3, role:'APPD CHIEF'},
-    'K.WEBB':     {display:'LT. K.WEBB',      password:'JETSTREAM',   nation:1, uicClr:2, nationClr:2, role:'USSF PILOT'},
+    'F.HALSTEAD': {display:'COL. F. HALSTEAD',   password:'BLUEEAGLE',  nation:1, uicClr:4, nationClr:4, role:'BASE TRANQUILLITY COMMANDER'},
+    'E.NGUYEN':   {display:'MAJ. E. NGUYEN',     password:'JETSTREAM',  nation:1, uicClr:3, nationClr:4, role:'BASE TRANQUILLITY XO'},
+    'K.WEBB':     {display:'DR. K. WEBB',        password:'PUSHERPLATE',nation:1, uicClr:2, nationClr:3, role:'TRANQ. CHIEF ENGINEER'},
+    'D.TORRES':   {display:'MAJ. D. TORRES',     password:'REDROCK',    nation:1, uicClr:2, nationClr:3, role:'TRANQ. FLIGHT SURGEON'},
 
     /* --- Soviet (nation = 2) --- */
-    'K.STEIN':    {display:'DIR. K.STEIN',    password:'RAVEN1989',   nation:2, uicClr:4, nationClr:5, role:'FLEET DIRECTOR'},
-    'R.VOSS':     {display:'CAPT. R.VOSS',    password:'IRONBIRD',    nation:2, uicClr:3, nationClr:4, role:'FLEET CAPTAIN'},
-    'T.GRISHIN':  {display:'COSM. T.GRISHIN', password:'HOLLOWORBIT', nation:2, uicClr:2, nationClr:3, role:'COSMONAUT-07'},
-    'N.KOVALEV':  {display:'LT. N.KOVALEV',   password:'BALTIC',      nation:2, uicClr:2, nationClr:2, role:'ССКЛ RELAY OFFICER'},
+    'K.STEIN':    {display:'POLK. K. STEIN',     password:'IRONBIRD',   nation:2, uicClr:4, nationClr:4, role:'ZVEZDA-3 KOMANDIR'},
+    'R.VOSS':     {display:'KAP. R. VOSS',       password:'MAREINGENII',nation:2, uicClr:3, nationClr:4, role:'ZVEZDA-3 ZAM. KOMANDIR'},
+    'N.KOVALEV':  {display:'LT. N. KOVALEV',     password:'BALTIC',     nation:2, uicClr:2, nationClr:3, role:'ZVEZDA-3 ENGINEER'},
+    'T.GRISHIN':  {display:'LT. T. GRISHIN',     password:'HOLLOWORBIT',nation:2, uicClr:2, nationClr:2, role:'ZVEZDA-3 COSMONAUT'},
 
-    /* --- Chinese (nation = 3) --- */
-    'W.ZHAO':     {display:'GEN. W.ZHAO',     password:'DRAGONRISE',  nation:3, uicClr:4, nationClr:5, role:'CNSA TIANGONG COMMANDER'},
-    'L.CHEN':     {display:'COL. L.CHEN',     password:'JADEGATE',    nation:3, uicClr:3, nationClr:4, role:'CNSA DEPUTY'},
-    'H.LI':       {display:'DR. H.LI',        password:'LOTUS',       nation:3, uicClr:2, nationClr:3, role:'CNSA CHIEF ENGINEER'},
-    'R.SUN':      {display:'LT. R.SUN',       password:'REDLANTERN',  nation:3, uicClr:2, nationClr:2, role:'TAIKONAUT'},
+    /* --- Europa Site 2 civilian science crew (neutral, nation = 0) --- */
+    'P.SORENSON': {display:'DR. P. SORENSON',    password:'ICECORE',    nation:0, uicClr:3, nationClr:0, role:'EUROPA SITE 2 LEAD'},
 };
 
 const NATION_LABEL = {0:'NEUTRAL', 1:'AMERICAN', 2:'SOVIET', 3:'CHINESE'};
