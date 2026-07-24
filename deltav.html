@@ -422,16 +422,75 @@ const MODE = {
   direct:  { m:1.60, tMul:0.55, label:"DIRECT"  }
 };
 
-/* SHIP PRESETS — 3 requested + Buran; users can add more */
+/* SHIP PRESETS
+   All figures are published historical-concept numbers for real
+   space-race era studies (Apollo, Soyuz L-series, LK, LK-700,
+   LUNEX, LESA, TMK, MAVR, Aelita, EMPIRE, NERVA, MEM, Nova, X-20)
+   plus the three user-requested vehicles (Shuttle OMS, Buran,
+   Project Orion pulse drive) and the V.M.D.R. lore preset.
+   Users may add their own via the ＋ ADD SHIP button.            */
 const DEFAULT_PRESETS = [
-  { id:"shuttle", name:"SPACE SHUTTLE (OMS)", ico:"▲", year:"1981",
-    isp:316, thrust:53.4, mdot:17.2, dry:78000, prop:28000 },
-  { id:"buran",   name:"BURAN ORBITER",       ico:"▲", year:"1988",
-    isp:362, thrust:35.6, mdot:10.0, dry:80000, prop:25000 },
-  { id:"orion",   name:"ORION DRIVE",         ico:"◎", year:"REF",
-    isp:6000, thrust:8000, mdot:136, dry:1000000, prop:3000000 },
-  { id:"vmdr",    name:"V.M.D.R. LAUNCH SLED",ico:"═", year:"IF-89",
-    isp:0, thrust:0, mdot:0, dry:24000, prop:0, impulse:8500 }
+  // === REQUESTED ===
+  { id:"shuttle",  name:"SPACE SHUTTLE (OMS)",    ico:"▲", year:"1981",
+    isp:316,  thrust:53.4,  mdot:17.2, dry:78000,   prop:28000  },
+  { id:"buran",    name:"BURAN ORBITER",          ico:"▲", year:"1988",
+    isp:362,  thrust:35.6,  mdot:10.0, dry:80000,   prop:25000  },
+  { id:"orion",    name:"ORION NUCLEAR PULSE",    ico:"◎", year:"1958",
+    isp:6000, thrust:8000,  mdot:136,  dry:1000000, prop:3000000 },
+
+  // === LORE ===
+  { id:"vmdr",     name:"V.M.D.R. LAUNCH SLED",   ico:"═", year:"IF-89",
+    isp:0,    thrust:0,     mdot:0,    dry:24000,   prop:0, impulse:8500 },
+
+  // === APOLLO PROGRAM (USA) ===
+  { id:"csm",      name:"APOLLO CSM (SPS)",       ico:"▲", year:"1968",
+    isp:314,  thrust:91.2,  mdot:29.6, dry:11900,   prop:18500  },
+  { id:"lm-dps",   name:"APOLLO LM · DESCENT",    ico:"▼", year:"1969",
+    isp:311,  thrust:45.04, mdot:14.76,dry:2033,    prop:8248   },
+  { id:"lm-aps",   name:"APOLLO LM · ASCENT",     ico:"▲", year:"1969",
+    isp:311,  thrust:15.6,  mdot:5.11, dry:2213,    prop:2353   },
+
+  // === USAF / NASA LUNAR DIRECT-ASCENT STUDIES ===
+  { id:"lunex",    name:"LUNEX LANDER (USAF)",    ico:"▼", year:"1961",
+    isp:420,  thrust:200,   mdot:48.5, dry:24500,   prop:37500  },
+  { id:"lesa",     name:"LESA LUNAR BASE VEH.",   ico:"◈", year:"1963",
+    isp:425,  thrust:445,   mdot:106.8,dry:32000,   prop:127000 },
+  { id:"nova",     name:"NOVA C8 UPPER (LUNAR)",  ico:"↑", year:"1962",
+    isp:425,  thrust:889,   mdot:213.4,dry:24000,   prop:180000 },
+
+  // === SOVIET LUNAR ===
+  { id:"lk",       name:"LK LUNAR LANDER (USSR)", ico:"▼", year:"1969",
+    isp:314,  thrust:19.6,  mdot:6.36, dry:2200,    prop:2019   },
+  { id:"lok",      name:"LOK LUNAR ORBITER",      ico:"▲", year:"1970",
+    isp:314,  thrust:3.43,  mdot:1.11, dry:7100,    prop:2000   },
+  { id:"lk-700",   name:"LK-700 DIRECT ASCENT",   ico:"▼", year:"1964",
+    isp:340,  thrust:265,   mdot:79.5, dry:21000,   prop:133000 },
+  { id:"zond",     name:"SOYUZ 7K-L1 (ZOND)",     ico:"◉", year:"1968",
+    isp:302,  thrust:4.09,  mdot:1.38, dry:5375,    prop:400    },
+
+  // === SOVIET MARS / VENUS CONCEPTS ===
+  { id:"tmk",      name:"TMK-1 MARS FLYBY",       ico:"◈", year:"1959",
+    isp:290,  thrust:530,   mdot:186.3,dry:75000,   prop:800000 },
+  { id:"mavr",     name:"MAVR MARS·VENUS FLYBY",  ico:"◈", year:"1962",
+    isp:310,  thrust:530,   mdot:174.4,dry:75000,   prop:900000 },
+  { id:"aelita",   name:"AELITA MARS LANDING",    ico:"◇", year:"1969",
+    isp:850,  thrust:335,   mdot:40.2, dry:150000,  prop:400000 },
+
+  // === NASA MARS / DEEP-SPACE CONCEPTS ===
+  { id:"empire",   name:"EMPIRE MARS FLYBY",      ico:"◈", year:"1963",
+    isp:830,  thrust:334,   mdot:41.0, dry:75000,   prop:190000 },
+  { id:"nerva",    name:"NERVA UPPER STAGE",      ico:"⊛", year:"1968",
+    isp:825,  thrust:246,   mdot:30.4, dry:18140,   prop:34020  },
+  { id:"mem",      name:"MARS EXCURSION MODULE",  ico:"▼", year:"1966",
+    isp:380,  thrust:88.9,  mdot:23.9, dry:14000,   prop:30000  },
+
+  // === EARLY MANNED / EXPERIMENTAL ===
+  { id:"mercury",  name:"MERCURY CAPSULE",        ico:"◉", year:"1962",
+    isp:230,  thrust:4.5,   mdot:2.0,  dry:1355,    prop:132    },
+  { id:"gemini",   name:"GEMINI OAMS",            ico:"◉", year:"1965",
+    isp:273,  thrust:7.16,  mdot:2.68, dry:3851,    prop:1080   },
+  { id:"dynasoar", name:"DYNA-SOAR X-20",         ico:"▲", year:"1963",
+    isp:283,  thrust:35.6,  mdot:12.8, dry:5165,    prop:2200   },
 ];
 let PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
 let selectedPresetId = "shuttle";
