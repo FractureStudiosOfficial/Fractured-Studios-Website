@@ -204,31 +204,21 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                 <div class="mini-boot" id="boot"></div>
 
                 <div class="login-block">
-                    <label>NATION / AFFILIATION</label>
-                    <select id="in-nation">
-                        <option value="">— SELECT SPONSOR —</option>
-                        <option value="USA">UNITED STATES — NASA</option>
-                        <option value="USSR">SOVIET UNION — ROSCOSMOS</option>
-                        <option value="UIC">U.I.C. — UNIVERSAL INTERSTELLAR COMPUTERS (CIVILIAN CARRIER)</option>
-                        <option value="EUROPA">EUROPA HAB (RESTRICTED)</option>
-                    </select>
+                    <label>PROFILE ID</label>
+                    <input id="in-user" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. horizon.ctrl"/>
                 </div>
                 <div class="login-block">
-                    <label>OPERATOR ID</label>
-                    <input id="in-user" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. fleet.cmd"/>
-                </div>
-                <div class="login-block">
-                    <label>CIPHER-KEY / PASSPHRASE</label>
-                    <input id="in-pass" type="password" autocomplete="off" spellcheck="false" placeholder="********"/>
+                    <label>ACCESS KEY</label>
+                    <input id="in-pass" type="password" autocomplete="off" spellcheck="false" placeholder="passphrase"/>
                 </div>
                 <div class="login-actions">
                     <button class="tool-btn" id="btn-login">▸ AUTHENTICATE</button>
-                    <button class="tool-btn warn" id="btn-guest">◇ CIVILIAN GUEST</button>
                 </div>
                 <div class="login-status" id="login-status"></div>
 
                 <div class="login-hint">
-                    <span class="k">NOTICE ▸</span> This node subscribes to U.I.C. commercial relay coverage across the Sol system. Channels are <b>invisible</b> — you must find the relay by tuning the dial. Higher clearance and nation-of-origin unlock more assigned frequencies in your directory. U.I.C. is a common carrier and takes no position on the content of transmissions it relays.
+                    <span class="k">NOTICE ▸</span> Your profile determines your <b>nation</b> and <b>clearance tier</b>. Channels are <b>invisible</b> — you must find each relay by tuning the dial. U.I.C. is a common carrier and takes no position on the content of transmissions it relays.<br>
+                    <span class="k">TIP ▸</span> type <span class="k">GUEST</span> / <span class="k">GUEST</span> for a public-tier civilian session.
                 </div>
             </div>
         </div>
@@ -448,31 +438,27 @@ function tryLogin(u, p){
     return acct || null;
 }
 
-/* Login events */
+/* Login events — profile ID + access key only. The account itself
+   carries the nation and clearance. */
 $('btn-login').addEventListener('click', ()=>{
-    const nation = $('in-nation').value;
     const u = $('in-user').value.trim();
     const p = $('in-pass').value;
     const status = $('login-status');
     status.className = 'login-status';
-    if(!nation){ status.classList.add('err'); status.textContent = '▸ SELECT NATION / AFFILIATION FIRST'; return; }
-    if(!u || !p){ status.classList.add('err'); status.textContent = '▸ OPERATOR ID AND CIPHER-KEY REQUIRED'; return; }
-    const acct = tryLogin(u,p);
-    if(!acct){ status.classList.add('err'); status.textContent = '▸ AUTH FAIL — CREDENTIALS REJECTED'; return; }
-    if(acct.nation !== nation){
-        status.classList.add('err');
-        status.textContent = '▸ NATION MISMATCH — CREDENTIALS BELONG TO ANOTHER FLAG';
+    if(!u || !p){ status.classList.add('err'); status.textContent = '▸ PROFILE ID AND ACCESS KEY REQUIRED'; return; }
+    // GUEST/GUEST shortcut like the remote-server terminal
+    if(u.toUpperCase()==='GUEST' && p.toUpperCase()==='GUEST'){
+        status.classList.add('ok');
+        status.textContent = '▸ GUEST SESSION — U.I.C. CIVILIAN CARRIER (CLR 0)';
+        setTimeout(()=>enterSession({u:'guest', nation:'UIC', clr:0, motd:'Guest session. Only U.I.C. common-carrier bands are audible.'}), 500);
         return;
     }
+    const acct = tryLogin(u,p);
+    if(!acct){ status.classList.add('err'); status.textContent = '▸ AUTH FAIL — CREDENTIALS REJECTED'; return; }
     status.classList.add('ok');
-    status.textContent = '▸ HANDSHAKE OK — CLR '+acct.clr+' — WELCOME OPERATOR '+acct.u.toUpperCase();
+    const nInfo = NATIONS[acct.nation];
+    status.textContent = '▸ HANDSHAKE OK — '+(nInfo?nInfo.name:acct.nation)+' · CLR '+acct.clr+' — WELCOME '+acct.u.toUpperCase();
     setTimeout(()=>enterSession({u:acct.u, nation:acct.nation, clr:acct.clr, motd:acct.motd}), 700);
-});
-$('btn-guest').addEventListener('click', ()=>{
-    const status = $('login-status');
-    status.className = 'login-status ok';
-    status.textContent = '▸ GUEST SESSION — U.I.C. CIVILIAN CARRIER (CLR 0)';
-    setTimeout(()=>enterSession({u:'guest', nation:'UIC', clr:0, motd:'Guest session. Only U.I.C. common-carrier bands are audible.'}), 500);
 });
 $('in-pass').addEventListener('keydown', e => { if(e.key==='Enter') $('btn-login').click(); });
 $('in-user').addEventListener('keydown', e => { if(e.key==='Enter') $('in-pass').focus(); });
@@ -771,7 +757,7 @@ $('btn-logout').addEventListener('click', ()=>{
     SESSION = null;
     $('session-layer').classList.add('hidden');
     $('login-layer').classList.remove('hidden');
-    $('in-user').value=''; $('in-pass').value=''; $('in-nation').value='';
+    $('in-user').value=''; $('in-pass').value='';
     $('login-status').textContent = ''; $('login-status').className='login-status';
     $('log-scroll').innerHTML='';
 });
