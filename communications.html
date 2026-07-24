@@ -82,7 +82,10 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 .tag.green{border-color:rgba(143,255,138,.5);color:var(--green);}
 @keyframes tag-blink{50%{opacity:.35;}}
 
-#session-body{flex:1;display:grid;grid-template-columns:1fr 340px;gap:16px;margin:0 26px 12px;min-height:0;overflow:hidden;}
+#session-scroll{flex:1;overflow-y:auto;scrollbar-width:none;padding:0 26px 12px;}
+#session-scroll::-webkit-scrollbar{display:none;}
+#dial-panel-wrap{margin-bottom:14px;}
+#session-body{display:grid;grid-template-columns:320px 1fr;gap:16px;min-height:0;}
 @media(max-width:1050px){#session-body{grid-template-columns:1fr;}}
 
 .panel{position:relative;padding:14px 16px 16px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));box-shadow:inset 0 0 24px rgba(255,159,7,.05),0 0 24px rgba(255,159,7,.06);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
@@ -95,7 +98,7 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 .panel-head .badge{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
 
 /* Waterfall */
-.dial-wrap{position:relative;background:#08060a;border:1px solid rgba(255,159,7,.3);overflow:hidden;height:170px;}
+.dial-wrap{position:relative;background:#08060a;border:1px solid rgba(255,159,7,.3);overflow:hidden;height:200px;}
 #waterfall{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;}
 .dial-ticks{position:absolute;bottom:0;left:0;right:0;height:22px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));display:flex;justify-content:space-between;padding:0 4px;pointer-events:none;}
 .dial-ticks span{font-size:9px;color:var(--amberBright);letter-spacing:.14em;opacity:.7;align-self:flex-end;padding-bottom:3px;text-shadow:0 0 4px rgba(255,159,7,.4);}
@@ -122,7 +125,10 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 .pb-grid > div{display:flex;flex-direction:column;gap:2px;}
 .pb-grid .k{color:var(--red);letter-spacing:.22em;font-size:10px;}
 @media(max-width:900px){.pb-grid{grid-template-columns:repeat(2,1fr);}}
-.pb-transcript{flex:1;min-height:120px;max-height:280px;overflow-y:auto;padding:12px 14px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.4);font-size:12px;letter-spacing:.06em;line-height:1.7;scrollbar-width:none;}
+.pb-waveform{position:relative;border:1px solid rgba(255,159,7,.3);background:#040406;height:90px;margin:10px 0;}
+#wave{position:absolute;inset:0;width:100%;height:100%;}
+.wave-cursor{position:absolute;top:0;bottom:0;width:1px;background:var(--red);box-shadow:0 0 8px var(--red);left:0;pointer-events:none;}
+.pb-transcript{flex:1;min-height:180px;max-height:340px;overflow-y:auto;padding:12px 14px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.4);font-size:12px;letter-spacing:.06em;line-height:1.7;scrollbar-width:none;}
 .pb-transcript::-webkit-scrollbar{display:none;}
 .pb-transcript .ts-line{opacity:.35;transition:opacity .18s,color .18s;padding:2px 0;}
 .pb-transcript .ts-line.on{opacity:1;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
@@ -248,9 +254,10 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                 </div>
             </div>
 
-            <div id="session-body">
+            <div id="session-scroll">
 
-                <div class="panel" style="grid-column:1;">
+                <!-- BIG WATERFALL / DIAL PANEL (across full width, like original comms) -->
+                <div id="dial-panel-wrap" class="panel">
                     <div class="panel-head">
                         <span class="tick">◆</span>
                         <span class="ttl">FREQUENCY DIAL — DEEP-BAND WATERFALL</span>
@@ -258,7 +265,7 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                     </div>
                     <div id="motd" class="motd"></div>
                     <div class="dial-wrap">
-                        <canvas id="waterfall" width="900" height="140"></canvas>
+                        <canvas id="waterfall" width="1200" height="180"></canvas>
                         <div class="dial-ticks" id="dial-ticks"></div>
                         <div class="dial-cursor" id="dial-cursor"></div>
                     </div>
@@ -273,8 +280,32 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                         </div>
                         <span class="lock-indicator" id="lock-ind">◇ NO LOCK</span>
                     </div>
+                </div>
 
-                    <div style="margin-top:12px;">
+                <!-- TWO-COL: DIRECTORY (left, narrow) + PLAYBACK (right, wide) -->
+                <div id="session-body">
+
+                    <div class="panel" id="dir-panel">
+                        <div class="panel-head">
+                            <span class="tick">◆</span>
+                            <span class="ttl">ASSIGNED DIRECTORY</span>
+                            <span class="badge" id="dir-count">0</span>
+                        </div>
+                        <div class="dir-tabs">
+                            <button class="dir-tab active" data-tab="MINE">MY NATION</button>
+                            <button class="dir-tab" data-tab="OPEN">CIVILIAN</button>
+                            <button class="dir-tab" data-tab="RUMOR">RUMORS</button>
+                        </div>
+                        <div class="dir-note" id="dir-note"></div>
+                        <div class="dir-list" id="dir-list"></div>
+                    </div>
+
+                    <div class="panel" id="play-panel">
+                        <div class="panel-head">
+                            <span class="tick">◆</span>
+                            <span class="ttl">PLAYBACK</span>
+                            <span class="badge" id="pb-badge">--</span>
+                        </div>
                         <div class="pb-title" id="pb-title">-- CARRIER SEARCH --</div>
                         <div class="pb-grid">
                             <div><span class="k">TIMESTAMP</span><span id="pb-ts">--</span></div>
@@ -284,25 +315,20 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                             <div><span class="k">TARGET</span><span id="pb-target">--</span></div>
                             <div><span class="k">CLASS</span><span id="pb-class">--</span></div>
                         </div>
+                        <div class="pb-waveform">
+                            <canvas id="wave" width="800" height="90"></canvas>
+                            <div class="wave-cursor" id="wave-cursor"></div>
+                        </div>
+                        <div class="pb-controls">
+                            <button class="tool-btn" id="pb-play">▶ PLAY</button>
+                            <button class="tool-btn" id="pb-stop">■ STOP</button>
+                            <span class="pb-time"><span id="pb-elapsed">0:00</span> / <span id="pb-total">0:00</span></span>
+                        </div>
                         <div class="pb-transcript" id="pb-transcript">
                             <div class="ts-empty">// NO CARRIER — SWEEP OR TUNE TO ACQUIRE //</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="panel" id="dir-panel">
-                    <div class="panel-head">
-                        <span class="tick">◆</span>
-                        <span class="ttl">ASSIGNED DIRECTORY</span>
-                        <span class="badge" id="dir-count">0</span>
-                    </div>
-                    <div class="dir-tabs">
-                        <button class="dir-tab active" data-tab="MINE">MY NATION</button>
-                        <button class="dir-tab" data-tab="OPEN">CIVILIAN</button>
-                        <button class="dir-tab" data-tab="RUMOR">RUMORS</button>
-                    </div>
-                    <div class="dir-note" id="dir-note"></div>
-                    <div class="dir-list" id="dir-list"></div>
                 </div>
 
             </div>
@@ -749,6 +775,8 @@ function enterSession(sess){
     buildDirectory();
     // Start waterfall + tuning
     startTuning();
+    // Wire playback controls
+    bindPlayback();
 }
 
 $('btn-logout').addEventListener('click', ()=>{
@@ -1010,9 +1038,11 @@ function tickLock(){
         }
     }
     // playback tick
-    if(currentRelay){
+    if(currentRelay && !playPaused){
         playElapsed += dt;
         advanceTranscript();
+        $('pb-elapsed').textContent = fmtSec(Math.min(playElapsed, playDuration));
+        $('wave-cursor').style.left = Math.min(100, (playElapsed/playDuration)*100)+'%';
     }
 }
 
@@ -1020,10 +1050,12 @@ function acquire(r){
     currentRelay = r;
     lockProgress = 0;
     playElapsed = 0;
+    playPaused = false;
     playStartedAt = performance.now();
     // stop sweep on acquire so player can listen
     if(sweeping){ sweeping=false; $('btn-sweep').textContent='◆ AUTO-SWEEP'; }
     // Populate playback header
+    $('pb-badge').textContent = r.id;
     $('pb-title').textContent = r.title;
     $('pb-ts').textContent    = simTimestamp();
     $('pb-freq').textContent  = r.freq.toFixed(2)+' MHz';
@@ -1033,8 +1065,14 @@ function acquire(r){
     $('pb-class').textContent = r.class_;
     // Snap dial exactly on
     $('freq').value = freqToSlider(r.freq);
-    // Render transcript
+    // Render transcript, draw waveform, reset timers
     renderTranscript(r);
+    drawWaveform();
+    playDuration = r.lines.length * LINE_SECS;
+    $('pb-total').textContent = fmtSec(playDuration);
+    $('pb-elapsed').textContent = '0:00';
+    $('wave-cursor').style.left = '0%';
+    $('pb-play').textContent = '⏸ PAUSE';
     logLine('◆ LOCKED · '+r.id+' · '+r.callsign+' @ '+r.freq.toFixed(2)+' MHz', 'ok');
     if(r.class_==='BLACK') logLine('!! LEVEL BLACK CONTENT · listening logged to your operator ID', 'black');
     if(r.class_==='ANOMALY') logLine('▸ ANOMALY CATALOGUED · deep-band deviation flagged', 'info');
@@ -1045,9 +1083,23 @@ function dropLock(){
     logLine('◇ DROPPED · '+currentRelay.callsign, 'info');
     currentRelay = null;
     lockProgress = 0;
+    playPaused = true;
+    $('pb-badge').textContent = '--';
     $('pb-title').textContent = '-- CARRIER SEARCH --';
     ['pb-ts','pb-freq','pb-call','pb-origin','pb-target','pb-class'].forEach(id=>$(id).textContent='--');
+    $('pb-elapsed').textContent = '0:00';
+    $('pb-total').textContent = '0:00';
+    $('wave-cursor').style.left = '0%';
+    $('pb-play').textContent = '▶ PLAY';
     $('pb-transcript').innerHTML = '<div class="ts-empty">// NO CARRIER — SWEEP OR TUNE TO ACQUIRE //</div>';
+    // Clear waveform
+    const wCtx = $('wave').getContext('2d');
+    wCtx.clearRect(0,0,$('wave').width,$('wave').height);
+}
+
+function fmtSec(s){
+    const m = Math.floor(s/60), r = Math.floor(s%60);
+    return m+':'+String(r).padStart(2,'0');
 }
 
 /* =========================================================
@@ -1055,6 +1107,8 @@ function dropLock(){
 ========================================================= */
 let playElapsed = 0;
 let playStartedAt = 0;
+let playPaused = true;
+let playDuration = 0;
 const LINE_SECS = 3.0;
 
 function renderTranscript(r){
@@ -1084,6 +1138,57 @@ function advanceTranscript(){
         playElapsed = 0;
         lines.forEach(el=>el.classList.remove('on'));
     }
+}
+
+/* Deterministic waveform per relay */
+function drawWaveform(){
+    if(!currentRelay) return;
+    const wave = $('wave');
+    const wCtx = wave.getContext('2d');
+    const w = wave.width, h = wave.height;
+    wCtx.clearRect(0,0,w,h);
+    wCtx.strokeStyle = 'rgba(255,159,7,.85)';
+    wCtx.lineWidth = 1;
+    wCtx.beginPath();
+    let seed = 0;
+    for(const c of currentRelay.id) seed = (seed*31 + c.charCodeAt(0)) & 0xffffff;
+    function rnd(){ seed = (seed*9301 + 49297) & 0xffffff; return seed/0xffffff; }
+    for(let x=0;x<w;x++){
+        const t = x/w;
+        const li = Math.floor(t*currentRelay.lines.length);
+        const line = currentRelay.lines[Math.min(li, currentRelay.lines.length-1)];
+        let amp = line?.static ? 0.15 : 0.55;
+        if(line?.violet) amp = 0.85;
+        const v = (Math.sin(x*0.15)+Math.sin(x*0.42+seed)+Math.sin(x*0.7-seed*0.3))/3;
+        const noise = (rnd()-0.5)*0.35;
+        const y = h/2 + (v*0.6 + noise) * amp * h/2;
+        if(x===0) wCtx.moveTo(x,y); else wCtx.lineTo(x,y);
+    }
+    wCtx.stroke();
+    wCtx.strokeStyle = 'rgba(255,74,43,.25)';
+    wCtx.beginPath(); wCtx.moveTo(0,h/2); wCtx.lineTo(w,h/2); wCtx.stroke();
+}
+
+/* PLAY / STOP */
+document.addEventListener('DOMContentLoaded', ()=>{}); // (safety no-op)
+function bindPlayback(){
+    const pb = $('pb-play'), st = $('pb-stop');
+    if(!pb || pb._bound) return;
+    pb._bound = true;
+    pb.addEventListener('click', ()=>{
+        if(!currentRelay) return;
+        playPaused = !playPaused;
+        pb.textContent = playPaused ? '▶ PLAY' : '⏸ PAUSE';
+    });
+    st.addEventListener('click', ()=>{
+        if(!currentRelay) return;
+        playPaused = true;
+        playElapsed = 0;
+        pb.textContent = '▶ PLAY';
+        $('pb-elapsed').textContent = '0:00';
+        $('wave-cursor').style.left = '0%';
+        document.querySelectorAll('#pb-transcript .ts-line').forEach(el=>el.classList.remove('on'));
+    });
 }
 
 /* Simulated in-universe timestamp — 1989 setting */
