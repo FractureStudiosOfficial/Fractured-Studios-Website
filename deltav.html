@@ -3,267 +3,1143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC SECURITY CORE</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-<style>
-body{
-margin:0;
-background:#111;
-color:#FF9F07;
-font-family:'Share Tech Mono', monospace;
-overflow:hidden;
+<title>U.I.C. // DELTA-V CALCULATOR — TRANSFER PLANNER</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>:root{
+  --amber:#FF9F07;
+  --amberBright:#FFC861;
+  --amberDim:#B36700;
+  --red:#ff4a2b;
+  --green:#8fff8a;
 }
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-#crt{
-position:fixed;
-inset:0;
-background:rgba(255,159,7,.04);
-pointer-events:none;
-}
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
-#scan{
-position:fixed;
-inset:0;
-background:repeating-linear-gradient(
-to bottom,
-rgba(255,255,255,.04) 0px,
-rgba(255,255,255,.04) 2px,
-transparent 4px,
-transparent 8px
-);
-opacity:.15;
-pointer-events:none;
-animation:flicker .12s infinite;
-}
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;isolation:isolate;transform-style:preserve-3d;}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
 
-@keyframes flicker{
-0%{opacity:.12}
-50%{opacity:.05}
-100%{opacity:.12}
-}
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.55;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
 
-#grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-grid-template-rows:repeat(3,1fr);
-gap:10px;
-padding:20px;
-height:100vh;
-box-sizing:border-box;
-}
+#crt-container{position:absolute;inset:0;padding:22px 26px 78px;display:flex;flex-direction:column;z-index:2;}
 
-.panel{
-border:1px solid rgba(255,159,7,.2);
-background:rgba(0,0,0,.25);
-padding:8px;
-font-size:12px;
-position:relative;
-}
+.panel{position:relative;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);border-radius:6px;}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;z-index:0;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;z-index:0;}
+.panel > *{position:relative;z-index:1;}
 
-.bar{
-height:6px;
-background:#222;
-margin-top:4px;
-}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;margin-bottom:12px;border:1px solid rgba(255,159,7,.4);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));flex-wrap:wrap;gap:12px;flex-shrink:0;}
+.hdr .l{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:led-pulse 1.6s ease-in-out infinite;}
+.hdr .ttl{font-size:15px;letter-spacing:.28em;color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.5);}
+.hdr .sub{font-size:10px;letter-spacing:.24em;color:var(--red);padding-left:12px;border-left:1px dashed rgba(255,159,7,.3);}
+.hdr .r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);}
+.tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);animation:tag-blink 1.4s steps(2) infinite;}
+@keyframes tag-blink{50%{opacity:.35;}}
 
-.fill{
-height:100%;
-background:#FF9F07;
-width:50%;
-}
+.main{flex:1;display:grid;grid-template-columns:300px 1fr 300px;gap:12px;min-height:0;}
+@media(max-width:1200px){.main{grid-template-columns:260px 1fr;}.col-right{display:none;}}
+@media(max-width:900px){.main{grid-template-columns:1fr;}.col-left,.col-right{display:none;}}
 
-.slider{
-width:100%;
-}
+.col-left,.col-right{padding:12px 14px;display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;min-height:0;}
+.col-left::-webkit-scrollbar,.col-right::-webkit-scrollbar{width:6px;}
+.col-left::-webkit-scrollbar-thumb,.col-right::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+.col-center{padding:10px;display:flex;flex-direction:column;min-height:0;}
 
-#logs{
-height:100%;
-overflow:hidden;
-font-size:10px;
-line-height:1.2em;
-}
+.sec-head{display:flex;align-items:center;gap:10px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.sec-head .tick{color:var(--red);}
+.sec-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:12px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;}
+.sec-head .bd{font-size:9px;letter-spacing:.22em;padding:2px 6px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+.sec-head + .sec-head{margin-top:14px;}
+.divider{margin:12px 0;border-top:1px dashed rgba(255,159,7,.22);}
 
-.dial{
-width:60px;
-height:60px;
-border:2px solid #FF9F07;
-border-radius:50%;
-margin:auto;
-position:relative;
-cursor:pointer;
-}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;margin-bottom:4px;border:1px solid rgba(255,159,7,.2);background:rgba(255,159,7,.03);cursor:pointer;font-size:11px;letter-spacing:.12em;gap:8px;transition:.12s;}
+.row:hover{background:rgba(255,159,7,.12);border-color:rgba(255,159,7,.5);color:var(--amberBright);}
+.row.active{background:rgba(255,74,43,.10);border-color:rgba(255,74,43,.45);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.row .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.row .ico{color:var(--red);width:20px;text-align:center;}
+.row .meta{font-size:9px;letter-spacing:.16em;color:var(--amberBright);opacity:.6;flex-shrink:0;}
 
-.dial:after{
-content:'';
-position:absolute;
-width:2px;
-height:25px;
-background:#FF9F07;
-left:50%;
-top:5px;
-transform-origin:bottom;
-}
+.field{display:grid;grid-template-columns:88px 1fr;align-items:center;gap:8px;padding:4px 0;font-size:11px;}
+.field label{color:var(--amberBright);opacity:.85;font-size:9px;letter-spacing:.22em;}
+.field .in{position:relative;display:flex;align-items:center;}
+.field input,.field select{width:100%;background:rgba(0,0,0,.5);border:1px solid rgba(255,159,7,.35);color:var(--amber);font-family:inherit;letter-spacing:.12em;padding:5px 8px;font-size:11px;outline:none;}
+.field input:focus,.field select:focus{border-color:var(--amberBright);box-shadow:0 0 6px rgba(255,159,7,.25) inset;}
+.field .u{position:absolute;right:6px;font-size:8px;letter-spacing:.22em;color:var(--amberBright);opacity:.5;pointer-events:none;}
+.field select{appearance:none;padding-right:18px;background-image:linear-gradient(45deg,transparent 50%,var(--amber) 50%),linear-gradient(-45deg,transparent 50%,var(--amber) 50%);background-position:calc(100% - 10px) 50%,calc(100% - 6px) 50%;background-size:4px 4px;background-repeat:no-repeat;}
 
-.warning{
-color:#ff4444;
-animation:blink .5s infinite;
-}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.btn{padding:8px 12px;border:1px solid var(--amber);background:transparent;color:var(--amber);font-family:inherit;cursor:pointer;letter-spacing:.14em;transition:.15s;text-decoration:none;position:relative;font-size:10px;flex:1;text-align:center;min-width:0;}
+.btn::before{content:"";position:absolute;inset:-3px;border:1px solid rgba(255,159,7,.25);pointer-events:none;}
+.btn:hover{background:rgba(255,159,7,.15);box-shadow:0 0 12px rgba(255,159,7,.25);color:var(--amberBright);}
+.btn.warn{border-color:var(--red);color:var(--red);}
+.btn.warn:hover{background:rgba(255,74,43,.12);box-shadow:0 0 12px rgba(255,74,43,.25);}
+.btn.small{padding:5px 8px;font-size:9px;flex:none;}
 
-@keyframes blink{
-0%{opacity:1}
-50%{opacity:.2}
-100%{opacity:1}
-}
+/* VIZ */
+#viz-wrap{position:relative;flex:1;border:1px solid rgba(255,159,7,.28);background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.04),rgba(0,0,0,.9) 80%);overflow:hidden;min-height:0;cursor:grab;}
+#viz-wrap.grabbing{cursor:grabbing;}
+#viz-wrap::before,#viz-wrap::after{content:"";position:absolute;width:14px;height:14px;border:1px solid var(--amberBright);opacity:.9;pointer-events:none;z-index:5;}
+#viz-wrap::before{top:4px;left:4px;border-right:none;border-bottom:none;}
+#viz-wrap::after{bottom:4px;right:4px;border-left:none;border-top:none;}
+#viz-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
 
-</style>
+.viz-hud{position:absolute;top:8px;left:12px;font-size:10px;letter-spacing:.24em;color:var(--amberBright);z-index:6;pointer-events:none;line-height:1.6;}
+.viz-hud .k{color:var(--red);}
+.viz-title{font-size:10px;letter-spacing:.3em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.4);position:absolute;top:8px;right:12px;z-index:6;pointer-events:none;}
+.viz-legend{position:absolute;bottom:8px;left:12px;font-size:9px;letter-spacing:.18em;color:var(--amberBright);opacity:.75;z-index:6;}
+.viz-legend .d{display:inline-block;width:8px;height:8px;margin-right:3px;vertical-align:middle;border-radius:50%;}
+.viz-legend span{margin-right:10px;}
+
+.viz-ctrl{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:6px;flex-wrap:wrap;}
+.viz-ctrl .cell{padding:5px 8px;border:1px solid rgba(255,159,7,.25);background:rgba(255,159,7,.04);flex:1;min-width:80px;text-align:center;font-size:10px;letter-spacing:.14em;}
+.viz-ctrl .cell b{display:block;font-size:8px;letter-spacing:.26em;color:var(--red);margin-bottom:2px;font-weight:normal;}
+.viz-ctrl .cell v{color:var(--amberBright);font-family:'VT323',monospace;font-size:14px;}
+
+.zoom-ctrl{position:absolute;top:8px;right:12px;z-index:7;display:flex;flex-direction:column;gap:4px;top:32px;}
+.zoom-ctrl .zb{width:26px;height:26px;border:1px solid rgba(255,159,7,.4);background:rgba(0,0,0,.6);color:var(--amberBright);cursor:pointer;font-family:inherit;font-size:14px;line-height:1;padding:0;}
+.zoom-ctrl .zb:hover{background:rgba(255,159,7,.15);border-color:var(--amberBright);}
+
+/* RESULTS */
+.dv-big{padding:12px 10px;text-align:center;border:1px solid rgba(255,74,43,.4);background:linear-gradient(180deg,rgba(255,74,43,.08),rgba(0,0,0,.4));margin-bottom:10px;}
+.dv-big .lbl{font-size:9px;letter-spacing:.3em;color:var(--red);opacity:.85;}
+.dv-big .v{font-size:32px;letter-spacing:.05em;color:var(--amberBright);text-shadow:0 0 10px rgba(255,159,7,.6);margin:4px 0 2px;font-family:'VT323',monospace;}
+.dv-big .u{font-size:9px;letter-spacing:.22em;color:var(--amberBright);opacity:.75;}
+.dv-big .bar{margin-top:8px;height:5px;background:rgba(255,159,7,.12);position:relative;overflow:hidden;}
+.dv-big .bar::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--amber),var(--amberBright),var(--red));box-shadow:0 0 6px rgba(255,159,7,.7);transform:translateX(var(--fill,-100%));transition:transform .5s ease;}
+
+.readout{padding:6px 8px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.35);font-size:10px;letter-spacing:.12em;line-height:1.7;color:var(--amberBright);}
+.readout .r{display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px dotted rgba(255,159,7,.1);}
+.readout .r:last-child{border-bottom:none;}
+.readout .k{color:var(--red);letter-spacing:.2em;font-size:9px;}
+.readout .v{color:var(--amberBright);}
+
+.verdict{margin-top:10px;padding:8px;text-align:center;font-size:10px;letter-spacing:.22em;border:1px solid;}
+.verdict.ok{border-color:rgba(143,255,138,.4);color:var(--green);background:rgba(143,255,138,.05);text-shadow:0 0 5px rgba(143,255,138,.35);}
+.verdict.warn{border-color:rgba(255,201,7,.4);color:var(--amberBright);background:rgba(255,159,7,.05);}
+.verdict.fail{border-color:rgba(255,74,43,.5);color:var(--red);background:rgba(255,74,43,.06);animation:tag-blink 1.4s steps(2) infinite;}
+
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;}
+.mode-cell{padding:6px 4px;text-align:center;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);font-size:9px;letter-spacing:.14em;cursor:pointer;transition:.12s;color:var(--amberBright);}
+.mode-cell:hover{background:rgba(255,159,7,.1);border-color:var(--amberBright);}
+.mode-cell.on{background:rgba(255,74,43,.1);border-color:var(--red);color:var(--red);}
+.mode-cell b{display:block;font-size:8px;letter-spacing:.22em;opacity:.7;margin-bottom:2px;font-weight:normal;}
+
+/* MODAL */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-back.on{display:flex;}
+.modal{width:min(460px,100%);max-height:90vh;overflow-y:auto;background:#0a0705;border:2px solid var(--red);box-shadow:0 0 40px rgba(255,74,43,.4),inset 0 0 30px rgba(255,159,7,.06);padding:20px;position:relative;}
+.modal h3{margin:0 0 14px;color:var(--red);letter-spacing:.24em;font-size:14px;text-shadow:0 0 6px rgba(255,74,43,.4);}
+.modal .close{position:absolute;top:8px;right:12px;color:var(--red);cursor:pointer;font-size:16px;background:none;border:none;font-family:inherit;}
+.modal .field{grid-template-columns:110px 1fr;}
+.modal .btn-row{margin-top:14px;}
+
+#terminal{position:absolute;bottom:0;left:0;right:0;padding:12px 20px;display:flex;gap:10px;align-items:center;z-index:1003;border-top:2px solid rgba(255,159,7,.35);background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));flex-wrap:wrap;}
+#terminal .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+@keyframes chev{50%{opacity:.3;}}
+#terminal input{background:none;border:none;outline:none;color:var(--amber);font-family:inherit;flex:1;min-width:120px;caret-color:var(--amberBright);}
+#terminal .hint{font-size:10px;letter-spacing:.2em;opacity:.7;}
+#terminal .go{padding:6px 12px;border:1px solid var(--red);color:var(--red);background:transparent;cursor:pointer;font-family:inherit;letter-spacing:.16em;font-size:10px;text-decoration:none;transition:.15s;}
+#terminal .go:hover{background:rgba(255,74,43,.12);box-shadow:0 0 12px rgba(255,74,43,.25);}
+#os{position:absolute;bottom:60px;right:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
+#clock{position:absolute;bottom:60px;left:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
+
+#poweron{position:absolute;inset:0;background:#fff;z-index:2000;pointer-events:none;animation:poweron 1.4s ease-out forwards;}
+@keyframes poweron{0%{opacity:0;}5%{opacity:.9;}10%{opacity:.15;}20%{transform:scaleY(.005);opacity:1;background:#fff;}25%{transform:scaleY(1);opacity:.6;background:#ffb060;}100%{transform:scaleY(1);opacity:0;background:#ffb060;}}
+
+@media(max-width:900px){#screen-wrap{inset:10px;border-radius:30px/38px;}#crt-container{padding:14px 14px 76px;}}</style>
 </head>
-
 <body>
 
-<div id="crt"></div>
-<div id="scan"></div>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+      <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>" result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
-<div id="grid">
+<div id="bezel"></div>
 
-<div class="panel">
-POWER GRID
-<div class="bar"><div id="power" class="fill"></div></div>
+<div id="screen-wrap">
+  <div id="screen">
+    <div id="crt-container">
+
+      <!-- HEADER -->
+      <div class="hdr">
+        <div class="l">
+          <span class="dot"></span>
+          <span class="ttl">DELTA-V CALCULATOR</span>
+          <span class="sub">TSIOLKOVSKY MODULE · TRANSFER PLANNER v4.1</span>
+        </div>
+        <div class="r">
+          <span class="tag">U.I.C. FLIGHT OPS</span>
+          <span class="tag warn">RCS: ARMED</span>
+          <span class="tag" id="hdr-date">1989.04.12</span>
+        </div>
+      </div>
+
+      <div class="main">
+        <!-- LEFT: SHIP + PARAMS -->
+        <div class="col-left panel">
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">SHIP PRESETS</span><span class="bd">A</span></div>
+          <div id="preset-list"></div>
+          <div class="btn-row">
+            <button class="btn small" id="btn-add-ship">＋ ADD SHIP</button>
+            <button class="btn small warn" id="btn-del-ship">− DEL</button>
+          </div>
+
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">ENGINE PARAMETERS</span><span class="bd">B</span></div>
+          <div class="field"><label>ISP</label><div class="in"><input type="number" id="in-isp" value="316" min="1" step="1"><span class="u">s</span></div></div>
+          <div class="field"><label>THRUST</label><div class="in"><input type="number" id="in-thr" value="53.4" min="0" step="0.1"><span class="u">kN</span></div></div>
+          <div class="field"><label>MDOT</label><div class="in"><input type="number" id="in-mdot" value="17.2" min="0" step="0.1"><span class="u">kg/s</span></div></div>
+          <div class="field"><label>DRY MASS</label><div class="in"><input type="number" id="in-dry" value="78000" min="1" step="10"><span class="u">kg</span></div></div>
+          <div class="field"><label>PROP MASS</label><div class="in"><input type="number" id="in-prop" value="28000" min="0" step="10"><span class="u">kg</span></div></div>
+          <div class="field"><label>PAYLOAD</label><div class="in"><input type="number" id="in-pay" value="0" min="0" step="10"><span class="u">kg</span></div></div>
+          <div class="btn-row">
+            <button class="btn" id="btn-calc">◈ CALCULATE</button>
+            <button class="btn warn" id="btn-reset">◈ RESET</button>
+          </div>
+        </div>
+
+        <!-- CENTER: 3D VIEW -->
+        <div class="col-center panel">
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">SOLAR SYSTEM · TRAJECTORY VIEW</span><span class="bd">3D</span></div>
+          <div id="viz-wrap">
+            <canvas id="viz-canvas"></canvas>
+            <div class="viz-title">HELIOCENTRIC PLOT</div>
+            <div class="viz-hud">
+              <div><span class="k">FRAME:</span> <span id="hud-frame">0000</span></div>
+              <div><span class="k">PHASE:</span> <span id="hud-phase">IDLE</span></div>
+              <div><span class="k">BURN:</span> <span id="hud-burn">OFF</span></div>
+              <div><span class="k">SPEED:</span> <span id="hud-speed">1×</span></div>
+            </div>
+            <div class="zoom-ctrl">
+              <button class="zb" id="zoom-in">+</button>
+              <button class="zb" id="zoom-out">−</button>
+              <button class="zb" id="zoom-reset" title="reset">◈</button>
+              <button class="zb" id="follow-toggle" title="follow ship">◉</button>
+            </div>
+            <div class="viz-legend">
+              <span><span class="d" style="background:var(--amber);box-shadow:0 0 6px var(--amber)"></span>ORIGIN</span>
+              <span><span class="d" style="background:var(--red);box-shadow:0 0 6px var(--red)"></span>TARGET</span>
+              <span><span class="d" style="background:var(--amberBright);box-shadow:0 0 6px var(--amberBright)"></span>SHIP</span>
+              <span style="opacity:.6;">DRAG TO PAN · SCROLL TO ZOOM</span>
+            </div>
+          </div>
+
+          <div class="viz-ctrl">
+            <div class="cell"><b>ORIGIN</b><v id="lbl-origin">EARTH SFC</v></div>
+            <div class="cell"><b>TARGET</b><v id="lbl-target">MARS</v></div>
+            <div class="cell"><b>MODE</b><v id="lbl-mode">HOHMANN</v></div>
+            <div class="cell"><b>ETA</b><v id="lbl-eta">T−000</v></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" id="btn-play">▶ SIMULATE</button>
+            <button class="btn" id="btn-pause">◼ PAUSE</button>
+            <button class="btn" id="btn-restart">↺ RESTART</button>
+            <button class="btn small" id="btn-speed">SPD 1×</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: MISSION + RESULT -->
+        <div class="col-right panel">
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">DESTINATION</span><span class="bd">DST</span></div>
+          <div class="field"><label>BODY</label><div class="in"><select id="in-dest"></select></div></div>
+          <div class="field"><label>ARRIVAL</label><div class="in"><select id="in-dest-loc"></select></div></div>
+
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">DEPARTURE</span><span class="bd">SRC</span></div>
+          <div class="field"><label>BODY</label><div class="in"><select id="in-src"></select></div></div>
+          <div class="field"><label>LOCATION</label><div class="in"><select id="in-src-loc"></select></div></div>
+
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">TRANSFER MODE</span><span class="bd">MODE</span></div>
+          <div class="mode-grid" id="mode-grid">
+            <div class="mode-cell" data-m="coast"><b>ECON</b>COAST</div>
+            <div class="mode-cell on" data-m="hohmann"><b>STD</b>HOHMANN</div>
+            <div class="mode-cell" data-m="direct"><b>FAST</b>DIRECT</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sec-head"><span class="tick">◈</span><span class="ttl">SOLUTION</span><span class="bd">Δv</span></div>
+          <div class="dv-big">
+            <div class="lbl">TOTAL DELTA-V AVAILABLE</div>
+            <div class="v" id="dv-val">0000</div>
+            <div class="u">METERS PER SECOND</div>
+            <div class="bar" id="dv-bar" style="--fill:-100%"></div>
+          </div>
+          <div class="readout">
+            <div class="r"><span class="k">Δv REQUIRED</span><span class="v" id="r-req">--</span></div>
+            <div class="r"><span class="k">MARGIN</span><span class="v" id="r-mgn">--</span></div>
+            <div class="r"><span class="k">MASS RATIO</span><span class="v" id="r-mr">--</span></div>
+            <div class="r"><span class="k">EX. VEL.</span><span class="v" id="r-ve">--</span></div>
+            <div class="r"><span class="k">BURN TIME</span><span class="v" id="r-bt">--</span></div>
+            <div class="r"><span class="k">TRANSIT</span><span class="v" id="r-tr">--</span></div>
+          </div>
+          <div class="verdict warn" id="verdict">CONFIGURING</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="amber-tint"></div>
+  <div id="rgb-mask"></div>
+  <div id="scanlines"></div>
+  <div id="roll"></div>
+  <div id="corners"></div>
+  <div id="vignette"></div>
+  <div id="glare"></div>
+  <div id="poweron"></div>
+
+  <div id="clock">SYS ::</div>
+  <div id="os">UIC OS v1.0.4 · DVCALC</div>
+
+  <div id="terminal">
+    <span class="chev">&gt;</span>
+    <input id="cmd" placeholder="type command ( solarmap · home · calc · reset )">
+    <a class="go" href="solarmap.html">◈ OPEN SOLAR MAP »</a>
+    <span class="hint">ENTER TO EXECUTE</span>
+  </div>
 </div>
 
-<div class="panel">
-THERMAL LOAD
-<div class="bar"><div id="temp" class="fill"></div></div>
+<!-- ADD SHIP MODAL -->
+<div class="modal-back" id="modal">
+  <div class="modal">
+    <button class="close" id="modal-close">✕</button>
+    <h3>◈ ADD SHIP / ENGINE PRESET</h3>
+    <div class="field"><label>NAME</label><div class="in"><input type="text" id="m-name" placeholder="e.g. NUCLEAR TUG"></div></div>
+    <div class="field"><label>ICON</label><div class="in"><input type="text" id="m-ico" placeholder="▲" maxlength="2" value="▲"></div></div>
+    <div class="field"><label>YEAR/TAG</label><div class="in"><input type="text" id="m-year" placeholder="1989" value="EXP"></div></div>
+    <div class="field"><label>ISP</label><div class="in"><input type="number" id="m-isp" value="450" min="1"><span class="u">s</span></div></div>
+    <div class="field"><label>THRUST</label><div class="in"><input type="number" id="m-thr" value="100" min="0" step="0.1"><span class="u">kN</span></div></div>
+    <div class="field"><label>MDOT</label><div class="in"><input type="number" id="m-mdot" value="22.6" min="0" step="0.1"><span class="u">kg/s</span></div></div>
+    <div class="field"><label>DRY MASS</label><div class="in"><input type="number" id="m-dry" value="20000" min="1" step="10"><span class="u">kg</span></div></div>
+    <div class="field"><label>PROP MASS</label><div class="in"><input type="number" id="m-prop" value="40000" min="0" step="10"><span class="u">kg</span></div></div>
+    <div class="btn-row">
+      <button class="btn" id="modal-save">◈ SAVE PRESET</button>
+      <button class="btn warn" id="modal-cancel">◈ CANCEL</button>
+    </div>
+  </div>
 </div>
 
-<div class="panel">
-CPU OVERLOAD
-<div class="bar"><div id="cpu" class="fill"></div></div>
-</div>
-
-<div class="panel">
-SIGNAL STABILITY
-<div class="bar"><div id="signal" class="fill"></div></div>
-</div>
-
-<div class="panel">
-POWER ROUTING
-<input type="range" id="s1" class="slider" min="0" max="100">
-</div>
-
-<div class="panel">
-COOLANT FLOW
-<input type="range" id="s2" class="slider" min="0" max="100">
-</div>
-
-<div class="panel">
-CORE BALANCE
-<input type="range" id="s3" class="slider" min="0" max="100">
-</div>
-
-<div class="panel">
-SIGNAL FILTER
-<input type="range" id="s4" class="slider" min="0" max="100">
-</div>
-
-<div class="panel">
-CIPHER DIAL
-<div id="dial" class="dial"></div>
-</div>
-
-<div class="panel warning" id="alert">
-SYSTEM INSTABILITY DETECTED
-</div>
-
-<div class="panel" style="grid-column: span 2;">
-SYSTEM LOG
-<div id="logs"></div>
-</div>
-
-</div>
+<div id="bezel-label">FRACTURED • MODEL FR-77 · DVCALC</div>
+<div id="brand-led"></div>
 
 <script>
+/* =========================================================
+   BODIES — celestial data. AU = 1 unit for viz.
+   dv values are simplified astrodynamics reference numbers
+   (m/s) drawn from standard published transfer budgets.
+   ========================================================= */
+const AU = 1;
+const BODIES = {
+  sun:     { name:"SUN",     au:0,      color:"#FFC861", rad:16, orbit:0,   period:0,    parent:null,   locations:[] },
+  mercury: { name:"MERCURY", au:0.39,   color:"#c0a884", rad:3,  orbit:0.39,period:0.24, parent:"sun",  locations:[
+    { id:"sfc", name:"MERCURY SURFACE", dvOut:3700, gLoc:3.7, kind:"surface" },
+    { id:"orb", name:"LOW MERCURY ORBIT", dvOut:100, gLoc:0, kind:"orbit" },
+  ]},
+  venus:   { name:"VENUS",   au:0.72,   color:"#e6b271", rad:5,  orbit:0.72,period:0.62, parent:"sun",  locations:[
+    { id:"sfc", name:"VENUS SURFACE",   dvOut:27700, gLoc:8.87, kind:"surface" },
+    { id:"cld", name:"CLOUD DECK (50 km)", dvOut:8000, gLoc:8.6, kind:"aero" },
+    { id:"orb", name:"LOW VENUS ORBIT", dvOut:200, gLoc:0, kind:"orbit" },
+  ]},
+  earth:   { name:"EARTH",   au:1.00,   color:"#68a0ff", rad:5,  orbit:1.00,period:1.00, parent:"sun",  locations:[
+    { id:"sfc", name:"EARTH SURFACE",   dvOut:9400, gLoc:9.81, kind:"surface" },
+    { id:"leo", name:"LEO",             dvOut:0,    gLoc:0, kind:"orbit" },
+    { id:"geo", name:"GEO",             dvOut:3800, gLoc:0, kind:"orbit" },
+  ]},
+  moon:    { name:"MOON",    au:1.00,   color:"#c9c9c9", rad:2.4,orbit:0.02,period:0.075,parent:"earth",locations:[
+    { id:"sfc", name:"LUNAR SURFACE",   dvOut:1870, gLoc:1.62, kind:"surface" },
+    { id:"lmo", name:"LOW LUNAR ORBIT", dvOut:100,  gLoc:0, kind:"orbit" },
+  ]},
+  mars:    { name:"MARS",    au:1.52,   color:"#d97050", rad:4,  orbit:1.52,period:1.88, parent:"sun",  locations:[
+    { id:"sfc", name:"MARS SURFACE",    dvOut:4100, gLoc:3.71, kind:"surface" },
+    { id:"lmo", name:"LOW MARS ORBIT",  dvOut:200,  gLoc:0, kind:"orbit" },
+  ]},
+  phobos:  { name:"PHOBOS",  au:1.52,   color:"#8a7a68", rad:1.4,orbit:0.012,period:0.032,parent:"mars",locations:[
+    { id:"sfc", name:"PHOBOS SURFACE",  dvOut:11,   gLoc:0.006, kind:"surface" },
+  ]},
+  deimos:  { name:"DEIMOS",  au:1.52,   color:"#9b8a75", rad:1.2,orbit:0.018,period:0.083,parent:"mars",locations:[
+    { id:"sfc", name:"DEIMOS SURFACE",  dvOut:6,    gLoc:0.003, kind:"surface" },
+  ]},
+  jupiter: { name:"JUPITER", au:5.20,   color:"#c9a67e", rad:11, orbit:5.20,period:11.86,parent:"sun",  locations:[
+    { id:"orb", name:"LOW JOVIAN ORBIT", dvOut:900, gLoc:0, kind:"orbit" },
+    { id:"hi",  name:"HIGH JUPITER ORBIT", dvOut:400, gLoc:0, kind:"orbit" },
+  ]},
+  europa:  { name:"EUROPA",  au:5.20,   color:"#d9c9b0", rad:2.2,orbit:0.03,period:0.010,parent:"jupiter",locations:[
+    { id:"sfc", name:"EUROPA SURFACE",  dvOut:2050, gLoc:1.31, kind:"surface" },
+    { id:"orb", name:"LOW EUROPA ORBIT", dvOut:100, gLoc:0, kind:"orbit" },
+  ]},
+  saturn:  { name:"SATURN",  au:9.58,   color:"#e0c890", rad:9.5,orbit:9.58,period:29.46,parent:"sun",  locations:[
+    { id:"orb", name:"LOW SATURNIAN ORBIT", dvOut:900, gLoc:0, kind:"orbit" },
+    { id:"hi",  name:"HIGH SATURN ORBIT", dvOut:400, gLoc:0, kind:"orbit" },
+  ]},
+  titan:   { name:"TITAN",   au:9.58,   color:"#d0a860", rad:2.4,orbit:0.045,period:0.043,parent:"saturn",locations:[
+    { id:"sfc", name:"TITAN SURFACE",   dvOut:2600, gLoc:1.35, kind:"surface" },
+    { id:"orb", name:"LOW TITAN ORBIT", dvOut:150,  gLoc:0, kind:"orbit" },
+  ]},
+  uranus:  { name:"URANUS",  au:19.20,  color:"#a0d8e0", rad:6.5,orbit:19.20,period:84.01,parent:"sun", locations:[
+    { id:"orb", name:"LOW URANIAN ORBIT", dvOut:700, gLoc:0, kind:"orbit" },
+    { id:"hi",  name:"HIGH URANUS ORBIT", dvOut:300, gLoc:0, kind:"orbit" },
+  ]},
+  neptune: { name:"NEPTUNE", au:30.05,  color:"#4870d8", rad:6.3,orbit:30.05,period:164.8,parent:"sun", locations:[
+    { id:"orb", name:"LOW NEPTUNIAN ORBIT", dvOut:800, gLoc:0, kind:"orbit" },
+    { id:"hi",  name:"HIGH NEPTUNE ORBIT", dvOut:300, gLoc:0, kind:"orbit" },
+  ]},
+};
+const BODY_ORDER = ["mercury","venus","earth","moon","mars","phobos","deimos","jupiter","europa","saturn","titan","uranus","neptune"];
 
-let power=60
-let temp=40
-let cpu=50
-let signal=45
-let dial=0
+/* Transfer Δv table (LEO-equivalent to target) — used as base injection cost
+   from a parking orbit around the parent body. Reference numbers.        */
+const TRANSFER_INJECT = {
+  mercury:5500, venus:3600, earth:0, moon:3200, mars:3800,
+  phobos:3800, deimos:3800, jupiter:6300, europa:6300,
+  saturn:7300, titan:7300, uranus:7900, neptune:8400
+};
+/* Mode multipliers on the transfer injection Δv */
+const MODE = {
+  coast:   { m:0.85, tMul:1.6,  label:"COAST"   },
+  hohmann: { m:1.00, tMul:1.0,  label:"HOHMANN" },
+  direct:  { m:1.60, tMul:0.55, label:"DIRECT"  }
+};
 
-const logs=document.getElementById("logs")
+/* SHIP PRESETS — 3 requested + Buran; users can add more */
+const DEFAULT_PRESETS = [
+  { id:"shuttle", name:"SPACE SHUTTLE (OMS)", ico:"▲", year:"1981",
+    isp:316, thrust:53.4, mdot:17.2, dry:78000, prop:28000 },
+  { id:"buran",   name:"BURAN ORBITER",       ico:"▲", year:"1988",
+    isp:362, thrust:35.6, mdot:10.0, dry:80000, prop:25000 },
+  { id:"orion",   name:"ORION DRIVE",         ico:"◎", year:"REF",
+    isp:6000, thrust:8000, mdot:136, dry:1000000, prop:3000000 },
+  { id:"vmdr",    name:"V.M.D.R. LAUNCH SLED",ico:"═", year:"IF-89",
+    isp:0, thrust:0, mdot:0, dry:24000, prop:0, impulse:8500 }
+];
+let PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+let selectedPresetId = "shuttle";
+let selectedSrc = "earth", selectedSrcLoc = "leo";
+let selectedDst = "mars", selectedDstLoc = "lmo";
+let selectedMode = "hohmann";
 
-function updateBars(){
-power+=Math.random()*2-1
-temp+=Math.random()*1.5
-cpu+=Math.random()*2-1
-signal+=Math.random()*2-1
+/* ===== BUILD UI ===== */
+function el(id){ return document.getElementById(id); }
 
-power+= (s1.value-50)*.01
-temp-= (s2.value-50)*.02
-cpu-= (s3.value-50)*.01
-signal+= (s4.value-50)*.01
-
-power=Math.max(0,Math.min(100,power))
-temp=Math.max(0,Math.min(100,temp))
-cpu=Math.max(0,Math.min(100,cpu))
-signal=Math.max(0,Math.min(100,signal))
-
-document.getElementById("power").style.width=power+"%"
-document.getElementById("temp").style.width=temp+"%"
-document.getElementById("cpu").style.width=cpu+"%"
-document.getElementById("signal").style.width=signal+"%"
-
-checkSolution()
+function renderPresetList(){
+  const list = el("preset-list");
+  list.innerHTML = "";
+  PRESETS.forEach(p=>{
+    const r = document.createElement("div");
+    r.className = "row" + (p.id===selectedPresetId?" active":"");
+    r.dataset.id = p.id;
+    r.innerHTML = `<span class="ico">${p.ico}</span><span class="n">${p.name}</span><span class="meta">${p.year}</span>`;
+    r.addEventListener("click",()=>selectPreset(p.id));
+    list.appendChild(r);
+  });
+}
+function selectPreset(id){
+  const p = PRESETS.find(x=>x.id===id); if(!p) return;
+  selectedPresetId = id;
+  el("in-isp").value = p.isp;
+  el("in-thr").value = p.thrust;
+  el("in-mdot").value = p.mdot;
+  el("in-dry").value = p.dry;
+  el("in-prop").value = p.prop;
+  renderPresetList();
+  calc();
 }
 
-function log(msg){
-logs.innerHTML=msg+"<br>"+logs.innerHTML
+function fillBodySelect(sel, isDest){
+  sel.innerHTML = "";
+  BODY_ORDER.forEach(id=>{
+    const b = BODIES[id];
+    if(!b.locations.length) return;
+    const opt = document.createElement("option");
+    opt.value = id; opt.textContent = b.name;
+    sel.appendChild(opt);
+  });
+}
+function fillLocSelect(sel, bodyId){
+  sel.innerHTML = "";
+  const b = BODIES[bodyId];
+  b.locations.forEach(l=>{
+    const opt = document.createElement("option");
+    opt.value = l.id; opt.textContent = l.name;
+    sel.appendChild(opt);
+  });
 }
 
-setInterval(()=>{
-updateBars()
+/* ===== Δv CALCULATION ===== */
+function calc(){
+  const isp = parseFloat(el("in-isp").value) || 0;
+  const thr = parseFloat(el("in-thr").value) || 0;
+  const mdot = parseFloat(el("in-mdot").value) || 0;
+  const dry = parseFloat(el("in-dry").value) || 0;
+  const prop = parseFloat(el("in-prop").value) || 0;
+  const pay = parseFloat(el("in-pay").value) || 0;
+  const g0 = 9.80665;
+  const m0 = dry + prop + pay;
+  const mf = dry + pay;
+  const mr = mf>0 ? m0/mf : 0;
+  const ve = isp * g0;
 
-if(Math.random()>.7){
-log("ERROR "+Math.floor(Math.random()*9000))
+  const p = PRESETS.find(x=>x.id===selectedPresetId);
+  let dvAvail = 0;
+  if(p && p.impulse){ dvAvail = p.impulse; }
+  else if(ve > 0 && mr > 1){ dvAvail = ve * Math.log(mr); }
+
+  const burnT = mdot > 0 ? prop/mdot : 0;
+
+  // required Δv
+  const src = BODIES[selectedSrc];
+  const dst = BODIES[selectedDst];
+  const srcLoc = src.locations.find(l=>l.id===selectedSrcLoc) || src.locations[0];
+  const dstLoc = dst.locations.find(l=>l.id===selectedDstLoc) || dst.locations[0];
+
+  const inject = (TRANSFER_INJECT[selectedDst] || 0);
+  const mmode = MODE[selectedMode];
+  let dvReq = srcLoc.dvOut + inject*mmode.m + dstLoc.dvOut;
+  // if same body just use loc-to-loc rough
+  if(selectedSrc === selectedDst){ dvReq = Math.abs(srcLoc.dvOut - dstLoc.dvOut) + 200; }
+  dvReq = Math.round(dvReq);
+
+  const margin = dvAvail - dvReq;
+  const pct = Math.min(1, Math.max(0, dvAvail/(dvReq*1.5)));
+  el("dv-val").textContent = Math.round(dvAvail).toString().padStart(4,"0");
+  el("dv-bar").style.setProperty("--fill", `${-100+pct*100}%`);
+
+  el("r-req").textContent = dvReq.toLocaleString()+" m/s";
+  el("r-mgn").textContent = (margin>=0?"+":"")+Math.round(margin).toLocaleString()+" m/s";
+  el("r-mr").textContent = (mr>0 && isFinite(mr))?mr.toFixed(3):"--";
+  el("r-ve").textContent = ve>0?Math.round(ve).toLocaleString()+" m/s":"IMPULSE";
+  el("r-bt").textContent = burnT>0?fmtTime(burnT):"—";
+
+  // rough transit time
+  const baseDays = transitDays(selectedSrc, selectedDst);
+  const days = baseDays * mmode.tMul;
+  el("r-tr").textContent = fmtDays(days);
+
+  const v = el("verdict");
+  if(dvAvail >= dvReq*1.15){ v.textContent="◈ MISSION NOMINAL ◈"; v.className="verdict ok"; }
+  else if(dvAvail >= dvReq){ v.textContent="⟁ MARGINAL — REDUCE PAYLOAD"; v.className="verdict warn"; }
+  else { v.textContent="✗ INSUFFICIENT Δv — MISSION SCRUB"; v.className="verdict fail"; }
+
+  el("lbl-origin").textContent = shortLoc(srcLoc.name);
+  el("lbl-target").textContent = shortLoc(dstLoc.name);
+  el("lbl-mode").textContent = mmode.label;
+
+  // reset sim with new params
+  sim.reset(selectedSrc, selectedDst, selectedMode);
+}
+function shortLoc(n){ return n.replace(/LOW /,"L").replace(/ ORBIT/,"O").replace(/ SURFACE/," SFC"); }
+function fmtTime(s){ if(s<60) return s.toFixed(1)+"s"; if(s<3600) return Math.floor(s/60)+"m "+Math.round(s%60)+"s"; return Math.floor(s/3600)+"h "+Math.floor((s%3600)/60)+"m"; }
+function fmtDays(d){ if(d<1) return (d*24).toFixed(1)+"h"; if(d<365) return d.toFixed(0)+"d"; return (d/365).toFixed(2)+"y"; }
+function transitDays(a,b){
+  const aBody = topLevel(a), bBody = topLevel(b);
+  if(aBody===bBody) return 0.5;
+  const rA = BODIES[aBody].au, rB = BODIES[bBody].au;
+  const a_semi = (rA+rB)/2;
+  // Kepler: T = year * a^1.5 ; hohmann = half that
+  const yrs = Math.pow(a_semi, 1.5) * 0.5;
+  return yrs*365;
+}
+function topLevel(id){ let b=BODIES[id]; while(b.parent && b.parent!=="sun"){ id=b.parent; b=BODIES[id]; } return id; }
+
+/* =========================================================
+   3D SOLAR SYSTEM SIMULATION
+   ========================================================= */
+const cvs = el("viz-canvas");
+const ctx = cvs.getContext("2d");
+let W=0,H=0;
+const DPR = Math.max(1, Math.min(2, window.devicePixelRatio||1));
+
+function resize(){
+  const wrap = cvs.parentElement.getBoundingClientRect();
+  W = wrap.width; H = wrap.height;
+  cvs.width = Math.floor(W*DPR); cvs.height = Math.floor(H*DPR);
+  cvs.style.width = W+"px"; cvs.style.height = H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+new ResizeObserver(resize).observe(cvs.parentElement);
+
+/* CAMERA */
+const cam = {
+  zoom: 40,       // pixels per AU (log-scale outer bodies via sqrt)
+  yaw: 0.6,
+  pitch: 0.55,
+  panX: 0, panY: 0,
+  follow: true,
+  targetZoom: 40
+};
+
+/* Solar system uses compressed log-ish scale so all planets fit */
+function auToUnit(au){
+  return Math.sign(au) * Math.pow(Math.abs(au), 0.55) * 1.8;
 }
 
-},200)
-
-const s1=document.getElementById("s1")
-const s2=document.getElementById("s2")
-const s3=document.getElementById("s3")
-const s4=document.getElementById("s4")
-
-const dialEl=document.getElementById("dial")
-
-dialEl.onclick=()=>{
-dial=(dial+30)%360
-dialEl.style.transform="rotate("+dial+"deg)"
+/* Project 3D world -> screen */
+function project(x,y,z){
+  const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw);
+  const cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+  let X = x*cy - z*sy;
+  let Z = x*sy + z*cy;
+  let Y = y*cp - Z*sp;
+  Z = y*sp + Z*cp;
+  const persp = 1;
+  return { x: W/2 + cam.panX + X*cam.zoom, y: H/2 + cam.panY + Y*cam.zoom, s: persp, z:Z };
 }
 
-function checkSolution(){
+/* Body world position (unit space) */
+function bodyPos(id, t){
+  const b = BODIES[id];
+  if(id==="sun") return {x:0,y:0,z:0};
+  const period = b.period || 1;
+  const angle = (t/period)*Math.PI*2 + hashSeed(id);
+  const r = auToUnit(b.orbit);
+  const px = r*Math.cos(angle);
+  const pz = r*Math.sin(angle);
+  const py = 0;
+  if(b.parent && b.parent!=="sun"){
+    const pp = bodyPos(b.parent, t);
+    return { x:pp.x + px*0.3, y:pp.y + py, z:pp.z + pz*0.3 }; // moon at reduced scale
+  }
+  return { x:px, y:py, z:pz };
+}
+function hashSeed(s){ let h=0; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i))|0; return (h%1000)/1000 * Math.PI*2; }
 
-if(
-power>48 && power<52 &&
-temp>30 && temp<35 &&
-cpu>40 && cpu<44 &&
-signal>60 && signal<64 &&
-s1.value==73 &&
-s2.value==21 &&
-s3.value==55 &&
-s4.value==88 &&
-dial==180
-){
-log("SYSTEM STABILIZED")
-setTimeout(()=>{
-window.location="classified.html"
-},1500)
+/* Draw wireframe sphere */
+function drawSphere(cx,cy,cz,rad,color,dense){
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  const seg = dense?18:12;
+  // equator + 2 latitudes
+  for(let i=-1;i<=1;i++){
+    const lat = i*Math.PI/4;
+    const y = cy + rad*Math.sin(lat);
+    const r = rad*Math.cos(lat);
+    ctx.beginPath();
+    for(let a=0;a<=seg;a++){
+      const t=(a/seg)*Math.PI*2;
+      const p=project(cx+r*Math.cos(t), y, cz+r*Math.sin(t));
+      if(a===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+  for(let j=0;j<4;j++){
+    const lon = j*Math.PI/4;
+    ctx.beginPath();
+    for(let a=0;a<=seg;a++){
+      const t=(a/seg)*Math.PI*2;
+      const p=project(cx+rad*Math.cos(t)*Math.cos(lon), cy+rad*Math.sin(t), cz+rad*Math.cos(t)*Math.sin(lon));
+      if(a===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+  const p=project(cx,cy,cz);
+  ctx.fillStyle=color;
+  ctx.beginPath(); ctx.arc(p.x,p.y,1.5,0,Math.PI*2); ctx.fill();
 }
 
+function drawOrbitRing(cx,cy,cz,rad,color,dashed){
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  if(dashed) ctx.setLineDash([3,5]); else ctx.setLineDash([]);
+  ctx.beginPath();
+  const seg=90;
+  for(let a=0;a<=seg;a++){
+    const t=(a/seg)*Math.PI*2;
+    const p=project(cx+rad*Math.cos(t), cy, cz+rad*Math.sin(t));
+    if(a===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
+/* SIMULATION STATE */
+const sim = {
+  t: 0,           // world time (planet orbital position clock, years)
+  simRunning: true,
+  speed: 1,       // sim speed multiplier
+  srcId: "earth",
+  dstId: "mars",
+  mode: "hohmann",
+  phase: "PARKING",
+  phaseT: 0,      // 0..1 progress within current phase
+  ship: {x:0,y:0,z:0},
+  thrusting: false,
+  trail: [],
+  eta: 0,
+  reset(src,dst,mode){
+    this.srcId=src; this.dstId=dst; this.mode=mode;
+    this.phase="PARKING"; this.phaseT=0; this.trail=[]; this.thrusting=false; this.eta=0;
+    this.startSrc = src;
+    this.endDst = dst;
+    this.a0 = auToUnit(BODIES[this.startSrc].orbit);
+    this.a1 = auToUnit(BODIES[this.endDst].orbit);
+    this.semi = (this.a0 + this.a1)/2;
+    this.ecc = Math.abs(this.a1-this.a0)/(this.a0+this.a1);
+    // fix start position at source-body position now
+    this.launchTime = this.t;
+    this.launchAngle = Math.atan2(bodyPos(this.startSrc,this.t).z, bodyPos(this.startSrc,this.t).x);
+  }
+};
+
+const PHASE_LEN = {
+  PARKING: 80,
+  BURN: 40,
+  TRANSFER: 320,
+  CAPTURE: 40,
+  ORBIT: 60
+};
+
+function updateSim(){
+  if(!sim.simRunning) return;
+  const dt = 0.0006 * sim.speed;
+  sim.t += dt;
+
+  const modeInfo = MODE[sim.mode];
+  const transferLen = PHASE_LEN.TRANSFER * modeInfo.tMul;
+  const total = PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen + PHASE_LEN.CAPTURE + PHASE_LEN.ORBIT;
+
+  sim.phaseT += sim.speed * 0.6;
+  const p = sim.phaseT;
+
+  const srcPos = bodyPos(sim.startSrc, sim.t);
+  const dstPos = bodyPos(sim.endDst, sim.t);
+
+  let x=0,y=0,z=0, phaseName="ORBITING", thrust=false;
+
+  if(p < PHASE_LEN.PARKING){
+    // parking orbit around source body
+    const a = (p/PHASE_LEN.PARKING)*Math.PI*2;
+    const r = Math.max(0.06, BODIES[sim.startSrc].rad*0.6/cam.zoom + 0.1);
+    x = srcPos.x + r*Math.cos(a);
+    y = 0;
+    z = srcPos.z + r*Math.sin(a);
+    phaseName = "PARKING";
+    sim.eta = Math.round((total-p)/6);
+  } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN){
+    const bt = (p - PHASE_LEN.PARKING)/PHASE_LEN.BURN;
+    const r = Math.max(0.06, BODIES[sim.startSrc].rad*0.6/cam.zoom + 0.1) + bt*0.4;
+    // tangent direction from source toward destination
+    const dx = dstPos.x - srcPos.x, dz = dstPos.z - srcPos.z;
+    const L = Math.hypot(dx,dz)||1;
+    x = srcPos.x + (dx/L)*r;
+    y = 0;
+    z = srcPos.z + (dz/L)*r;
+    phaseName = "TRANS BURN";
+    thrust = true;
+    sim.eta = Math.round((total-p)/6);
+  } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen){
+    const tt = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN)/transferLen;
+    // spline interp along transfer arc
+    // arc goes from (srcPos + small offset) to dstPos, with bulge based on mode
+    const start = srcPos;
+    const end = dstPos;
+    const mx = (start.x + end.x)/2;
+    const mz = (start.z + end.z)/2;
+    const dx = end.x - start.x, dz = end.z - start.z;
+    // perpendicular for bulge
+    const px = -dz, pz = dx;
+    const L = Math.hypot(px,pz)||1;
+    const bulge = sim.mode==="direct" ? 0.1 : (sim.mode==="coast" ? 0.55 : 0.35);
+    const cx = mx + (px/L)*bulge*Math.hypot(dx,dz);
+    const cz = mz + (pz/L)*bulge*Math.hypot(dx,dz);
+    // quadratic bezier
+    const it = 1-tt;
+    x = it*it*start.x + 2*it*tt*cx + tt*tt*end.x;
+    z = it*it*start.z + 2*it*tt*cz + tt*tt*end.z;
+    y = Math.sin(tt*Math.PI)*0.08; // slight out-of-plane arc
+    phaseName = "TRANSFER · " + modeInfo.label;
+    // brief mid-course correction burn
+    if(sim.mode==="direct") thrust = (tt<0.15 || tt>0.85);
+    sim.eta = Math.round((total-p)/6);
+  } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen + PHASE_LEN.CAPTURE){
+    const ct = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN - transferLen)/PHASE_LEN.CAPTURE;
+    const r = 0.5 - ct*0.4;
+    const a = ct*Math.PI;
+    x = dstPos.x + r*Math.cos(a);
+    y = 0;
+    z = dstPos.z + r*Math.sin(a);
+    phaseName = "CAPTURE";
+    thrust = true;
+    sim.eta = Math.round((total-p)/6);
+  } else if(p < total){
+    const ot = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN - transferLen - PHASE_LEN.CAPTURE)/PHASE_LEN.ORBIT;
+    const r = Math.max(0.06, BODIES[sim.endDst].rad*0.6/cam.zoom + 0.1);
+    const a = ot*Math.PI*2 + Math.PI;
+    x = dstPos.x + r*Math.cos(a);
+    y = 0;
+    z = dstPos.z + r*Math.sin(a);
+    phaseName = "ORBITING";
+    sim.eta = 0;
+  } else {
+    // loop
+    sim.phaseT = 0;
+    sim.trail = [];
+    return;
+  }
+
+  sim.ship.x = x; sim.ship.y = y; sim.ship.z = z;
+  sim.thrusting = thrust;
+  sim.phase = phaseName;
+
+  sim.trail.push({x,y,z});
+  if(sim.trail.length > 260) sim.trail.shift();
+
+  el("hud-phase").textContent = phaseName;
+  el("hud-burn").textContent = thrust?"◈ FIRING":"COAST";
+  el("hud-frame").textContent = String(Math.floor(sim.phaseT)).padStart(4,"0").slice(-4);
+  el("hud-speed").textContent = sim.speed+"×";
+  el("lbl-eta").textContent = "T−"+String(sim.eta).padStart(3,"0");
+}
+
+/* MAIN DRAW */
+function draw(){
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0,0,W,H);
+  // dim vignette bg
+  const bg = ctx.createRadialGradient(W/2,H/2,20, W/2,H/2, Math.max(W,H)*0.7);
+  bg.addColorStop(0, "rgba(30,15,0,0.4)");
+  bg.addColorStop(1, "rgba(0,0,0,1)");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  drawStars();
+
+  // camera follow ship
+  if(cam.follow){
+    const target = sim.ship;
+    // ease pan to follow
+    const wantX = -target.x*cam.zoom;
+    const wantY = -target.y*cam.zoom;
+    cam.panX += (wantX - cam.panX)*0.08;
+    cam.panY += (wantY - cam.panY)*0.08;
+  }
+  cam.zoom += (cam.targetZoom - cam.zoom)*0.15;
+
+  // draw sun
+  drawSphere(0,0,0, 20/cam.zoom + 0.3, "rgba(255,200,90,0.85)", true);
+  const psun = project(0,0,0);
+  const g = ctx.createRadialGradient(psun.x,psun.y,2, psun.x,psun.y, 24);
+  g.addColorStop(0, "rgba(255,200,90,0.6)");
+  g.addColorStop(1, "rgba(255,159,7,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(psun.x,psun.y, 24,0,Math.PI*2); ctx.fill();
+
+  // orbit rings (heliocentric)
+  BODY_ORDER.forEach(id=>{
+    const b = BODIES[id];
+    if(b.parent!=="sun") return;
+    const r = auToUnit(b.orbit);
+    const isRoute = (id===sim.startSrc || id===sim.endDst);
+    drawOrbitRing(0,0,0, r, isRoute?"rgba(255,159,7,0.5)":"rgba(255,159,7,0.14)", !isRoute);
+  });
+
+  // planets
+  BODY_ORDER.forEach(id=>{
+    const b = BODIES[id];
+    if(b.parent!=="sun") return;
+    const pos = bodyPos(id, sim.t);
+    const rad = Math.max(0.04, b.rad*0.04);
+    drawSphere(pos.x,pos.y,pos.z, rad, hexA(b.color, 0.8));
+    // label
+    const p = project(pos.x,pos.y,pos.z);
+    ctx.fillStyle = (id===sim.startSrc)?"rgba(255,200,90,0.9)":(id===sim.endDst)?"rgba(255,74,43,0.9)":"rgba(255,159,7,0.5)";
+    ctx.font = "9px 'Share Tech Mono'";
+    ctx.fillText(b.name, p.x+8, p.y-8);
+    // moon of this planet along route
+    BODY_ORDER.forEach(mid=>{
+      const m = BODIES[mid];
+      if(m.parent===id){
+        const mpos = bodyPos(mid, sim.t);
+        drawOrbitRing(pos.x,pos.y,pos.z, auToUnit(m.orbit)*0.3, "rgba(255,159,7,0.2)", true);
+        drawSphere(mpos.x,mpos.y,mpos.z, Math.max(0.02, m.rad*0.03), hexA(m.color,0.75));
+        if(mid===sim.startSrc || mid===sim.endDst){
+          const pm = project(mpos.x,mpos.y,mpos.z);
+          ctx.fillStyle = (mid===sim.startSrc)?"rgba(255,200,90,0.9)":"rgba(255,74,43,0.9)";
+          ctx.fillText(m.name, pm.x+6, pm.y-6);
+        }
+      }
+    });
+  });
+
+  // trail
+  if(sim.trail.length>1){
+    ctx.strokeStyle = "rgba(255,200,90,0.6)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i=0;i<sim.trail.length;i++){
+      const t = sim.trail[i];
+      const p = project(t.x,t.y,t.z);
+      const alpha = i/sim.trail.length;
+      if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+
+  // planned trajectory arc (dotted) — only during PARKING and TRANSFER
+  if(sim.phase.startsWith("TRANSFER") || sim.phase==="PARKING" || sim.phase==="TRANS BURN"){
+    const start = bodyPos(sim.startSrc, sim.t);
+    const end = bodyPos(sim.endDst, sim.t);
+    const dx = end.x - start.x, dz = end.z - start.z;
+    const px = -dz, pz = dx;
+    const L = Math.hypot(px,pz)||1;
+    const bulge = sim.mode==="direct" ? 0.1 : (sim.mode==="coast" ? 0.55 : 0.35);
+    const cx = (start.x+end.x)/2 + (px/L)*bulge*Math.hypot(dx,dz);
+    const cz = (start.z+end.z)/2 + (pz/L)*bulge*Math.hypot(dx,dz);
+    ctx.strokeStyle = "rgba(255,74,43,0.35)";
+    ctx.setLineDash([2,5]);
+    ctx.beginPath();
+    for(let i=0;i<=48;i++){
+      const t = i/48; const it=1-t;
+      const x = it*it*start.x + 2*it*t*cx + t*t*end.x;
+      const z = it*it*start.z + 2*it*t*cz + t*t*end.z;
+      const p = project(x, Math.sin(t*Math.PI)*0.08, z);
+      if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // ship
+  const sp = project(sim.ship.x, sim.ship.y, sim.ship.z);
+  if(sim.thrusting){
+    const flick = 0.6+Math.random()*0.5;
+    const grad = ctx.createRadialGradient(sp.x,sp.y,1,sp.x,sp.y,22);
+    grad.addColorStop(0,"rgba(255,200,90,"+(0.95*flick)+")");
+    grad.addColorStop(0.4,"rgba(255,120,0,"+(0.5*flick)+")");
+    grad.addColorStop(1,"rgba(255,74,43,0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(sp.x,sp.y, 20*flick, 0,Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle = "#FFC861";
+  ctx.strokeStyle = "#FFC861";
+  ctx.shadowColor = "#FFC861"; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.arc(sp.x,sp.y, 4, 0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  // crosshair
+  ctx.strokeStyle = "rgba(255,200,90,0.5)";
+  ctx.beginPath();
+  ctx.moveTo(sp.x-10,sp.y); ctx.lineTo(sp.x-5,sp.y);
+  ctx.moveTo(sp.x+5,sp.y); ctx.lineTo(sp.x+10,sp.y);
+  ctx.moveTo(sp.x,sp.y-10); ctx.lineTo(sp.x,sp.y-5);
+  ctx.moveTo(sp.x,sp.y+5); ctx.lineTo(sp.x,sp.y+10);
+  ctx.stroke();
+}
+
+function hexA(hex, a){
+  // #rrggbb -> rgba
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* stars */
+const STAR_SEEDS = Array.from({length:120},(_,i)=>({
+  x: Math.random(), y: Math.random(), s: Math.random()*1.5+0.3, p: Math.random()*6.28
+}));
+function drawStars(){
+  ctx.fillStyle = "rgba(255,200,90,0.6)";
+  STAR_SEEDS.forEach((s,i)=>{
+    const tw = 0.35 + 0.65*Math.abs(Math.sin(sim.t*10 + s.p));
+    ctx.globalAlpha = tw*0.6;
+    ctx.fillRect(s.x*W, s.y*H, s.s, s.s);
+  });
+  ctx.globalAlpha = 1;
+}
+
+function frame(){
+  updateSim();
+  draw();
+  requestAnimationFrame(frame);
+}
+
+/* =========================================================
+   WIRE UI
+   ========================================================= */
+function updateSrcLocs(){
+  fillLocSelect(el("in-src-loc"), selectedSrc);
+  // filter: gas giants have no surface — already handled in data
+  const first = BODIES[selectedSrc].locations[0];
+  selectedSrcLoc = first.id;
+  el("in-src-loc").value = first.id;
+}
+function updateDstLocs(){
+  fillLocSelect(el("in-dest-loc"), selectedDst);
+  const first = BODIES[selectedDst].locations[0];
+  selectedDstLoc = first.id;
+  el("in-dest-loc").value = first.id;
+}
+
+fillBodySelect(el("in-src"), false);
+fillBodySelect(el("in-dest"), true);
+el("in-src").value = selectedSrc;
+el("in-dest").value = selectedDst;
+updateSrcLocs();
+updateDstLocs();
+el("in-src-loc").value = "leo"; selectedSrcLoc = "leo";
+el("in-dest-loc").value = "lmo"; selectedDstLoc = "lmo";
+
+el("in-src").addEventListener("change", e=>{ selectedSrc = e.target.value; updateSrcLocs(); calc(); });
+el("in-dest").addEventListener("change", e=>{ selectedDst = e.target.value; updateDstLocs(); calc(); });
+el("in-src-loc").addEventListener("change", e=>{ selectedSrcLoc = e.target.value; calc(); });
+el("in-dest-loc").addEventListener("change", e=>{ selectedDstLoc = e.target.value; calc(); });
+
+document.querySelectorAll(".mode-cell").forEach(c=>{
+  c.addEventListener("click",()=>{
+    selectedMode = c.dataset.m;
+    document.querySelectorAll(".mode-cell").forEach(x=>x.classList.toggle("on", x===c));
+    calc();
+  });
+});
+
+["in-isp","in-thr","in-mdot","in-dry","in-prop","in-pay"].forEach(id=>{
+  el(id).addEventListener("input", calc);
+});
+
+el("btn-calc").addEventListener("click", calc);
+el("btn-reset").addEventListener("click", ()=>{
+  PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+  selectPreset("shuttle");
+});
+
+el("btn-play").addEventListener("click", ()=>{ sim.simRunning = true; });
+el("btn-pause").addEventListener("click", ()=>{ sim.simRunning = false; });
+el("btn-restart").addEventListener("click", ()=>{ sim.reset(selectedSrc, selectedDst, selectedMode); sim.simRunning=true; });
+const speeds = [0.5,1,2,4,8];
+let speedIdx = 1;
+el("btn-speed").addEventListener("click", ()=>{
+  speedIdx = (speedIdx+1)%speeds.length;
+  sim.speed = speeds[speedIdx];
+  el("btn-speed").textContent = "SPD "+sim.speed+"×";
+});
+
+/* Zoom & pan */
+el("zoom-in").addEventListener("click", ()=>{ cam.targetZoom = Math.min(400, cam.targetZoom*1.4); });
+el("zoom-out").addEventListener("click", ()=>{ cam.targetZoom = Math.max(4, cam.targetZoom/1.4); });
+el("zoom-reset").addEventListener("click", ()=>{ cam.targetZoom = 40; cam.panX=0; cam.panY=0; });
+el("follow-toggle").addEventListener("click", ()=>{
+  cam.follow = !cam.follow;
+  el("follow-toggle").style.background = cam.follow ? "rgba(255,159,7,0.2)" : "rgba(0,0,0,0.6)";
+});
+const vwrap = el("viz-wrap");
+vwrap.addEventListener("wheel", e=>{
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+  cam.targetZoom = Math.max(4, Math.min(400, cam.targetZoom*factor));
+}, {passive:false});
+let dragging=false, lastMX=0, lastMY=0;
+vwrap.addEventListener("mousedown", e=>{
+  dragging=true; lastMX=e.clientX; lastMY=e.clientY;
+  vwrap.classList.add("grabbing");
+  cam.follow = false;
+  el("follow-toggle").style.background = "rgba(0,0,0,0.6)";
+});
+window.addEventListener("mouseup", ()=>{ dragging=false; vwrap.classList.remove("grabbing"); });
+window.addEventListener("mousemove", e=>{
+  if(!dragging) return;
+  cam.panX += (e.clientX - lastMX);
+  cam.panY += (e.clientY - lastMY);
+  lastMX = e.clientX; lastMY = e.clientY;
+});
+// touch
+vwrap.addEventListener("touchstart", e=>{
+  if(e.touches.length===1){
+    dragging=true; lastMX=e.touches[0].clientX; lastMY=e.touches[0].clientY;
+    cam.follow=false;
+  }
+}, {passive:true});
+vwrap.addEventListener("touchmove", e=>{
+  if(dragging && e.touches.length===1){
+    cam.panX += (e.touches[0].clientX - lastMX);
+    cam.panY += (e.touches[0].clientY - lastMY);
+    lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
+  }
+}, {passive:true});
+vwrap.addEventListener("touchend", ()=>{ dragging=false; });
+
+/* ADD SHIP MODAL */
+const modal = el("modal");
+function openModal(){ modal.classList.add("on"); }
+function closeModal(){ modal.classList.remove("on"); }
+el("btn-add-ship").addEventListener("click", openModal);
+el("modal-close").addEventListener("click", closeModal);
+el("modal-cancel").addEventListener("click", closeModal);
+el("modal-save").addEventListener("click", ()=>{
+  const name = el("m-name").value.trim() || "CUSTOM SHIP";
+  const p = {
+    id: "custom-"+Date.now(),
+    name: name.toUpperCase(),
+    ico: el("m-ico").value.trim() || "▲",
+    year: el("m-year").value.trim() || "CUSTOM",
+    isp: parseFloat(el("m-isp").value)||0,
+    thrust: parseFloat(el("m-thr").value)||0,
+    mdot: parseFloat(el("m-mdot").value)||0,
+    dry: parseFloat(el("m-dry").value)||0,
+    prop: parseFloat(el("m-prop").value)||0
+  };
+  PRESETS.push(p);
+  selectedPresetId = p.id;
+  renderPresetList();
+  selectPreset(p.id);
+  closeModal();
+});
+el("btn-del-ship").addEventListener("click", ()=>{
+  // don't delete last one
+  if(PRESETS.length<=1) return;
+  const idx = PRESETS.findIndex(p=>p.id===selectedPresetId);
+  if(idx<0) return;
+  PRESETS.splice(idx,1);
+  selectedPresetId = PRESETS[0].id;
+  selectPreset(selectedPresetId);
+});
+
+/* Clock */
+function tickClock(){
+  const d = new Date();
+  const p = n=>n.toString().padStart(2,"0");
+  el("clock").textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+setInterval(tickClock,1000); tickClock();
+
+/* Terminal */
+el("cmd").addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    const v = e.target.value.toLowerCase().trim();
+    if(v==="solarmap"||v==="map") location.href="solarmap.html";
+    else if(v==="home") location.href="index.html";
+    else if(v==="calc") calc();
+    else if(v==="reset") { PRESETS = JSON.parse(JSON.stringify(DEFAULT_PRESETS)); selectPreset("shuttle"); }
+    e.target.value="";
+  }
+});
+
+/* BOOT */
+renderPresetList();
+resize();
+sim.reset(selectedSrc, selectedDst, selectedMode);
+selectPreset("shuttle");
+requestAnimationFrame(frame);
 </script>
-
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
