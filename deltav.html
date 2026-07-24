@@ -672,34 +672,15 @@ function drawOrbitRing(cx,cy,cz,rad,color,dashed){
   ctx.setLineDash([]);
 }
 
-/* SIMULATION STATE */
-const sim = {
-  t: 0,           // world time (planet orbital position clock, years)
-  simRunning: true,
-  speed: 1,       // sim speed multiplier
-  srcId: "earth",
-  dstId: "mars",
-  mode: "hohmann",
-  phase: "PARKING",
-  phaseT: 0,      // 0..1 progress within current phase
-  ship: {x:0,y:0,z:0},
-  thrusting: false,
-  trail: [],
-  eta: 0,
-  reset(src,dst,mode){
-    this.srcId=src; this.dstId=dst; this.mode=mode;
-    this.phase="PARKING"; this.phaseT=0; this.trail=[]; this.thrusting=false; this.eta=0;
-    this.startSrc = src;
-    this.endDst = dst;
-    this.a0 = auToUnit(BODIES[this.startSrc].orbit);
-    this.a1 = auToUnit(BODIES[this.endDst].orbit);
-    this.semi = (this.a0 + this.a1)/2;
-    this.ecc = Math.abs(this.a1-this.a0)/(this.a0+this.a1);
-    // fix start position at source-body position now
-    this.launchTime = this.t;
-    this.launchAngle = Math.atan2(bodyPos(this.startSrc,this.t).z, bodyPos(this.startSrc,this.t).x);
-  }
-};
+/* SIMULATION STATE
+   Time budget:
+    - world time (years) advances continuously so planets orbit
+    - phaseT counts sim frames; phase durations are in sim frames
+    - WORLD time consumed by transfer is precomputed so we can
+      lead-intercept the target's future position
+*/
+const DT_PER_FRAME = 0.0006;   // years per frame at speed 1
+const PHASE_STEP = 0.6;        // phaseT increment per frame at speed 1
 
 const PHASE_LEN = {
   PARKING: 80,
@@ -709,91 +690,209 @@ const PHASE_LEN = {
   ORBIT: 60
 };
 
+const sim = {
+  t: 0,
+  simRunning: true,
+  speed: 1,
+  mode: "hohmann",
+  phase: "PARKING",
+  phaseT: 0,
+  ship: {x:0,y:0,z:0},
+  thrusting: false,
+  trail: [],
+  eta: 0,
+  startSrc: "earth",
+  endDst: "mars",
+  // Fixed launch + intercept points captured at burn end
+  launchPos: null,
+  arrivalPos: null,
+  // Control point of the transfer arc (perpendicular bulge)
+  ctrlPos: null,
+  transferLen: PHASE_LEN.TRANSFER,
+  reset(src,dst,mode){
+    this.startSrc = src;
+    this.endDst   = dst;
+    this.mode     = mode;
+    this.phase    = "PARKING";
+    this.phaseT   = 0;
+    this.trail    = [];
+    this.thrusting= false;
+    this.eta      = 0;
+    this.launchPos = null;
+    this.arrivalPos = null;
+    this.ctrlPos = null;
+    this.transferLen = PHASE_LEN.TRANSFER * MODE[mode].tMul;
+  }
+};
+
+/* Parking-orbit radius (world units) for a given body */
+function parkingRadius(id){
+  const b = BODIES[id];
+  const base = Math.max(0.05, b.rad * 0.04 + 0.06);
+  return base;
+}
+
+/* Snapshot the transfer geometry — called once when TRANSFER starts.
+   - Ship's current position is the launch point (fixed).
+   - Destination's FUTURE position at arrival time is the intercept.
+   - Control point creates the Hohmann-style bulge (perpendicular
+     to the chord). Mode adjusts bulge magnitude:
+       COAST   = large bulge (slow, elliptical, low Δv)
+       HOHMANN = moderate bulge (standard half-ellipse)
+       DIRECT  = near-zero bulge (straight-line high-thrust)  */
+function snapshotTransfer(){
+  // Launch point = ship's current world position (end of burn)
+  sim.launchPos = { x: sim.ship.x, y: sim.ship.y, z: sim.ship.z };
+
+  // World time cost of the transfer (in years)
+  const transferWorldTime = sim.transferLen * DT_PER_FRAME / PHASE_STEP;
+
+  // Where the destination body will BE at arrival
+  const dstFuture = bodyPos(sim.endDst, sim.t + transferWorldTime);
+
+  // Intercept the destination's edge (approach vector along chord)
+  const dx = dstFuture.x - sim.launchPos.x;
+  const dz = dstFuture.z - sim.launchPos.z;
+  const L = Math.hypot(dx, dz) || 1;
+  const rApp = parkingRadius(sim.endDst) * 1.15;
+  sim.arrivalPos = {
+    x: dstFuture.x - (dx/L)*rApp,
+    y: 0,
+    z: dstFuture.z - (dz/L)*rApp
+  };
+
+  // Control point — perpendicular to chord for bulge
+  const mx = (sim.launchPos.x + sim.arrivalPos.x)/2;
+  const mz = (sim.launchPos.z + sim.arrivalPos.z)/2;
+  const chordX = sim.arrivalPos.x - sim.launchPos.x;
+  const chordZ = sim.arrivalPos.z - sim.launchPos.z;
+  const perpX = -chordZ, perpZ = chordX;
+  const pL = Math.hypot(perpX, perpZ) || 1;
+  const chordLen = Math.hypot(chordX, chordZ);
+  const bulge = sim.mode === "direct" ? 0.02
+              : sim.mode === "coast"  ? 0.55
+              : 0.30;
+  // Sign: bulge outward (away from the sun) so path is a proper half-ellipse
+  const cx = mx + (perpX/pL) * bulge * chordLen;
+  const cz = mz + (perpZ/pL) * bulge * chordLen;
+  // Pick the outward side (further from origin)
+  const cxOther = mx - (perpX/pL) * bulge * chordLen;
+  const czOther = mz - (perpZ/pL) * bulge * chordLen;
+  const rA = Math.hypot(cx,cz), rB = Math.hypot(cxOther,czOther);
+  sim.ctrlPos = (rA >= rB) ? {x:cx,y:0,z:cz} : {x:cxOther,y:0,z:czOther};
+
+  // DIRECT: near-straight path
+  if(sim.mode === "direct"){
+    sim.ctrlPos = {x:mx, y:0, z:mz};
+  }
+}
+
+/* Sample the transfer arc at t∈[0,1] using a fixed quadratic bezier
+   between launchPos, ctrlPos, arrivalPos. Nothing follows any planet. */
+function transferPoint(t){
+  const s = sim.launchPos, c = sim.ctrlPos, e = sim.arrivalPos;
+  const it = 1-t;
+  return {
+    x: it*it*s.x + 2*it*t*c.x + t*t*e.x,
+    y: Math.sin(t*Math.PI) * 0.06,   // tiny inclination hint
+    z: it*it*s.z + 2*it*t*c.z + t*t*e.z
+  };
+}
+
 function updateSim(){
   if(!sim.simRunning) return;
-  const dt = 0.0006 * sim.speed;
+  const dt = DT_PER_FRAME * sim.speed;
   sim.t += dt;
 
   const modeInfo = MODE[sim.mode];
-  const transferLen = PHASE_LEN.TRANSFER * modeInfo.tMul;
+  const transferLen = sim.transferLen;
   const total = PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen + PHASE_LEN.CAPTURE + PHASE_LEN.ORBIT;
 
-  sim.phaseT += sim.speed * 0.6;
+  sim.phaseT += sim.speed * PHASE_STEP;
   const p = sim.phaseT;
-
-  const srcPos = bodyPos(sim.startSrc, sim.t);
-  const dstPos = bodyPos(sim.endDst, sim.t);
 
   let x=0,y=0,z=0, phaseName="ORBITING", thrust=false;
 
   if(p < PHASE_LEN.PARKING){
-    // parking orbit around source body
+    // Parking orbit — follows source body (still docked to it)
+    const srcPos = bodyPos(sim.startSrc, sim.t);
     const a = (p/PHASE_LEN.PARKING)*Math.PI*2;
-    const r = Math.max(0.06, BODIES[sim.startSrc].rad*0.6/cam.zoom + 0.1);
+    const r = parkingRadius(sim.startSrc);
     x = srcPos.x + r*Math.cos(a);
     y = 0;
     z = srcPos.z + r*Math.sin(a);
     phaseName = "PARKING";
-    sim.eta = Math.round((total-p)/6);
+    // clear any previous transfer geometry
+    sim.launchPos = null;
   } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN){
+    // Ejection burn — still near source, accelerating outward
+    const srcPos = bodyPos(sim.startSrc, sim.t);
     const bt = (p - PHASE_LEN.PARKING)/PHASE_LEN.BURN;
-    const r = Math.max(0.06, BODIES[sim.startSrc].rad*0.6/cam.zoom + 0.1) + bt*0.4;
-    // tangent direction from source toward destination
-    const dx = dstPos.x - srcPos.x, dz = dstPos.z - srcPos.z;
-    const L = Math.hypot(dx,dz)||1;
-    x = srcPos.x + (dx/L)*r;
+    // Aim toward the FUTURE position of the destination (lead)
+    const worldTransferT = sim.transferLen * DT_PER_FRAME / PHASE_STEP;
+    const dstFut = bodyPos(sim.endDst, sim.t + worldTransferT);
+    const dx = dstFut.x - srcPos.x, dz = dstFut.z - srcPos.z;
+    const L = Math.hypot(dx,dz) || 1;
+    const r = parkingRadius(sim.startSrc) + bt * 0.15;
+    x = srcPos.x + (dx/L) * r;
     y = 0;
-    z = srcPos.z + (dz/L)*r;
+    z = srcPos.z + (dz/L) * r;
     phaseName = "TRANS BURN";
     thrust = true;
-    sim.eta = Math.round((total-p)/6);
+    // At the very end of the burn, snapshot fixed transfer geometry
+    if(bt >= 0.98 && !sim.launchPos){
+      sim.ship.x = x; sim.ship.y = y; sim.ship.z = z;
+      snapshotTransfer();
+    }
   } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen){
+    // Coasting on fixed arc from launchPos to arrivalPos — planets keep moving,
+    // ship does NOT track destination's orbit. Continuous coast (no thrust)
+    // except for DIRECT which represents a long continuous burn.
+    if(!sim.launchPos) snapshotTransfer();
     const tt = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN)/transferLen;
-    // spline interp along transfer arc
-    // arc goes from (srcPos + small offset) to dstPos, with bulge based on mode
-    const start = srcPos;
-    const end = dstPos;
-    const mx = (start.x + end.x)/2;
-    const mz = (start.z + end.z)/2;
-    const dx = end.x - start.x, dz = end.z - start.z;
-    // perpendicular for bulge
-    const px = -dz, pz = dx;
-    const L = Math.hypot(px,pz)||1;
-    const bulge = sim.mode==="direct" ? 0.1 : (sim.mode==="coast" ? 0.55 : 0.35);
-    const cx = mx + (px/L)*bulge*Math.hypot(dx,dz);
-    const cz = mz + (pz/L)*bulge*Math.hypot(dx,dz);
-    // quadratic bezier
-    const it = 1-tt;
-    x = it*it*start.x + 2*it*tt*cx + tt*tt*end.x;
-    z = it*it*start.z + 2*it*tt*cz + tt*tt*end.z;
-    y = Math.sin(tt*Math.PI)*0.08; // slight out-of-plane arc
+    const pt = transferPoint(tt);
+    x = pt.x; y = pt.y; z = pt.z;
     phaseName = "TRANSFER · " + modeInfo.label;
-    // brief mid-course correction burn
-    if(sim.mode==="direct") thrust = (tt<0.15 || tt>0.85);
-    sim.eta = Math.round((total-p)/6);
+    // DIRECT = high-thrust brachistochrone-style: burn most of the way
+    if(sim.mode === "direct")      thrust = (tt < 0.55);
+    else if(sim.mode === "coast")  thrust = false;
+    else                           thrust = (tt < 0.02);   // just the tail of ejection
   } else if(p < PHASE_LEN.PARKING + PHASE_LEN.BURN + transferLen + PHASE_LEN.CAPTURE){
+    // Capture burn — decelerating into orbit around the destination.
+    // Interpolate from the intercept point (arrivalPos, fixed) to a point
+    // on the destination's current orbit (which HAS moved during transit).
     const ct = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN - transferLen)/PHASE_LEN.CAPTURE;
-    const r = 0.5 - ct*0.4;
-    const a = ct*Math.PI;
-    x = dstPos.x + r*Math.cos(a);
+    const dstNow = bodyPos(sim.endDst, sim.t);
+    const rPark = parkingRadius(sim.endDst);
+    // insertion point on the far side of destination (retrograde-style)
+    const insX = dstNow.x + rPark;
+    const insZ = dstNow.z;
+    const sx = sim.arrivalPos ? sim.arrivalPos.x : dstNow.x;
+    const sz = sim.arrivalPos ? sim.arrivalPos.z : dstNow.z;
+    // ease into orbit
+    const e = ct*ct*(3-2*ct);
+    x = sx*(1-e) + insX*e;
     y = 0;
-    z = dstPos.z + r*Math.sin(a);
+    z = sz*(1-e) + insZ*e;
     phaseName = "CAPTURE";
     thrust = true;
-    sim.eta = Math.round((total-p)/6);
   } else if(p < total){
+    // Circular orbit around destination
+    const dstPos = bodyPos(sim.endDst, sim.t);
     const ot = (p - PHASE_LEN.PARKING - PHASE_LEN.BURN - transferLen - PHASE_LEN.CAPTURE)/PHASE_LEN.ORBIT;
-    const r = Math.max(0.06, BODIES[sim.endDst].rad*0.6/cam.zoom + 0.1);
-    const a = ot*Math.PI*2 + Math.PI;
+    const r = parkingRadius(sim.endDst);
+    const a = ot*Math.PI*2;
     x = dstPos.x + r*Math.cos(a);
     y = 0;
     z = dstPos.z + r*Math.sin(a);
     phaseName = "ORBITING";
-    sim.eta = 0;
   } else {
-    // loop
+    // Loop mission
     sim.phaseT = 0;
     sim.trail = [];
+    sim.launchPos = null;
+    sim.arrivalPos = null;
+    sim.ctrlPos = null;
     return;
   }
 
@@ -802,8 +901,9 @@ function updateSim(){
   sim.phase = phaseName;
 
   sim.trail.push({x,y,z});
-  if(sim.trail.length > 260) sim.trail.shift();
+  if(sim.trail.length > 400) sim.trail.shift();
 
+  sim.eta = Math.max(0, Math.round((total - p)/6));
   el("hud-phase").textContent = phaseName;
   el("hud-burn").textContent = thrust?"◈ FIRING":"COAST";
   el("hud-frame").textContent = String(Math.floor(sim.phaseT)).padStart(4,"0").slice(-4);
@@ -895,28 +995,58 @@ function draw(){
     ctx.stroke();
   }
 
-  // planned trajectory arc (dotted) — only during PARKING and TRANSFER
-  if(sim.phase.startsWith("TRANSFER") || sim.phase==="PARKING" || sim.phase==="TRANS BURN"){
-    const start = bodyPos(sim.startSrc, sim.t);
-    const end = bodyPos(sim.endDst, sim.t);
-    const dx = end.x - start.x, dz = end.z - start.z;
-    const px = -dz, pz = dx;
-    const L = Math.hypot(px,pz)||1;
-    const bulge = sim.mode==="direct" ? 0.1 : (sim.mode==="coast" ? 0.55 : 0.35);
-    const cx = (start.x+end.x)/2 + (px/L)*bulge*Math.hypot(dx,dz);
-    const cz = (start.z+end.z)/2 + (pz/L)*bulge*Math.hypot(dx,dz);
-    ctx.strokeStyle = "rgba(255,74,43,0.35)";
-    ctx.setLineDash([2,5]);
-    ctx.beginPath();
-    for(let i=0;i<=48;i++){
-      const t = i/48; const it=1-t;
-      const x = it*it*start.x + 2*it*t*cx + t*t*end.x;
-      const z = it*it*start.z + 2*it*t*cz + t*t*end.z;
-      const p = project(x, Math.sin(t*Math.PI)*0.08, z);
-      if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+  // Planned trajectory arc (dotted)
+  // Use the FIXED transfer geometry once it's been snapshotted, otherwise
+  // project a preview arc from source (now) toward destination's future
+  // position — never track the destination's live orbital position.
+  {
+    let start, ctrl, end, showArc = false;
+    if(sim.launchPos && sim.arrivalPos && sim.ctrlPos){
+      start = sim.launchPos; ctrl = sim.ctrlPos; end = sim.arrivalPos;
+      showArc = true;
+    } else if(sim.phase==="PARKING" || sim.phase==="TRANS BURN"){
+      const srcNow = bodyPos(sim.startSrc, sim.t);
+      const worldTransferT = sim.transferLen * DT_PER_FRAME / PHASE_STEP;
+      const dstFut = bodyPos(sim.endDst, sim.t + worldTransferT);
+      const dx = dstFut.x - srcNow.x, dz = dstFut.z - srcNow.z;
+      const L = Math.hypot(dx,dz)||1;
+      const rApp = parkingRadius(sim.endDst)*1.15;
+      const endPt = { x: dstFut.x - (dx/L)*rApp, y:0, z: dstFut.z - (dz/L)*rApp };
+      const mx = (srcNow.x+endPt.x)/2, mz = (srcNow.z+endPt.z)/2;
+      const perpX = -(endPt.z - srcNow.z), perpZ = (endPt.x - srcNow.x);
+      const pL = Math.hypot(perpX,perpZ)||1;
+      const chordLen = Math.hypot(endPt.x-srcNow.x, endPt.z-srcNow.z);
+      const bulge = sim.mode==="direct"?0.02:(sim.mode==="coast"?0.55:0.30);
+      let cx = mx + (perpX/pL)*bulge*chordLen;
+      let cz = mz + (perpZ/pL)*bulge*chordLen;
+      const cxB = mx - (perpX/pL)*bulge*chordLen;
+      const czB = mz - (perpZ/pL)*bulge*chordLen;
+      if(Math.hypot(cxB,czB) > Math.hypot(cx,cz)){ cx=cxB; cz=czB; }
+      if(sim.mode==="direct"){ cx=mx; cz=mz; }
+      start = srcNow; ctrl = {x:cx,y:0,z:cz}; end = endPt;
+      showArc = true;
     }
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if(showArc){
+      ctx.strokeStyle = "rgba(255,74,43,0.4)";
+      ctx.setLineDash([2,5]);
+      ctx.beginPath();
+      for(let i=0;i<=64;i++){
+        const t = i/64, it = 1-t;
+        const x = it*it*start.x + 2*it*t*ctrl.x + t*t*end.x;
+        const z = it*it*start.z + 2*it*t*ctrl.z + t*t*end.z;
+        const p = project(x, Math.sin(t*Math.PI)*0.06, z);
+        if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // mark intercept point
+      const pi = project(end.x, end.y, end.z);
+      ctx.strokeStyle = "rgba(255,74,43,0.8)";
+      ctx.beginPath(); ctx.arc(pi.x, pi.y, 6, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = "rgba(255,74,43,0.9)";
+      ctx.font = "8px 'Share Tech Mono'";
+      ctx.fillText("INTERCEPT", pi.x+8, pi.y+3);
+    }
   }
 
   // ship
