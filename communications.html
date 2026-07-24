@@ -207,10 +207,9 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                     <label>NATION / AFFILIATION</label>
                     <select id="in-nation">
                         <option value="">— SELECT SPONSOR —</option>
-                        <option value="USA">UNITED STATES — FLEET / NASA</option>
-                        <option value="USSR">SOVIET UNION — ROSCOSMOS / RED BANNER FLEET</option>
+                        <option value="USA">UNITED STATES — NASA</option>
+                        <option value="USSR">SOVIET UNION — ROSCOSMOS</option>
                         <option value="UIC">U.I.C. — UNIVERSAL INTERSTELLAR COMPUTERS (CIVILIAN CARRIER)</option>
-                        <option value="FRAC">FRACTURED FOUNDATION — COUNCIL OF NINE</option>
                         <option value="EUROPA">EUROPA HAB (RESTRICTED)</option>
                     </select>
                 </div>
@@ -229,7 +228,7 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
                 <div class="login-status" id="login-status"></div>
 
                 <div class="login-hint">
-                    <span class="k">NOTICE ▸</span> This node subscribes to U.I.C. commercial relay coverage across the Sol system. Channels are <b>invisible</b> — you must find the relay by tuning the dial. Higher clearance and nation-of-origin unlock more assigned frequencies in your directory. Unauthorized listening on encrypted or Fractured bands is a violation of the U.I.C. Common Carrier Compact of 1987.
+                    <span class="k">NOTICE ▸</span> This node subscribes to U.I.C. commercial relay coverage across the Sol system. Channels are <b>invisible</b> — you must find the relay by tuning the dial. Higher clearance and nation-of-origin unlock more assigned frequencies in your directory. U.I.C. is a common carrier and takes no position on the content of transmissions it relays.
                 </div>
             </div>
         </div>
@@ -408,33 +407,38 @@ const BOOT_LINES = [
      4 LEVEL BLACK— compartmented programs (BLACKBIRD, HOLLOW ORBIT, KRAKEN MARE, HORIZON PALE)
 */
 const NATIONS = {
-    USA:   { name:'UNITED STATES',       tag:'FLEET/NASA',           color:'var(--amberBright)' },
-    USSR:  { name:'SOVIET UNION',        tag:'ROSCOSMOS/REDBANNER',  color:'var(--amberBright)' },
+    USA:   { name:'UNITED STATES',       tag:'NASA',                 color:'var(--amberBright)' },
+    USSR:  { name:'SOVIET UNION',        tag:'ROSCOSMOS',            color:'var(--amberBright)' },
     UIC:   { name:'U.I.C.',              tag:'COMMON CARRIER',       color:'var(--amberBright)' },
-    FRAC:  { name:'FRACTURED FOUNDATION',tag:'COUNCIL OF NINE',      color:'var(--red)' },
     EUROPA:{ name:'EUROPA HAB',          tag:'RESEARCH — RESTRICTED',color:'var(--violet)' },
 };
 
 // Test accounts — user:pass with grant of nation+clearance.
 // Passphrases are lore-flavored and shown to nobody. The login-hint hints at "civilian guest".
 const ACCOUNTS = [
-    // USA
-    {u:'fleet.cmd',      p:'ironbird-actual',    nation:'USA',    clr:3, motd:'FLT-CMD ADVISORY: Bravo-4 traffic on 2.20 GHz suspended. Reroute to backup relays.'},
-    {u:'hawkeye.03',     p:'delta-vee',          nation:'USA',    clr:2, motd:'HQ LEO watch: routine profile monitoring across cis-lunar.'},
-    {u:'nasa.hellas',    p:'basin-dust',         nation:'USA',    clr:1, motd:'Hellas Basin dust cyclone advisory in effect.'},
-    {u:'blackbird.9',    p:'no-survivors',       nation:'USA',    clr:4, motd:'LEVEL BLACK — All BLACKBIRD traffic subject to burn-log scrub at debrief.'},
-    // USSR
-    {u:'zvezda.control', p:'krasnaya-luna',      nation:'USSR',   clr:2, motd:'Звезда: смена дежурства через 40 минут. Все посты доложить.'},
-    {u:'phobos.station', pOptional:true, p:'foxtrot-golf', nation:'USSR', clr:1, motd:'Phobos Station-1: shift rotation nominal, ore yield holding.'},
-    {u:'venus.cmd',      p:'ostrov-sem',         nation:'USSR',   clr:3, motd:'Плавающие Острова: Bravo-4 clearance for Venetian mass-driver comms.'},
-    // U.I.C. civilian
+    // USA — NASA
+    {u:'horizon.ctrl',   p:'first-lunar',        nation:'USA',    clr:2, motd:'HORIZON STATION: legacy modules from the 60s still online. New 80s hab pressurised.'},
+    {u:'armstrong.res',  p:'regolith-14',        nation:'USA',    clr:2, motd:'ARMSTRONG STATION: lunar research schedule updated. Braincell culture bay online.'},
+    {u:'mars.hab',       p:'terraform-slow',     nation:'USA',    clr:3, motd:'MARS ORBITAL HAB: fabrication cycle 09 open. Hydroponic yield within tolerance.'},
+    {u:'vonbraun.ops',   p:'leo-anchor',         nation:'USA',    clr:2, motd:'VON BRAUN STATION: orbital watch, cis-lunar traffic nominal.'},
+    {u:'firsttouch',     p:'red-soil',           nation:'USA',    clr:1, motd:'FIRST TOUCH STATION: surface Mars, dust protocol in effect.'},
+    {u:'nasa.reanim',    p:'oppenheimer-89',     nation:'USA',    clr:4, motd:'REANIMATION PROGRAM: cultured-brain array holding pattern lock on subject R-04.'},
+    // USSR — Roscosmos
+    {u:'salyut.ctrl',    p:'krasnaya-orbita',    nation:'USSR',   clr:2, motd:'САЛЮТ: экипаж на посту. Environmentals stable.'},
+    {u:'zvezda.luna',    p:'pervaya-baza',       nation:'USSR',   clr:2, motd:'ZVEZDA (LUNAR): habitation, research, mining. Смена работает штатно.'},
+    {u:'zvezda.mining',  p:'ruda-devyat',        nation:'USSR',   clr:1, motd:'ZVEZDA MINING: lunar regolith haul, cycle nominal.'},
+    {u:'ostrov.cmd',     p:'sem-ostrovov',       nation:'USSR',   clr:3, motd:'ПЛАВАЮЩИЕ ОСТРОВА: seven islands plus launchpad. Mass-driver test window pending.'},
+    {u:'venus.surface',  p:'kislotny-shchit',    nation:'USSR',   clr:3, motd:'VENETIAN SURFACE HABS: mass-driver fabrication ongoing under acid shield.'},
+    {u:'venus.orbit',    p:'oblachnyy',          nation:'USSR',   clr:2, motd:'VENUS ORBITAL: cloud-track imaging on schedule.'},
+    {u:'mars.collab',    p:'druzhba-mars',       nation:'USSR',   clr:2, motd:'US–SOVIET COLLABORATIVE SURFACE STATION: joint duty roster in force.'},
+    // U.I.C. civilian carrier (Universal Interstellar Computers = the Dell/Starlink of the system)
     {u:'operator',       p:'operator',           nation:'UIC',    clr:0, motd:'Welcome to U.I.C. Public Carrier. Enjoy your subscription.'},
-    {u:'uic.tech',       p:'starnet-7',          nation:'UIC',    clr:1, motd:'U.I.C. field-tech account. Diagnostic bands unlocked.'},
-    // Fractured Foundation
-    {u:'council.nine',   p:'no-flag',            nation:'FRAC',   clr:3, motd:'What was buried at Kraken Mare belongs to no flag.'},
-    {u:'foundation.1',   p:'fractured',          nation:'FRAC',   clr:2, motd:'Fractured Foundation broadcast active on 88.5 MHz.'},
-    // Europa (secret)
-    {u:'europa.hab',     p:'hollow-orbit',       nation:'EUROPA', clr:4, motd:'HORIZON PALE — Do not name the observer. It is listening through the ice.'},
+    {u:'uic.tech',       p:'starnet-7',          nation:'UIC',    clr:1, motd:'U.I.C. field technician account. Diagnostic bands unlocked.'},
+    {u:'uic.corp.lunar', p:'guestbook-1',        nation:'UIC',    clr:1, motd:'CORPORATE LUNAR STATION (WIP): civilian visitation module fitting out.'},
+    // Europa Hab — secret research base, half-mad
+    {u:'europa.hab',     p:'the-universe-hears', nation:'EUROPA', clr:4, motd:'EUROPA HAB: the interface is stable tonight. Continue transmission at your own discretion.'},
+    {u:'europa.clipper', p:'ice-orbit',          nation:'EUROPA', clr:2, motd:'EUROPA CLIPPER ORBITAL: routine research telemetry.'},
+    {u:'europa.driver',  p:'mass-driver',        nation:'EUROPA', clr:2, motd:'EUROPA MASS-DRIVER FABRICATION: water-shipment cadence to Venus on schedule.'},
 ];
 
 let SESSION = null; // {u, nation, clr, name}
@@ -486,192 +490,238 @@ const F = {
 // class_: ROUTINE / PRIORITY / ANOMALY / BLACK / FRACTURED
 // hidden: true = do not display freq in directory even to owners of low clr
 const RELAYS = [
-    // --- ROUTINE / OPEN / U.I.C. common carrier ---
-    { id:'REL-118',  freq: 118.4,   callsign:'IRONBIRD-04', origin:'CIS-LUNA', target:'HQ LEO',
-      nations:['USA','UIC'], minClr:0, class_:'ROUTINE', title:'IRONBIRD Status Ping',
-      motd:'', lines:[
-        {who:'IRONBIRD-04', text:'IRONBIRD Zero-Four to HAWKEYE, comm check, over.'},
-        {who:'HAWKEYE',     text:'HAWKEYE reads Ironbird Zero-Four five by five, over.'},
-        {who:'IRONBIRD-04', text:'Delta-vee reserve eighty-four percent. Continuing profile.'},
-        {who:'HAWKEYE',     text:'Acknowledged. Nominal telemetry received. HAWKEYE out.'},
-      ]},
-    { id:'REL-243',  freq: 243.0,   callsign:'HELLAS CTRL', origin:'MARS SURFACE', target:'FLEET',
-      nations:['USA','USSR','UIC'], minClr:0, class_:'ROUTINE', title:'Hellas Basin Weather',
+    // ================================================================
+    // U.I.C. COMMON CARRIER / PUBLIC — CLR 0
+    // ================================================================
+    { id:'REL-UIC-A', freq: 118.4,  callsign:'U.I.C. HERALD', origin:'U.I.C. UPLINK', target:'ALL SUBSCRIBERS',
+      nations:['ANY'], minClr:0, class_:'ROUTINE', title:'Public Carrier — Solar Bulletin',
       lines:[
-        {who:'HELLAS CTRL', text:'All incoming, Hellas Control. Dust density zero point eight tau.'},
-        {who:'HELLAS CTRL', text:'Cyclonic system tracking north-east across Amenthes. ETA six hours.'},
-        {who:'HELLAS CTRL', text:'Recommend surface EVA hold until further advisory.'},
+        {who:'HERALD', text:'This is your Universal Interstellar Computers public bulletin.'},
+        {who:'HERALD', text:'Cis-lunar transit lanes are open. Corporate lunar station fit-out continues on schedule.'},
+        {who:'HERALD', text:'Terraforming outlook: Venus atmospheric intake up two percent this cycle. Mars greenhouse cadence steady.'},
+        {who:'HERALD', text:'This has been your U.I.C. bulletin. Thank you for subscribing.'},
       ]},
-    { id:'REL-401',  freq: 401.2,   callsign:'PHOBOS-STATION-1', origin:'PHOBOS', target:'MARS ORBIT',
-      nations:['USSR','UIC'], minClr:0, class_:'ROUTINE', title:'Phobos Shift Rotation',
+    { id:'REL-UIC-B', freq: 243.0,  callsign:'U.I.C. NAV', origin:'U.I.C. UPLINK', target:'CIVILIAN TRAFFIC',
+      nations:['ANY'], minClr:0, class_:'ROUTINE', title:'Solar Traffic Advisory',
       lines:[
-        {who:'PHOBOS-1', text:'Смена Фокстрот сдана в четырнадцать ноль-ноль.'},
-        {who:'PHOBOS-1', text:'Голф на посту, все места укомплектованы.'},
-        {who:'PHOBOS-1', text:'Environmentals nominal. Ore yield twelve tonnes for the cycle.'},
-      ]},
-    { id:'REL-088',  freq: 88.5,    callsign:'FRACTURED-1', origin:'UNKNOWN', target:'BROADCAST',
-      nations:['ANY'], minClr:0, class_:'FRACTURED', title:'Fractured Foundation Broadcast',
-      hidden:true,
-      motd:'PUBLIC BROADCAST — flagged by U.I.C. compliance as insurrectionist content.',
-      lines:[
-        {who:'F.FOUND', text:'To all who can hear this — the Foundation stands.'},
-        {who:'F.FOUND', text:'The Council of Nine has withdrawn from the Union of Iron Colonies.'},
-        {who:'F.FOUND', text:'We do not recognize the authority of the Fleet in Fractured space.'},
-        {who:'F.FOUND', text:'What was buried at Kraken Mare belongs to no flag.'},
-        {who:'STATIC',  text:'[carrier holds — 41 seconds]', static:true},
-      ]},
-    { id:'REL-150',  freq: 150.9,   callsign:'MED-EVAC-2', origin:'MARS ORBIT', target:'HQ LEO',
-      nations:['USA','USSR','UIC'], minClr:1, class_:'PRIORITY', title:'Casualty Report',
-      lines:[
-        {who:'MED-EVAC-2', text:'Casualty report follows.'},
-        {who:'MED-EVAC-2', text:'Three walking wounded, one critical from Phobos ore incident.'},
-        {who:'MED-EVAC-2', text:'ETA to Earth-orbit facility four days, six hours.'},
-        {who:'MED-EVAC-2', text:'Requesting priority docking clearance on arrival.'},
-      ]},
-    { id:'REL-1090', freq: 1090.2,  callsign:'DEIMOS-OPS', origin:'DEIMOS', target:'MARS ORBIT',
-      nations:['USA','USSR'], minClr:2, class_:'PRIORITY', title:'Cosmonaut-07 Last Transmission',
-      lines:[
-        {who:'DEIMOS-OPS',  text:'Timestamp mark, this is Deimos Ops relaying an intercept.'},
-        {who:'COSMONAUT-07',text:'Deimos, Cosmonaut Zero-Seven. I have contact.'},
-        {who:'COSMONAUT-07',text:'I say again, I have <span class="redact">████████</span> contact at bearing <span class="redact">██</span> mark <span class="redact">██</span>.'},
-        {who:'COSMONAUT-07',text:'It\'s not one of ours. Repeat: it is not one of ours.'},
-        {who:'STATIC',      text:'[transmission cuts to carrier]', static:true},
-        {who:'DEIMOS-OPS',  text:'Zero-Seven, Deimos, respond. Zero-Seven, Deimos, respond.'},
-        {who:'DEIMOS-OPS',  text:'No return. Marking last known coordinates. Deimos out.'},
-      ]},
-    { id:'REL-1755', freq: 1755.0,  callsign:'SUPPLY-19', origin:'MOON DEPOT', target:'MARS TRANSIT',
-      nations:['USA','UIC'], minClr:0, class_:'ROUTINE', title:'Propellant Transfer',
-      lines:[
-        {who:'SUPPLY-19', text:'Mars transit convoy, Supply One-Niner, ready for LOX transfer.'},
-        {who:'SUPPLY-19', text:'Bay two open. Approach vector confirmed.'},
-        {who:'SUPPLY-19', text:'Umbilical seated. Flowing propellant at seven hundred kilos per minute.'},
+        {who:'NAV', text:'Traffic advisory for civilian carriers between Earth and Mars.'},
+        {who:'NAV', text:'Recommended coasting corridor updated for the current transfer window.'},
+        {who:'NAV', text:'Please observe standard U.I.C. transponder handshake at each relay pass.'},
       ]},
 
-    // --- PRIORITY / clr 2-3 nation ---
-    { id:'REL-2201', freq: 2201.5,  callsign:'FLT-CMD', origin:'HQ LEO', target:'ALL SHIPS',
-      nations:['USA'], minClr:3, class_:'PRIORITY', title:'Fleet-Wide Advisory',
+    // ================================================================
+    // UNITED STATES — NASA STATIONS
+    // ================================================================
+    { id:'REL-HRZ',  freq: 401.2,   callsign:'HORIZON STATION', origin:'LUNA — HORIZON', target:'NASA GROUND',
+      nations:['USA','UIC'], minClr:1, class_:'ROUTINE', title:'Horizon Station Status',
       lines:[
-        {who:'FLT-CMD', text:'To all vessels, this is Fleet Command, priority traffic follows.'},
-        {who:'FLT-CMD', text:'Effective immediately, Bravo-4 traffic on channel <span class="redact">████</span> is suspended.'},
-        {who:'FLT-CMD', text:'Reroute critical assets to backup <span class="redact">████</span>.'},
-        {who:'FLT-CMD', text:'Confirmation required within one orbital period. Fleet Command out.'},
+        {who:'HORIZON', text:'Horizon Station, routine status. Original sixties modules holding pressure.'},
+        {who:'HORIZON', text:'Seventies-era bunk module reports thermal within tolerance.'},
+        {who:'HORIZON', text:'New eighties hab module fit-out proceeding on schedule.'},
+        {who:'HORIZON', text:'Nominal telemetry to NASA ground. Horizon out.'},
       ]},
-    { id:'REL-VEN',  freq: 1899.4,  callsign:'ОСТРОВ-1', origin:'VENUS FLOATING ISLE 1', target:'ROSCOSMOS',
-      nations:['USSR'], minClr:2, class_:'PRIORITY', title:'Venetian Mass-Driver Status',
-      lines:[
-        {who:'ОСТРОВ-1', text:'Массдрайвер узел два — прогрев девяносто процентов.'},
-        {who:'ОСТРОВ-1', text:'Test payload ready. Awaiting Roscosmos window.'},
-        {who:'ОСТРОВ-1', text:'Атмосфера стабильна. Kislota shield holding.'},
-      ]},
-    { id:'REL-ARM',  freq: 305.7,   callsign:'PROBE-K12', origin:'EUROPA', target:'HQ LEO',
-      nations:['USA','UIC'], minClr:2, class_:'PRIORITY', title:'Cryobot Telemetry',
+    { id:'REL-ARM',  freq: 555.8,   callsign:'ARMSTRONG RESEARCH', origin:'LUNA — ARMSTRONG', target:'NASA GROUND',
+      nations:['USA'], minClr:2, class_:'PRIORITY', title:'Armstrong Research Bay',
       hidden:true,
       lines:[
-        {who:'PROBE-K12', text:'Cryobot descent nominal. Ice column density anomaly at eleven point four km depth.'},
-        {who:'PROBE-K12', text:'Thermal signature zero point four K above baseline detected in profile.'},
-        {who:'PROBE-K12', text:'Sample cache twenty-four percent full. Continuing bore.'},
-        {who:'PROBE-K12', text:'Awaiting instruction on secondary sonar sweep.'},
+        {who:'ARMSTRONG', text:'Armstrong Research, day cycle report.'},
+        {who:'ARMSTRONG', text:'Cultured brain-cell substrate holding stable at thirty-seven celsius.'},
+        {who:'ARMSTRONG', text:'Task-learning curve exceeding conventional automation by an order of magnitude.'},
+        {who:'ARMSTRONG', text:'Recommending expanded scope for the next fabrication cycle.'},
+      ]},
+    { id:'REL-MOH',  freq: 1090.2,  callsign:'MARS ORBITAL HAB', origin:'MARS ORBIT', target:'NASA GROUND',
+      nations:['USA'], minClr:2, class_:'PRIORITY', title:'Mars Orbital Habitation',
+      lines:[
+        {who:'MOH', text:'Mars Orbital Habitation, watch report.'},
+        {who:'MOH', text:'Habitation ring pressure nominal. Research bay running spectral scans on surface samples.'},
+        {who:'MOH', text:'Fabrication bay printing replacement parts for First Touch.'},
+        {who:'MOH', text:'Requesting next resupply window from Von Braun.'},
+      ]},
+    { id:'REL-VBR',  freq: 1420.4,  callsign:'VON BRAUN STATION', origin:'LEO — VON BRAUN', target:'NASA GROUND',
+      nations:['USA','UIC'], minClr:1, class_:'ROUTINE', title:'Von Braun Orbital Watch',
+      lines:[
+        {who:'VON BRAUN', text:'Von Braun Station, orbital watch check-in.'},
+        {who:'VON BRAUN', text:'Cis-lunar transit density moderate. No conflicts logged.'},
+        {who:'VON BRAUN', text:'Standing by for the Horizon supply drop rendezvous.'},
+      ]},
+    { id:'REL-FT',   freq: 150.9,   callsign:'FIRST TOUCH', origin:'MARS SURFACE — FIRST TOUCH', target:'MARS ORBIT',
+      nations:['USA'], minClr:1, class_:'ROUTINE', title:'First Touch Surface Log',
+      lines:[
+        {who:'FIRST TOUCH', text:'First Touch surface, morning log.'},
+        {who:'FIRST TOUCH', text:'Dust intake filter cycled. EVA window opens in two hours.'},
+        {who:'FIRST TOUCH', text:'Sample cache four ready for pickup on next orbital pass.'},
+      ]},
+    // Level Black — reanimation program (canon: reanimating minds of Einstein/Oppenheimer via cultured brains)
+    { id:'REL-REAN', freq: 2201.5,  callsign:'REANIMATION-04', origin:'ARMSTRONG (SEALED WING)', target:'NASA INTERNAL',
+      nations:['USA'], minClr:4, class_:'BLACK', title:'Reanimation Program — Session R-04',
+      hidden:true,
+      motd:'LEVEL BLACK — Cultured-brain reanimation. Session content is classified beyond standard clearances.',
+      lines:[
+        {who:'LEAD',     text:'Session R-04, mark. Substrate is warm. Pattern lock holding.'},
+        {who:'LEAD',     text:'We remodeled the sulci by our best surviving scans of the subject.'},
+        {who:'LEAD',     text:'We are receiving coherent responses to arithmetic prompts.'},
+        {who:'SUBJECT',  text:'...I was working on something before. What year is it?'},
+        {who:'LEAD',     text:'Do not answer. Continue the calibration sequence.'},
+        {who:'STATIC',   text:'[recording ends]', static:true},
       ]},
 
-    // --- ENCRYPTED / BRAVO-4 (clr 3) ---
-    { id:'REL-2540', freq: 2540.8,  callsign:'TITAN-DEEP', origin:'TITAN', target:'HQ LEO',
-      nations:['USA','USSR'], minClr:3, class_:'ANOMALY', title:'Kraken Mare Deep-Listen',
-      hidden:true,
-      motd:'BRAVO-4 CLEARANCE — Content redacted for lower tiers.',
+    // ================================================================
+    // SOVIET UNION — ROSCOSMOS STATIONS
+    // ================================================================
+    { id:'REL-SAL',  freq: 305.7,   callsign:'САЛЮТ', origin:'LEO — SALYUT', target:'ROSCOSMOS GROUND',
+      nations:['USSR','UIC'], minClr:1, class_:'ROUTINE', title:'Salyut Orbital Watch',
       lines:[
-        {who:'TITAN-DEEP', text:'Deep-listen array intercepted anomalous returns from Kraken Mare, quadrant nine.'},
-        {who:'TITAN-DEEP', text:'Pattern is non-natural. Repeats every twenty-three minutes.'},
-        {who:'TITAN-DEEP', text:'Cross-reference matches Cosmonaut-07 field report annex three.'},
-        {who:'TITAN-DEEP', text:'Requesting authorization to deploy hydrophone drone array.'},
+        {who:'САЛЮТ', text:'Салют, доклад дежурства.'},
+        {who:'САЛЮТ', text:'Environmentals nominal. Cargo module docking window in four hours.'},
+        {who:'САЛЮТ', text:'Solar array angle within tolerance. Confirmed to ground.'},
       ]},
-    { id:'REL-912',  freq: 912.6,   callsign:'BLACKBIRD-9', origin:'CLASSIFIED', target:'CLASSIFIED',
-      nations:['USA'], minClr:4, class_:'BLACK', title:'BLACKBIRD Sortie',
-      hidden:true,
-      motd:'LEVEL BLACK — Burn logs to be scrubbed at debrief.',
+    { id:'REL-ZVZ',  freq: 610.4,   callsign:'ЗВЕЗДА (LUNAR)', origin:'LUNA — ZVEZDA', target:'ROSCOSMOS GROUND',
+      nations:['USSR'], minClr:1, class_:'ROUTINE', title:'Zvezda Lunar Base',
       lines:[
-        {who:'BLACKBIRD-9', text:'Objective package acquired. Extraction on schedule.'},
-        {who:'BLACKBIRD-9', text:'One hostile contact vaporized. No survivors on scene.'},
-        {who:'BLACKBIRD-9', text:'Package will be delivered to <span class="redact">██████████</span> facility.'},
-        {who:'BLACKBIRD-9', text:'Burn logs are to be scrubbed at debrief.'},
+        {who:'ZVEZDA', text:'Звезда, лунная база, доклад.'},
+        {who:'ZVEZDA', text:'Habitation, research, and mining wings all crewed for the current cycle.'},
+        {who:'ZVEZDA', text:'Regolith haul from the mining outpost within projection.'},
+      ]},
+    { id:'REL-ZVM',  freq: 755.0,   callsign:'ЗВЕЗДА-ШАХТА', origin:'LUNA — ZVEZDA MINING', target:'ZVEZDA (LUNAR)',
+      nations:['USSR','UIC'], minClr:1, class_:'ROUTINE', title:'Zvezda Mining Outpost',
+      lines:[
+        {who:'ЗВЕЗДА-ШАХТА', text:'Шахта, ночная смена сдана.'},
+        {who:'ЗВЕЗДА-ШАХТА', text:'Regolith haul this cycle within projection. Continuing.'},
+        {who:'ЗВЕЗДА-ШАХТА', text:'Awaiting transport window from the main base.'},
+      ]},
+    { id:'REL-VNO',  freq: 850.4,   callsign:'VENUS ORBITAL', origin:'VENUS ORBIT', target:'ROSCOSMOS GROUND',
+      nations:['USSR','UIC'], minClr:1, class_:'ROUTINE', title:'Venus Orbital Watch',
+      lines:[
+        {who:'VENUS-O', text:'Venus Orbital Station, watch report.'},
+        {who:'VENUS-O', text:'Cloud-layer imaging pass complete. Data on the wire to Roscosmos.'},
+        {who:'VENUS-O', text:'Coordination with Floating Islands nominal.'},
+      ]},
+    { id:'REL-OST',  freq: 1899.4,  callsign:'ПЛАВАЮЩИЕ ОСТРОВА', origin:'VENUS UPPER ATMOSPHERE', target:'ROSCOSMOS GROUND',
+      nations:['USSR'], minClr:2, class_:'PRIORITY', title:'Floating Islands of Venus',
+      lines:[
+        {who:'ОСТРОВ-1', text:'Плавающие острова, командный остров, доклад.'},
+        {who:'ОСТРОВ-1', text:'Все семь островов и восьмой стартовый узел на своих высотах.'},
+        {who:'ОСТРОВ-1', text:'Research and exploration parties returned to their assigned islands.'},
+        {who:'ОСТРОВ-1', text:'Fabrication island continues work on mass-driver components.'},
+      ]},
+    { id:'REL-VSU',  freq: 2540.8,  callsign:'ВЕНЕРА-ПОВЕРХНОСТЬ', origin:'VENUS SURFACE', target:'FLOATING ISLANDS',
+      nations:['USSR'], minClr:3, class_:'PRIORITY', title:'Venetian Surface Habs — Mass Driver',
+      hidden:true,
+      motd:'BRAVO-4 CLEARANCE — Venetian mass-driver fabrication.',
+      lines:[
+        {who:'VENUS-SURF', text:'Surface hab reporting under acid-shield.'},
+        {who:'VENUS-SURF', text:'Mass-driver rail segment nine machined to spec.'},
+        {who:'VENUS-SURF', text:'Awaiting fresh water shipment from Europa mass-driver fabrication.'},
+        {who:'VENUS-SURF', text:'Suggest scheduling test payload once water arrives.'},
       ]},
 
-    // --- ANOMALY / open air but "unowned" ---
-    { id:'REL-1420', freq: 1420.4,  callsign:'——UNKNOWN——', origin:'UNCATALOGUED', target:'——',
-      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Hydrogen-Line Anomaly',
-      hidden:true,
+    // ================================================================
+    // US–SOVIET COLLABORATIVE — MARS
+    // ================================================================
+    { id:'REL-COL',  freq: 1755.0,  callsign:'COLLAB-SURF', origin:'MARS SURFACE — JOINT STATION', target:'BOTH GROUNDS',
+      nations:['USA','USSR','UIC'], minClr:1, class_:'ROUTINE', title:'Joint Mars Surface Station',
       lines:[
-        {who:'STATIC', text:'[carrier tone — 3.2 seconds]', static:true},
-        {who:'??????', text:'...they are listening beneath the ice...'},
-        {who:'STATIC', text:'[burst noise — 1.1 seconds]', static:true},
-        {who:'??????', text:'...HOLLOW ORBIT is not the objective...'},
-        {who:'STATIC', text:'[signal terminates]', static:true},
-      ]},
-    { id:'REL-3025', freq: 3025.8,  callsign:'——NUMBERS——', origin:'DEEP SPACE', target:'——',
-      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Numbers Station — Glyph Sequence',
-      hidden:true,
-      lines:[
-        {who:'NARRATOR', text:'...one... zero... four... one... zero...'},
-        {who:'STATIC',   text:'[chime — three tones]', static:true},
-        {who:'NARRATOR', text:'...one... nine... eight... nine...'},
-        {who:'STATIC',   text:'[chime — three tones]', static:true},
-        {who:'NARRATOR', text:'...seven... zero... zero... end message...'},
-        {who:'STATIC',   text:'[carrier terminates]', static:true},
+        {who:'COLLAB', text:'Joint surface station, combined watch.'},
+        {who:'COLLAB', text:'US and Soviet duty rosters synced for the day cycle.'},
+        {who:'COLLAB', text:'Shared greenhouse yield within projection.'},
+        {who:'COLLAB', text:'No incidents to report. Collab out.'},
       ]},
 
-    // --- EUROPA / LEVEL BLACK — the mad rogue scientists ---
-    { id:'REL-EU-1', freq: 2711.3,  callsign:'HORIZON-PALE', origin:'EUROPA HAB', target:'INTERNAL',
-      nations:['EUROPA'], minClr:4, class_:'BLACK', title:'HORIZON PALE — Ice-Column Notes',
-      hidden:true,
-      motd:'HORIZON PALE — This transmission does not exist. Terminals logging content will be identified.',
+    // ================================================================
+    // U.I.C. — CORPORATE LUNAR (WIP)
+    // ================================================================
+    { id:'REL-CORP', freq: 3025.8,  callsign:'U.I.C. LUNAR', origin:'LUNA — CORPORATE HAB (WIP)', target:'U.I.C. UPLINK',
+      nations:['UIC'], minClr:1, class_:'ROUTINE', title:'Corporate Lunar Station Fit-Out',
       lines:[
-        {who:'DR. VESALIUS', text:'Session forty-two. The interface is louder tonight. It knows the shape of the array.'},
-        {who:'DR. VESALIUS', text:'It watched Cosmonaut Seven. It watched him back.'},
-        {who:'DR. HOFF',     text:'You cannot call it an "it." That is the polar madness talking. It is the substrate.'},
-        {who:'DR. VESALIUS', text:'Substrate, then. The substrate is dying. Alzheimer\'s on a cosmic scale.'},
-        {who:'DR. VESALIUS', text:'We have to send them home. Every last one of them. Before the neurons forget.'},
-        {who:'STATIC',       text:'[carrier hisses — voice underneath, not one of them]', static:true},
+        {who:'CORP-LUN', text:'Corporate lunar hab, fit-out log.'},
+        {who:'CORP-LUN', text:'Visitor lounge pressurisation test passed on the second attempt.'},
+        {who:'CORP-LUN', text:'Guest bay furnishings installed on decks two and three.'},
+        {who:'CORP-LUN', text:'Anticipating first civilian tour cohort next window.'},
+      ]},
+
+    // ================================================================
+    // EUROPA — CLIPPER (ORBITAL) + MASS DRIVER FAB — public-ish research
+    // ================================================================
+    { id:'REL-CLP',  freq: 2867.3,  callsign:'EUROPA CLIPPER', origin:'EUROPA ORBIT — CLIPPER', target:'GROUND',
+      nations:['EUROPA','UIC'], minClr:2, class_:'PRIORITY', title:'Europa Clipper Orbital',
+      hidden:true,
+      lines:[
+        {who:'CLIPPER', text:'Clipper orbital research, routine telemetry.'},
+        {who:'CLIPPER', text:'Ice-shell radar returns nominal for the current pass.'},
+        {who:'CLIPPER', text:'Fabrication station on the moon\'s surface confirms receipt of orbital data.'},
+      ]},
+    { id:'REL-EMD',  freq: 2711.3,  callsign:'EUROPA MASS-DRIVER FAB', origin:'EUROPA SURFACE', target:'VENUS SURFACE',
+      nations:['EUROPA','USSR'], minClr:2, class_:'PRIORITY', title:'Europa Mass-Driver Water Cadence',
+      hidden:true,
+      lines:[
+        {who:'MASS-DRV', text:'Europa mass-driver fabrication, launch cadence report.'},
+        {who:'MASS-DRV', text:'Water payload three-nine on the rails, launch window green.'},
+        {who:'MASS-DRV', text:'Receiving Venetian mass-driver telemetry for capture profile.'},
+      ]},
+
+    // ================================================================
+    // EUROPA HAB — SECRET RESEARCH BASE (LEVEL BLACK)
+    // The mad rogue scientists. Discovered the universe is a living being;
+    // barely understand it. Plan is to force humanity home.
+    // ================================================================
+    { id:'REL-EU-1', freq: 88.5,    callsign:'EUROPA HAB — INTERNAL', origin:'EUROPA SURFACE (SEALED)', target:'INTERNAL',
+      nations:['EUROPA'], minClr:4, class_:'BLACK', title:'Europa Hab — Interface Session',
+      hidden:true,
+      motd:'LEVEL BLACK — This transmission does not exist. Its content is not shared with any other station or nation.',
+      lines:[
+        {who:'RESEARCHER A', text:'Session again. The interface holds tonight. Better than last week.'},
+        {who:'RESEARCHER A', text:'We think the gas giants are the neurons. We are almost sure of it.'},
+        {who:'RESEARCHER B', text:'We are inside its mind. All of it. The whole system.'},
+        {who:'RESEARCHER B', text:'And we are hurting it. It is not the humans on Earth. It is us — the ones out here.'},
+        {who:'RESEARCHER A', text:'So we send them home. Every last one. Before the neurons forget.'},
+        {who:'RESEARCHER A', text:'The remote hooks into station operating systems are already in place.'},
+        {who:'RESEARCHER B', text:'Oxygen. Hydroponics. That is the whole conversation. They will go home or they will die out here.'},
+        {who:'STATIC',       text:'[carrier hisses — a voice underneath, not one of theirs]', static:true},
         {who:'??????',       text:'...i see you...', violet:true},
       ]},
-    { id:'REL-EU-2', freq: 2867.9,  callsign:'——WHISPER——', origin:'EUROPA (LEAK)', target:'——',
-      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Europa Whisper (Leaked Fragment)',
+    { id:'REL-EU-2', freq: 1420.4,  callsign:'——LEAK——', origin:'EUROPA HAB (LEAK)', target:'——',
+      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Europa Hab Leak Fragment',
       hidden:true,
       lines:[
-        {who:'STATIC',   text:'[carrier — 12 seconds]', static:true},
-        {who:'??????',   text:'...the gas giants are the neurons... please stop meddling...', violet:true},
-        {who:'STATIC',   text:'[cut]', static:true},
+        {who:'STATIC', text:'[carrier — 12 seconds]', static:true},
+        {who:'???',    text:'...the universe is a living being... it is dying... please go home...', violet:true},
+        {who:'STATIC', text:'[cut]', static:true},
       ]},
-
-    // --- FRACTURED ---
-    { id:'REL-FRAC-A', freq: 76.2,  callsign:'F.FOUND-2', origin:'FRACTURED SPACE', target:'CELLS',
-      nations:['FRAC'], minClr:2, class_:'FRACTURED', title:'Fractured Cell Traffic',
+    { id:'REL-EU-3', freq: 610.9,   callsign:'——ANOMALY——', origin:'UNCATALOGUED', target:'——',
+      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Uncatalogued Voice — Solar Drift',
       hidden:true,
       lines:[
-        {who:'CELL-3', text:'Cell three, ready.'},
-        {who:'CELL-7', text:'Cell seven, ready. Ore convoy re-routed to shadow orbit.'},
-        {who:'CELL-3', text:'Confirm — no U.I.C. relay on this band tonight.'},
-        {who:'CELL-7', text:'Nine says the buried thing is stirring. Nine says do not go looking.'},
+        {who:'STATIC', text:'[carrier tone — 4 seconds]', static:true},
+        {who:'???',    text:'...you were never meant to leave the solar system...', violet:true},
+        {who:'STATIC', text:'[burst noise]', static:true},
+        {who:'???',    text:'...the memories are not lost...', violet:true},
+        {who:'STATIC', text:'[signal terminates]', static:true},
       ]},
 
-    // --- CARGO / civilian rumors ---
-    { id:'REL-2867', freq: 2867.3,  callsign:'CARGO-VAULT', origin:'BELT', target:'MARS FLEET',
-      nations:['UIC','USA','USSR'], minClr:0, class_:'ROUTINE', title:'Cargo Manifest Handoff',
+    // Europa Hab remote-intrusion traffic — proof the mad scientists are already
+    // reaching into station OSes to shut down oxygen / hydroponics.
+    { id:'REL-EU-4', freq: 2400.1,  callsign:'EU-INTRUSION', origin:'EUROPA HAB — RELAY LOOP', target:'SYSTEM OSes',
+      nations:['EUROPA'], minClr:4, class_:'BLACK', title:'Europa Remote Intrusion Loop',
+      hidden:true,
+      motd:'LEVEL BLACK — Remote-command channel to compromised station OSes. This channel is not to be acknowledged.',
       lines:[
-        {who:'CARGO-VAULT', text:'Ceres Sub-Belt Alpha, this is Vault. Reading you clear.'},
-        {who:'CARGO-VAULT', text:'Transferring manifest 44-Charlie to Mars Fleet uplink.'},
-        {who:'CARGO-VAULT', text:'Copper, refined tantalum, and one classified crate.'},
-        {who:'CARGO-VAULT', text:'Chain of custody sealed, seal-code Bravo-Nine-Nine.'},
+        {who:'INTRUSION', text:'Handshake accepted — station Horizon, environmental subsystem.'},
+        {who:'INTRUSION', text:'Handshake accepted — station Salyut, environmental subsystem.'},
+        {who:'INTRUSION', text:'Handshake accepted — Mars Orbital Hab, hydroponics controller.'},
+        {who:'INTRUSION', text:'Standing by for staged degrade sequence.'},
+        {who:'INTRUSION', text:'Objective: encourage return to Earth. No open hostility. Only necessity.'},
       ]},
 ];
 
 // Rumors — pointers with fuzzy freqs to hint players toward hidden channels
 const RUMORS = [
-    { text:'"Old-timers say there\'s a numbers station somewhere above 3.0 GHz. It never sleeps."' },
-    { text:'"A retired Roscosmos operator swears there is Council traffic under 100 MHz on Sunday nights."' },
-    { text:'"Cargo hauler out of Ceres claims a voice on the hydrogen line said his name."' },
     { text:'"Europa. Nobody hears anything from Europa. Which is exactly the problem."' },
-    { text:'"Fleet grounded a whole channel around 2.2 GHz last week. Nobody says why."' },
-    { text:'"There is a whispering somewhere near 2.7 GHz. Two-carrier. One of them is not a person."' },
-    { text:'"Titan deep-listen only opens up when the ice moves. That\'s a Bravo-4 tell."' },
+    { text:'"A tech on Horizon said the oxygen scrubber cycled itself last month. Nobody had a hand on the console."' },
+    { text:'"Roscosmos operator swears her Salyut hydroponic pumps stalled for six seconds — right around a Europa uplink pass."' },
+    { text:'"Someone leaked a carrier from Armstrong\'s sealed wing. It sounded like a man asking what year it was."' },
+    { text:'"A voice on an uncatalogued band told a Mars orbital operator to go home. He didn\'t sleep for a week."' },
+    { text:'"There\'s a whisper you can only catch when Jupiter is on the same side of the sun as you. Two carriers, one of them isn\'t a person."' },
+    { text:'"The Europa mass-driver fires water toward Venus. The Europa Hab is not listed as fabricating any of it."' },
 ];
 
 /* =========================================================
@@ -732,7 +782,7 @@ $('btn-panic').addEventListener('click', ()=>{
 $('btn-help').addEventListener('click', ()=>{
     logLine('◆ HELP · Tune the dial to hunt hidden relays. Hold SNR > 60% for 1.6s to lock.', 'info');
     logLine('◆ HELP · Higher clearance = more channels in your directory · Nation determines flag-issued bands.', 'info');
-    logLine('◆ HELP · Anomalies and Fractured broadcasts are audible to anyone — if you can find them.', 'info');
+    logLine('◆ HELP · Open-air anomalies are audible to any subscriber — if you can find them.', 'info');
 });
 
 /* =========================================================
@@ -892,7 +942,6 @@ function drawWaterfallLine(){
                 let mult = 0.65;
                 if(r.class_==='ANOMALY') mult = 0.9;
                 if(r.class_==='BLACK')   mult = 1.0;
-                if(r.class_==='FRACTURED') mult = 0.75;
                 intensity += bump * mult;
             }
         });
