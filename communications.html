@@ -3,31 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. // COMMS INTERCEPT</title>
+<title>U.I.C. // DEEP-BAND RELAY LISTENER</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <style>
+/* === CORE PALETTE === */
 :root{
     --amber:#FF9F07;
     --amberBright:#FFC861;
     --amberDim:#B36700;
     --red:#ff4a2b;
     --green:#8fff8a;
+    --violet:#c58bff;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;height:100%;background:#000;overflow:hidden;}
-body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 
+/* === BEZEL === */
 #bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
 #bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
-#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;font-family:'VT323',monospace;user-select:none;}
 #brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
 @keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
+/* === SCREEN === */
 #screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);overflow:hidden;isolation:isolate;}
 #screen{position:absolute;inset:0;overflow:hidden;}
-#screen-scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
-#screen-scroll::-webkit-scrollbar{display:none;}
 
+/* CRT overlays */
 #glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
 #vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
 #corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
@@ -39,234 +42,292 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
 @keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
 #amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
 
-#crt-container{padding:44px 52px 90px;min-height:100%;position:relative;z-index:2;}
+.screen-layer{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;overflow:hidden;}
+.hidden{display:none !important;}
 
-/* HEADER */
-.header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
-.header-left h1{margin:0 0 6px 0;font-size:26px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.6),0 0 14px rgba(255,74,43,.3);}
-.header-left p{margin:0;opacity:.85;letter-spacing:.16em;font-size:12px;}
-.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+/* === LOGIN SCREEN === */
+#login-inner{margin:auto;max-width:680px;width:92%;padding:34px 40px 30px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.55));box-shadow:inset 0 0 30px rgba(255,159,7,.06),0 0 40px rgba(0,0,0,.7);position:relative;}
+#login-inner::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
+.login-title{font-size:30px;letter-spacing:.32em;color:var(--red);text-shadow:0 0 8px rgba(255,74,43,.55),0 0 20px rgba(255,74,43,.25);margin-bottom:6px;text-align:center;}
+.login-sub{font-size:11px;letter-spacing:.28em;color:var(--amberBright);opacity:.85;text-align:center;margin-bottom:22px;}
+.login-block{margin-bottom:16px;}
+.login-block label{display:block;font-size:10px;letter-spacing:.24em;color:var(--red);margin-bottom:6px;}
+.login-block select,.login-block input{width:100%;padding:10px 12px;background:rgba(255,159,7,.05);border:1px solid rgba(255,159,7,.35);color:var(--amberBright);font:inherit;letter-spacing:.14em;outline:none;text-shadow:0 0 4px rgba(255,159,7,.4);}
+.login-block select:focus,.login-block input:focus{border-color:var(--red);background:rgba(255,74,43,.06);}
+.login-block select option{background:#0a0705;color:var(--amberBright);}
+.login-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;}
+.login-actions .tool-btn{flex:1;padding:12px 14px;font-size:12px;}
+.login-status{margin-top:12px;font-size:11px;letter-spacing:.22em;min-height:1em;text-align:center;}
+.login-status.err{color:var(--red);text-shadow:0 0 5px rgba(255,74,43,.4);animation:tag-blink .8s steps(2) 3;}
+.login-status.ok{color:var(--green);text-shadow:0 0 5px rgba(143,255,138,.4);}
+.login-hint{margin-top:14px;padding:10px 12px;border:1px dashed rgba(255,159,7,.28);background:rgba(255,159,7,.03);font-size:10px;letter-spacing:.16em;line-height:1.7;color:var(--amberBright);opacity:.78;}
+.login-hint .k{color:var(--red);letter-spacing:.22em;}
+.brand-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:10px;letter-spacing:.24em;color:var(--amberBright);opacity:.7;}
+.brand-strip .l{color:var(--red);}
+.brand-strip .r{font-family:'VT323',monospace;letter-spacing:.18em;}
+.mini-boot{font-family:'VT323',monospace;font-size:15px;letter-spacing:.06em;line-height:1.4;color:var(--amberDim);margin-bottom:20px;padding:10px 12px;border:1px dashed rgba(255,159,7,.22);background:rgba(0,0,0,.35);max-height:120px;overflow:hidden;}
+.mini-boot .ok{color:var(--green);}
+.mini-boot .warn{color:var(--red);}
+
+/* === MAIN SESSION === */
+#session-bar{margin:18px 26px 10px;padding:10px 14px;border:1px solid rgba(255,159,7,.4);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.sb-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.sb-left .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:led-pulse 1.6s ease-in-out infinite;}
+.sb-addr{font-size:13px;letter-spacing:.22em;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);}
+.sb-name{font-size:11px;letter-spacing:.24em;color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);padding-left:14px;border-left:1px dashed rgba(255,159,7,.3);}
+.sb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
 .tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);animation:tag-blink 1.4s steps(2) infinite;}
+.tag.black{border-color:var(--violet);color:var(--violet);text-shadow:0 0 6px rgba(197,139,255,.5);}
+.tag.green{border-color:rgba(143,255,138,.5);color:var(--green);}
 @keyframes tag-blink{50%{opacity:.35;}}
 
-/* Marquee */
-.marquee{overflow:hidden;border-top:1px dashed rgba(255,159,7,.35);border-bottom:1px dashed rgba(255,159,7,.35);margin-bottom:20px;padding:6px 0;font-size:11px;letter-spacing:.22em;color:var(--amberBright);opacity:.85;text-shadow:0 0 4px rgba(255,159,7,.5);}
-.marquee-inner{display:flex;gap:40px;white-space:nowrap;animation:marq 32s linear infinite;}
-@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+#session-body{flex:1;display:grid;grid-template-columns:1fr 340px;gap:16px;margin:0 26px 12px;min-height:0;overflow:hidden;}
+@media(max-width:1050px){#session-body{grid-template-columns:1fr;}}
 
-/* Panels */
-.panel{position:relative;padding:18px 20px 22px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);border-radius:6px;margin-bottom:22px;}
-.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;}
-.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;}
-.panel-head{display:flex;align-items:center;gap:12px;padding:0 0 12px;margin-bottom:14px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.panel{position:relative;padding:14px 16px 16px;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));box-shadow:inset 0 0 24px rgba(255,159,7,.05),0 0 24px rgba(255,159,7,.06);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;z-index:0;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#FF9F07,#FF9F07) 0 0/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 0/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 12px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/12px 2px no-repeat,linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 12px no-repeat;opacity:.7;z-index:0;}
+.panel > *{position:relative;z-index:1;}
+.panel-head{display:flex;align-items:center;gap:10px;padding:0 0 8px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.3);}
 .panel-head .tick{color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
-.panel-head .ttl{color:var(--amberBright);letter-spacing:.24em;text-shadow:0 0 4px rgba(255,159,7,.6);font-size:14px;flex:1;}
+.panel-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:13px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;}
 .panel-head .badge{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
 
-/* DIAL / WATERFALL */
-.dial-panel{padding:16px 20px 20px;}
-.dial-wrap{position:relative;background:#08060a;border:1px solid rgba(255,159,7,.3);overflow:hidden;height:150px;}
+/* Waterfall */
+.dial-wrap{position:relative;background:#08060a;border:1px solid rgba(255,159,7,.3);overflow:hidden;height:170px;}
 #waterfall{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;}
-.dial-ticks{position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.65));display:flex;justify-content:space-between;padding:0 4px;pointer-events:none;}
+.dial-ticks{position:absolute;bottom:0;left:0;right:0;height:22px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));display:flex;justify-content:space-between;padding:0 4px;pointer-events:none;}
 .dial-ticks span{font-size:9px;color:var(--amberBright);letter-spacing:.14em;opacity:.7;align-self:flex-end;padding-bottom:3px;text-shadow:0 0 4px rgba(255,159,7,.4);}
 .dial-cursor{position:absolute;top:0;bottom:0;width:2px;background:var(--red);box-shadow:0 0 12px var(--red),0 0 24px rgba(255,74,43,.5);pointer-events:none;transition:left .08s ease-out;}
 .dial-cursor::before,.dial-cursor::after{content:"";position:absolute;left:-4px;width:10px;height:6px;background:var(--red);clip-path:polygon(50% 100%,0 0,100% 0);}
 .dial-cursor::before{top:0;}
 .dial-cursor::after{bottom:0;transform:scaleY(-1);}
 
-.dial-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;}
-.dial-controls input[type=range]{flex:1;min-width:200px;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(90deg,rgba(255,159,7,.15),rgba(255,159,7,.55));outline:none;}
+.dial-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;}
+.dial-controls input[type=range]{flex:1;min-width:220px;-webkit-appearance:none;appearance:none;height:4px;background:linear-gradient(90deg,rgba(255,159,7,.15),rgba(255,159,7,.55));outline:none;}
 .dial-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--amberBright);border:1px solid #ffec9c;box-shadow:0 0 8px rgba(255,159,7,.7);cursor:pointer;}
 .dial-controls input[type=range]::-moz-range-thumb{width:14px;height:14px;background:var(--amberBright);border:1px solid #ffec9c;box-shadow:0 0 8px rgba(255,159,7,.7);cursor:pointer;border-radius:0;}
 .signal-meter{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.18em;color:var(--amberBright);}
 .signal-meter .k{color:var(--red);}
-.meter-bar{width:120px;height:8px;background:rgba(255,159,7,.08);border:1px solid rgba(255,159,7,.3);position:relative;overflow:hidden;}
+.meter-bar{width:140px;height:8px;background:rgba(255,159,7,.08);border:1px solid rgba(255,159,7,.3);position:relative;overflow:hidden;}
 .meter-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8b3a10,#ff9f07,#ffd48a);box-shadow:0 0 8px rgba(255,159,7,.5);transition:width .1s;}
+.lock-indicator{padding:4px 10px;font-size:11px;letter-spacing:.24em;border:1px solid rgba(255,159,7,.3);color:var(--amberDim);}
+.lock-indicator.locking{color:var(--amber);border-color:rgba(255,159,7,.6);animation:tag-blink .6s steps(2) infinite;}
+.lock-indicator.locked{color:var(--green);border-color:rgba(143,255,138,.5);text-shadow:0 0 5px rgba(143,255,138,.4);animation:none;}
 
-/* TWO-COL LAYOUT */
-.two-col{display:grid;grid-template-columns:340px 1fr;gap:22px;margin-bottom:22px;}
-@media(max-width:1100px){.two-col{grid-template-columns:1fr;}}
-
-/* FILTER ROW */
-.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-.filter-btn{font-family:inherit;font-size:10px;letter-spacing:.2em;padding:5px 10px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.3);color:var(--amberBright);cursor:pointer;text-shadow:0 0 3px rgba(255,159,7,.4);}
-.filter-btn:hover{background:rgba(255,159,7,.14);}
-.filter-btn.active{background:rgba(255,74,43,.15);border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.5);}
-
-/* INTERCEPT LIST */
-#intercept-list{max-height:520px;overflow-y:auto;scrollbar-width:none;padding-right:4px;}
-#intercept-list::-webkit-scrollbar{display:none;}
-.intercept{position:relative;padding:10px 12px;margin-bottom:8px;border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);cursor:pointer;transition:background .12s,border-color .12s;}
-.intercept:hover{background:rgba(255,159,7,.08);border-color:rgba(255,159,7,.5);}
-.intercept.active{background:rgba(255,74,43,.10);border-color:rgba(255,74,43,.5);}
-.intercept .ic-top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.2em;margin-bottom:5px;color:var(--amberBright);opacity:.75;}
-.intercept .ic-title{font-size:13px;letter-spacing:.14em;color:var(--amber);margin-bottom:4px;text-shadow:0 0 3px rgba(255,159,7,.4);}
-.intercept .ic-meta{font-size:10px;letter-spacing:.18em;color:var(--amberBright);opacity:.7;display:flex;gap:12px;flex-wrap:wrap;}
-.intercept.pri{border-left:3px solid var(--amber);}
-.intercept.anom{border-left:3px solid var(--red);}
-.intercept.anom .ic-title{color:var(--red);text-shadow:0 0 3px rgba(255,74,43,.5);}
-.intercept.enc .ic-title::after{content:" 🔒";}
-.intercept .ic-dot{position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber);}
-.intercept.anom .ic-dot{background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse-red 1.2s ease-in-out infinite;}
-@keyframes pulse-red{0%,100%{opacity:.6;}50%{opacity:1;}}
-
-/* PLAYBACK */
-.pb-meta{margin-bottom:14px;}
-.pb-title{font-size:16px;letter-spacing:.2em;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);padding-bottom:10px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.25);}
-.pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 20px;font-size:11px;letter-spacing:.14em;}
+/* Playback area */
+.pb-title{font-size:15px;letter-spacing:.2em;color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);padding-bottom:8px;margin-bottom:8px;border-bottom:1px dashed rgba(255,159,7,.25);}
+.pb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;font-size:11px;letter-spacing:.12em;margin-bottom:8px;}
 .pb-grid > div{display:flex;flex-direction:column;gap:2px;}
 .pb-grid .k{color:var(--red);letter-spacing:.22em;font-size:10px;}
 @media(max-width:900px){.pb-grid{grid-template-columns:repeat(2,1fr);}}
-
-.pb-waveform{position:relative;border:1px solid rgba(255,159,7,.3);background:#040406;height:80px;margin:10px 0;}
-#wave{position:absolute;inset:0;width:100%;height:100%;}
-.wave-cursor{position:absolute;top:0;bottom:0;width:1px;background:var(--red);box-shadow:0 0 8px var(--red);left:0;pointer-events:none;}
-
-.pb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
-.pb-time{font-size:11px;letter-spacing:.18em;color:var(--amberBright);}
-.pb-transcript{max-height:280px;overflow-y:auto;padding:12px 14px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.4);font-size:12px;letter-spacing:.08em;line-height:1.7;scrollbar-width:none;}
+.pb-transcript{flex:1;min-height:120px;max-height:280px;overflow-y:auto;padding:12px 14px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.4);font-size:12px;letter-spacing:.06em;line-height:1.7;scrollbar-width:none;}
 .pb-transcript::-webkit-scrollbar{display:none;}
 .pb-transcript .ts-line{opacity:.35;transition:opacity .18s,color .18s;padding:2px 0;}
 .pb-transcript .ts-line.on{opacity:1;color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.5);}
-.pb-transcript .ts-empty{color:var(--red);letter-spacing:.24em;font-size:11px;text-align:center;padding:18px;text-shadow:0 0 4px rgba(255,74,43,.4);}
 .pb-transcript .ts-line .speaker{color:var(--red);margin-right:8px;font-size:11px;letter-spacing:.18em;text-shadow:0 0 3px rgba(255,74,43,.4);}
-.pb-transcript .ts-line .redact{background:#000;color:#000;padding:0 3px;text-shadow:none;user-select:none;}
+.pb-transcript .ts-line .redact{background:#000;color:#000;padding:0 3px;user-select:none;}
 .pb-transcript .ts-line .redact:hover{color:var(--red);}
 .pb-transcript .ts-line.static{color:var(--amberDim);font-style:italic;font-size:11px;letter-spacing:.14em;}
 .pb-transcript .ts-line.encrypted{font-family:'VT323',monospace;color:var(--red);letter-spacing:.05em;font-size:14px;}
+.pb-transcript .ts-line.violet{color:var(--violet);text-shadow:0 0 5px rgba(197,139,255,.4);font-style:italic;}
+.pb-transcript .ts-empty{color:var(--red);letter-spacing:.24em;font-size:11px;text-align:center;padding:22px 8px;opacity:.75;}
+.pb-transcript .ts-noise{color:var(--amberDim);letter-spacing:.14em;font-family:'VT323',monospace;font-size:14px;opacity:.7;}
+.pb-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;}
+.pb-time{font-size:11px;letter-spacing:.18em;color:var(--amberBright);}
+
+/* Right column: directory */
+#dir-panel{display:flex;flex-direction:column;min-height:0;}
+.dir-tabs{display:flex;gap:4px;margin-bottom:8px;}
+.dir-tab{flex:1;padding:6px 8px;font:inherit;font-size:10px;letter-spacing:.2em;background:rgba(255,159,7,.05);border:1px solid rgba(255,159,7,.3);color:var(--amberBright);cursor:pointer;text-align:center;}
+.dir-tab.active{background:rgba(255,74,43,.15);border-color:rgba(255,74,43,.5);color:var(--red);}
+.dir-list{flex:1;overflow-y:auto;scrollbar-width:none;}
+.dir-list::-webkit-scrollbar{display:none;}
+.dir-row{padding:8px 10px;margin-bottom:4px;border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);cursor:pointer;font-size:11px;letter-spacing:.08em;transition:background .1s,border-color .1s;}
+.dir-row:hover{background:rgba(255,159,7,.10);border-color:rgba(255,159,7,.5);}
+.dir-row .top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.18em;color:var(--amberBright);opacity:.7;margin-bottom:3px;}
+.dir-row .call{font-size:12px;letter-spacing:.14em;color:var(--amber);}
+.dir-row.hidden-known{color:var(--amberDim);}
+.dir-row.hidden-known .call{color:var(--amberDim);}
+.dir-row.hidden-known::after{content:" — FREQ REDACTED";display:block;font-size:9px;letter-spacing:.2em;color:var(--red);opacity:.6;}
+.dir-row.locked-clr{opacity:.55;}
+.dir-row.locked-clr .call::after{content:" 🔒";}
+.dir-note{padding:8px 10px;font-size:10px;letter-spacing:.16em;color:var(--amberBright);opacity:.65;border:1px dashed rgba(255,159,7,.22);background:rgba(255,159,7,.02);margin-bottom:6px;line-height:1.55;}
+
+/* Motd/log */
+.motd{padding:8px 10px;margin-bottom:10px;font-size:11px;letter-spacing:.12em;line-height:1.55;background:rgba(255,74,43,.06);border:1px dashed rgba(255,74,43,.3);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.35);}
+.motd.black{background:rgba(197,139,255,.05);border-color:rgba(197,139,255,.4);color:var(--violet);text-shadow:0 0 6px rgba(197,139,255,.4);}
+
+/* Terminal frame (mini log) */
+#log-frame{margin:0 26px 10px;padding:8px 12px;border:1px solid rgba(255,159,7,.35);background:rgba(0,0,0,.55);max-height:110px;overflow:hidden;}
+#log-scroll{max-height:90px;overflow-y:auto;font-size:11px;letter-spacing:.06em;line-height:1.55;color:var(--amber);scrollbar-width:none;font-family:'VT323',monospace;}
+#log-scroll::-webkit-scrollbar{display:none;}
+#log-scroll .ln{padding:1px 0;}
+#log-scroll .ln.err{color:var(--red);}
+#log-scroll .ln.ok{color:var(--green);}
+#log-scroll .ln.info{color:var(--amberBright);}
+#log-scroll .ln.black{color:var(--violet);}
 
 /* Footer */
-.footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:14px;border-top:1px dashed rgba(255,159,7,.3);}
-.tool-btn{font-family:inherit;font-size:11px;letter-spacing:.22em;padding:8px 14px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.4);color:var(--amberBright);cursor:pointer;text-shadow:0 0 4px rgba(255,159,7,.5);transition:background .12s,color .12s,border-color .12s;}
+#foot-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 26px 22px;padding-top:8px;border-top:1px dashed rgba(255,159,7,.25);}
+.tool-btn{font-family:inherit;font-size:11px;letter-spacing:.22em;padding:7px 12px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.4);color:var(--amberBright);cursor:pointer;text-shadow:0 0 4px rgba(255,159,7,.4);transition:background .12s,color .12s,border-color .12s;}
 .tool-btn:hover{background:rgba(255,159,7,.16);color:#fff2c1;border-color:var(--amberBright);}
-.footer-note{margin-left:auto;font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.6;}
+.tool-btn.warn{border-color:rgba(255,74,43,.4);color:var(--red);}
+.tool-btn.warn:hover{background:rgba(255,74,43,.18);}
+.foot-note{margin-left:auto;font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.55;}
+
+/* Marquee */
+.marquee{overflow:hidden;border-top:1px dashed rgba(255,159,7,.28);border-bottom:1px dashed rgba(255,159,7,.28);margin:0 26px 10px;padding:5px 0;font-size:11px;letter-spacing:.18em;color:var(--amberBright);opacity:.85;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.marquee-inner{display:flex;gap:40px;white-space:nowrap;animation:marq 36s linear infinite;}
+@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 </style>
 </head>
 <body>
 
 <div id="bezel"></div>
-<div id="bezel-label">FRACTURED</div>
+<div id="bezel-label">U.I.C. — UNIVERSAL INTERSTELLAR COMPUTERS</div>
 <div id="brand-led"></div>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <filter id="fisheye" x="-10%" y="-10%" width="120%" height="120%">
-        <feImage xlink:href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='100%25' stop-color='rgb(255,255,255)'/></radialGradient></defs><rect width='100%25' height='100%25' fill='url(%23g)'/></svg>" result="disp"/>
-        <feDisplacementMap in="SourceGraphic" in2="disp" scale="14" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-</svg>
 
 <div id="screen-wrap">
     <div id="screen">
-        <div id="screen-scroll">
-            <div id="crt-container">
 
-                <div class="header">
-                    <div class="header-left">
-                        <h1>// COMMS INTERCEPT</h1>
-                        <p>SIGNAL INTELLIGENCE UNIT — CH.07</p>
-                    </div>
-                    <div class="header-right">
-                        <span class="tag amber" id="strength">SIG 87%</span>
-                        <span class="tag warn">LIVE</span>
-                        <span class="tag amber" id="clock">--:--:--</span>
-                    </div>
+        <!-- ===== LOGIN LAYER ===== -->
+        <div id="login-layer" class="screen-layer">
+            <div id="login-inner">
+                <div class="brand-strip">
+                    <span class="l">◆ U.I.C. NODE // TERM-07/RELAY</span>
+                    <span class="r" id="login-clock">--:--:--</span>
                 </div>
+                <div class="login-title">// SIGN IN</div>
+                <div class="login-sub">UIC DEEP-BAND RELAY LISTENER — CLR AUTHORIZATION REQUIRED</div>
+                <div class="mini-boot" id="boot"></div>
 
-                <!-- MARQUEE -->
-                <div class="marquee">
-                    <div class="marquee-inner">
-                        <span>▸ SIGINT UPLINK ACTIVE ▸ MONITORING 3.5MHz — 3.2GHz ▸ 14 CATALOGUED CHANNELS ▸ 6 FLAGGED ANOMALIES ▸ ENCRYPTED PACKETS AWAITING KEY ▸ AUTHORIZATION LEVEL BRAVO-4 ▸</span>
-                        <span>▸ SIGINT UPLINK ACTIVE ▸ MONITORING 3.5MHz — 3.2GHz ▸ 14 CATALOGUED CHANNELS ▸ 6 FLAGGED ANOMALIES ▸ ENCRYPTED PACKETS AWAITING KEY ▸ AUTHORIZATION LEVEL BRAVO-4 ▸</span>
-                    </div>
+                <div class="login-block">
+                    <label>NATION / AFFILIATION</label>
+                    <select id="in-nation">
+                        <option value="">— SELECT SPONSOR —</option>
+                        <option value="USA">UNITED STATES — FLEET / NASA</option>
+                        <option value="USSR">SOVIET UNION — ROSCOSMOS / RED BANNER FLEET</option>
+                        <option value="UIC">U.I.C. — UNIVERSAL INTERSTELLAR COMPUTERS (CIVILIAN CARRIER)</option>
+                        <option value="FRAC">FRACTURED FOUNDATION — COUNCIL OF NINE</option>
+                        <option value="EUROPA">EUROPA HAB (RESTRICTED)</option>
+                    </select>
                 </div>
+                <div class="login-block">
+                    <label>OPERATOR ID</label>
+                    <input id="in-user" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. fleet.cmd"/>
+                </div>
+                <div class="login-block">
+                    <label>CIPHER-KEY / PASSPHRASE</label>
+                    <input id="in-pass" type="password" autocomplete="off" spellcheck="false" placeholder="********"/>
+                </div>
+                <div class="login-actions">
+                    <button class="tool-btn" id="btn-login">▸ AUTHENTICATE</button>
+                    <button class="tool-btn warn" id="btn-guest">◇ CIVILIAN GUEST</button>
+                </div>
+                <div class="login-status" id="login-status"></div>
 
-                <!-- WATERFALL / DIAL -->
-                <div class="panel dial-panel">
+                <div class="login-hint">
+                    <span class="k">NOTICE ▸</span> This node subscribes to U.I.C. commercial relay coverage across the Sol system. Channels are <b>invisible</b> — you must find the relay by tuning the dial. Higher clearance and nation-of-origin unlock more assigned frequencies in your directory. Unauthorized listening on encrypted or Fractured bands is a violation of the U.I.C. Common Carrier Compact of 1987.
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SESSION LAYER ===== -->
+        <div id="session-layer" class="screen-layer hidden">
+
+            <div id="session-bar">
+                <div class="sb-left">
+                    <span class="dot"></span>
+                    <span class="sb-addr" id="sb-addr">UIC://relay.term-07</span>
+                    <span class="sb-name" id="sb-name">OPERATOR --</span>
+                </div>
+                <div class="sb-right">
+                    <span class="tag" id="tag-nation">--</span>
+                    <span class="tag" id="tag-clr">CLR --</span>
+                    <span class="tag warn" id="tag-live">LIVE</span>
+                    <span class="tag" id="tag-clock">--:--:--</span>
+                    <button class="tool-btn warn" id="btn-logout">◂ LOGOUT</button>
+                </div>
+            </div>
+
+            <div class="marquee">
+                <div class="marquee-inner">
+                    <span id="marq-a">▸ U.I.C. DEEP-BAND ONLINE ▸ 30 MHz — 3.2 GHz SWEEP ▸ CHANNELS INVISIBLE — TUNE TO ACQUIRE ▸ SIGNAL LOCK REQUIRES SNR &gt; 60% FOR 1.6s ▸</span>
+                    <span>▸ U.I.C. DEEP-BAND ONLINE ▸ 30 MHz — 3.2 GHz SWEEP ▸ CHANNELS INVISIBLE — TUNE TO ACQUIRE ▸ SIGNAL LOCK REQUIRES SNR &gt; 60% FOR 1.6s ▸</span>
+                </div>
+            </div>
+
+            <div id="session-body">
+
+                <div class="panel" style="grid-column:1;">
                     <div class="panel-head">
                         <span class="tick">◆</span>
-                        <span class="ttl">FREQUENCY DIAL</span>
+                        <span class="ttl">FREQUENCY DIAL — DEEP-BAND WATERFALL</span>
                         <span class="badge" id="freq-badge">-- MHz</span>
                     </div>
+                    <div id="motd" class="motd"></div>
                     <div class="dial-wrap">
-                        <canvas id="waterfall" width="800" height="120"></canvas>
+                        <canvas id="waterfall" width="900" height="140"></canvas>
                         <div class="dial-ticks" id="dial-ticks"></div>
                         <div class="dial-cursor" id="dial-cursor"></div>
                     </div>
                     <div class="dial-controls">
-                        <input type="range" id="freq" min="0" max="1000" value="240"/>
+                        <input type="range" id="freq" min="0" max="10000" value="2400"/>
                         <button class="tool-btn" id="btn-sweep">◆ AUTO-SWEEP</button>
-                        <button class="tool-btn" id="btn-play">▶ MONITOR</button>
+                        <button class="tool-btn warn" id="btn-drop">■ DROP LOCK</button>
                         <div class="signal-meter">
                             <span class="k">SNR</span>
                             <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
                             <span id="snr-val">--dB</span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- MAIN LAYOUT -->
-                <div class="two-col">
-
-                    <!-- LEFT: intercept list -->
-                    <div class="panel list-panel">
-                        <div class="panel-head">
-                            <span class="tick">◆</span>
-                            <span class="ttl">INTERCEPT LOG</span>
-                            <span class="badge">14 / 14</span>
-                        </div>
-                        <div class="filter-row">
-                            <button class="filter-btn active" data-filter="ALL">ALL</button>
-                            <button class="filter-btn" data-filter="ROUTINE">ROUTINE</button>
-                            <button class="filter-btn" data-filter="PRIORITY">PRIORITY</button>
-                            <button class="filter-btn" data-filter="ANOMALY">◆ ANOMALY</button>
-                            <button class="filter-btn" data-filter="ENCRYPTED">🔒 ENC</button>
-                        </div>
-                        <div id="intercept-list"></div>
+                        <span class="lock-indicator" id="lock-ind">◇ NO LOCK</span>
                     </div>
 
-                    <!-- RIGHT: playback -->
-                    <div class="panel play-panel">
-                        <div class="panel-head">
-                            <span class="tick">◆</span>
-                            <span class="ttl">PLAYBACK</span>
-                            <span class="badge" id="pb-badge">--</span>
-                        </div>
-                        <div id="pb-meta" class="pb-meta">
-                            <div class="pb-title" id="pb-title">-- SELECT TRANSMISSION --</div>
-                            <div class="pb-grid">
-                                <div><span class="k">TIMESTAMP</span><span id="pb-ts">--</span></div>
-                                <div><span class="k">FREQUENCY</span><span id="pb-freq">--</span></div>
-                                <div><span class="k">CALLSIGN</span><span id="pb-call">--</span></div>
-                                <div><span class="k">ORIGIN</span><span id="pb-origin">--</span></div>
-                                <div><span class="k">TARGET</span><span id="pb-target">--</span></div>
-                                <div><span class="k">CLASS</span><span id="pb-class">--</span></div>
-                            </div>
-                        </div>
-                        <div class="pb-waveform">
-                            <canvas id="wave" width="640" height="80"></canvas>
-                            <div class="wave-cursor" id="wave-cursor"></div>
-                        </div>
-                        <div class="pb-controls">
-                            <button class="tool-btn" id="pb-play">▶ PLAY</button>
-                            <button class="tool-btn" id="pb-stop">■ STOP</button>
-                            <span class="pb-time"><span id="pb-elapsed">0:00</span> / <span id="pb-total">0:00</span></span>
-                            <button class="tool-btn" id="pb-decrypt" style="display:none;">🔒 DECRYPT</button>
+                    <div style="margin-top:12px;">
+                        <div class="pb-title" id="pb-title">-- CARRIER SEARCH --</div>
+                        <div class="pb-grid">
+                            <div><span class="k">TIMESTAMP</span><span id="pb-ts">--</span></div>
+                            <div><span class="k">FREQUENCY</span><span id="pb-freq">--</span></div>
+                            <div><span class="k">CALLSIGN</span><span id="pb-call">--</span></div>
+                            <div><span class="k">ORIGIN</span><span id="pb-origin">--</span></div>
+                            <div><span class="k">TARGET</span><span id="pb-target">--</span></div>
+                            <div><span class="k">CLASS</span><span id="pb-class">--</span></div>
                         </div>
                         <div class="pb-transcript" id="pb-transcript">
-                            <div class="ts-empty">// AWAITING SELECTION //</div>
+                            <div class="ts-empty">// NO CARRIER — SWEEP OR TUNE TO ACQUIRE //</div>
                         </div>
                     </div>
-
                 </div>
 
-                <div class="footer">
-                    <button class="tool-btn" id="btn-terminal">◂ BACK TO TERMINAL</button>
-                    <button class="tool-btn" id="btn-map">◂ SOL CHART</button>
-                    <div class="footer-note">All intercepts declassified for training use. Level Bravo-4 clearance required for encrypted packets.</div>
+                <div class="panel" id="dir-panel">
+                    <div class="panel-head">
+                        <span class="tick">◆</span>
+                        <span class="ttl">ASSIGNED DIRECTORY</span>
+                        <span class="badge" id="dir-count">0</span>
+                    </div>
+                    <div class="dir-tabs">
+                        <button class="dir-tab active" data-tab="MINE">MY NATION</button>
+                        <button class="dir-tab" data-tab="OPEN">CIVILIAN</button>
+                        <button class="dir-tab" data-tab="RUMOR">RUMORS</button>
+                    </div>
+                    <div class="dir-note" id="dir-note"></div>
+                    <div class="dir-list" id="dir-list"></div>
                 </div>
 
             </div>
+
+            <div id="log-frame">
+                <div id="log-scroll"></div>
+            </div>
+
+            <div id="foot-bar">
+                <button class="tool-btn" id="btn-help">◈ HELP</button>
+                <button class="tool-btn warn" id="btn-panic">◆ PANIC WIPE</button>
+                <div class="foot-note">U.I.C. Common Carrier — All listening is logged. This terminal is not authorized to transmit.</div>
+            </div>
+
         </div>
 
         <div id="glare"></div>
@@ -281,480 +342,737 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
 
 <script>
 /* =========================================================
-   COMMS INTERCEPT — SIGINT console
+   U.I.C. DEEP-BAND RELAY LISTENER
+   ---------------------------------------------------------
+   Lore: The Iron Frontier, 1989.
+   U.I.C. (Universal Interstellar Computers) is the Dell +
+   Starlink of the solar system — a commercial common-carrier
+   relay network that sells subscriptions and hardware to
+   nations, corps, and civilians.
+   Nobody knows the universe is a living being except the mad
+   rogue scientists on Europa, and they barely understand it.
 ========================================================= */
-const $ = id => document.getElementById(id);
 
-/* Live clock */
+const $ = id => document.getElementById(id);
+const PI = Math.PI;
+
+/* ---------- CLOCKS ---------- */
+function fmtClock(d){
+    return String(d.getUTCHours()).padStart(2,'0')+':'+
+           String(d.getUTCMinutes()).padStart(2,'0')+':'+
+           String(d.getUTCSeconds()).padStart(2,'0')+'Z';
+}
 setInterval(()=>{
     const d=new Date();
-    $('clock').textContent=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+':'+String(d.getUTCSeconds()).padStart(2,'0')+'Z';
+    const s = fmtClock(d);
+    const a = $('login-clock'); if(a) a.textContent = s;
+    const b = $('tag-clock'); if(b) b.textContent = s;
 },1000);
 
-/* ---------- INTERCEPT DATABASE ---------- */
-// freq is in MHz. Class: ROUTINE / PRIORITY / ANOMALY. enc=true means encrypted.
-const LOG = [
-    {id:'TX-1001', freq:118.4,  ts:'1989-03-14 06:12:07', callsign:'IRONBIRD-04', origin:'CIS LUNA',    target:'HQ LEO',        class_:'ROUTINE',  enc:false,
-        title:'ROUTINE STATUS PING',
-        lines:[
-            {who:'IRONBIRD-04', text:'IRONBIRD Zero-Four to HAWKEYE, comm check, over.'},
-            {who:'HAWKEYE',    text:'HAWKEYE reads Ironbird Zero-Four five by five, over.'},
-            {who:'IRONBIRD-04', text:'Roger. Delta-vee reserve at 84 percent. Continuing profile.'},
-            {who:'HAWKEYE',    text:'Acknowledged. Nominal telemetry received. HAWKEYE out.'},
-        ]},
+/* ---------- MINI BOOT LOG ---------- */
+const BOOT_LINES = [
+    ['UIC BIOS v3.14 — TERM-07/RELAY',''],
+    ['MEMORY   ▸ 512 KB CORE  OK','ok'],
+    ['TAPE     ▸ CIPHER-KEY VAULT MOUNTED','ok'],
+    ['LINK     ▸ CIS-LUNA UPLINK 87%','ok'],
+    ['LINK     ▸ MARS-LEO XPONDER 61%','ok'],
+    ['LINK     ▸ JOVIAN LOOP  ...timeout','warn'],
+    ['MODULE   ▸ WATERFALL DSP LOADED','ok'],
+    ['MODULE   ▸ SIGINT ARBITRATOR LOADED','ok'],
+    ['AUTH     ▸ AWAITING OPERATOR CREDENTIALS','warn'],
+];
+(function bootRoll(){
+    const el = $('boot'); let i=0;
+    function tick(){
+        if(i>=BOOT_LINES.length) return;
+        const [t,cls] = BOOT_LINES[i++];
+        const line = document.createElement('div');
+        if(cls) line.className = cls;
+        line.textContent = '> '+t;
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+        setTimeout(tick, 120 + Math.random()*180);
+    }
+    tick();
+})();
 
-    {id:'TX-1017', freq:243.0,  ts:'1989-03-14 09:44:52', callsign:'HELLAS CTRL', origin:'MARS SURFACE', target:'FLEET',        class_:'ROUTINE',  enc:false,
-        title:'HELLAS BASIN WEATHER',
-        lines:[
-            {who:'HELLAS CTRL', text:'All incoming, Hellas Control. Dust density 0.8 tau. Visibility three klicks.'},
-            {who:'HELLAS CTRL', text:'Cyclonic system tracking north-east across Amenthes. ETA six hours.'},
-            {who:'HELLAS CTRL', text:'Recommend surface EVA hold until further advisory.'},
-        ]},
+/* =========================================================
+   AUTH — nation × clearance model
+========================================================= */
+/*
+   Clearance ladder (0..4):
+     0 CIVILIAN   — public U.I.C. common-carrier only
+     1 STANDARD   — nation-issued crew (routine, weather, cargo)
+     2 PRIORITY   — fleet ops / medical / classified cargo notes
+     3 BRAVO-4    — encrypted fleet traffic
+     4 LEVEL BLACK— compartmented programs (BLACKBIRD, HOLLOW ORBIT, KRAKEN MARE, HORIZON PALE)
+*/
+const NATIONS = {
+    USA:   { name:'UNITED STATES',       tag:'FLEET/NASA',           color:'var(--amberBright)' },
+    USSR:  { name:'SOVIET UNION',        tag:'ROSCOSMOS/REDBANNER',  color:'var(--amberBright)' },
+    UIC:   { name:'U.I.C.',              tag:'COMMON CARRIER',       color:'var(--amberBright)' },
+    FRAC:  { name:'FRACTURED FOUNDATION',tag:'COUNCIL OF NINE',      color:'var(--red)' },
+    EUROPA:{ name:'EUROPA HAB',          tag:'RESEARCH — RESTRICTED',color:'var(--violet)' },
+};
 
-    {id:'TX-1032', freq:305.7,  ts:'1989-03-14 12:03:19', callsign:'PROBE-K12',  origin:'EUROPA',       target:'HQ LEO',        class_:'PRIORITY', enc:false,
-        title:'CRYOBOT TELEMETRY REPORT',
-        lines:[
-            {who:'PROBE-K12', text:'Cryobot descent nominal. Ice column density anomaly at 11.4 km depth.'},
-            {who:'PROBE-K12', text:'Thermal signature 0.4K above baseline detected in profile.'},
-            {who:'PROBE-K12', text:'Continuing bore. Sample cache 24 percent full.'},
-            {who:'PROBE-K12', text:'Awaiting instruction on secondary sonar sweep.'},
-        ]},
-
-    {id:'TX-1045', freq:401.2,  ts:'1989-03-14 14:29:00', callsign:'PHOBOS-STATION-1', origin:'PHOBOS', target:'MARS ORBIT',    class_:'ROUTINE',  enc:false,
-        title:'SHIFT ROTATION',
-        lines:[
-            {who:'PHOBOS-1', text:'Foxtrot shift stood down at fourteen hundred station time.'},
-            {who:'PHOBOS-1', text:'Golf shift on deck, all posts manned.'},
-            {who:'PHOBOS-1', text:'Environmentals nominal. Ore yield twelve tonnes for the cycle.'},
-        ]},
-
-    {id:'TX-1063', freq:1420.4, ts:'1989-03-14 18:47:33', callsign:'——UNKNOWN——',origin:'UNCATALOGUED', target:'——',            class_:'ANOMALY',  enc:false,
-        title:'HYDROGEN-LINE ANOMALY',
-        lines:[
-            {who:'STATIC',       text:'[carrier tone — 3.2 seconds]', static:true},
-            {who:'??????',       text:'...they are listening beneath the ice...'},
-            {who:'STATIC',       text:'[burst noise — 1.1 seconds]', static:true},
-            {who:'??????',       text:'...HOLLOW ORBIT is not the objective...'},
-            {who:'STATIC',       text:'[signal terminates]', static:true},
-        ]},
-
-    {id:'TX-1071', freq:2201.5, ts:'1989-03-15 02:11:04', callsign:'FLT-CMD',    origin:'HQ LEO',       target:'ALL SHIPS',     class_:'PRIORITY', enc:false,
-        title:'FLEET-WIDE ADVISORY',
-        lines:[
-            {who:'FLT-CMD', text:'To all vessels, this is Fleet Command, priority traffic follows.'},
-            {who:'FLT-CMD', text:'Effective immediately, all Bravo-4 traffic on channel <span class="redact">████</span> is suspended.'},
-            {who:'FLT-CMD', text:'Reroute critical assets to backup <span class="redact">████</span>.'},
-            {who:'FLT-CMD', text:'Confirmation required within one orbital period. Fleet Command out.'},
-        ]},
-
-    {id:'TX-1084', freq:2540.8, ts:'1989-03-15 05:32:17', callsign:'TITAN-DEEP', origin:'TITAN',        target:'HQ LEO',        class_:'ANOMALY',  enc:true,
-        title:'ENCRYPTED PACKET — KRAKEN MARE',
-        lines:[
-            {who:'CIPHER', encrypted:true, text:'█▓▒░  0x4E45 0xD1A0 0xEF83 0xCC12  ░▒▓█'},
-            {who:'CIPHER', encrypted:true, text:'█▓▒░  0xB4A9 0x7CE3 0x88F0 0x2F51  ░▒▓█'},
-            {who:'CIPHER', encrypted:true, text:'█▓▒░  KEY REQUIRED  —  BRAVO-4 CLR ░▒▓█'},
-        ],
-        decrypted:[
-            {who:'TITAN-DEEP', text:'Deep-listen array intercepted anomalous returns from Kraken Mare, quadrant nine.'},
-            {who:'TITAN-DEEP', text:'Pattern is non-natural. Repeats every twenty-three minutes.'},
-            {who:'TITAN-DEEP', text:'Cross-reference matches Cosmonaut-07 field report annex three.'},
-            {who:'TITAN-DEEP', text:'Requesting authorization to deploy hydrophone drone array.'},
-        ]},
-
-    {id:'TX-1092', freq:2867.3, ts:'1989-03-15 08:04:52', callsign:'CARGO-VAULT',origin:'BELT',         target:'MARS FLEET',    class_:'ROUTINE',  enc:false,
-        title:'CARGO MANIFEST HANDOFF',
-        lines:[
-            {who:'CARGO-VAULT', text:'Ceres Sub-Belt Alpha, this is Vault. Reading you clear.'},
-            {who:'CARGO-VAULT', text:'Transferring manifest 44-Charlie to Mars Fleet uplink.'},
-            {who:'CARGO-VAULT', text:'Copper, refined tantalum, and one classified crate.'},
-            {who:'CARGO-VAULT', text:'Chain of custody sealed, seal-code Bravo-Nine-Nine.'},
-        ]},
-
-    {id:'TX-1108', freq:1090.2, ts:'1989-03-15 11:19:28', callsign:'DEIMOS-OPS', origin:'DEIMOS',       target:'MARS ORBIT',    class_:'PRIORITY', enc:false,
-        title:'COSMONAUT-07 LAST TRANSMISSION',
-        lines:[
-            {who:'DEIMOS-OPS',  text:'Timestamp mark, this is Deimos Ops relaying an intercept.'},
-            {who:'COSMONAUT-07',text:'Deimos, Cosmonaut Zero-Seven. I have contact.'},
-            {who:'COSMONAUT-07',text:'I say again, I have <span class="redact">████████</span> contact at bearing <span class="redact">██</span> mark <span class="redact">██</span>.'},
-            {who:'COSMONAUT-07',text:'It\'s not one of ours. Repeat: it is not one of ours.'},
-            {who:'STATIC',      text:'[transmission cuts to carrier]', static:true},
-            {who:'DEIMOS-OPS',  text:'Zero-Seven, Deimos, respond. Zero-Seven, Deimos, respond.'},
-            {who:'DEIMOS-OPS',  text:'No return. Marking last known coordinates. Deimos out.'},
-        ]},
-
-    {id:'TX-1120', freq:1755.0, ts:'1989-03-15 14:52:41', callsign:'SUPPLY-19',  origin:'MOON DEPOT',   target:'MARS TRANSIT',  class_:'ROUTINE',  enc:false,
-        title:'PROPELLANT TRANSFER',
-        lines:[
-            {who:'SUPPLY-19', text:'Mars transit convoy, Supply One-Niner, ready for LOX transfer.'},
-            {who:'SUPPLY-19', text:'Bay two open. Approach vector confirmed.'},
-            {who:'SUPPLY-19', text:'Umbilical seated. Flowing propellant at seven hundred kilos per minute.'},
-        ]},
-
-    {id:'TX-1136', freq:3025.8, ts:'1989-03-15 20:07:14', callsign:'——UNKNOWN——',origin:'DEEP SPACE',   target:'——',            class_:'ANOMALY',  enc:false,
-        title:'NUMBERS STATION — GLYPH SEQUENCE',
-        lines:[
-            {who:'NARRATOR', text:'...one... zero... four... one... zero...'},
-            {who:'STATIC',   text:'[chime — three tones]', static:true},
-            {who:'NARRATOR', text:'...one... nine... eight... nine...'},
-            {who:'STATIC',   text:'[chime — three tones]', static:true},
-            {who:'NARRATOR', text:'...seven... zero... zero... end message...'},
-            {who:'STATIC',   text:'[carrier terminates]', static:true},
-        ]},
-
-    {id:'TX-1149', freq:912.6,  ts:'1989-03-16 02:44:03', callsign:'BLACKBIRD-9',origin:'CLASSIFIED',   target:'CLASSIFIED',    class_:'ANOMALY',  enc:true,
-        title:'ENCRYPTED — BLACKBIRD SORTIE',
-        lines:[
-            {who:'CIPHER', encrypted:true, text:'▓░ 0x03AA 0xFE21 0x77CC 0x1900 ░▓'},
-            {who:'CIPHER', encrypted:true, text:'▓░ 0x88C4 0xDD01 0x5561 0x0F42 ░▓'},
-            {who:'CIPHER', encrypted:true, text:'▓░ KEY REQUIRED — LEVEL BLACK ░▓'},
-        ],
-        decrypted:[
-            {who:'BLACKBIRD-9', text:'Objective package acquired. Extraction on schedule.'},
-            {who:'BLACKBIRD-9', text:'One hostile contact vaporized. No survivors on scene.'},
-            {who:'BLACKBIRD-9', text:'Package will be delivered to <span class="redact">██████████</span> facility.'},
-            {who:'BLACKBIRD-9', text:'Burn logs are to be scrubbed at debrief.'},
-        ]},
-
-    {id:'TX-1163', freq:150.9,  ts:'1989-03-16 06:15:39', callsign:'MED-EVAC-2', origin:'MARS ORBIT',   target:'HQ LEO',        class_:'PRIORITY', enc:false,
-        title:'CASUALTY REPORT',
-        lines:[
-            {who:'MED-EVAC-2', text:'Casualty report follows.'},
-            {who:'MED-EVAC-2', text:'Three walking wounded, one critical from Phobos ore incident.'},
-            {who:'MED-EVAC-2', text:'ETA to Earth-orbit facility, four days, six hours.'},
-            {who:'MED-EVAC-2', text:'Requesting priority docking clearance on arrival.'},
-        ]},
-
-    {id:'TX-1178', freq:88.5,   ts:'1989-03-16 09:32:12', callsign:'FRACTURED-1',origin:'UNKNOWN',      target:'BROADCAST',     class_:'ANOMALY',  enc:false,
-        title:'FRACTURED FOUNDATION BROADCAST',
-        lines:[
-            {who:'F.FOUND', text:'To all who can hear this — the Foundation stands.'},
-            {who:'F.FOUND', text:'The Council of Nine has withdrawn from the Union of Iron Colonies.'},
-            {who:'F.FOUND', text:'We do not recognize the authority of the Fleet in Fractured space.'},
-            {who:'F.FOUND', text:'What was buried at Kraken Mare belongs to no flag.'},
-            {who:'STATIC',  text:'[carrier holds — 41 seconds]', static:true},
-        ]},
+// Test accounts — user:pass with grant of nation+clearance.
+// Passphrases are lore-flavored and shown to nobody. The login-hint hints at "civilian guest".
+const ACCOUNTS = [
+    // USA
+    {u:'fleet.cmd',      p:'ironbird-actual',    nation:'USA',    clr:3, motd:'FLT-CMD ADVISORY: Bravo-4 traffic on 2.20 GHz suspended. Reroute to backup relays.'},
+    {u:'hawkeye.03',     p:'delta-vee',          nation:'USA',    clr:2, motd:'HQ LEO watch: routine profile monitoring across cis-lunar.'},
+    {u:'nasa.hellas',    p:'basin-dust',         nation:'USA',    clr:1, motd:'Hellas Basin dust cyclone advisory in effect.'},
+    {u:'blackbird.9',    p:'no-survivors',       nation:'USA',    clr:4, motd:'LEVEL BLACK — All BLACKBIRD traffic subject to burn-log scrub at debrief.'},
+    // USSR
+    {u:'zvezda.control', p:'krasnaya-luna',      nation:'USSR',   clr:2, motd:'Звезда: смена дежурства через 40 минут. Все посты доложить.'},
+    {u:'phobos.station', pOptional:true, p:'foxtrot-golf', nation:'USSR', clr:1, motd:'Phobos Station-1: shift rotation nominal, ore yield holding.'},
+    {u:'venus.cmd',      p:'ostrov-sem',         nation:'USSR',   clr:3, motd:'Плавающие Острова: Bravo-4 clearance for Venetian mass-driver comms.'},
+    // U.I.C. civilian
+    {u:'operator',       p:'operator',           nation:'UIC',    clr:0, motd:'Welcome to U.I.C. Public Carrier. Enjoy your subscription.'},
+    {u:'uic.tech',       p:'starnet-7',          nation:'UIC',    clr:1, motd:'U.I.C. field-tech account. Diagnostic bands unlocked.'},
+    // Fractured Foundation
+    {u:'council.nine',   p:'no-flag',            nation:'FRAC',   clr:3, motd:'What was buried at Kraken Mare belongs to no flag.'},
+    {u:'foundation.1',   p:'fractured',          nation:'FRAC',   clr:2, motd:'Fractured Foundation broadcast active on 88.5 MHz.'},
+    // Europa (secret)
+    {u:'europa.hab',     p:'hollow-orbit',       nation:'EUROPA', clr:4, motd:'HORIZON PALE — Do not name the observer. It is listening through the ice.'},
 ];
 
-/* ---------- RENDER LIST ---------- */
-const listEl = $('intercept-list');
-let currentFilter = 'ALL';
+let SESSION = null; // {u, nation, clr, name}
 
-function renderList(){
-    listEl.innerHTML = '';
-    const filtered = LOG.filter(l=>{
-        if(currentFilter==='ALL') return true;
-        if(currentFilter==='ENCRYPTED') return l.enc;
-        return l.class_ === currentFilter;
-    });
-    filtered.forEach(l=>{
-        const el = document.createElement('div');
-        el.className = 'intercept';
-        if(l.class_==='PRIORITY') el.classList.add('pri');
-        if(l.class_==='ANOMALY')  el.classList.add('anom');
-        if(l.enc) el.classList.add('enc');
-        el.innerHTML = `
-            <div class="ic-dot"></div>
-            <div class="ic-top">
-                <span>${l.id}</span>
-                <span>${l.class_}</span>
-            </div>
-            <div class="ic-title">${l.title}</div>
-            <div class="ic-meta">
-                <span>${l.freq.toFixed(1)} MHz</span>
-                <span>${l.callsign}</span>
-                <span>${l.ts.slice(11)}</span>
-            </div>
-        `;
-        el.addEventListener('click', ()=>loadIntercept(l.id));
-        listEl.appendChild(el);
-    });
+function tryLogin(u, p){
+    const acct = ACCOUNTS.find(a => a.u.toLowerCase() === (u||'').toLowerCase() && a.p === p);
+    return acct || null;
 }
-document.querySelectorAll('.filter-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
-        renderList();
+
+/* Login events */
+$('btn-login').addEventListener('click', ()=>{
+    const nation = $('in-nation').value;
+    const u = $('in-user').value.trim();
+    const p = $('in-pass').value;
+    const status = $('login-status');
+    status.className = 'login-status';
+    if(!nation){ status.classList.add('err'); status.textContent = '▸ SELECT NATION / AFFILIATION FIRST'; return; }
+    if(!u || !p){ status.classList.add('err'); status.textContent = '▸ OPERATOR ID AND CIPHER-KEY REQUIRED'; return; }
+    const acct = tryLogin(u,p);
+    if(!acct){ status.classList.add('err'); status.textContent = '▸ AUTH FAIL — CREDENTIALS REJECTED'; return; }
+    if(acct.nation !== nation){
+        status.classList.add('err');
+        status.textContent = '▸ NATION MISMATCH — CREDENTIALS BELONG TO ANOTHER FLAG';
+        return;
+    }
+    status.classList.add('ok');
+    status.textContent = '▸ HANDSHAKE OK — CLR '+acct.clr+' — WELCOME OPERATOR '+acct.u.toUpperCase();
+    setTimeout(()=>enterSession({u:acct.u, nation:acct.nation, clr:acct.clr, motd:acct.motd}), 700);
+});
+$('btn-guest').addEventListener('click', ()=>{
+    const status = $('login-status');
+    status.className = 'login-status ok';
+    status.textContent = '▸ GUEST SESSION — U.I.C. CIVILIAN CARRIER (CLR 0)';
+    setTimeout(()=>enterSession({u:'guest', nation:'UIC', clr:0, motd:'Guest session. Only U.I.C. common-carrier bands are audible.'}), 500);
+});
+$('in-pass').addEventListener('keydown', e => { if(e.key==='Enter') $('btn-login').click(); });
+$('in-user').addEventListener('keydown', e => { if(e.key==='Enter') $('in-pass').focus(); });
+
+/* =========================================================
+   RELAY DATABASE — invisible until tuned
+   Each relay has a real hidden freq in kHz (30 MHz–3.2 GHz).
+   Directory rows show ORIGIN/CALLSIGN only, never the freq
+   (unless the operator's clearance >= reveal_at).
+========================================================= */
+const F = {
+    kHz: mhz => Math.round(mhz*1000),
+};
+// nations key: who is *allowed* to hear. 'ANY' means public.
+// class_: ROUTINE / PRIORITY / ANOMALY / BLACK / FRACTURED
+// hidden: true = do not display freq in directory even to owners of low clr
+const RELAYS = [
+    // --- ROUTINE / OPEN / U.I.C. common carrier ---
+    { id:'REL-118',  freq: 118.4,   callsign:'IRONBIRD-04', origin:'CIS-LUNA', target:'HQ LEO',
+      nations:['USA','UIC'], minClr:0, class_:'ROUTINE', title:'IRONBIRD Status Ping',
+      motd:'', lines:[
+        {who:'IRONBIRD-04', text:'IRONBIRD Zero-Four to HAWKEYE, comm check, over.'},
+        {who:'HAWKEYE',     text:'HAWKEYE reads Ironbird Zero-Four five by five, over.'},
+        {who:'IRONBIRD-04', text:'Delta-vee reserve eighty-four percent. Continuing profile.'},
+        {who:'HAWKEYE',     text:'Acknowledged. Nominal telemetry received. HAWKEYE out.'},
+      ]},
+    { id:'REL-243',  freq: 243.0,   callsign:'HELLAS CTRL', origin:'MARS SURFACE', target:'FLEET',
+      nations:['USA','USSR','UIC'], minClr:0, class_:'ROUTINE', title:'Hellas Basin Weather',
+      lines:[
+        {who:'HELLAS CTRL', text:'All incoming, Hellas Control. Dust density zero point eight tau.'},
+        {who:'HELLAS CTRL', text:'Cyclonic system tracking north-east across Amenthes. ETA six hours.'},
+        {who:'HELLAS CTRL', text:'Recommend surface EVA hold until further advisory.'},
+      ]},
+    { id:'REL-401',  freq: 401.2,   callsign:'PHOBOS-STATION-1', origin:'PHOBOS', target:'MARS ORBIT',
+      nations:['USSR','UIC'], minClr:0, class_:'ROUTINE', title:'Phobos Shift Rotation',
+      lines:[
+        {who:'PHOBOS-1', text:'Смена Фокстрот сдана в четырнадцать ноль-ноль.'},
+        {who:'PHOBOS-1', text:'Голф на посту, все места укомплектованы.'},
+        {who:'PHOBOS-1', text:'Environmentals nominal. Ore yield twelve tonnes for the cycle.'},
+      ]},
+    { id:'REL-088',  freq: 88.5,    callsign:'FRACTURED-1', origin:'UNKNOWN', target:'BROADCAST',
+      nations:['ANY'], minClr:0, class_:'FRACTURED', title:'Fractured Foundation Broadcast',
+      hidden:true,
+      motd:'PUBLIC BROADCAST — flagged by U.I.C. compliance as insurrectionist content.',
+      lines:[
+        {who:'F.FOUND', text:'To all who can hear this — the Foundation stands.'},
+        {who:'F.FOUND', text:'The Council of Nine has withdrawn from the Union of Iron Colonies.'},
+        {who:'F.FOUND', text:'We do not recognize the authority of the Fleet in Fractured space.'},
+        {who:'F.FOUND', text:'What was buried at Kraken Mare belongs to no flag.'},
+        {who:'STATIC',  text:'[carrier holds — 41 seconds]', static:true},
+      ]},
+    { id:'REL-150',  freq: 150.9,   callsign:'MED-EVAC-2', origin:'MARS ORBIT', target:'HQ LEO',
+      nations:['USA','USSR','UIC'], minClr:1, class_:'PRIORITY', title:'Casualty Report',
+      lines:[
+        {who:'MED-EVAC-2', text:'Casualty report follows.'},
+        {who:'MED-EVAC-2', text:'Three walking wounded, one critical from Phobos ore incident.'},
+        {who:'MED-EVAC-2', text:'ETA to Earth-orbit facility four days, six hours.'},
+        {who:'MED-EVAC-2', text:'Requesting priority docking clearance on arrival.'},
+      ]},
+    { id:'REL-1090', freq: 1090.2,  callsign:'DEIMOS-OPS', origin:'DEIMOS', target:'MARS ORBIT',
+      nations:['USA','USSR'], minClr:2, class_:'PRIORITY', title:'Cosmonaut-07 Last Transmission',
+      lines:[
+        {who:'DEIMOS-OPS',  text:'Timestamp mark, this is Deimos Ops relaying an intercept.'},
+        {who:'COSMONAUT-07',text:'Deimos, Cosmonaut Zero-Seven. I have contact.'},
+        {who:'COSMONAUT-07',text:'I say again, I have <span class="redact">████████</span> contact at bearing <span class="redact">██</span> mark <span class="redact">██</span>.'},
+        {who:'COSMONAUT-07',text:'It\'s not one of ours. Repeat: it is not one of ours.'},
+        {who:'STATIC',      text:'[transmission cuts to carrier]', static:true},
+        {who:'DEIMOS-OPS',  text:'Zero-Seven, Deimos, respond. Zero-Seven, Deimos, respond.'},
+        {who:'DEIMOS-OPS',  text:'No return. Marking last known coordinates. Deimos out.'},
+      ]},
+    { id:'REL-1755', freq: 1755.0,  callsign:'SUPPLY-19', origin:'MOON DEPOT', target:'MARS TRANSIT',
+      nations:['USA','UIC'], minClr:0, class_:'ROUTINE', title:'Propellant Transfer',
+      lines:[
+        {who:'SUPPLY-19', text:'Mars transit convoy, Supply One-Niner, ready for LOX transfer.'},
+        {who:'SUPPLY-19', text:'Bay two open. Approach vector confirmed.'},
+        {who:'SUPPLY-19', text:'Umbilical seated. Flowing propellant at seven hundred kilos per minute.'},
+      ]},
+
+    // --- PRIORITY / clr 2-3 nation ---
+    { id:'REL-2201', freq: 2201.5,  callsign:'FLT-CMD', origin:'HQ LEO', target:'ALL SHIPS',
+      nations:['USA'], minClr:3, class_:'PRIORITY', title:'Fleet-Wide Advisory',
+      lines:[
+        {who:'FLT-CMD', text:'To all vessels, this is Fleet Command, priority traffic follows.'},
+        {who:'FLT-CMD', text:'Effective immediately, Bravo-4 traffic on channel <span class="redact">████</span> is suspended.'},
+        {who:'FLT-CMD', text:'Reroute critical assets to backup <span class="redact">████</span>.'},
+        {who:'FLT-CMD', text:'Confirmation required within one orbital period. Fleet Command out.'},
+      ]},
+    { id:'REL-VEN',  freq: 1899.4,  callsign:'ОСТРОВ-1', origin:'VENUS FLOATING ISLE 1', target:'ROSCOSMOS',
+      nations:['USSR'], minClr:2, class_:'PRIORITY', title:'Venetian Mass-Driver Status',
+      lines:[
+        {who:'ОСТРОВ-1', text:'Массдрайвер узел два — прогрев девяносто процентов.'},
+        {who:'ОСТРОВ-1', text:'Test payload ready. Awaiting Roscosmos window.'},
+        {who:'ОСТРОВ-1', text:'Атмосфера стабильна. Kislota shield holding.'},
+      ]},
+    { id:'REL-ARM',  freq: 305.7,   callsign:'PROBE-K12', origin:'EUROPA', target:'HQ LEO',
+      nations:['USA','UIC'], minClr:2, class_:'PRIORITY', title:'Cryobot Telemetry',
+      hidden:true,
+      lines:[
+        {who:'PROBE-K12', text:'Cryobot descent nominal. Ice column density anomaly at eleven point four km depth.'},
+        {who:'PROBE-K12', text:'Thermal signature zero point four K above baseline detected in profile.'},
+        {who:'PROBE-K12', text:'Sample cache twenty-four percent full. Continuing bore.'},
+        {who:'PROBE-K12', text:'Awaiting instruction on secondary sonar sweep.'},
+      ]},
+
+    // --- ENCRYPTED / BRAVO-4 (clr 3) ---
+    { id:'REL-2540', freq: 2540.8,  callsign:'TITAN-DEEP', origin:'TITAN', target:'HQ LEO',
+      nations:['USA','USSR'], minClr:3, class_:'ANOMALY', title:'Kraken Mare Deep-Listen',
+      hidden:true,
+      motd:'BRAVO-4 CLEARANCE — Content redacted for lower tiers.',
+      lines:[
+        {who:'TITAN-DEEP', text:'Deep-listen array intercepted anomalous returns from Kraken Mare, quadrant nine.'},
+        {who:'TITAN-DEEP', text:'Pattern is non-natural. Repeats every twenty-three minutes.'},
+        {who:'TITAN-DEEP', text:'Cross-reference matches Cosmonaut-07 field report annex three.'},
+        {who:'TITAN-DEEP', text:'Requesting authorization to deploy hydrophone drone array.'},
+      ]},
+    { id:'REL-912',  freq: 912.6,   callsign:'BLACKBIRD-9', origin:'CLASSIFIED', target:'CLASSIFIED',
+      nations:['USA'], minClr:4, class_:'BLACK', title:'BLACKBIRD Sortie',
+      hidden:true,
+      motd:'LEVEL BLACK — Burn logs to be scrubbed at debrief.',
+      lines:[
+        {who:'BLACKBIRD-9', text:'Objective package acquired. Extraction on schedule.'},
+        {who:'BLACKBIRD-9', text:'One hostile contact vaporized. No survivors on scene.'},
+        {who:'BLACKBIRD-9', text:'Package will be delivered to <span class="redact">██████████</span> facility.'},
+        {who:'BLACKBIRD-9', text:'Burn logs are to be scrubbed at debrief.'},
+      ]},
+
+    // --- ANOMALY / open air but "unowned" ---
+    { id:'REL-1420', freq: 1420.4,  callsign:'——UNKNOWN——', origin:'UNCATALOGUED', target:'——',
+      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Hydrogen-Line Anomaly',
+      hidden:true,
+      lines:[
+        {who:'STATIC', text:'[carrier tone — 3.2 seconds]', static:true},
+        {who:'??????', text:'...they are listening beneath the ice...'},
+        {who:'STATIC', text:'[burst noise — 1.1 seconds]', static:true},
+        {who:'??????', text:'...HOLLOW ORBIT is not the objective...'},
+        {who:'STATIC', text:'[signal terminates]', static:true},
+      ]},
+    { id:'REL-3025', freq: 3025.8,  callsign:'——NUMBERS——', origin:'DEEP SPACE', target:'——',
+      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Numbers Station — Glyph Sequence',
+      hidden:true,
+      lines:[
+        {who:'NARRATOR', text:'...one... zero... four... one... zero...'},
+        {who:'STATIC',   text:'[chime — three tones]', static:true},
+        {who:'NARRATOR', text:'...one... nine... eight... nine...'},
+        {who:'STATIC',   text:'[chime — three tones]', static:true},
+        {who:'NARRATOR', text:'...seven... zero... zero... end message...'},
+        {who:'STATIC',   text:'[carrier terminates]', static:true},
+      ]},
+
+    // --- EUROPA / LEVEL BLACK — the mad rogue scientists ---
+    { id:'REL-EU-1', freq: 2711.3,  callsign:'HORIZON-PALE', origin:'EUROPA HAB', target:'INTERNAL',
+      nations:['EUROPA'], minClr:4, class_:'BLACK', title:'HORIZON PALE — Ice-Column Notes',
+      hidden:true,
+      motd:'HORIZON PALE — This transmission does not exist. Terminals logging content will be identified.',
+      lines:[
+        {who:'DR. VESALIUS', text:'Session forty-two. The interface is louder tonight. It knows the shape of the array.'},
+        {who:'DR. VESALIUS', text:'It watched Cosmonaut Seven. It watched him back.'},
+        {who:'DR. HOFF',     text:'You cannot call it an "it." That is the polar madness talking. It is the substrate.'},
+        {who:'DR. VESALIUS', text:'Substrate, then. The substrate is dying. Alzheimer\'s on a cosmic scale.'},
+        {who:'DR. VESALIUS', text:'We have to send them home. Every last one of them. Before the neurons forget.'},
+        {who:'STATIC',       text:'[carrier hisses — voice underneath, not one of them]', static:true},
+        {who:'??????',       text:'...i see you...', violet:true},
+      ]},
+    { id:'REL-EU-2', freq: 2867.9,  callsign:'——WHISPER——', origin:'EUROPA (LEAK)', target:'——',
+      nations:['ANY'], minClr:0, class_:'ANOMALY', title:'Europa Whisper (Leaked Fragment)',
+      hidden:true,
+      lines:[
+        {who:'STATIC',   text:'[carrier — 12 seconds]', static:true},
+        {who:'??????',   text:'...the gas giants are the neurons... please stop meddling...', violet:true},
+        {who:'STATIC',   text:'[cut]', static:true},
+      ]},
+
+    // --- FRACTURED ---
+    { id:'REL-FRAC-A', freq: 76.2,  callsign:'F.FOUND-2', origin:'FRACTURED SPACE', target:'CELLS',
+      nations:['FRAC'], minClr:2, class_:'FRACTURED', title:'Fractured Cell Traffic',
+      hidden:true,
+      lines:[
+        {who:'CELL-3', text:'Cell three, ready.'},
+        {who:'CELL-7', text:'Cell seven, ready. Ore convoy re-routed to shadow orbit.'},
+        {who:'CELL-3', text:'Confirm — no U.I.C. relay on this band tonight.'},
+        {who:'CELL-7', text:'Nine says the buried thing is stirring. Nine says do not go looking.'},
+      ]},
+
+    // --- CARGO / civilian rumors ---
+    { id:'REL-2867', freq: 2867.3,  callsign:'CARGO-VAULT', origin:'BELT', target:'MARS FLEET',
+      nations:['UIC','USA','USSR'], minClr:0, class_:'ROUTINE', title:'Cargo Manifest Handoff',
+      lines:[
+        {who:'CARGO-VAULT', text:'Ceres Sub-Belt Alpha, this is Vault. Reading you clear.'},
+        {who:'CARGO-VAULT', text:'Transferring manifest 44-Charlie to Mars Fleet uplink.'},
+        {who:'CARGO-VAULT', text:'Copper, refined tantalum, and one classified crate.'},
+        {who:'CARGO-VAULT', text:'Chain of custody sealed, seal-code Bravo-Nine-Nine.'},
+      ]},
+];
+
+// Rumors — pointers with fuzzy freqs to hint players toward hidden channels
+const RUMORS = [
+    { text:'"Old-timers say there\'s a numbers station somewhere above 3.0 GHz. It never sleeps."' },
+    { text:'"A retired Roscosmos operator swears there is Council traffic under 100 MHz on Sunday nights."' },
+    { text:'"Cargo hauler out of Ceres claims a voice on the hydrogen line said his name."' },
+    { text:'"Europa. Nobody hears anything from Europa. Which is exactly the problem."' },
+    { text:'"Fleet grounded a whole channel around 2.2 GHz last week. Nobody says why."' },
+    { text:'"There is a whispering somewhere near 2.7 GHz. Two-carrier. One of them is not a person."' },
+    { text:'"Titan deep-listen only opens up when the ice moves. That\'s a Bravo-4 tell."' },
+];
+
+/* =========================================================
+   FREQUENCY MODEL
+   Slider 0..10000 maps logarithmically over 30 MHz — 3.2 GHz
+========================================================= */
+const FREQ_MIN = 30, FREQ_MAX = 3200; // MHz
+function sliderToFreq(v){ const t=v/10000; return FREQ_MIN*Math.pow(FREQ_MAX/FREQ_MIN,t); }
+function freqToSlider(f){ const t=Math.log(f/FREQ_MIN)/Math.log(FREQ_MAX/FREQ_MIN); return Math.round(t*10000); }
+
+/* =========================================================
+   SESSION ENTRY
+========================================================= */
+function enterSession(sess){
+    SESSION = sess;
+    $('login-layer').classList.add('hidden');
+    $('session-layer').classList.remove('hidden');
+    $('sb-addr').textContent = 'UIC://relay.term-07/'+sess.u;
+    $('sb-name').textContent = 'OPERATOR '+sess.u.toUpperCase();
+    const nInfo = NATIONS[sess.nation];
+    $('tag-nation').textContent = nInfo ? nInfo.name : sess.nation;
+    if(sess.nation === 'EUROPA') $('tag-nation').classList.add('black');
+    else if(sess.nation === 'FRAC') $('tag-nation').classList.add('warn');
+    else $('tag-nation').classList.add('green');
+    const clrLbl = ['CIVILIAN','STANDARD','PRIORITY','BRAVO-4','LEVEL BLACK'][sess.clr] || ('CLR '+sess.clr);
+    $('tag-clr').textContent = 'CLR '+sess.clr+' · '+clrLbl;
+    if(sess.clr >= 4) $('tag-clr').classList.add('black');
+    else if(sess.clr >= 3) $('tag-clr').classList.add('warn');
+    // motd
+    const motdEl = $('motd');
+    if(sess.motd){ motdEl.textContent = '▸ '+sess.motd; if(sess.nation==='EUROPA') motdEl.classList.add('black'); }
+    else motdEl.style.display = 'none';
+    // Log
+    logLine('◆ SESSION OPENED · '+sess.u+' · '+sess.nation+' · CLR '+sess.clr, 'ok');
+    logLine('◆ COMMON CARRIER LICENSE VERIFIED · SIGINT ARBITRATOR ONLINE', 'info');
+    if(sess.clr >= 3) logLine('▸ ENCRYPTED PACKET DECRYPTION ENABLED', 'info');
+    if(sess.clr >= 4) logLine('▸ LEVEL BLACK CHANNELS UNLOCKED — LISTENING IS AUDITED', 'black');
+    // Build directory
+    buildDirectory();
+    // Start waterfall + tuning
+    startTuning();
+}
+
+$('btn-logout').addEventListener('click', ()=>{
+    if(!confirm('End session and wipe local key cache?')) return;
+    stopTuning();
+    SESSION = null;
+    $('session-layer').classList.add('hidden');
+    $('login-layer').classList.remove('hidden');
+    $('in-user').value=''; $('in-pass').value=''; $('in-nation').value='';
+    $('login-status').textContent = ''; $('login-status').className='login-status';
+    $('log-scroll').innerHTML='';
+});
+$('btn-panic').addEventListener('click', ()=>{
+    logLine('!! PANIC WIPE — key cache cleared, session terminated', 'err');
+    setTimeout(()=>{ $('btn-logout').click(); }, 400);
+});
+$('btn-help').addEventListener('click', ()=>{
+    logLine('◆ HELP · Tune the dial to hunt hidden relays. Hold SNR > 60% for 1.6s to lock.', 'info');
+    logLine('◆ HELP · Higher clearance = more channels in your directory · Nation determines flag-issued bands.', 'info');
+    logLine('◆ HELP · Anomalies and Fractured broadcasts are audible to anyone — if you can find them.', 'info');
+});
+
+/* =========================================================
+   DIRECTORY BUILD (with visibility filtering)
+========================================================= */
+let CURRENT_TAB = 'MINE';
+function relayVisibleForClrOnly(r){
+    // Directory listing: user can *see the row exists* if either
+    //  - it's their nation and clr sufficient, or
+    //  - it's a public/ANY band and clr sufficient
+    if(!SESSION) return false;
+    const n = SESSION.nation, c = SESSION.clr;
+    const ownsNation = r.nations.includes(n);
+    const anyNation  = r.nations.includes('ANY');
+    if(!ownsNation && !anyNation) return false;
+    if(c < r.minClr) return false;
+    return true;
+}
+function canHear(r){
+    if(!SESSION) return false;
+    const n = SESSION.nation, c = SESSION.clr;
+    const ownsNation = r.nations.includes(n);
+    const anyNation  = r.nations.includes('ANY');
+    if(!ownsNation && !anyNation) return false;
+    if(c < r.minClr) return false;
+    return true;
+}
+function buildDirectory(){
+    const list = $('dir-list');
+    const note = $('dir-note');
+    list.innerHTML = '';
+    let rows = [];
+    if(CURRENT_TAB === 'MINE'){
+        note.innerHTML = 'Directory entries assigned by your sponsor. <b>Frequencies are not printed here</b> — you must find each relay by tuning the dial. Rows with 🔒 exceed your clearance and cannot be heard.';
+        rows = RELAYS.filter(r => r.nations.includes(SESSION.nation));
+    } else if(CURRENT_TAB === 'OPEN'){
+        note.innerHTML = 'U.I.C. common-carrier bands and public open-air anomalies. Anyone with a receiver may hear these — <b>if they can find them</b>.';
+        rows = RELAYS.filter(r => r.nations.includes('ANY') || r.nations.includes('UIC'));
+    } else {
+        note.innerHTML = 'Unverified operator chatter forwarded through the U.I.C. rumor mill. No frequencies, no callsigns — just where to point your dial.';
+        rows = null; // rumor render below
+    }
+    if(rows){
+        rows.forEach(r=>{
+            const el = document.createElement('div');
+            el.className = 'dir-row';
+            const canH = canHear(r);
+            const showFreq = canH && !r.hidden;
+            if(r.hidden || !canH) el.classList.add('hidden-known');
+            if(!canH) el.classList.add('locked-clr');
+            el.innerHTML = `
+                <div class="top">
+                    <span>${r.id}</span>
+                    <span>${r.class_}${r.hidden?' · CONCEALED':''}</span>
+                </div>
+                <div class="call">${r.callsign}</div>
+                <div style="font-size:10px;letter-spacing:.14em;color:var(--amberBright);opacity:.75;margin-top:2px;">
+                    ${r.origin} ▸ ${r.target}
+                    ${showFreq ? `<span style="color:var(--red);margin-left:8px;">${r.freq.toFixed(1)} MHz</span>` : ''}
+                </div>`;
+            if(canH){
+                el.addEventListener('click', ()=>{
+                    // Only allow "known-freq" jumps for non-hidden bands the user has clearance for.
+                    if(!r.hidden){
+                        $('freq').value = freqToSlider(r.freq);
+                        updateDial(true);
+                        logLine('▸ QUICK-TUNE ▸ '+r.id+' · '+r.freq.toFixed(1)+' MHz','info');
+                    } else {
+                        logLine('◇ '+r.id+' concealed by carrier. Sweep to acquire.','info');
+                    }
+                });
+            } else {
+                el.addEventListener('click', ()=>{
+                    logLine('✗ '+r.id+' — clearance insufficient · CLR '+r.minClr+' required.','err');
+                });
+            }
+            list.appendChild(el);
+        });
+        $('dir-count').textContent = rows.length;
+    } else {
+        RUMORS.forEach((r,i)=>{
+            const el = document.createElement('div');
+            el.className = 'dir-row';
+            el.innerHTML = `
+                <div class="top"><span>RUMOR-${(i+1).toString().padStart(2,'0')}</span><span>UNVERIFIED</span></div>
+                <div class="call" style="font-family:'VT323',monospace;font-size:15px;letter-spacing:.05em;color:var(--amberBright);">${r.text}</div>`;
+            list.appendChild(el);
+        });
+        $('dir-count').textContent = RUMORS.length;
+    }
+}
+document.querySelectorAll('.dir-tab').forEach(b=>{
+    b.addEventListener('click', ()=>{
+        document.querySelectorAll('.dir-tab').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        CURRENT_TAB = b.dataset.tab;
+        buildDirectory();
     });
 });
-renderList();
 
-/* ---------- FREQUENCY DIAL ---------- */
-const freqEl = $('freq');
-const cursorEl = $('dial-cursor');
-const badgeEl = $('freq-badge');
-const meterFill = $('meter-fill');
-const snrEl = $('snr-val');
-const strengthEl = $('strength');
+/* =========================================================
+   WATERFALL + TUNING + LOCK
+========================================================= */
+const wf = $('waterfall'); const wfCtx = wf.getContext('2d');
+let wfTimer = null, lockTimer = null;
+let sweeping = false, sweepDir = 1;
+let currentRelay = null;      // relay we are locked onto
+let candidateRelay = null;    // relay near enough that lock is progressing
+let lockProgress = 0;         // seconds of continuous good SNR
+const LOCK_TIME = 1.6;        // seconds
+let lastTickMs = 0;
 
-const FREQ_MIN = 30;    // MHz
-const FREQ_MAX = 3200;  // MHz
-
-function sliderToFreq(v){
-    // logarithmic-ish
-    const t = v/1000;
-    return FREQ_MIN * Math.pow(FREQ_MAX/FREQ_MIN, t);
-}
-function freqToSlider(f){
-    const t = Math.log(f/FREQ_MIN) / Math.log(FREQ_MAX/FREQ_MIN);
-    return Math.round(t*1000);
-}
-function updateDial(){
-    const f = sliderToFreq(+freqEl.value);
-    cursorEl.style.left = (freqEl.value/1000*100) + '%';
-    badgeEl.textContent = f.toFixed(1)+' MHz';
-    // proximity to nearest cataloged intercept
-    let best = 9e9;
-    LOG.forEach(l=>{
-        const df = Math.abs(l.freq - f);
-        if(df < best) best = df;
+function startTuning(){
+    // Ticks
+    const ticksEl = $('dial-ticks'); ticksEl.innerHTML = '';
+    for(let i=0;i<=10;i++){
+        const s = document.createElement('span');
+        const f = sliderToFreq(i*1000);
+        s.textContent = f>=1000 ? (f/1000).toFixed(1)+'G' : Math.round(f)+'M';
+        ticksEl.appendChild(s);
+    }
+    $('freq').addEventListener('input', ()=>updateDial(true));
+    $('btn-sweep').addEventListener('click', ()=>{
+        sweeping = !sweeping;
+        $('btn-sweep').textContent = sweeping ? '■ STOP SWEEP' : '◆ AUTO-SWEEP';
     });
-    const snr = Math.max(0, 30 - Math.log10(1+best)*10);
-    meterFill.style.width = (snr/30*100) + '%';
-    snrEl.textContent = snr.toFixed(1)+'dB';
-    strengthEl.textContent = 'SIG ' + Math.round(snr/30*100) + '%';
+    $('btn-drop').addEventListener('click', dropLock);
+    wfTimer = setInterval(drawWaterfallLine, 55);
+    lockTimer = setInterval(tickLock, 60);
+    lastTickMs = performance.now();
+    updateDial(true);
 }
-freqEl.addEventListener('input', updateDial);
-
-/* Tick marks */
-const ticksEl = $('dial-ticks');
-for(let i=0;i<=10;i++){
-    const s = document.createElement('span');
-    const f = sliderToFreq(i*100);
-    s.textContent = f>=1000 ? (f/1000).toFixed(1)+'G' : Math.round(f)+'M';
-    ticksEl.appendChild(s);
+function stopTuning(){
+    if(wfTimer) clearInterval(wfTimer); wfTimer=null;
+    if(lockTimer) clearInterval(lockTimer); lockTimer=null;
+    sweeping=false;
 }
 
-/* ---------- WATERFALL CANVAS ---------- */
-const wf = $('waterfall');
-const wfCtx = wf.getContext('2d');
+/* Draw waterfall — only relays audible to this operator create peaks.
+   Bands the operator cannot hear are pure floor noise = invisible in waterfall. */
+function relayContributesToWaterfall(r){ return canHear(r); }
+
 function drawWaterfallLine(){
-    // scroll up
-    const img = wfCtx.getImageData(0, 0, wf.width, wf.height-1);
-    wfCtx.putImageData(img, 0, 1);
-    // new line at top with noise + peaks at cataloged freqs
+    const img = wfCtx.getImageData(0,0,wf.width,wf.height-1);
+    wfCtx.putImageData(img,0,1);
     const w = wf.width;
-    const line = wfCtx.createImageData(w, 1);
+    const line = wfCtx.createImageData(w,1);
+    const cx = (+$('freq').value/10000)*w;
     for(let x=0;x<w;x++){
-        // baseline noise
-        let intensity = 0.10 + Math.random()*0.10;
-        const f = sliderToFreq(x/w*1000);
-        LOG.forEach(l=>{
-            const df = Math.abs(l.freq - f) / f;
-            if(df < 0.02){
-                const bump = Math.max(0, 0.02 - df) / 0.02;
-                intensity += bump * (l.class_==='ANOMALY' ? 0.9 : 0.7);
+        let intensity = 0.09 + Math.random()*0.10;
+        const f = sliderToFreq(x/w*10000);
+        RELAYS.forEach(r=>{
+            if(!relayContributesToWaterfall(r)) return;
+            const df = Math.abs(r.freq - f) / f;
+            if(df < 0.015){
+                const bump = Math.max(0, 0.015 - df)/0.015;
+                let mult = 0.65;
+                if(r.class_==='ANOMALY') mult = 0.9;
+                if(r.class_==='BLACK')   mult = 1.0;
+                if(r.class_==='FRACTURED') mult = 0.75;
+                intensity += bump * mult;
             }
         });
-        // cursor line brighter
-        const cx = (+freqEl.value/1000)*w;
         if(Math.abs(x - cx) < 1.5) intensity = Math.min(1, intensity+0.5);
         intensity = Math.min(1, intensity + (Math.random()-0.5)*0.05);
-        const r = Math.round(255 * intensity);
-        const g = Math.round(160 * intensity);
-        const b = Math.round(30  * intensity);
-        line.data[x*4]   = r;
-        line.data[x*4+1] = g;
-        line.data[x*4+2] = b;
-        line.data[x*4+3] = 255;
+        const r = Math.round(255*intensity);
+        const g = Math.round(160*intensity);
+        const b = Math.round(30*intensity);
+        line.data[x*4]=r; line.data[x*4+1]=g; line.data[x*4+2]=b; line.data[x*4+3]=255;
     }
-    wfCtx.putImageData(line, 0, 0);
+    wfCtx.putImageData(line,0,0);
 }
-setInterval(drawWaterfallLine, 55);
-updateDial();
 
-/* ---------- AUTO-SWEEP ---------- */
-let sweeping=false, sweepDir=1;
-$('btn-sweep').addEventListener('click', ()=>{
-    sweeping = !sweeping;
-    $('btn-sweep').textContent = sweeping ? '■ STOP SWEEP' : '◆ AUTO-SWEEP';
-    $('btn-sweep').classList.toggle('active', sweeping);
-});
-setInterval(()=>{
-    if(!sweeping) return;
-    let v = +freqEl.value + sweepDir*3;
-    if(v>=1000){v=1000;sweepDir=-1;}
-    if(v<=0){v=0;sweepDir=1;}
-    freqEl.value = v;
-    updateDial();
-    // auto-select nearest intercept if very close
+function updateDial(userScrub){
+    const v = +$('freq').value;
     const f = sliderToFreq(v);
-    const near = LOG.find(l=>Math.abs(l.freq-f) < f*0.003);
-    if(near && current?.id !== near.id){
-        loadIntercept(near.id);
-    }
-},80);
-
-$('btn-play').addEventListener('click', ()=>{
-    // snap to nearest
-    const f = sliderToFreq(+freqEl.value);
+    $('dial-cursor').style.left = (v/10000*100)+'%';
+    $('freq-badge').textContent = f.toFixed(2)+' MHz';
+    // find nearest audible relay
     let best=null, bd=9e9;
-    LOG.forEach(l=>{
-        const d = Math.abs(l.freq-f);
-        if(d<bd){bd=d; best=l;}
+    RELAYS.forEach(r=>{
+        if(!canHear(r)) return;
+        const d = Math.abs(r.freq-f);
+        if(d<bd){bd=d; best=r;}
     });
+    // SNR: distance-relative. tight window ~0.3% for lock candidate.
+    let snr = 0;
     if(best){
-        freqEl.value = freqToSlider(best.freq);
-        updateDial();
-        loadIntercept(best.id);
+        const rel = bd/f;
+        snr = Math.max(0, 30 - Math.log10(1+rel*1000)*10);
     }
-});
-
-/* ---------- PLAYBACK ---------- */
-let current = null;
-let playTimer = null;
-let playAudioCtx = null;
-let playStart = 0;
-let playDuration = 0;
-let playPaused = true;
-
-function stopPlayback(){
-    if(playTimer){cancelAnimationFrame(playTimer); playTimer=null;}
-    playPaused = true;
-    $('pb-play').textContent = '▶ PLAY';
-    document.querySelectorAll('#pb-transcript .ts-line').forEach(el=>el.classList.remove('on'));
-    $('wave-cursor').style.left = '0%';
-    $('pb-elapsed').textContent = '0:00';
-}
-
-function fmtSec(s){
-    const m = Math.floor(s/60), r = Math.floor(s%60);
-    return m+':'+String(r).padStart(2,'0');
-}
-
-function loadIntercept(id){
-    const l = LOG.find(x=>x.id===id);
-    if(!l) return;
-    stopPlayback();
-    current = l;
-    document.querySelectorAll('.intercept').forEach(el=>el.classList.remove('active'));
-    // mark active
-    const idx = LOG.filter(x=>{
-        if(currentFilter==='ALL') return true;
-        if(currentFilter==='ENCRYPTED') return x.enc;
-        return x.class_ === currentFilter;
-    }).indexOf(l);
-    if(idx>=0){
-        listEl.children[idx]?.classList.add('active');
+    $('meter-fill').style.width = (snr/30*100)+'%';
+    $('snr-val').textContent = snr.toFixed(1)+' dB';
+    // Determine candidate & lock progression happens in tickLock
+    if(userScrub){
+        // scrubbing breaks lock immediately if we leave the window
+        if(currentRelay && best !== currentRelay){
+            const rel = Math.abs(currentRelay.freq-f)/currentRelay.freq;
+            if(rel > 0.004) dropLock();
+        }
     }
-
-    $('pb-badge').textContent = l.id;
-    $('pb-title').textContent = l.title;
-    $('pb-ts').textContent = l.ts;
-    $('pb-freq').textContent = l.freq.toFixed(1)+' MHz';
-    $('pb-call').textContent = l.callsign;
-    $('pb-origin').textContent = l.origin;
-    $('pb-target').textContent = l.target;
-    $('pb-class').textContent = l.class_ + (l.enc ? ' / ENC' : '');
-    $('pb-decrypt').style.display = l.enc ? 'inline-block' : 'none';
-    $('pb-decrypt').textContent = l.enc ? '🔒 DECRYPT' : '';
-
-    renderTranscript(l, l.enc && !l._decrypted);
-    // Duration: ~3s per line
-    playDuration = (l._decrypted ? l.decrypted : l.lines).length * 3;
-    $('pb-total').textContent = fmtSec(playDuration);
-    drawWaveform();
-    // Snap dial
-    freqEl.value = freqToSlider(l.freq);
-    updateDial();
+    // Update candidate
+    if(best && (bd/f) < 0.004) candidateRelay = best;
+    else candidateRelay = null;
+    if(!candidateRelay) lockProgress = 0;
+    // lock indicator
+    const li = $('lock-ind');
+    li.classList.remove('locking','locked');
+    if(currentRelay){
+        li.classList.add('locked');
+        li.textContent = '◆ LOCKED · '+currentRelay.callsign;
+    } else if(candidateRelay){
+        li.classList.add('locking');
+        const pct = Math.round(lockProgress/LOCK_TIME*100);
+        li.textContent = '▸ ACQUIRING ('+pct+'%)';
+    } else {
+        li.textContent = '◇ NO LOCK';
+    }
+    return {f, best, snr};
 }
 
-function renderTranscript(l, encrypted){
+/* Continuous tick — advances lock, drives sweep, and plays transcript. */
+function tickLock(){
+    const now = performance.now();
+    const dt = Math.min(0.25, (now-lastTickMs)/1000);
+    lastTickMs = now;
+    // sweep
+    if(sweeping){
+        let v = +$('freq').value + sweepDir*8;
+        if(v>=10000){v=10000;sweepDir=-1;}
+        if(v<=0){v=0;sweepDir=1;}
+        $('freq').value = v;
+    }
+    const st = updateDial(false);
+    // lock progress
+    if(candidateRelay && !currentRelay){
+        lockProgress += dt;
+        if(lockProgress >= LOCK_TIME){
+            acquire(candidateRelay);
+        }
+    }
+    // playback tick
+    if(currentRelay){
+        playElapsed += dt;
+        advanceTranscript();
+    }
+}
+
+function acquire(r){
+    currentRelay = r;
+    lockProgress = 0;
+    playElapsed = 0;
+    playStartedAt = performance.now();
+    // stop sweep on acquire so player can listen
+    if(sweeping){ sweeping=false; $('btn-sweep').textContent='◆ AUTO-SWEEP'; }
+    // Populate playback header
+    $('pb-title').textContent = r.title;
+    $('pb-ts').textContent    = simTimestamp();
+    $('pb-freq').textContent  = r.freq.toFixed(2)+' MHz';
+    $('pb-call').textContent  = r.callsign;
+    $('pb-origin').textContent= r.origin;
+    $('pb-target').textContent= r.target;
+    $('pb-class').textContent = r.class_;
+    // Snap dial exactly on
+    $('freq').value = freqToSlider(r.freq);
+    // Render transcript
+    renderTranscript(r);
+    logLine('◆ LOCKED · '+r.id+' · '+r.callsign+' @ '+r.freq.toFixed(2)+' MHz', 'ok');
+    if(r.class_==='BLACK') logLine('!! LEVEL BLACK CONTENT · listening logged to your operator ID', 'black');
+    if(r.class_==='ANOMALY') logLine('▸ ANOMALY CATALOGUED · deep-band deviation flagged', 'info');
+}
+
+function dropLock(){
+    if(!currentRelay){ return; }
+    logLine('◇ DROPPED · '+currentRelay.callsign, 'info');
+    currentRelay = null;
+    lockProgress = 0;
+    $('pb-title').textContent = '-- CARRIER SEARCH --';
+    ['pb-ts','pb-freq','pb-call','pb-origin','pb-target','pb-class'].forEach(id=>$(id).textContent='--');
+    $('pb-transcript').innerHTML = '<div class="ts-empty">// NO CARRIER — SWEEP OR TUNE TO ACQUIRE //</div>';
+}
+
+/* =========================================================
+   TRANSCRIPT PLAYBACK
+========================================================= */
+let playElapsed = 0;
+let playStartedAt = 0;
+const LINE_SECS = 3.0;
+
+function renderTranscript(r){
     const box = $('pb-transcript');
     box.innerHTML = '';
-    const lines = encrypted ? l.lines : (l._decrypted ? l.decrypted : l.lines);
-    lines.forEach((line, i)=>{
+    // If ENCRYPTED style (BRAVO-4) and user is exactly at min clr, could show cipher first,
+    // but here canHear() already requires clearance, so render decoded.
+    r.lines.forEach((line, i)=>{
         const el = document.createElement('div');
         el.className = 'ts-line';
         if(line.static)   el.classList.add('static');
         if(line.encrypted)el.classList.add('encrypted');
+        if(line.violet)   el.classList.add('violet');
         el.dataset.i = i;
         el.innerHTML = `<span class="speaker">${line.who}::</span>${line.text}`;
         box.appendChild(el);
     });
 }
-
-$('pb-decrypt').addEventListener('click', ()=>{
-    if(!current) return;
-    if(!current.enc) return;
-    current._decrypted = true;
-    renderTranscript(current, false);
-    $('pb-decrypt').textContent = '✓ DECRYPTED';
-    $('pb-decrypt').style.color = 'var(--green)';
-    playDuration = current.decrypted.length * 3;
-    $('pb-total').textContent = fmtSec(playDuration);
-    drawWaveform();
-});
-
-/* WAVEFORM CANVAS */
-const wave = $('wave');
-const wCtx = wave.getContext('2d');
-function drawWaveform(){
-    if(!current) return;
-    const w = wave.width, h = wave.height;
-    wCtx.clearRect(0,0,w,h);
-    wCtx.strokeStyle = 'rgba(255,159,7,.85)';
-    wCtx.lineWidth = 1;
-    wCtx.beginPath();
-    // deterministic pseudo-random from id
-    let seed = 0;
-    for(const c of current.id) seed = (seed*31 + c.charCodeAt(0)) & 0xffffff;
-    function rnd(){ seed = (seed*9301 + 49297) & 0xffffff; return (seed/0xffffff); }
-    for(let x=0;x<w;x++){
-        const t = x/w;
-        // envelope by line position
-        const lines = current._decrypted ? current.decrypted : current.lines;
-        const li = Math.floor(t*lines.length);
-        const line = lines[Math.min(li, lines.length-1)];
-        let amp = line?.static ? 0.15 : 0.55;
-        if(line?.encrypted) amp = 0.9;
-        const v = (Math.sin(x*0.15)+Math.sin(x*0.42+seed)+Math.sin(x*0.7-seed*0.3))/3;
-        const noise = (rnd()-0.5)*0.35;
-        const y = h/2 + (v*0.6 + noise) * amp * h/2;
-        if(x===0) wCtx.moveTo(x,y); else wCtx.lineTo(x,y);
+function advanceTranscript(){
+    if(!currentRelay) return;
+    const activeIdx = Math.floor(playElapsed / LINE_SECS);
+    const box = $('pb-transcript');
+    const lines = box.querySelectorAll('.ts-line');
+    lines.forEach(el=> el.classList.toggle('on', +el.dataset.i <= activeIdx));
+    if(activeIdx >= currentRelay.lines.length){
+        // Loop the carrier — signal continues
+        playElapsed = 0;
+        lines.forEach(el=>el.classList.remove('on'));
     }
-    wCtx.stroke();
-    // center line
-    wCtx.strokeStyle = 'rgba(255,74,43,.25)';
-    wCtx.beginPath(); wCtx.moveTo(0,h/2); wCtx.lineTo(w,h/2); wCtx.stroke();
 }
 
-/* PLAY */
-$('pb-play').addEventListener('click', ()=>{
-    if(!current) return;
-    if(playPaused){
-        playPaused = false;
-        playStart = performance.now();
-        $('pb-play').textContent = '⏸ PAUSE';
-        tickPlay();
-    } else {
-        stopPlayback();
-    }
-});
-$('pb-stop').addEventListener('click', stopPlayback);
-
-function tickPlay(){
-    if(playPaused) return;
-    const elapsed = (performance.now() - playStart)/1000;
-    if(elapsed >= playDuration){
-        stopPlayback();
-        return;
-    }
-    const lines = current._decrypted ? current.decrypted : current.lines;
-    const activeIdx = Math.floor(elapsed / 3);
-    document.querySelectorAll('#pb-transcript .ts-line').forEach(el=>{
-        el.classList.toggle('on', +el.dataset.i <= activeIdx);
-    });
-    $('wave-cursor').style.left = (elapsed/playDuration*100)+'%';
-    $('pb-elapsed').textContent = fmtSec(elapsed);
-    playTimer = requestAnimationFrame(tickPlay);
+/* Simulated in-universe timestamp — 1989 setting */
+function simTimestamp(){
+    const base = new Date(Date.UTC(1989, 2, 14, 0, 0, 0));
+    const off = (Date.now()/1000) % (86400*3);
+    const d = new Date(base.getTime() + off*1000);
+    return d.toISOString().replace('T',' ').slice(0,19);
 }
 
-/* Footer nav */
-$('btn-terminal').addEventListener('click', ()=>{ window.location.href='terminal.html'; });
-$('btn-map').addEventListener('click', ()=>{ window.location.href='solarmap.html'; });
+/* =========================================================
+   MINI LOG
+========================================================= */
+function logLine(t, cls){
+    const box = $('log-scroll');
+    const el = document.createElement('div');
+    el.className = 'ln'+(cls?' '+cls:'');
+    const ts = fmtClock(new Date());
+    el.textContent = '['+ts+'] '+t;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+    while(box.children.length > 200) box.removeChild(box.firstChild);
+}
 </script>
-
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
