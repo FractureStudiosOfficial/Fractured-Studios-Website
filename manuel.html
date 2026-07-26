@@ -3,582 +3,582 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>U.I.C. // OPERATOR'S MANUAL — TECHNICAL PRINT</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Special+Elite&display=swap" rel="stylesheet">
+<title>U.I.C. // OPERATOR'S MANUAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <style>
-/* ==========================================================
-   OPERATOR'S MANUAL — "TECHNICAL PRINT" EDITION
-   Distinct from the CRT tube pages: this is a printed/blueprint
-   document. No fisheye, no bezel, no scanroll. Graph paper,
-   binding punch-holes, rubber stamps, chapter tabs, authorization seal.
-   ========================================================== */
 :root{
-  --paper:#141008;
-  --paperTint:#1c1608;
-  --grid:rgba(255,159,7,.05);
-  --gridStrong:rgba(255,159,7,.08);
-  --ink:#f0c674;
-  --inkBright:#ffe0a3;
-  --inkDim:#8a6224;
-  --stampRed:#c93b1a;
-  --stampRedBright:#ff5a34;
-  --stampBlue:#3a6ea5;
-  --seal:#d97b1a;
+  --amber:#FF9F07;
+  --amberBright:#FFC861;
+  --amberDim:#B36700;
+  --red:#ff4a2b;
+  --green:#8fff8a;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;min-height:100%;background:#000;overflow-x:hidden;}
-body{
-  color:var(--ink);
-  font-family:'Special Elite','Share Tech Mono',monospace;
-  padding:0;
-  line-height:1.6;
-  font-size:15px;
-  background:radial-gradient(ellipse at 50% 0%, #241a0c 0%, #0a0704 60%, #000 100%);
-  min-height:100vh;
-}
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
-  background:
-    repeating-linear-gradient(23deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px),
-    repeating-linear-gradient(-67deg,rgba(0,0,0,.15) 0 1px,transparent 1px 4px);
-  mix-blend-mode:overlay;
-}
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:6;
-  background:radial-gradient(ellipse 100% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%);
-}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-/* ============ SHEET ============ */
-.sheet{
-  max-width:960px;
-  margin:22px auto 22px;
-  position:relative;
-  background:
-    radial-gradient(ellipse at 100% 0%,rgba(58,110,165,.06),transparent 45%),
-    radial-gradient(ellipse at 0% 100%,rgba(201,59,26,.05),transparent 45%),
-    repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 22px),
-    repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 22px),
-    repeating-linear-gradient(0deg,var(--gridStrong) 0 1px,transparent 1px 110px),
-    repeating-linear-gradient(90deg,var(--gridStrong) 0 1px,transparent 1px 110px),
-    linear-gradient(180deg,var(--paperTint),var(--paper));
-  border:1px solid rgba(255,159,7,.35);
-  box-shadow:
-    0 0 0 6px #0a0705,
-    0 0 0 7px rgba(255,159,7,.18),
-    0 30px 60px rgba(0,0,0,.7);
-  padding:36px 44px 44px 88px;
-  z-index:2;
-}
-.sheet::before{
-  content:"";
-  position:absolute;top:0;bottom:0;left:0;width:60px;
-  background:
-    radial-gradient(circle at 30px 90px,   #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 250px,  #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 410px,  #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 570px,  #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 730px,  #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 890px,  #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1050px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1210px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1370px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1530px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1690px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 1850px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 2010px, #000 0 9px, transparent 10px),
-    radial-gradient(circle at 30px 2170px, #000 0 9px, transparent 10px),
-    linear-gradient(90deg,rgba(0,0,0,.35),transparent);
-  pointer-events:none;
-}
-.sheet::after{
-  content:"";
-  position:absolute;top:0;left:88px;right:20px;height:14px;
-  background:
-    repeating-linear-gradient(90deg,rgba(255,159,7,.35) 0 1px,transparent 1px 20px),
-    repeating-linear-gradient(90deg,rgba(255,159,7,.55) 0 1px,transparent 1px 100px);
-  opacity:.55;pointer-events:none;
-}
+/* ============ BEZEL (same UIC grammar) ============ */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
-/* ============ HEADER ============ */
-.doc-head{
+/* ============ SCREEN ============ */
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;
+  box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,
+    0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);
+  overflow:hidden;isolation:isolate;transform-style:preserve-3d;}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);overflow:hidden;}
+
+/* CRT overlays */
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.55;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
+
+/* ============ MAIN GRID — top header, left chapter rail, right page viewer, bottom nav ============ */
+#crt-container{
+  position:absolute;inset:0;
+  padding:22px 26px 78px;
   display:grid;
-  grid-template-columns:1fr auto;
-  gap:24px;
-  border-bottom:2px solid var(--ink);
-  padding-bottom:18px;margin-bottom:22px;
+  grid-template-rows:auto 1fr;
+  grid-template-columns:270px 1fr;
+  gap:12px;
+  z-index:2;
+  transform-style:preserve-3d;
+  transition:transform .1s ease-out;
+}
+
+.panel{
+  position:relative;
+  border:2px solid rgba(255,159,7,.45);
+  background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
+  box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);
+  border-radius:6px;
+}
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;z-index:0;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;z-index:0;}
+.panel > *{position:relative;z-index:1;}
+
+/* HEADER (spans both columns) */
+.hdr{
+  grid-column:1/-1;
+  padding:10px 18px;
+  border:1px solid rgba(255,159,7,.4);
+  background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.hdr .l{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:led-pulse 1.6s ease-in-out infinite;}
+.hdr .ttl{font-size:15px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.5);}
+.hdr .sub{font-size:10px;letter-spacing:.24em;color:var(--amberBright);padding-left:12px;border-left:1px dashed rgba(255,159,7,.3);opacity:.85;}
+.hdr .r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);}
+.tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);animation:tag-blink 1.4s steps(2) infinite;}
+.tag.stamp{border-color:rgba(143,255,138,.4);color:var(--green);text-shadow:0 0 4px rgba(143,255,138,.35);}
+@keyframes tag-blink{50%{opacity:.35;}}
+
+/* ============ LEFT RAIL — CHAPTER INDEX ============ */
+.rail{
+  padding:14px;
+  display:flex;flex-direction:column;
+  min-height:0;overflow:hidden;
+}
+.rail-head{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:8px;margin-bottom:10px;
+  border-bottom:1px dashed rgba(255,159,7,.3);
+}
+.rail-head .tick{color:var(--red);}
+.rail-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:12px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;}
+.rail-head .bd{font-size:9px;letter-spacing:.22em;padding:2px 6px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+
+.chap-list{
+  display:flex;flex-direction:column;gap:6px;
+  overflow-y:auto;flex:1;min-height:0;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,159,7,.4) transparent;
+  padding-right:4px;
+}
+.chap-list::-webkit-scrollbar{width:6px;}
+.chap-list::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+
+.chap-row{
+  display:grid;
+  grid-template-columns:34px 1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border:1px solid rgba(255,159,7,.22);
+  background:rgba(255,159,7,.03);
+  cursor:pointer;
+  color:var(--amberBright);
+  transition:.15s;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-align:left;
+  font-family:inherit;
+}
+.chap-row .n{
+  font-family:'VT323',monospace;
+  font-size:20px;color:var(--red);letter-spacing:.04em;
+  text-shadow:0 0 6px rgba(255,74,43,.35);
+  line-height:1;
+}
+.chap-row .name{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--amberBright);
+}
+.chap-row .dot{
+  width:7px;height:7px;border:1px solid rgba(255,159,7,.4);
+  background:transparent;
+}
+.chap-row:hover{background:rgba(255,159,7,.1);border-color:rgba(255,159,7,.5);}
+.chap-row.on{
+  background:rgba(255,74,43,.10);
+  border-color:rgba(255,74,43,.55);
+  color:var(--red);
+  text-shadow:0 0 4px rgba(255,74,43,.4);
+}
+.chap-row.on .name{color:var(--red);}
+.chap-row.on .dot{background:var(--red);box-shadow:0 0 6px var(--red);border-color:var(--red);}
+
+.rail-foot{
+  margin-top:10px;padding-top:8px;
+  border-top:1px dashed rgba(255,159,7,.25);
+  font-size:10px;letter-spacing:.22em;color:var(--amberBright);opacity:.75;
+  display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;
+}
+.rail-foot .k{color:var(--red);}
+
+/* mini schematic */
+.mini-diag{
+  margin-top:8px;padding:6px 8px;
+  border:1px dashed rgba(255,159,7,.28);
+  background:rgba(0,0,0,.35);
+  display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;
+  font-family:'VT323',monospace;font-size:12px;letter-spacing:.06em;
+  color:var(--amberBright);
+}
+.mini-diag svg{width:36px;height:36px;}
+
+/* ============ RIGHT — PAGE VIEWER ============ */
+.viewer{
+  padding:0;
+  display:flex;flex-direction:column;
+  min-height:0;overflow:hidden;
   position:relative;
 }
-.doc-head .lockup{display:flex;flex-direction:column;gap:6px;}
-.doc-head .kicker{
-  font-family:'VT323',monospace;font-size:14px;
-  letter-spacing:.28em;color:var(--inkDim);text-transform:uppercase;
+.view-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:14px;
+  padding:14px 20px 10px;
+  border-bottom:1px dashed rgba(255,159,7,.28);
+  flex-wrap:wrap;
 }
-.doc-head h1{
-  margin:0;font-family:'Share Tech Mono',monospace;
-  font-size:38px;letter-spacing:.14em;color:var(--inkBright);
-  text-shadow:2px 0 0 rgba(201,59,26,.35);line-height:1;
+.view-head .doc-num{
+  font-family:'VT323',monospace;font-size:34px;line-height:1;
+  color:var(--red);letter-spacing:.02em;
+  padding:2px 10px;border:2px solid var(--red);
+  text-shadow:0 0 8px rgba(255,74,43,.4);
+  background:rgba(255,74,43,.05);
 }
-.doc-head .sub{
-  font-family:'VT323',monospace;font-size:16px;letter-spacing:.22em;
-  color:var(--ink);opacity:.85;
+.view-head .doc-body{flex:1;min-width:0;}
+.view-head .doc-body h2{
+  margin:0 0 4px;font-size:16px;letter-spacing:.24em;
+  color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.4);
 }
-.doc-head .meta-block{
-  display:flex;flex-direction:column;gap:6px;align-items:flex-end;
-  font-family:'VT323',monospace;font-size:13px;letter-spacing:.16em;color:var(--ink);
+.view-head .doc-body .lede{
+  font-size:10px;letter-spacing:.22em;color:var(--red);opacity:.9;
 }
-.doc-head .meta-block .row{display:flex;gap:10px;align-items:center;}
-.doc-head .meta-block .lbl{color:var(--inkDim);}
+.view-head .doc-meta{
+  display:flex;flex-direction:column;gap:3px;align-items:flex-end;
+  font-family:'VT323',monospace;font-size:12px;letter-spacing:.06em;
+  color:var(--amberBright);opacity:.85;text-align:right;
+}
+.view-head .doc-meta .k{color:var(--red);letter-spacing:.2em;font-size:9px;font-family:'Share Tech Mono',monospace;}
 
-.stamp{
-  position:absolute;font-family:'Share Tech Mono',monospace;
-  border:3px double var(--stampRed);color:var(--stampRed);
-  padding:5px 12px;letter-spacing:.28em;font-size:13px;
-  text-shadow:0 0 1px rgba(201,59,26,.5);
-  transform:rotate(-6deg);opacity:.85;
-  box-shadow:0 0 0 2px rgba(0,0,0,.4) inset;
-  pointer-events:none;background:rgba(20,10,4,.35);z-index:3;
+.view-body{
+  flex:1;min-height:0;overflow-y:auto;
+  padding:14px 20px 16px;
+  line-height:1.6;
+  font-size:13px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,159,7,.4) transparent;
+  text-shadow:0 0 3px rgba(255,159,7,.35);
+  background:
+    repeating-linear-gradient(180deg,rgba(255,159,7,.02) 0 2px,transparent 2px 3px),
+    linear-gradient(180deg,rgba(255,159,7,.02),rgba(0,0,0,.2));
 }
-.stamp.public{
-  top:-8px;right:170px;transform:rotate(-8deg);
-  border-color:var(--stampRedBright);color:var(--stampRedBright);
-}
-.stamp.rev{
-  top:38px;right:36px;transform:rotate(4deg);
-  border:2px solid var(--stampBlue);color:var(--stampBlue);
-  border-style:dashed;font-size:11px;padding:4px 10px;
-}
+.view-body::-webkit-scrollbar{width:8px;}
+.view-body::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
 
-.barcode{display:flex;gap:2px;align-items:end;height:24px;margin-top:8px;}
-.barcode span{display:block;background:var(--ink);width:2px;height:100%;}
-.barcode span.thin{width:1px;height:80%;}
-.barcode span.thick{width:4px;}
-.barcode-label{
-  font-family:'VT323',monospace;font-size:12px;color:var(--inkDim);
-  letter-spacing:.28em;margin-top:2px;
-}
-
-/* ============ TABS ============ */
-.tabs{
-  display:flex;flex-wrap:wrap;gap:0;
-  border-top:1px dashed rgba(255,159,7,.35);
-  border-bottom:1px dashed rgba(255,159,7,.35);
-  margin-bottom:24px;background:rgba(255,159,7,.03);
-}
-.tabs a{
-  flex:1 1 auto;min-width:120px;padding:12px 14px;
-  text-decoration:none;color:var(--ink);
-  font-family:'Share Tech Mono',monospace;
-  font-size:12px;letter-spacing:.22em;
-  border-right:1px dashed rgba(255,159,7,.25);
-  position:relative;transition:.15s;
-  display:flex;flex-direction:column;gap:4px;
-  min-height:60px;justify-content:center;
-}
-.tabs a:last-child{border-right:none;}
-.tabs a b{
-  display:block;font-family:'VT323',monospace;font-size:16px;
-  color:var(--stampRed);letter-spacing:.24em;font-weight:normal;
-}
-.tabs a:hover,.tabs a:focus{
-  background:rgba(255,159,7,.09);color:var(--inkBright);outline:none;
-}
-.tabs a.on{
-  background:rgba(201,59,26,.12);color:var(--inkBright);
-  box-shadow:inset 0 -3px 0 var(--stampRed);
+.page{display:none;animation:pageIn .28s ease;}
+.page.on{display:block;}
+@keyframes pageIn{
+  0%{opacity:0;transform:translateY(4px);}
+  100%{opacity:1;transform:translateY(0);}
 }
 
-/* ============ SECTIONS ============ */
-section{
-  scroll-margin-top:24px;padding:22px 0 8px;
-  border-top:1px solid rgba(255,159,7,.14);position:relative;
-}
-section:first-of-type{border-top:none;padding-top:0;}
-section .chap{
-  display:flex;align-items:center;gap:16px;
-  margin-bottom:8px;flex-wrap:wrap;
-}
-section .chap .num{
-  font-family:'VT323',monospace;font-size:56px;color:var(--stampRed);
-  line-height:.85;padding:2px 12px;
-  border:3px solid var(--stampRed);letter-spacing:.06em;
-  transform:rotate(-2deg);background:rgba(201,59,26,.05);
-}
-section .chap .title{flex:1;min-width:200px;}
-section .chap h2{
-  margin:0 0 4px;font-family:'Share Tech Mono',monospace;
-  font-size:22px;letter-spacing:.22em;color:var(--inkBright);
-}
-section .chap .lede{
-  font-family:'VT323',monospace;font-size:15px;letter-spacing:.18em;
-  color:var(--inkDim);text-transform:uppercase;
-}
-section .chap .docno{
-  font-family:'VT323',monospace;font-size:12px;padding:4px 10px;
-  border:1px solid var(--stampBlue);color:var(--stampBlue);
-  letter-spacing:.24em;align-self:flex-start;
-}
-
-section p{margin:0 0 12px;color:var(--ink);}
-section p .amb{color:var(--inkBright);}
-section p .rd{color:var(--stampRedBright);text-decoration:underline dotted rgba(201,59,26,.5);}
+.page p{margin:0 0 10px;color:var(--amberBright);opacity:.94;}
+.page p .amb{color:var(--amber);}
+.page p .rd{color:var(--red);}
 
 h3.sub{
-  font-family:'Share Tech Mono',monospace;font-size:13px;
-  letter-spacing:.28em;color:var(--stampRed);
-  margin:20px 0 8px;padding-left:14px;
-  border-left:3px solid var(--stampRed);
+  font-size:11px;letter-spacing:.28em;
+  color:var(--red);margin:14px 0 6px;
+  padding-left:10px;border-left:2px solid var(--red);
+  text-shadow:0 0 4px rgba(255,74,43,.35);
 }
 
+/* Key-value rows */
 .kv{
-  display:grid;grid-template-columns:150px 1fr;gap:14px;
-  padding:6px 0;border-bottom:1px dotted rgba(255,159,7,.22);
-  font-family:'VT323',monospace;font-size:16px;letter-spacing:.06em;
+  padding:6px 10px;
+  border:1px solid rgba(255,159,7,.2);
+  background:rgba(255,159,7,.03);
+  margin:4px 0;
+  font-size:11px;letter-spacing:.08em;
+  display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:baseline;
 }
-.kv .k{
-  color:var(--stampRed);letter-spacing:.22em;font-size:12px;
-  font-family:'Share Tech Mono',monospace;padding-top:2px;
-}
-.kv .v{color:var(--inkBright);}
+.kv .k{color:var(--red);letter-spacing:.22em;font-size:10px;}
+.kv .v{color:var(--amberBright);}
 
-.card-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:14px;margin-top:12px;
+/* Code cards */
+.code-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.code-card{
+  border:1px solid rgba(255,74,43,.35);
+  background:linear-gradient(180deg,rgba(255,74,43,.05),rgba(0,0,0,.3));
+  padding:10px;
 }
-.card{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.25)),
-    linear-gradient(0deg,rgba(255,159,7,.05),rgba(255,159,7,.05));
-  border:1px solid rgba(255,159,7,.35);
-  border-top:3px solid var(--stampRed);
-  padding:14px 16px 16px;position:relative;
-  box-shadow:2px 2px 0 rgba(0,0,0,.5);
+.code-card .name{
+  font-size:11px;letter-spacing:.22em;color:var(--red);
+  display:flex;justify-content:space-between;align-items:center;gap:6px;
+  margin-bottom:5px;
+  text-shadow:0 0 5px rgba(255,74,43,.35);
 }
-.card::before{
-  content:"◈";position:absolute;top:8px;right:12px;
-  color:var(--stampRed);font-size:14px;
+.code-card .name .ico{color:var(--amberBright);opacity:.75;font-size:10px;}
+.code-card .seq{
+  font-family:'VT323',monospace;font-size:16px;letter-spacing:.05em;
+  color:var(--amberBright);padding:4px 6px;background:rgba(0,0,0,.5);
+  border:1px dashed rgba(255,159,7,.25);margin-bottom:5px;
+  word-break:break-word;
 }
-.card .name{
-  font-family:'Share Tech Mono',monospace;font-size:13px;
-  letter-spacing:.22em;color:var(--inkBright);margin-bottom:2px;
-}
-.card .file{
-  font-family:'VT323',monospace;font-size:13px;
-  color:var(--inkDim);letter-spacing:.06em;margin-bottom:8px;
-}
-.card .seq{
-  font-family:'VT323',monospace;font-size:19px;letter-spacing:.04em;
-  color:var(--inkBright);padding:7px 10px;background:#0d0904;
-  border:1px dashed rgba(255,159,7,.35);
-  word-break:break-word;margin-bottom:8px;
-}
-.card .seq .arrow{color:var(--stampRed);padding:0 4px;}
-.card .desc{
-  font-family:'Share Tech Mono',monospace;font-size:11px;
-  letter-spacing:.12em;color:var(--ink);opacity:.85;
-}
-.card .desc .lbl{color:var(--stampRed);}
+.code-card .seq .a{color:var(--red);padding:0 3px;}
+.code-card .desc{font-size:10px;letter-spacing:.1em;color:var(--amberBright);opacity:.8;}
+.code-card .desc .k{color:var(--red);}
 
-.page-list{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+/* Page-list rows (for section 04) */
+.page-list{display:flex;flex-direction:column;gap:5px;margin-top:4px;}
 .page-row{
-  display:grid;grid-template-columns:1fr auto;gap:12px;
-  padding:12px 4px 12px 40px;
-  border-bottom:1px dashed rgba(255,159,7,.22);position:relative;
-}
-.page-row::before{
-  content:"▸";position:absolute;left:14px;top:12px;
-  color:var(--stampRed);font-family:'VT323',monospace;font-size:18px;
+  border:1px solid rgba(255,159,7,.22);
+  background:rgba(255,159,7,.03);
+  padding:8px 10px;
 }
 .page-row .name{
-  font-family:'Share Tech Mono',monospace;
-  color:var(--stampRedBright);letter-spacing:.22em;font-size:13px;
-  margin-bottom:4px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
+  color:var(--red);letter-spacing:.22em;font-size:11px;margin-bottom:3px;
 }
-.page-row .file{
-  font-family:'VT323',monospace;font-size:14px;color:var(--inkBright);
-  letter-spacing:.06em;padding:2px 8px;background:#0d0904;
-  border:1px solid rgba(255,159,7,.25);
-  align-self:start;justify-self:end;white-space:nowrap;
+.page-row .name .file{
+  font-family:'VT323',monospace;font-size:13px;color:var(--amberBright);
+  letter-spacing:.06em;opacity:.9;
 }
-.page-row .desc{
-  font-family:'Special Elite','Share Tech Mono',monospace;
-  font-size:14px;color:var(--ink);opacity:.9;
-  grid-column:1/-1;padding-right:8px;
-}
+.page-row .desc{color:var(--amberBright);font-size:11px;letter-spacing:.06em;opacity:.88;}
 
+/* Terminal example (carbon-copy) */
 .term-ex{
-  border:1px solid rgba(255,159,7,.4);
-  border-left:5px solid var(--stampRed);
-  background:
-    repeating-linear-gradient(180deg,rgba(255,159,7,.03) 0 2px,transparent 2px 4px),
-    #0a0603;
-  padding:14px 16px;font-family:'VT323',monospace;font-size:19px;
-  letter-spacing:.05em;color:var(--inkBright);line-height:1.35;
-  margin:14px 0;overflow-x:auto;white-space:pre;
-  box-shadow:inset 0 0 20px rgba(0,0,0,.6);
+  border:1px solid rgba(255,159,7,.28);
+  background:rgba(0,0,0,.6);
+  padding:10px 12px;
+  font-family:'VT323',monospace;
+  font-size:16px;letter-spacing:.04em;color:var(--amberBright);
+  line-height:1.4;margin:10px 0;overflow-x:auto;white-space:pre;
 }
-.term-ex .p{color:var(--stampRed);}
-.term-ex .in{color:var(--inkBright);}
-.term-ex .ok{color:#8fff8a;}
+.term-ex .p{color:var(--red);}
+.term-ex .in{color:var(--amber);}
+.term-ex .ok{color:var(--green);}
 
+/* Callouts */
 .callout{
-  margin:14px 0;padding:12px 14px 12px 60px;
-  border:1px solid rgba(255,159,7,.35);
-  background:rgba(255,159,7,.04);
-  color:var(--ink);
-  font-family:'Special Elite','Share Tech Mono',monospace;
-  font-size:14px;line-height:1.55;position:relative;
+  margin:10px 0;padding:8px 10px;
+  border:1px dashed rgba(255,201,7,.4);background:rgba(255,159,7,.05);
+  color:var(--amberBright);font-size:11px;letter-spacing:.1em;line-height:1.55;
 }
-.callout::before{
-  content:"NOTE";position:absolute;left:8px;top:12px;
-  font-family:'Share Tech Mono',monospace;font-size:11px;
-  letter-spacing:.24em;color:var(--stampRed);
-  border:1px solid var(--stampRed);padding:3px 6px;
-  transform:rotate(-4deg);background:rgba(201,59,26,.08);
-}
-.callout.warn{border-color:rgba(201,59,26,.55);background:rgba(201,59,26,.06);}
-.callout.warn::before{content:"WARN";color:var(--stampRedBright);border-color:var(--stampRedBright);}
-.callout.tip::before{content:"TIP";color:var(--seal);border-color:var(--seal);}
+.callout.red{border-color:rgba(255,74,43,.45);background:rgba(255,74,43,.06);color:var(--red);}
+.callout b{color:var(--red);letter-spacing:.22em;font-size:10px;margin-right:6px;}
+.callout.red b{color:var(--amberBright);}
 
-.doc-foot{
-  margin-top:28px;padding:20px 0 4px;
-  border-top:2px solid var(--ink);
-  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;
-}
-.doc-foot .sign{
-  font-family:'Special Elite',cursive;font-size:22px;color:var(--inkBright);
-  border-bottom:1px solid var(--ink);padding-bottom:2px;max-width:220px;
-  letter-spacing:.02em;
-}
-.doc-foot .sign-lbl{
-  font-family:'VT323',monospace;font-size:12px;color:var(--inkDim);
-  letter-spacing:.28em;margin-top:4px;
-}
-.doc-foot .seal{
-  width:96px;height:96px;border-radius:50%;
-  border:2px solid var(--seal);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:var(--seal);font-family:'Share Tech Mono',monospace;
-  text-align:center;font-size:9px;letter-spacing:.22em;
-  transform:rotate(-8deg);
-  box-shadow:inset 0 0 12px rgba(217,123,26,.2);
-  position:relative;padding:6px;
-}
-.doc-foot .seal::before{
-  content:"";position:absolute;inset:6px;
-  border:1px dashed var(--seal);border-radius:50%;
-}
-.doc-foot .seal b{
-  font-size:11px;letter-spacing:.16em;color:var(--seal);
-  font-weight:normal;margin-top:2px;
+/* Punched sheet edge illusion on the viewer (very subtle) */
+.viewer::before{
+  content:"";position:absolute;
+  left:0;top:0;bottom:0;width:14px;
+  background:
+    radial-gradient(circle at 7px 40px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 130px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 220px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 310px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 400px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 490px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 580px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    radial-gradient(circle at 7px 670px, rgba(0,0,0,.5) 0 3px, transparent 4px),
+    linear-gradient(90deg,rgba(0,0,0,.35),transparent);
+  pointer-events:none;z-index:2;
 }
 
-.nav-row{
-  margin-top:22px;display:flex;flex-wrap:wrap;gap:10px;
-  padding-top:14px;border-top:1px dashed rgba(255,159,7,.25);
+/* ============ BOTTOM NAV BAR (like the site's #terminal bar) ============ */
+#terminal{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:12px 20px;display:flex;gap:10px;align-items:center;
+  z-index:1003;border-top:2px solid rgba(255,159,7,.35);
+  background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));
+  flex-wrap:wrap;
 }
-.btn{
-  padding:10px 16px;border:1px solid var(--ink);color:var(--ink);
-  font-family:'Share Tech Mono',monospace;text-decoration:none;
-  letter-spacing:.2em;font-size:12px;transition:.15s;
-  background:rgba(255,159,7,.04);min-height:42px;
-  display:inline-flex;align-items:center;
+#terminal .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+@keyframes chev{50%{opacity:.3;}}
+#terminal .info{
+  font-size:11px;letter-spacing:.2em;
+  color:var(--amberBright);
+  flex:1;min-width:0;
 }
-.btn:hover,.btn:focus{
-  background:rgba(255,159,7,.15);color:var(--inkBright);
-  border-color:var(--inkBright);outline:none;
+#terminal .info .k{color:var(--red);letter-spacing:.22em;margin-right:6px;}
+#terminal .info .pg{
+  font-family:'VT323',monospace;font-size:16px;color:var(--amberBright);
+  padding:0 6px;letter-spacing:.04em;
 }
-.btn .k{color:var(--stampRed);margin-right:8px;}
+#terminal .btns{display:flex;gap:6px;flex-wrap:wrap;}
+.pnav{
+  padding:6px 12px;border:1px solid var(--amber);
+  color:var(--amber);background:transparent;font-family:inherit;
+  cursor:pointer;letter-spacing:.16em;font-size:11px;
+  text-decoration:none;transition:.15s;
+  min-height:34px;display:inline-flex;align-items:center;gap:4px;
+}
+.pnav:hover,.pnav:focus{background:rgba(255,159,7,.15);color:var(--amberBright);outline:none;}
+.pnav[disabled]{opacity:.35;cursor:not-allowed;}
+.pnav.red{border-color:var(--red);color:var(--red);}
+.pnav.red:hover{background:rgba(255,74,43,.12);color:#ffd0c1;}
 
-.pagefoot{
-  text-align:center;font-family:'VT323',monospace;
-  font-size:13px;letter-spacing:.28em;color:var(--inkDim);
-  margin:16px auto 22px;max-width:960px;padding:0 20px;
-}
+#os{position:absolute;bottom:60px;right:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
+#clock{position:absolute;bottom:60px;left:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
 
 /* ============ MOBILE ============ */
-@media (max-width:760px){
-  .sheet{margin:8px;padding:22px 16px 26px 44px;max-width:none;}
-  .sheet::before{
-    width:30px;
-    background:
-      radial-gradient(circle at 15px 60px,   #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 220px,  #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 380px,  #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 540px,  #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 700px,  #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 860px,  #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1020px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1180px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1340px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1500px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1660px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1820px, #000 0 6px, transparent 7px),
-      radial-gradient(circle at 15px 1980px, #000 0 6px, transparent 7px),
-      linear-gradient(90deg,rgba(0,0,0,.35),transparent);
+@media(max-width:820px){
+  html,body{overflow:auto;height:auto;min-height:100%;-webkit-text-size-adjust:100%;}
+  body{perspective:none;}
+  #bezel-label,#brand-led{display:none;}
+  #bezel{background:radial-gradient(ellipse at 30% 20%,#241a10 0%,#0a0705 60%,#000 100%);}
+  #screen-wrap{position:relative;inset:auto;margin:6px;border-radius:14px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);min-height:calc(100vh - 12px);}
+  #screen{position:relative;inset:auto;filter:none;transform:none;overflow:visible;}
+  #glare,#rgb-mask,#roll,#corners{display:none;}
+  #scanlines{opacity:.45;}
+  #vignette{background:radial-gradient(ellipse 110% 110% at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
+  #amber-tint{opacity:.6;}
+  #crt-container{
+    position:relative;inset:auto;
+    grid-template-columns:1fr;grid-template-rows:auto auto 1fr;
+    padding:12px 10px 76px;
+    gap:10px;
+    min-height:calc(100vh - 20px);
+    transform:none !important;
   }
-  .sheet::after{left:44px;right:12px;}
-  body{font-size:14px;}
-  .doc-head{grid-template-columns:1fr;gap:12px;}
-  .doc-head h1{font-size:26px;letter-spacing:.1em;}
-  .doc-head .sub{font-size:13px;letter-spacing:.16em;}
-  .doc-head .meta-block{align-items:flex-start;font-size:12px;}
-  .stamp.public{position:relative;top:auto;right:auto;display:inline-block;margin:6px 0;transform:rotate(-4deg);}
-  .stamp.rev{top:18px;right:8px;font-size:9px;}
-
-  .tabs a{min-width:45%;font-size:11px;letter-spacing:.16em;padding:10px 10px;min-height:52px;}
-  .tabs a b{font-size:14px;}
-
-  section .chap .num{font-size:38px;padding:2px 8px;}
-  section .chap h2{font-size:17px;letter-spacing:.16em;}
-  section .chap .lede{font-size:13px;letter-spacing:.14em;}
-
-  .kv{grid-template-columns:100px 1fr;gap:8px;font-size:14px;}
-  .kv .k{font-size:10px;letter-spacing:.16em;}
-
-  .card-grid{grid-template-columns:1fr;}
-  .card .seq{font-size:16px;}
-
-  .page-row{padding-left:28px;grid-template-columns:1fr;}
-  .page-row .file{justify-self:start;margin-top:4px;}
-
-  .term-ex{font-size:15px;padding:10px 12px;}
-  .callout{padding-left:16px;padding-top:36px;}
-  .callout::before{top:6px;left:8px;}
-
-  .doc-foot{grid-template-columns:1fr;gap:14px;}
-  .doc-foot .seal{align-self:flex-start;}
-
-  .btn{font-size:11px;padding:9px 12px;letter-spacing:.14em;}
+  .hdr{padding:8px 12px;}
+  .hdr .ttl{font-size:13px;letter-spacing:.2em;}
+  .hdr .sub{font-size:9px;padding-left:8px;}
+  .rail{padding:10px 12px;}
+  .chap-list{
+    flex-direction:row;overflow-x:auto;overflow-y:hidden;
+    gap:6px;padding:4px 2px 8px;flex:none;
+    scroll-snap-type:x mandatory;
+  }
+  .chap-row{
+    grid-template-columns:26px 1fr;
+    min-width:150px;flex:0 0 auto;scroll-snap-align:start;
+    padding:6px 8px;font-size:10px;letter-spacing:.12em;
+  }
+  .chap-row .n{font-size:16px;}
+  .chap-row .dot{display:none;}
+  .rail-foot{display:none;}
+  .mini-diag{display:none;}
+  .viewer::before{display:none;}
+  .view-head{padding:10px 12px 8px;gap:10px;}
+  .view-head .doc-num{font-size:26px;padding:2px 8px;}
+  .view-head .doc-body h2{font-size:13px;letter-spacing:.16em;}
+  .view-head .doc-body .lede{font-size:9px;letter-spacing:.16em;}
+  .view-head .doc-meta{font-size:10px;align-items:flex-start;}
+  .view-body{padding:12px 14px;font-size:12px;}
+  .kv{grid-template-columns:80px 1fr;font-size:10px;}
+  .code-grid{grid-template-columns:1fr;}
+  .term-ex{font-size:14px;}
+  #os,#clock{bottom:56px;font-size:9px;letter-spacing:.14em;}
+  #terminal{padding:10px 12px;gap:6px;}
+  #terminal .info{font-size:10px;letter-spacing:.14em;}
+  #terminal .info .pg{font-size:14px;}
+  .pnav{font-size:10px;padding:6px 10px;letter-spacing:.12em;}
 }
-@media (max-width:400px){
-  .sheet{padding:18px 12px 22px 34px;}
-  .sheet::before{width:22px;}
-  .tabs a{min-width:100%;border-right:none;border-bottom:1px dashed rgba(255,159,7,.2);}
-  .tabs a:last-child{border-bottom:none;}
-  section .chap{gap:10px;}
-  section .chap .num{font-size:30px;}
+@media(max-width:440px){
+  #crt-container{padding:10px 8px 76px;}
+  .hdr{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 10px;}
+  .chap-row{min-width:130px;}
+  .view-head{flex-direction:column;align-items:flex-start;}
+  .view-head .doc-meta{align-items:flex-start;text-align:left;}
+  #terminal .btns{width:100%;justify-content:space-between;}
+  .pnav{flex:1;justify-content:center;}
 }
 </style>
 </head>
 <body>
 
-<div class="sheet">
+<!-- Fisheye SVG filter — matches other UIC pages -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+      <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>" result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+      <feDisplacementMap in="SourceGraphic" in2="map" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
-  <!-- HEADER -->
-  <header class="doc-head">
-    <span class="stamp public">// PUBLIC EDITION</span>
-    <span class="stamp rev">REV 4.02 · CTRL-DOC</span>
+<div id="bezel"></div>
 
-    <div class="lockup">
-      <div class="kicker">U.I.C. · DOCUMENT CONTROL · CH.00</div>
-      <h1>OPERATOR'S MANUAL</h1>
-      <div class="sub">FR-77 TERMINAL SYSTEMS &nbsp;·&nbsp; PRINTED EDITION</div>
-      <div class="barcode" aria-hidden="true">
-        <span></span><span class="thin"></span><span class="thick"></span><span class="thin"></span>
-        <span></span><span></span><span class="thick"></span><span class="thin"></span>
-        <span></span><span class="thin"></span><span></span><span class="thick"></span>
-        <span></span><span></span><span class="thin"></span><span></span>
-        <span class="thick"></span><span></span><span class="thin"></span><span></span>
-        <span></span><span class="thin"></span><span class="thick"></span><span></span>
-        <span class="thin"></span><span></span><span></span><span class="thick"></span>
+<div id="screen-wrap">
+  <div id="screen">
+
+    <div id="crt-container">
+
+      <!-- HEADER -->
+      <div class="hdr">
+        <div class="l">
+          <span class="dot"></span>
+          <span class="ttl">// OPERATOR'S MANUAL</span>
+          <span class="sub">U.I.C. TERMINAL SYSTEMS · CH.00 · REV 4.02</span>
+        </div>
+        <div class="r">
+          <span class="tag">FR-77</span>
+          <span class="tag stamp">APPROVED</span>
+          <span class="tag warn">PUBLIC</span>
+        </div>
       </div>
-      <div class="barcode-label">UIC-FR77-MAN-402 · 1989</div>
-    </div>
 
-    <div class="meta-block">
-      <div class="row"><span class="lbl">FILE #</span><span>MAN-000-402</span></div>
-      <div class="row"><span class="lbl">SHEET</span><span>1 of 1</span></div>
-      <div class="row"><span class="lbl">CLASS</span><span>UNRESTRICTED</span></div>
-      <div class="row"><span class="lbl">ISSUED</span><span>1989.11.09</span></div>
-      <div class="row"><span class="lbl">ORIGIN</span><span>UIC INDUSTRIES · DOC CTRL</span></div>
-    </div>
-  </header>
+      <!-- LEFT: CHAPTER INDEX -->
+      <div class="rail panel" role="navigation" aria-label="Chapter index">
+        <div class="rail-head">
+          <span class="tick" style="color:var(--red);">◆</span>
+          <span class="ttl">TABLE OF CONTENTS</span>
+          <span class="bd">TOC</span>
+        </div>
 
-  <!-- TABS -->
-  <nav class="tabs" aria-label="Manual chapters">
-    <a href="#intro"><b>Ch. 01</b>ABOUT U.I.C.</a>
-    <a href="#terminal"><b>Ch. 02</b>TERMINAL 101</a>
-    <a href="#codes"><b>Ch. 03</b>ACCESS CODES</a>
-    <a href="#pages"><b>Ch. 04</b>PAGE INDEX</a>
-    <a href="#bulletin"><b>Ch. 05</b>BULLETIN</a>
-    <a href="#tips"><b>Ch. 06</b>TIPS &amp; FAULTS</a>
-  </nav>
+        <div class="chap-list" id="chapList">
+          <button class="chap-row on" data-idx="1"><span class="n">01</span><span class="name">ABOUT U.I.C.</span><span class="dot"></span></button>
+          <button class="chap-row"    data-idx="2"><span class="n">02</span><span class="name">TERMINAL 101</span><span class="dot"></span></button>
+          <button class="chap-row"    data-idx="3"><span class="n">03</span><span class="name">ACCESS CODES</span><span class="dot"></span></button>
+          <button class="chap-row"    data-idx="4"><span class="n">04</span><span class="name">PAGE INDEX</span><span class="dot"></span></button>
+          <button class="chap-row"    data-idx="5"><span class="n">05</span><span class="name">BULLETIN BOARD</span><span class="dot"></span></button>
+          <button class="chap-row"    data-idx="6"><span class="n">06</span><span class="name">TIPS &amp; FAULTS</span><span class="dot"></span></button>
+        </div>
 
-  <!-- 01 -->
-  <section id="intro">
-    <div class="chap">
-      <div class="num">01</div>
-      <div class="title">
-        <h2>UNIVERSAL INTERSTELLAR COMPUTERS</h2>
-        <div class="lede">FR-77 · Terminal Node Standard Issue · 1989</div>
+        <div class="rail-foot">
+          <span><span class="k">FILE</span> MAN-000-402</span>
+          <span><span class="k">SHT</span> 1/1</span>
+        </div>
+
+        <div class="mini-diag" aria-hidden="true">
+          <span>FR-77 NODE OK</span>
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="4" y="6" width="32" height="22" rx="2"/>
+            <line x1="4" y1="24" x2="36" y2="24"/>
+            <circle cx="10" cy="34" r="1.5" fill="currentColor"/>
+            <line x1="14" y1="34" x2="30" y2="34"/>
+          </svg>
+        </div>
       </div>
-      <span class="docno">DOC.01</span>
-    </div>
 
-    <p>
-      <span class="rd">U.I.C.</span> — Universal Interstellar Computers — is the standard mainframe network deployed
-      across solar-system infrastructure. Every station, every rail, every hab-module runs on a U.I.C. node like the
-      one you are reading this manual on. If it has a screen and it hums, it is almost certainly U.I.C.
-    </p>
+      <!-- RIGHT: PAGE VIEWER -->
+      <div class="viewer panel" aria-live="polite">
 
-    <p>
-      This unit is a <span class="amb">Model FR-77</span>. It runs UIC OS v1.0.4 with 64K core memory, RS-232 uplink,
-      and a cipher engine for secure link. When it boots it will run a power-on self-test and then hand you a prompt.
-      Everything after that prompt is yours to command.
-    </p>
+        <div class="view-head">
+          <div class="doc-num" id="docNum">01</div>
+          <div class="doc-body">
+            <h2 id="docTitle">ABOUT U.I.C.</h2>
+            <div class="lede" id="docLede">UNIVERSAL INTERSTELLAR COMPUTERS · FR-77 NODE</div>
+          </div>
+          <div class="doc-meta">
+            <div><span class="k">DOC</span> <span id="docId">DOC.01</span></div>
+            <div><span class="k">DATE</span> 1989.11.09</div>
+            <div><span class="k">CLASS</span> UNRESTRICTED</div>
+          </div>
+        </div>
 
-    <h3 class="sub">§ 01.1 — History in Brief</h3>
-    <p>
-      Humanity landed on the Moon in <span class="amb">1965</span>. The first woman on the Moon planted a flag; the
-      Soviets beat the United States there and the race never actually ended. Instead of packing up, both blocs raced
-      to build lunar bases, orbital stations, and outposts on Venus and Mars. This is the timeline you are living in.
-    </p>
+        <div class="view-body" id="viewBody">
 
-    <div class="kv"><span class="k">YEAR</span><span class="v">1989 · A.D.</span></div>
-    <div class="kv"><span class="k">LUNAR STA.</span><span class="v">Horizon (USA) · Armstrong (USA) · Zvezda (USSR) · Zvezda Mining</span></div>
-    <div class="kv"><span class="k">ORBITAL</span><span class="v">Salyut · Vaun Braun · Mars Orbital Habitation</span></div>
-    <div class="kv"><span class="k">VENUS</span><span class="v">Floating Islands (7 + partial launchpad) · Surface Hab · V.O.S.S.</span></div>
-    <div class="kv"><span class="k">MARS</span><span class="v">First Touch Station · US/USSR Collaborative Surface Station</span></div>
-    <div class="kv"><span class="k">EUROPA</span><span class="v">Clipper Orbital Station · Mass Driver Fabrication Station</span></div>
+          <!-- ============ PAGE 01 ============ -->
+          <article class="page on" data-idx="1">
+            <p>
+              <span class="rd">U.I.C.</span> — Universal Interstellar Computers — is the standard mainframe network deployed
+              across solar-system infrastructure. Every station, every rail, every hab-module runs on a U.I.C. node like the
+              one you are reading this manual on. If it has a screen and it hums, it is almost certainly U.I.C.
+            </p>
+            <p>
+              This unit is a <span class="amb">Model FR-77</span>. It runs UIC OS v1.0.4 with 64K core memory, RS-232 uplink,
+              and a cipher engine for secure link. When it boots it will run a power-on self-test and then hand you a prompt.
+              Everything after that prompt is yours to command.
+            </p>
 
-    <h3 class="sub">§ 01.2 — What We're Building</h3>
-    <p>
-      The current flagship project is the <span class="rd">Venetian Mass Driver Rail</span> (V.M.D.R.) — a rail system
-      being fabricated at the Venus Surface Habitation Modules. Sister infrastructure at the Europa Mass Driver
-      Fabrication Station supports the Europa-to-Venus water pipeline that feeds the Venetian terra-forming project.
-      The long-range plan: three habitable planets. Earth. Mars. Venus.
-    </p>
+            <h3 class="sub">// HISTORY IN BRIEF</h3>
+            <p>
+              Humanity landed on the Moon in <span class="amb">1965</span>. The first woman on the Moon planted a flag; the
+              Soviets beat the United States there and the race never actually ended. Instead of packing up, both blocs raced
+              to build lunar bases, orbital stations, and outposts on Venus and Mars. This is the timeline you are living in.
+            </p>
 
-    <div class="callout">
-      This manual covers public-tier terminal operation only. Restricted-access sequences exist but are not documented
-      here and are not available to unauthenticated users.
-    </div>
-  </section>
+            <div class="kv"><span class="k">YEAR</span><span class="v">1989 · A.D.</span></div>
+            <div class="kv"><span class="k">LUNAR STA.</span><span class="v">Horizon (USA) · Armstrong (USA) · Zvezda (USSR) · Zvezda Mining</span></div>
+            <div class="kv"><span class="k">ORBITAL</span><span class="v">Salyut · Vaun Braun · Mars Orbital Habitation</span></div>
+            <div class="kv"><span class="k">VENUS</span><span class="v">Floating Islands (7 + partial launchpad) · Surface Hab · V.O.S.S.</span></div>
+            <div class="kv"><span class="k">MARS</span><span class="v">First Touch Station · US/USSR Collaborative Surface Station</span></div>
+            <div class="kv"><span class="k">EUROPA</span><span class="v">Clipper Orbital Station · Mass Driver Fabrication Station</span></div>
 
-  <!-- 02 -->
-  <section id="terminal">
-    <div class="chap">
-      <div class="num">02</div>
-      <div class="title">
-        <h2>HOW TO USE THE TERMINAL</h2>
-        <div class="lede">Prompt · Sequence · Redirect</div>
-      </div>
-      <span class="docno">DOC.02</span>
-    </div>
+            <h3 class="sub">// WHAT WE'RE BUILDING</h3>
+            <p>
+              The current flagship project is the <span class="rd">Venetian Mass Driver Rail</span> (V.M.D.R.) — a rail system
+              being fabricated at the Venus Surface Habitation Modules. Sister infrastructure at the Europa Mass Driver
+              Fabrication Station supports the Europa-to-Venus water pipeline that feeds the Venetian terra-forming project.
+              The long-range plan: three habitable planets. Earth. Mars. Venus.
+            </p>
 
-    <p>
-      The U.I.C. terminal is a <span class="amb">sequential command</span> system. You do not type one long command.
-      You type a short keyword, press ENTER, and if it is the first step of a valid access sequence the terminal will
-      respond <span class="amb">STEP 1/N ACCEPTED</span> and wait for the next word.
-    </p>
+            <div class="callout">
+              <b>NOTE</b>This manual covers public-tier terminal operation only. Restricted-access sequences exist but are not
+              documented here and are not available to unauthenticated users.
+            </div>
+          </article>
 
-    <p>
-      Every access route has a fixed sequence of words. Complete all of them in order and the terminal will grant
-      access and redirect you to the requested page. Enter a wrong word at any point and the sequence
-      <span class="rd">RESETS</span> — you start over from step one.
-    </p>
+          <!-- ============ PAGE 02 ============ -->
+          <article class="page" data-idx="2">
+            <p>
+              The U.I.C. terminal is a <span class="amb">sequential command</span> system. You do not type one long command.
+              You type a short keyword, press ENTER, and if it is the first step of a valid access sequence the terminal will
+              respond <span class="amb">STEP 1/N ACCEPTED</span> and wait for the next word.
+            </p>
+            <p>
+              Every access route has a fixed sequence of words. Complete all of them in order and the terminal will grant
+              access and redirect you to the requested page. Enter a wrong word at any point and the sequence
+              <span class="rd">RESETS</span> — you start over from step one.
+            </p>
 
-    <h3 class="sub">§ 02.1 — Example: Open the Users Directory</h3>
+            <h3 class="sub">// EXAMPLE — OPEN THE USERS DIRECTORY</h3>
 <div class="term-ex"><span class="p">&gt;</span> <span class="in">init</span>
 STEP 1/3 ACCEPTED
 <span class="p">&gt;</span> <span class="in">access</span>
@@ -587,334 +587,335 @@ STEP 2/3 ACCEPTED
 USERS <span class="ok">ACCESS GRANTED</span>
 REDIRECTING...</div>
 
-    <h3 class="sub">§ 02.2 — Status Line</h3>
-    <p>
-      Below the prompt is a status line: <span class="amb">SEQUENCE</span>, <span class="amb">STEP</span>,
-      <span class="amb">SECURE</span>. SEQUENCE shows which route you are currently walking; STEP shows how far you
-      are through it. If SEQUENCE reads <span class="amb">IDLE</span>, you are at step zero and any first-word will
-      begin a new route.
-    </p>
+            <h3 class="sub">// STATUS LINE</h3>
+            <p>
+              Below the prompt is a status line: <span class="amb">SEQUENCE</span>, <span class="amb">STEP</span>,
+              <span class="amb">SECURE</span>. SEQUENCE shows which route you are currently walking; STEP shows how far you
+              are through it. If SEQUENCE reads <span class="amb">IDLE</span>, you are at step zero and any first-word will
+              begin a new route.
+            </p>
 
-    <h3 class="sub">§ 02.3 — Commands Are Case-Insensitive</h3>
-    <p>
-      <span class="amb">init</span>, <span class="amb">INIT</span> and <span class="amb">Init</span> all match. Spaces
-      at the front and end are trimmed. Only the first word on a line is read — do not chain commands together.
-    </p>
+            <h3 class="sub">// CASE-INSENSITIVE</h3>
+            <p>
+              <span class="amb">init</span>, <span class="amb">INIT</span> and <span class="amb">Init</span> all match. Spaces
+              at the front and end are trimmed. Only the first word on a line is read — do not chain commands together.
+            </p>
 
-    <div class="callout warn">
-      Unknown first words return <span class="amb">UNKNOWN COMMAND</span> and do not begin any sequence.
-      Wrong follow-up words trigger <span class="amb">INVALID SEQUENCE — RESET</span>.
-    </div>
-  </section>
+            <div class="callout red">
+              <b>WARN</b>Unknown first words return <span class="amb">UNKNOWN COMMAND</span> and do not begin any sequence.
+              Wrong follow-up words trigger <span class="amb">INVALID SEQUENCE — RESET</span>.
+            </div>
+          </article>
 
-  <!-- 03 -->
-  <section id="codes">
-    <div class="chap">
-      <div class="num">03</div>
-      <div class="title">
-        <h2>PUBLIC ACCESS CODES</h2>
-        <div class="lede">Sequences by Route · Rev 4.02</div>
-      </div>
-      <span class="docno">DOC.03</span>
-    </div>
+          <!-- ============ PAGE 03 ============ -->
+          <article class="page" data-idx="3">
+            <p>
+              The following seven routes are cleared for all authenticated operators. Enter the words one at a time from the
+              main terminal prompt. Restricted-tier routes exist and are not listed here.
+            </p>
 
-    <p>
-      The following seven routes are cleared for all authenticated operators. Enter the words one at a time from the
-      main terminal prompt. Restricted-tier routes exist and are not listed here.
-    </p>
+            <div class="code-grid">
+              <div class="code-card">
+                <div class="name">USERS <span class="ico">◈ users.html</span></div>
+                <div class="seq">init <span class="a">→</span> access <span class="a">→</span> grant</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> personnel roster</div>
+              </div>
+              <div class="code-card">
+                <div class="name">SPACECRAFT <span class="ico">◈ ships.html</span></div>
+                <div class="seq">fleet <span class="a">→</span> engage <span class="a">→</span> authorize</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> vessel &amp; vehicle catalogue</div>
+              </div>
+              <div class="code-card">
+                <div class="name">SUITS <span class="ico">◈ suits.html</span></div>
+                <div class="seq">support <span class="a">→</span> 02 <span class="a">→</span> pressurize</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> EVA and pressure-suit index</div>
+              </div>
+              <div class="code-card">
+                <div class="name">MAP <span class="ico">◈ solarmap.html</span></div>
+                <div class="seq">locate <span class="a">→</span> enhance <span class="a">→</span> identify</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> interactive solar-system map</div>
+              </div>
+              <div class="code-card">
+                <div class="name">DELTA · Δ <span class="ico">◈ deltav.html</span></div>
+                <div class="seq">distance <span class="a">→</span> orbit <span class="a">→</span> burn</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> transfer planner &amp; Δv</div>
+              </div>
+              <div class="code-card">
+                <div class="name">COMMS <span class="ico">◈ communications.html</span></div>
+                <div class="seq">adjust <span class="a">→</span> radio <span class="a">→</span> mhz</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> radio traffic &amp; tuner</div>
+              </div>
+              <div class="code-card">
+                <div class="name">SERVER <span class="ico">◈ remoteserver.html</span></div>
+                <div class="seq">system <span class="a">→</span> connect <span class="a">→</span> address</div>
+                <div class="desc"><span class="k">ROUTES TO:</span> remote node crawlspace</div>
+              </div>
+              <div class="code-card">
+                <div class="name">BULLETIN <span class="ico">◈ bulletin.html</span></div>
+                <div class="seq">— direct link only —</div>
+                <div class="desc"><span class="k">NOTE:</span> reached from home nav</div>
+              </div>
+            </div>
 
-    <div class="card-grid">
+            <div class="callout">
+              <b>TIP</b>All access codes above are cleared for public use. Any codes not listed here are considered restricted
+              and will not be documented on this page. Do not attempt to guess them; unknown sequences simply return
+              <span class="amb">UNKNOWN COMMAND</span>.
+            </div>
+          </article>
 
-      <div class="card">
-        <div class="name">USERS</div>
-        <div class="file">◈ users.html</div>
-        <div class="seq">init <span class="arrow">→</span> access <span class="arrow">→</span> grant</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> personnel roster · operator directory</div>
-      </div>
+          <!-- ============ PAGE 04 ============ -->
+          <article class="page" data-idx="4">
+            <p>
+              Every public page on the FR-77 shell, what it does, and how it is reached from the terminal. Read this
+              once and you know the whole map.
+            </p>
 
-      <div class="card">
-        <div class="name">SPACECRAFT</div>
-        <div class="file">◈ ships.html</div>
-        <div class="seq">fleet <span class="arrow">→</span> engage <span class="arrow">→</span> authorize</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> vessel and vehicle catalogue</div>
-      </div>
+            <div class="page-list">
+              <div class="page-row">
+                <div class="name">TERMINAL <span class="file">terminal.html</span></div>
+                <div class="desc">The main entry point. Diagnostics self-test, then a prompt. All routes begin here.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">USERS <span class="file">users.html</span></div>
+                <div class="desc">Personnel directory — active operators, assigned station, current post. Read-only.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">SPACECRAFT <span class="file">ships.html</span></div>
+                <div class="desc">Fleet catalogue: crewed vessels, transfer stages, landers, sled vehicles. Specs and status.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">SUITS <span class="file">suits.html</span></div>
+                <div class="desc">EVA and surface-pressure suit index. Load-out per environment (LEO, Lunar, Venus, Europa).</div>
+              </div>
+              <div class="page-row">
+                <div class="name">SOLAR MAP <span class="file">solarmap.html</span></div>
+                <div class="desc">Interactive heliocentric map of stations, mass drivers, and orbital assets.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">DELTA-V CALCULATOR <span class="file">deltav.html</span></div>
+                <div class="desc">
+                  Transfer planner. Pick a departure body/location (surface, LEO, cloud deck, etc.) and destination.
+                  Choose a ship preset or enter engine parameters manually. Modes: COAST, HOHMANN, DIRECT.
+                </div>
+              </div>
+              <div class="page-row">
+                <div class="name">COMMUNICATIONS <span class="file">communications.html</span></div>
+                <div class="desc">Radio channels, station-to-station comm log, frequency tuner. Live traffic feed.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">SERVER ACCESS <span class="file">remoteserver.html</span></div>
+                <div class="desc">Remote node crawlspace. File browser with per-file gating (locked, encrypted, corrupt tags).</div>
+              </div>
+              <div class="page-row">
+                <div class="name">BULLETIN BOARD <span class="file">bulletin.html</span></div>
+                <div class="desc">Public postings and internal notices. See chapter 05 for full details.</div>
+              </div>
+              <div class="page-row">
+                <div class="name">MANUAL <span class="file">manuel.html</span></div>
+                <div class="desc">This document.</div>
+              </div>
+            </div>
+          </article>
 
-      <div class="card">
-        <div class="name">SUITS</div>
-        <div class="file">◈ suits.html</div>
-        <div class="seq">support <span class="arrow">→</span> 02 <span class="arrow">→</span> pressurize</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> EVA and pressure-suit index</div>
-      </div>
+          <!-- ============ PAGE 05 ============ -->
+          <article class="page" data-idx="5">
+            <p>
+              The Bulletin Board is where U.I.C. posts <span class="amb">public notices</span>, station memos, staffing
+              updates, project status blurbs, and general information. Think of it as the electronic corkboard for the
+              entire network. It is not a chat, it is not comms — it is one-way from operations to you.
+            </p>
 
-      <div class="card">
-        <div class="name">MAP</div>
-        <div class="file">◈ solarmap.html</div>
-        <div class="seq">locate <span class="arrow">→</span> enhance <span class="arrow">→</span> identify</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> interactive solar-system map</div>
-      </div>
+            <h3 class="sub">// LAYOUT</h3>
+            <div class="kv"><span class="k">LEFT</span><span class="v">Posted documents list — scrollable, tap or click a row to open.</span></div>
+            <div class="kv"><span class="k">RIGHT</span><span class="v">Viewer — the selected document's body, header meta and date.</span></div>
+            <div class="kv"><span class="k">BOTTOM</span><span class="v">Search bar — type keywords to filter the list.</span></div>
 
-      <div class="card">
-        <div class="name">DELTA · Δ</div>
-        <div class="file">◈ deltav.html</div>
-        <div class="seq">distance <span class="arrow">→</span> orbit <span class="arrow">→</span> burn</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> transfer planner &amp; Δv calculator</div>
-      </div>
+            <h3 class="sub">// READING A POST</h3>
+            <p>
+              Tap or click any row in the left column to load it into the viewer. The viewer shows the post's meta block
+              (author, station, date, classification) followed by the body text. Posts marked with a
+              <span class="rd">🔒</span> icon are gated; you will be shown a password prompt instead of the body.
+              If you do not have the code, you do not have the code. Move on.
+            </p>
 
-      <div class="card">
-        <div class="name">COMMUNICATIONS</div>
-        <div class="file">◈ communications.html</div>
-        <div class="seq">adjust <span class="arrow">→</span> radio <span class="arrow">→</span> mhz</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> radio traffic &amp; frequency tuner</div>
-      </div>
+            <h3 class="sub">// MOBILE</h3>
+            <p>
+              On phones the layout stacks — post list on top, viewer below. Tap a row to jump the viewer to it. Search
+              still works and is scoped to whatever is currently loaded. The board is entirely readable on a 320px screen.
+            </p>
 
-      <div class="card">
-        <div class="name">SERVER ACCESS</div>
-        <div class="file">◈ remoteserver.html</div>
-        <div class="seq">system <span class="arrow">→</span> connect <span class="arrow">→</span> address</div>
-        <div class="desc"><span class="lbl">ROUTES TO:</span> remote node crawlspace &amp; file browser</div>
-      </div>
+            <h3 class="sub">// POSTING</h3>
+            <p>
+              Standard operators cannot post to the bulletin. Posts are pushed from station ops; if you have information
+              to submit, route it through your station lead. The bulletin is read-only from any FR-77 node.
+            </p>
 
-      <div class="card">
-        <div class="name">BULLETIN</div>
-        <div class="file">◈ bulletin.html</div>
-        <div class="seq">— direct link only —</div>
-        <div class="desc"><span class="lbl">NOTE:</span> reached from home page navigation; no sequence required</div>
-      </div>
+            <div class="callout">
+              <b>TIP</b>Posts are dated in the top-right of each row. Newest is at the top by default. Use the search bar
+              to filter by station name, project code, or author.
+            </div>
+          </article>
 
-    </div>
+          <!-- ============ PAGE 06 ============ -->
+          <article class="page" data-idx="6">
+            <p>Common terminal messages and what to do when they show up.</p>
 
-    <div class="callout tip">
-      All access codes above are cleared for public use. Any codes not listed here are considered restricted
-      and will not be documented on this page. Do not attempt to guess them; unknown sequences simply return
-      <span class="amb">UNKNOWN COMMAND</span>.
-    </div>
-  </section>
+            <div class="kv"><span class="k">UNKNOWN CMD</span><span class="v">First word was not the start of any valid sequence. Check spelling. Retry.</span></div>
+            <div class="kv"><span class="k">INVALID SEQ</span><span class="v">You gave the wrong follow-up word. Sequence is dropped. Restart from step one.</span></div>
+            <div class="kv"><span class="k">STEP N/M OK</span><span class="v">Progress. Give the next word in the sequence.</span></div>
+            <div class="kv"><span class="k">ACCESS OK</span><span class="v">All steps correct. The page is loading. If the redirect stalls, retype the last word.</span></div>
+            <div class="kv"><span class="k">NET WARN</span><span class="v">Self-test flagged the Systems Network as degraded. Terminal still operates; expect slow page loads.</span></div>
 
-  <!-- 04 -->
-  <section id="pages">
-    <div class="chap">
-      <div class="num">04</div>
-      <div class="title">
-        <h2>PAGE INDEX</h2>
-        <div class="lede">Public Pages · FR-77 Systems Shell</div>
-      </div>
-      <span class="docno">DOC.04</span>
-    </div>
+            <h3 class="sub">// GENERAL ADVICE</h3>
+            <p>
+              • The terminal is <span class="amb">stateless</span> between refreshes — reload the page and any half-typed
+              sequence is dropped.<br>
+              • Do not paste long strings into the prompt. The terminal expects <span class="amb">one keyword per ENTER</span>.<br>
+              • If the CRT tilt makes you seasick on mobile, hold the device still — the tilt tracks touch position.<br>
+              • Every public page has a link back to the terminal or the home page in the footer.
+            </p>
 
-    <div class="page-list">
+            <div class="callout red">
+              <b>NOTE</b>This manual is public-tier. If you believe you should have restricted access and do not, your
+              clearance has not been provisioned. Contact your station's operations lead. Do not attempt to brute-force
+              unknown sequences — they will simply return UNKNOWN COMMAND and log the attempt to the network.
+            </div>
+          </article>
 
-      <div class="page-row">
-        <div>
-          <div class="name">TERMINAL</div>
-          <div class="desc">The main entry point. Diagnostics self-test, then a prompt. All routes begin here.</div>
         </div>
-        <div class="file">terminal.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">USERS</div>
-          <div class="desc">Personnel directory — active operators, assigned station, current post. Read-only.</div>
-        </div>
-        <div class="file">users.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">SPACECRAFT</div>
-          <div class="desc">Fleet catalogue: crewed vessels, transfer stages, landers, sled vehicles. Specs and status.</div>
-        </div>
-        <div class="file">ships.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">SUITS</div>
-          <div class="desc">EVA and surface-pressure suit index. Load-out per environment (LEO, Lunar, Venus, Europa).</div>
-        </div>
-        <div class="file">suits.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">SOLAR MAP</div>
-          <div class="desc">Interactive heliocentric map of stations, mass drivers, and orbital assets.</div>
-        </div>
-        <div class="file">solarmap.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">DELTA-V CALCULATOR</div>
-          <div class="desc">
-            Transfer planner. Pick a departure body/location (surface, LEO, cloud deck, etc.) and destination.
-            Choose a ship preset or enter engine parameters manually. Modes: COAST, HOHMANN, DIRECT. The 3D view
-            shows the trajectory, intercept point, and phase (parking → burn → transfer → capture → orbit).
-          </div>
-        </div>
-        <div class="file">deltav.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">COMMUNICATIONS</div>
-          <div class="desc">Radio channels, station-to-station comm log, frequency tuner. Live traffic feed.</div>
-        </div>
-        <div class="file">communications.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">SERVER ACCESS</div>
-          <div class="desc">Remote node crawlspace. File browser with per-file gating (locked, encrypted, corrupt tags).</div>
-        </div>
-        <div class="file">remoteserver.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">BULLETIN BOARD</div>
-          <div class="desc">Public postings and internal notices. See section 05 for full details.</div>
-        </div>
-        <div class="file">bulletin.html</div>
-      </div>
-
-      <div class="page-row">
-        <div>
-          <div class="name">MANUAL</div>
-          <div class="desc">This document.</div>
-        </div>
-        <div class="file">manuel.html</div>
       </div>
 
     </div>
-  </section>
 
-  <!-- 05 -->
-  <section id="bulletin">
-    <div class="chap">
-      <div class="num">05</div>
-      <div class="title">
-        <h2>USING THE BULLETIN BOARD</h2>
-        <div class="lede">Public Postings · Internal Notices · Updated Periodically</div>
+    <!-- CRT overlays -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4</div>
+
+    <!-- BOTTOM NAV -->
+    <div id="terminal">
+      <span class="chev">&gt;</span>
+      <span class="info">
+        <span class="k">PAGE</span><span class="pg" id="pgNum">01</span><span class="k">/</span><span class="pg" id="pgTot">06</span>
+        &nbsp;·&nbsp;
+        <span class="k">CH.</span><span id="pgTag">ABOUT U.I.C.</span>
+      </span>
+      <div class="btns">
+        <a class="pnav" href="terminal.html" title="Return to terminal">◄ TERMINAL</a>
+        <button class="pnav" id="btnPrev">◄ PREV</button>
+        <button class="pnav red" id="btnNext">NEXT ►</button>
+        <a class="pnav" href="index.html">◈ HOME</a>
       </div>
-      <span class="docno">DOC.05</span>
     </div>
 
-    <p>
-      The Bulletin Board is where U.I.C. posts <span class="amb">public notices</span>, station memos, staffing
-      updates, project status blurbs, and general information. Think of it as the electronic corkboard for the
-      entire network. It is not a chat, it is not comms — it is one-way from operations to you.
-    </p>
-
-    <h3 class="sub">§ 05.1 — Layout</h3>
-    <div class="kv"><span class="k">LEFT</span><span class="v">Posted documents list — scrollable, tap or click a row to open.</span></div>
-    <div class="kv"><span class="k">RIGHT</span><span class="v">Viewer — the selected document's body, header meta and date.</span></div>
-    <div class="kv"><span class="k">BOTTOM</span><span class="v">Search bar — type keywords to filter the list.</span></div>
-
-    <h3 class="sub">§ 05.2 — Reading a Post</h3>
-    <p>
-      Tap or click any row in the left column to load it into the viewer. The viewer shows the post's meta block
-      (author, station, date, classification) followed by the body text. Posts marked with a
-      <span class="rd">🔒</span> icon are gated; you will be shown a password prompt instead of the body.
-      If you do not have the code, you do not have the code. Move on.
-    </p>
-
-    <h3 class="sub">§ 05.3 — Mobile</h3>
-    <p>
-      On phones the layout stacks — post list on top, viewer below. Tap a row to jump the viewer to it. Search
-      still works and is scoped to whatever is currently loaded. The board is entirely readable on a 320px screen.
-    </p>
-
-    <h3 class="sub">§ 05.4 — Posting</h3>
-    <p>
-      Standard operators cannot post to the bulletin. Posts are pushed from station ops; if you have information
-      to submit, route it through your station lead. The bulletin is read-only from any FR-77 node.
-    </p>
-
-    <div class="callout tip">
-      Posts are dated in the top-right of each row. Newest is at the top by default. Use the search bar
-      to filter by station name, project code, or author.
-    </div>
-  </section>
-
-  <!-- 06 -->
-  <section id="tips">
-    <div class="chap">
-      <div class="num">06</div>
-      <div class="title">
-        <h2>TIPS &amp; FAULT CODES</h2>
-        <div class="lede">Common Messages · First-Line Recovery</div>
-      </div>
-      <span class="docno">DOC.06</span>
-    </div>
-
-    <div class="kv"><span class="k">UNKNOWN CMD</span><span class="v">First word was not the start of any valid sequence. Check spelling. Retry.</span></div>
-    <div class="kv"><span class="k">INVALID SEQ</span><span class="v">You gave the wrong follow-up word. Sequence is dropped. Restart from step one.</span></div>
-    <div class="kv"><span class="k">STEP N/M OK</span><span class="v">Progress. Give the next word in the sequence.</span></div>
-    <div class="kv"><span class="k">ACCESS GRANT</span><span class="v">All steps correct. The page is loading. If the redirect stalls, retype the last word.</span></div>
-    <div class="kv"><span class="k">NET WARN</span><span class="v">Self-test flagged the Systems Network as degraded. Terminal still operates; expect slow page loads.</span></div>
-
-    <h3 class="sub">§ 06.1 — General Advice</h3>
-    <p>
-      • The terminal is <span class="amb">stateless</span> between refreshes — reload the page and any half-typed
-      sequence is dropped.<br>
-      • Do not paste long strings into the prompt. The terminal expects <span class="amb">one keyword per ENTER</span>.<br>
-      • If the CRT tilt makes you seasick on mobile, hold the device still — the tilt tracks touch position.<br>
-      • Every public page has a link back to the terminal or the home page in the footer.
-    </p>
-
-    <div class="callout warn">
-      This manual is public-tier. If you believe you should have restricted access and do not, your
-      clearance has not been provisioned. Contact your station's operations lead. Do not attempt to brute-force
-      unknown sequences — they will simply return UNKNOWN COMMAND and log the attempt to the network.
-    </div>
-
-    <div class="nav-row">
-      <a class="btn" href="index.html"><span class="k">◈</span>HOME</a>
-      <a class="btn" href="terminal.html"><span class="k">◈</span>TERMINAL</a>
-      <a class="btn" href="bulletin.html"><span class="k">◈</span>BULLETIN</a>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="doc-foot">
-    <div>
-      <div class="sign">A. R. Halvorsen</div>
-      <div class="sign-lbl">DIRECTOR · DOCUMENT CONTROL</div>
-    </div>
-    <div class="seal" aria-hidden="true">
-      UIC<br>
-      <b>APPROVED</b>
-      1989
-    </div>
-  </footer>
-
+  </div>
 </div>
 
-<div class="pagefoot">END OF MANUAL · REV 4.02 · (C) UIC INDUSTRIES · SHEET 1/1</div>
+<div id="bezel-label">FRACTURED • MODEL FR-77</div>
+<div id="brand-led"></div>
 
 <script>
-const secs = document.querySelectorAll("section[id]");
-const tabs = document.querySelectorAll(".tabs a");
-const obs = new IntersectionObserver(entries=>{
-  entries.forEach(en=>{
-    if(en.isIntersecting){
-      tabs.forEach(a=>{
-        a.classList.toggle("on", a.getAttribute("href") === "#"+en.target.id);
-      });
-    }
-  });
-},{ rootMargin:"-40% 0px -55% 0px" });
-secs.forEach(s=>obs.observe(s));
+/* ============ CHAPTER PAGING ============ */
+const CHAPTERS = [
+  { title:"ABOUT U.I.C.",     lede:"UNIVERSAL INTERSTELLAR COMPUTERS · FR-77 NODE", doc:"DOC.01" },
+  { title:"TERMINAL 101",     lede:"PROMPT · SEQUENCE · REDIRECT",                  doc:"DOC.02" },
+  { title:"PUBLIC ACCESS CODES", lede:"SEQUENCES BY ROUTE · REV 4.02",              doc:"DOC.03" },
+  { title:"PAGE INDEX",       lede:"PUBLIC PAGES · FR-77 SYSTEMS SHELL",            doc:"DOC.04" },
+  { title:"BULLETIN BOARD",   lede:"PUBLIC POSTINGS · INTERNAL NOTICES",            doc:"DOC.05" },
+  { title:"TIPS & FAULT CODES", lede:"COMMON MESSAGES · FIRST-LINE RECOVERY",       doc:"DOC.06" },
+];
 
-tabs.forEach(a=>{
-  a.addEventListener("click",e=>{
-    const id = a.getAttribute("href").slice(1);
-    const t = document.getElementById(id);
-    if(t){ e.preventDefault(); t.scrollIntoView({behavior:"smooth",block:"start"}); }
-  });
+const rows = [...document.querySelectorAll(".chap-row")];
+const pages = [...document.querySelectorAll(".page")];
+const docNum = document.getElementById("docNum");
+const docTitle = document.getElementById("docTitle");
+const docLede = document.getElementById("docLede");
+const docId = document.getElementById("docId");
+const pgNum = document.getElementById("pgNum");
+const pgTot = document.getElementById("pgTot");
+const pgTag = document.getElementById("pgTag");
+const btnPrev = document.getElementById("btnPrev");
+const btnNext = document.getElementById("btnNext");
+const viewBody = document.getElementById("viewBody");
+
+let cur = 1;
+const TOTAL = CHAPTERS.length;
+pgTot.textContent = String(TOTAL).padStart(2,"0");
+
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function go(idx){
+  idx = Math.max(1, Math.min(TOTAL, idx));
+  cur = idx;
+  rows.forEach(r=>r.classList.toggle("on", +r.dataset.idx === idx));
+  pages.forEach(p=>p.classList.toggle("on", +p.dataset.idx === idx));
+  const c = CHAPTERS[idx-1];
+  docNum.textContent = pad(idx);
+  docTitle.textContent = c.title;
+  docLede.textContent = c.lede;
+  docId.textContent = c.doc;
+  pgNum.textContent = pad(idx);
+  pgTag.textContent = c.title;
+  btnPrev.disabled = idx===1;
+  btnNext.disabled = idx===TOTAL;
+  viewBody.scrollTop = 0;
+
+  // keep the active row visible in the rail
+  const activeRow = rows[idx-1];
+  if(activeRow && activeRow.scrollIntoView){
+    activeRow.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});
+  }
+}
+
+rows.forEach(r=>{
+  r.addEventListener("click", ()=>go(+r.dataset.idx));
 });
+btnPrev.addEventListener("click", ()=>go(cur-1));
+btnNext.addEventListener("click", ()=>go(cur+1));
+
+/* Keyboard nav — arrows and page up/down */
+document.addEventListener("keydown", e=>{
+  if(e.target.matches("input,textarea")) return;
+  if(e.key === "ArrowLeft"  || e.key === "PageUp")   { e.preventDefault(); go(cur-1); }
+  if(e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(cur+1); }
+  if(e.key === "Home") { e.preventDefault(); go(1); }
+  if(e.key === "End")  { e.preventDefault(); go(TOTAL); }
+});
+
+/* ============ 3D TILT (matches other UIC pages, rAF-throttled) ============ */
+const container = document.getElementById("crt-container");
+let tiltPending = false, lastX = window.innerWidth/2, lastY = window.innerHeight/2;
+function scheduleTilt(){
+  if(tiltPending) return;
+  tiltPending = true;
+  requestAnimationFrame(()=>{
+    const rx = (window.innerHeight/2 - lastY)/1400;
+    const ry = (window.innerWidth/2  - lastX)/1400;
+    container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    tiltPending = false;
+  });
+}
+function applyTilt(x,y){ lastX=x; lastY=y; scheduleTilt(); }
+document.addEventListener("mousemove",e=>applyTilt(e.clientX,e.clientY),{passive:true});
+document.addEventListener("touchmove",e=>{const t=e.touches[0];applyTilt(t.clientX,t.clientY);},{passive:true});
+
+/* ============ CLOCK ============ */
+const clock = document.getElementById("clock");
+function tickClock(){
+  const d = new Date();
+  const p = n=>String(n).padStart(2,"0");
+  clock.textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+setInterval(tickClock,1000);
+tickClock();
 </script>
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
