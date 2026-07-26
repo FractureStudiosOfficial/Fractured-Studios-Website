@@ -678,6 +678,34 @@ body{
     .action-btn{width:100%;text-align:center;}
     #terminal{padding:12px;}
 }
+
+/* ==== MOBILE OVERHAUL ==== */
+@media(max-width:820px){
+    html,body{-webkit-text-size-adjust:100%;}
+    body{perspective:none;}
+    #bezel-label,#brand-led{display:none;}
+    #bezel{background:radial-gradient(ellipse at 30% 20%,#241a10 0%,#0a0705 60%,#000 100%);}
+    #screen-wrap{inset:6px;border-radius:16px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);}
+    #screen{filter:none;transform:none;}
+    #crt-container{padding:18px 12px 100px;transform:none !important;}
+    #glare,#rgb-mask,#roll,#corners{display:none;}
+    #scanlines{opacity:.5;}
+    #vignette{background:radial-gradient(ellipse 110% 110% at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
+    #amber-tint{opacity:.6;}
+    #poweron{display:none;}
+    #os,#clock{bottom:60px;font-size:9px;letter-spacing:.14em;}
+    #terminal{padding:10px 12px;font-size:12px;}
+    #terminal .hint{display:none;}
+    .hero-telemetry{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:440px){
+    #crt-container{padding:12px 8px 90px;}
+    .hero,.section{padding:14px;}
+    .hero h1{font-size:22px !important;letter-spacing:.14em !important;}
+    .hero-telemetry{grid-template-columns:1fr 1fr;gap:6px;}
+    .hero-telemetry .cell{font-size:10px;padding:6px;}
+    #terminal{padding:8px 10px;font-size:11px;gap:6px;}
+}
 </style>
 </head>
 
