@@ -3,692 +3,912 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>U.I.C. // OPERATOR'S MANUAL</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-<style>:root{
-  --amber:#FF9F07;
-  --amberBright:#FFC861;
-  --amberDim:#B36700;
-  --red:#ff4a2b;
-  --green:#8fff8a;
-  --bg:#0a0705;
-  --paper:rgba(255,159,7,0.04);
+<title>U.I.C. // OPERATOR'S MANUAL — TECHNICAL PRINT</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   OPERATOR'S MANUAL — "TECHNICAL PRINT" EDITION
+   Distinct from the CRT tube pages: this is a printed/blueprint
+   document. No fisheye, no bezel, no scanroll. Graph paper,
+   binding punch-holes, rubber stamps, chapter tabs, authorization seal.
+   ========================================================== */
+:root{
+  --paper:#141008;
+  --paperTint:#1c1608;
+  --grid:rgba(255,159,7,.05);
+  --gridStrong:rgba(255,159,7,.08);
+  --ink:#f0c674;
+  --inkBright:#ffe0a3;
+  --inkDim:#8a6224;
+  --stampRed:#c93b1a;
+  --stampRedBright:#ff5a34;
+  --stampBlue:#3a6ea5;
+  --seal:#d97b1a;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;background:var(--bg);}
+html,body{margin:0;min-height:100%;background:#000;overflow-x:hidden;}
 body{
-  color:var(--amber);
-  font-family:'Share Tech Mono',monospace;
+  color:var(--ink);
+  font-family:'Special Elite','Share Tech Mono',monospace;
+  padding:0;
+  line-height:1.6;
+  font-size:15px;
+  background:radial-gradient(ellipse at 50% 0%, #241a0c 0%, #0a0704 60%, #000 100%);
   min-height:100vh;
-  line-height:1.55;
-  font-size:14px;
-  overflow-x:hidden;
 }
-
-/* CRT FX */
-#scanlines{position:fixed;inset:0;pointer-events:none;z-index:1300;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.30) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;}
-#vignette{position:fixed;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.55) 90%);}
-#amber-tint{position:fixed;inset:0;pointer-events:none;z-index:1150;background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.06) 80%);mix-blend-mode:screen;}
-#bg-grid{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
   background:
-    linear-gradient(rgba(255,159,7,.045) 1px,transparent 1px) 0 0/28px 28px,
-    linear-gradient(90deg,rgba(255,159,7,.045) 1px,transparent 1px) 0 0/28px 28px,
-    radial-gradient(circle at 20% 15%,rgba(255,159,7,.05),transparent 60%);
-  opacity:.6;
+    repeating-linear-gradient(23deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(-67deg,rgba(0,0,0,.15) 0 1px,transparent 1px 4px);
+  mix-blend-mode:overlay;
 }
-@media (max-width:600px){#scanlines{opacity:.55;}#bg-grid{background-size:20px 20px,20px 20px,auto;}}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:6;
+  background:radial-gradient(ellipse 100% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%);
+}
 
-/* BINDER LAYOUT */
-.binder{
+/* ============ SHEET ============ */
+.sheet{
+  max-width:960px;
+  margin:22px auto 22px;
   position:relative;
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(58,110,165,.06),transparent 45%),
+    radial-gradient(ellipse at 0% 100%,rgba(201,59,26,.05),transparent 45%),
+    repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 22px),
+    repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 22px),
+    repeating-linear-gradient(0deg,var(--gridStrong) 0 1px,transparent 1px 110px),
+    repeating-linear-gradient(90deg,var(--gridStrong) 0 1px,transparent 1px 110px),
+    linear-gradient(180deg,var(--paperTint),var(--paper));
+  border:1px solid rgba(255,159,7,.35);
+  box-shadow:
+    0 0 0 6px #0a0705,
+    0 0 0 7px rgba(255,159,7,.18),
+    0 30px 60px rgba(0,0,0,.7);
+  padding:36px 44px 44px 88px;
   z-index:2;
-  display:grid;
-  grid-template-columns:56px 1fr;
-  min-height:100vh;
-  max-width:1180px;
-  margin:0 auto;
 }
-
-/* LEFT SPINE (fixed as tab-rail on desktop, becomes horizontal on mobile) */
-#spine{
-  position:sticky;
-  top:0;
-  height:100vh;
-  border-right:2px solid rgba(255,159,7,.5);
-  background:linear-gradient(180deg,rgba(255,159,7,.09),rgba(255,74,43,.06) 50%,rgba(255,159,7,.09));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:14px 4px;
-  z-index:20;
-}
-.spine-title{
-  writing-mode:vertical-rl;
-  transform:rotate(180deg);
-  letter-spacing:.5em;
-  color:var(--red);
-  font-size:16px;
-  text-shadow:0 0 8px rgba(255,74,43,.4);
-  margin-bottom:16px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-}
-.spine-title span{display:block;}
-.spine-sub{
-  writing-mode:vertical-rl;
-  transform:rotate(180deg);
-  font-size:8px;letter-spacing:.4em;color:var(--amberBright);opacity:.6;margin-top:8px;
-}
-.tabs{
-  display:flex;
-  flex-direction:column;
-  flex:1;
-  gap:6px;
-  width:100%;
-  padding:8px 0;
-}
-.tab{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:8px 4px;
-  border:1px solid rgba(255,159,7,.28);
-  background:rgba(255,159,7,.04);
-  color:var(--amberBright);
-  text-decoration:none;
-  letter-spacing:.18em;
-  font-size:8px;
-  text-align:center;
-  transition:.15s;
-  min-height:56px;
-  position:relative;
-}
-.tab b{
-  display:block;
-  font-size:11px;
-  color:var(--red);
-  font-weight:normal;
-  margin-bottom:2px;
-  letter-spacing:.14em;
-}
-.tab:hover,.tab:focus{
-  background:rgba(255,159,7,.14);
-  border-color:var(--amberBright);
-  color:var(--amberBright);
-  outline:none;
-}
-.tab.on{
-  background:rgba(255,74,43,.14);
-  border-color:var(--red);
-  color:var(--red);
-  text-shadow:0 0 4px rgba(255,74,43,.4);
-}
-.tab.on::after{
-  content:"◀";
-  position:absolute;
-  right:-11px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--red);
-  font-size:10px;
-  text-shadow:0 0 5px rgba(255,74,43,.5);
-}
-.spine-foot{
-  font-size:7px;
-  letter-spacing:.3em;
-  color:var(--amberBright);
-  opacity:.55;
-  text-align:center;
-  line-height:1.4;
-  padding-top:8px;
-  border-top:1px dashed rgba(255,159,7,.2);
-  width:100%;
-}
-
-/* PUNCH HOLES over the seam */
-#holes{
-  position:absolute;
-  top:0;
-  left:56px;
-  bottom:0;
-  width:18px;
-  transform:translateX(-50%);
-  display:flex;
-  flex-direction:column;
-  justify-content:space-evenly;
-  align-items:center;
-  z-index:15;
+.sheet::before{
+  content:"";
+  position:absolute;top:0;bottom:0;left:0;width:60px;
+  background:
+    radial-gradient(circle at 30px 90px,   #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 250px,  #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 410px,  #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 570px,  #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 730px,  #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 890px,  #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1050px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1210px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1370px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1530px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1690px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 1850px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 2010px, #000 0 9px, transparent 10px),
+    radial-gradient(circle at 30px 2170px, #000 0 9px, transparent 10px),
+    linear-gradient(90deg,rgba(0,0,0,.35),transparent);
   pointer-events:none;
 }
-#holes span{
-  width:16px;height:16px;
-  border-radius:50%;
-  background:radial-gradient(circle at 40% 35%,#000 0%,#000 60%,rgba(0,0,0,.4) 90%,transparent 100%);
-  box-shadow:
-    inset 0 0 6px rgba(0,0,0,.9),
-    0 0 0 1px rgba(255,159,7,.35),
-    0 0 6px rgba(255,159,7,.15);
-}
-
-/* MAIN PAGES */
-.pages{
-  padding:22px 24px 24px 36px;
-  position:relative;
-  min-width:0;
-}
-
-/* COVER */
-#cover{
-  position:relative;
-  border:2px solid var(--amber);
-  padding:0;
+.sheet::after{
+  content:"";
+  position:absolute;top:0;left:88px;right:20px;height:14px;
   background:
-    linear-gradient(120deg,rgba(255,74,43,.08),transparent 40%),
-    linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.4));
-  margin-bottom:22px;
-  overflow:hidden;
+    repeating-linear-gradient(90deg,rgba(255,159,7,.35) 0 1px,transparent 1px 20px),
+    repeating-linear-gradient(90deg,rgba(255,159,7,.55) 0 1px,transparent 1px 100px);
+  opacity:.55;pointer-events:none;
 }
-#cover::before{
-  content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.25);pointer-events:none;
-}
-.cover-band{
-  display:flex;justify-content:space-between;gap:12px;
-  padding:8px 14px;
-  border-bottom:1px solid rgba(255,159,7,.4);
-  background:rgba(255,159,7,.08);
-  font-size:9px;letter-spacing:.3em;color:var(--amberBright);
-  position:relative;z-index:2;
-  flex-wrap:wrap;
-}
-.cover-body{
-  display:grid;
-  grid-template-columns:1.4fr 1fr;
-  gap:16px;
-  padding:22px 24px;
-  align-items:center;
-  position:relative;z-index:2;
-}
-.cover-eyebrow{
-  font-size:10px;letter-spacing:.3em;color:var(--red);opacity:.85;margin-bottom:8px;
-  text-shadow:0 0 5px rgba(255,74,43,.3);
-}
-.cover-title{
-  margin:0;
-  font-family:'VT323',monospace;
-  font-size:clamp(38px,7vw,74px);
-  line-height:.95;
-  letter-spacing:.06em;
-  color:var(--amberBright);
-  text-shadow:0 0 10px rgba(255,159,7,.4),0 0 22px rgba(255,120,0,.3);
-}
-.cover-title .tt{color:var(--red);text-shadow:0 0 10px rgba(255,74,43,.4);}
-.cover-meta{
-  margin-top:14px;
-  display:flex;flex-wrap:wrap;gap:6px;
-  font-size:10px;letter-spacing:.28em;color:var(--amberBright);opacity:.85;
-}
-.cover-rhs{display:flex;justify-content:center;align-items:center;}
 
-/* STAMP (diagonal official-approved) */
+/* ============ HEADER ============ */
+.doc-head{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:24px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:18px;margin-bottom:22px;
+  position:relative;
+}
+.doc-head .lockup{display:flex;flex-direction:column;gap:6px;}
+.doc-head .kicker{
+  font-family:'VT323',monospace;font-size:14px;
+  letter-spacing:.28em;color:var(--inkDim);text-transform:uppercase;
+}
+.doc-head h1{
+  margin:0;font-family:'Share Tech Mono',monospace;
+  font-size:38px;letter-spacing:.14em;color:var(--inkBright);
+  text-shadow:2px 0 0 rgba(201,59,26,.35);line-height:1;
+}
+.doc-head .sub{
+  font-family:'VT323',monospace;font-size:16px;letter-spacing:.22em;
+  color:var(--ink);opacity:.85;
+}
+.doc-head .meta-block{
+  display:flex;flex-direction:column;gap:6px;align-items:flex-end;
+  font-family:'VT323',monospace;font-size:13px;letter-spacing:.16em;color:var(--ink);
+}
+.doc-head .meta-block .row{display:flex;gap:10px;align-items:center;}
+.doc-head .meta-block .lbl{color:var(--inkDim);}
+
 .stamp{
-  border:3px double var(--red);
-  transform:rotate(-8deg);
-  padding:10px 16px;
-  color:var(--red);
-  text-align:center;
-  background:rgba(255,74,43,.05);
-  box-shadow:0 0 18px rgba(255,74,43,.15) inset,0 0 12px rgba(255,74,43,.2);
-  max-width:220px;
+  position:absolute;font-family:'Share Tech Mono',monospace;
+  border:3px double var(--stampRed);color:var(--stampRed);
+  padding:5px 12px;letter-spacing:.28em;font-size:13px;
+  text-shadow:0 0 1px rgba(201,59,26,.5);
+  transform:rotate(-6deg);opacity:.85;
+  box-shadow:0 0 0 2px rgba(0,0,0,.4) inset;
+  pointer-events:none;background:rgba(20,10,4,.35);z-index:3;
 }
-.stamp-inner{position:relative;}
-.stamp-inner::before,.stamp-inner::after{
-  content:"";position:absolute;left:0;right:0;height:1px;background:rgba(255,74,43,.4);
+.stamp.public{
+  top:-8px;right:170px;transform:rotate(-8deg);
+  border-color:var(--stampRedBright);color:var(--stampRedBright);
 }
-.stamp-inner::before{top:-4px;}
-.stamp-inner::after{bottom:-4px;}
-.stamp-t{
-  font-family:'VT323',monospace;font-size:34px;letter-spacing:.16em;line-height:1;
-  text-shadow:0 0 8px rgba(255,74,43,.4);
+.stamp.rev{
+  top:38px;right:36px;transform:rotate(4deg);
+  border:2px solid var(--stampBlue);color:var(--stampBlue);
+  border-style:dashed;font-size:11px;padding:4px 10px;
 }
-.stamp-d{font-size:8px;letter-spacing:.3em;opacity:.85;margin-top:2px;}
-.stamp-sig{font-size:8px;letter-spacing:.24em;margin-top:6px;opacity:.7;color:var(--amberBright);}
 
-.cover-bar{
-  padding:8px 14px;
-  border-top:1px solid rgba(255,159,7,.4);
-  background:rgba(0,0,0,.35);
-  display:flex;align-items:center;gap:10px;
-  font-size:9px;letter-spacing:.28em;color:var(--amberBright);
-  position:relative;z-index:2;
+.barcode{display:flex;gap:2px;align-items:end;height:24px;margin-top:8px;}
+.barcode span{display:block;background:var(--ink);width:2px;height:100%;}
+.barcode span.thin{width:1px;height:80%;}
+.barcode span.thick{width:4px;}
+.barcode-label{
+  font-family:'VT323',monospace;font-size:12px;color:var(--inkDim);
+  letter-spacing:.28em;margin-top:2px;
 }
-.cover-run{flex:1;text-align:center;opacity:.8;}
-.cover-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.8s infinite;}
-.cover-bar .dot.warn{background:var(--red);box-shadow:0 0 6px var(--red);}
-@keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 
-/* SECTIONS as "pages" with a heavy top-band */
+/* ============ TABS ============ */
+.tabs{
+  display:flex;flex-wrap:wrap;gap:0;
+  border-top:1px dashed rgba(255,159,7,.35);
+  border-bottom:1px dashed rgba(255,159,7,.35);
+  margin-bottom:24px;background:rgba(255,159,7,.03);
+}
+.tabs a{
+  flex:1 1 auto;min-width:120px;padding:12px 14px;
+  text-decoration:none;color:var(--ink);
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;letter-spacing:.22em;
+  border-right:1px dashed rgba(255,159,7,.25);
+  position:relative;transition:.15s;
+  display:flex;flex-direction:column;gap:4px;
+  min-height:60px;justify-content:center;
+}
+.tabs a:last-child{border-right:none;}
+.tabs a b{
+  display:block;font-family:'VT323',monospace;font-size:16px;
+  color:var(--stampRed);letter-spacing:.24em;font-weight:normal;
+}
+.tabs a:hover,.tabs a:focus{
+  background:rgba(255,159,7,.09);color:var(--inkBright);outline:none;
+}
+.tabs a.on{
+  background:rgba(201,59,26,.12);color:var(--inkBright);
+  box-shadow:inset 0 -3px 0 var(--stampRed);
+}
+
+/* ============ SECTIONS ============ */
 section{
-  position:relative;
-  margin-bottom:22px;
-  scroll-margin-top:12px;
-  border:2px solid rgba(255,159,7,.45);
-  background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));
-  border-radius:2px;
-  overflow:hidden;
+  scroll-margin-top:24px;padding:22px 0 8px;
+  border-top:1px solid rgba(255,159,7,.14);position:relative;
 }
-section::before{
-  content:"";position:absolute;inset:6px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;
+section:first-of-type{border-top:none;padding-top:0;}
+section .chap{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:8px;flex-wrap:wrap;
 }
-section > *{position:relative;z-index:1;}
+section .chap .num{
+  font-family:'VT323',monospace;font-size:56px;color:var(--stampRed);
+  line-height:.85;padding:2px 12px;
+  border:3px solid var(--stampRed);letter-spacing:.06em;
+  transform:rotate(-2deg);background:rgba(201,59,26,.05);
+}
+section .chap .title{flex:1;min-width:200px;}
+section .chap h2{
+  margin:0 0 4px;font-family:'Share Tech Mono',monospace;
+  font-size:22px;letter-spacing:.22em;color:var(--inkBright);
+}
+section .chap .lede{
+  font-family:'VT323',monospace;font-size:15px;letter-spacing:.18em;
+  color:var(--inkDim);text-transform:uppercase;
+}
+section .chap .docno{
+  font-family:'VT323',monospace;font-size:12px;padding:4px 10px;
+  border:1px solid var(--stampBlue);color:var(--stampBlue);
+  letter-spacing:.24em;align-self:flex-start;
+}
 
-/* Section header — like a chapter divider tab */
-.sec-header{
-  display:flex;justify-content:space-between;align-items:stretch;
-  border-bottom:1px solid rgba(255,159,7,.4);
-  background:linear-gradient(90deg,rgba(255,74,43,.14),rgba(255,159,7,.06));
-}
-.sec-header .num{
-  padding:14px 16px;
-  border-right:1px solid rgba(255,159,7,.4);
-  font-family:'VT323',monospace;
-  font-size:34px;
-  line-height:1;
-  color:var(--red);
-  text-shadow:0 0 8px rgba(255,74,43,.4);
-  min-width:74px;
-  text-align:center;
-  background:rgba(255,74,43,.08);
-  display:flex;align-items:center;justify-content:center;
-}
-.sec-header .heading{
-  flex:1;padding:12px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px;
-  min-width:0;
-}
-.sec-header h2{
-  margin:0;
-  font-size:15px;letter-spacing:.28em;
-  color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.5);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.sec-header .lede{
-  font-size:9px;letter-spacing:.28em;color:var(--red);opacity:.85;
-}
-.sec-header .filing{
-  padding:10px 14px;
-  border-left:1px dashed rgba(255,159,7,.3);
-  display:flex;flex-direction:column;justify-content:center;align-items:flex-end;
-  font-size:8px;letter-spacing:.28em;color:var(--amberBright);gap:2px;
-  min-width:100px;
-}
-.sec-header .filing b{color:var(--red);font-weight:normal;font-size:9px;}
+section p{margin:0 0 12px;color:var(--ink);}
+section p .amb{color:var(--inkBright);}
+section p .rd{color:var(--stampRedBright);text-decoration:underline dotted rgba(201,59,26,.5);}
 
-/* Body of each section */
-.sec-body{padding:18px 20px 22px;}
-.sec-body h3{
-  font-size:12px;letter-spacing:.28em;color:var(--red);
-  margin:16px 0 8px;
-  padding-bottom:4px;
-  border-bottom:1px dashed rgba(255,74,43,.28);
-  display:flex;align-items:center;gap:8px;
+h3.sub{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  letter-spacing:.28em;color:var(--stampRed);
+  margin:20px 0 8px;padding-left:14px;
+  border-left:3px solid var(--stampRed);
 }
-.sec-body h3::before{content:"//";color:var(--amberBright);opacity:.6;}
-.sec-body h3:first-child{margin-top:0;}
-.sec-body p{margin:0 0 12px;color:var(--amberBright);opacity:.94;}
-.sec-body p .amb{color:var(--amber);}
-.sec-body p .rd{color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.3);}
 
-/* Two-column magazine flow (large screens only) */
-.cols-2{column-count:2;column-gap:22px;column-rule:1px dashed rgba(255,159,7,.2);}
-.cols-2 > *{break-inside:avoid;}
-@media (max-width:820px){.cols-2{column-count:1;}}
-
-/* SPEC ROWS */
-.spec-row{
-  display:grid;
-  grid-template-columns:130px 1fr;
-  gap:10px;
-  padding:6px 10px;
-  border-left:2px solid rgba(255,74,43,.35);
-  background:rgba(0,0,0,.25);
-  margin:4px 0;
-  font-size:11px;letter-spacing:.1em;
+.kv{
+  display:grid;grid-template-columns:150px 1fr;gap:14px;
+  padding:6px 0;border-bottom:1px dotted rgba(255,159,7,.22);
+  font-family:'VT323',monospace;font-size:16px;letter-spacing:.06em;
 }
-.spec-row .k{color:var(--red);letter-spacing:.24em;font-size:9px;line-height:1.6;}
-.spec-row .v{color:var(--amberBright);}
-@media (max-width:600px){.spec-row{grid-template-columns:88px 1fr;}}
+.kv .k{
+  color:var(--stampRed);letter-spacing:.22em;font-size:12px;
+  font-family:'Share Tech Mono',monospace;padding-top:2px;
+}
+.kv .v{color:var(--inkBright);}
 
-/* CODE INDEX CARDS */
-.code-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px;}
-@media (max-width:640px){.code-grid{grid-template-columns:1fr;}}
-
-.code-card{
-  position:relative;
-  border:1px solid rgba(255,74,43,.4);
+.card-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:14px;margin-top:12px;
+}
+.card{
   background:
-    linear-gradient(180deg,rgba(255,74,43,.05),rgba(0,0,0,.4)),
-    repeating-linear-gradient(180deg,rgba(255,159,7,.03) 0 22px,transparent 22px 24px);
-  padding:10px 12px 12px;
+    linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.25)),
+    linear-gradient(0deg,rgba(255,159,7,.05),rgba(255,159,7,.05));
+  border:1px solid rgba(255,159,7,.35);
+  border-top:3px solid var(--stampRed);
+  padding:14px 16px 16px;position:relative;
+  box-shadow:2px 2px 0 rgba(0,0,0,.5);
 }
-.code-card::before{
-  content:"";position:absolute;top:0;left:0;
-  border-style:solid;border-width:9px 9px 0 0;
-  border-color:var(--red) transparent transparent transparent;
-  opacity:.7;
+.card::before{
+  content:"◈";position:absolute;top:8px;right:12px;
+  color:var(--stampRed);font-size:14px;
 }
-.code-card .idx{
-  position:absolute;
-  top:6px;right:8px;
-  font-family:'VT323',monospace;
-  font-size:16px;
-  color:var(--red);opacity:.6;
-  letter-spacing:.05em;
+.card .name{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  letter-spacing:.22em;color:var(--inkBright);margin-bottom:2px;
 }
-.code-card .name{
-  display:flex;align-items:baseline;justify-content:space-between;gap:8px;
-  font-size:12px;letter-spacing:.24em;color:var(--red);
-  text-shadow:0 0 6px rgba(255,74,43,.4);
-  padding:8px 0 6px 12px;
-  border-bottom:1px dashed rgba(255,74,43,.3);margin-bottom:6px;
+.card .file{
+  font-family:'VT323',monospace;font-size:13px;
+  color:var(--inkDim);letter-spacing:.06em;margin-bottom:8px;
 }
-.code-card .name .file{font-family:'VT323',monospace;color:var(--amberBright);opacity:.85;font-size:14px;letter-spacing:.06em;}
-.code-card .seq{
-  font-family:'VT323',monospace;
-  font-size:18px;
-  letter-spacing:.06em;
-  color:var(--amberBright);
-  padding:6px 8px;
-  background:rgba(0,0,0,.55);
-  border:1px dashed rgba(255,159,7,.28);
-  margin:4px 0 6px 12px;
-  word-break:break-word;
+.card .seq{
+  font-family:'VT323',monospace;font-size:19px;letter-spacing:.04em;
+  color:var(--inkBright);padding:7px 10px;background:#0d0904;
+  border:1px dashed rgba(255,159,7,.35);
+  word-break:break-word;margin-bottom:8px;
 }
-.code-card .seq .arr{color:var(--red);padding:0 4px;}
-.code-card .desc{
-  font-size:11px;letter-spacing:.1em;color:var(--amberBright);opacity:.85;padding-left:12px;
+.card .seq .arrow{color:var(--stampRed);padding:0 4px;}
+.card .desc{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:.12em;color:var(--ink);opacity:.85;
 }
-.code-card .desc .k{color:var(--red);letter-spacing:.22em;font-size:9px;}
+.card .desc .lbl{color:var(--stampRed);}
 
-/* PAGE INDEX (dossier row) */
-.page-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.page-list{display:flex;flex-direction:column;gap:0;margin-top:6px;}
 .page-row{
-  display:grid;
-  grid-template-columns:64px 1fr;
-  gap:12px;
-  border:1px solid rgba(255,159,7,.28);
-  background:rgba(255,159,7,.03);
-  padding:10px 12px;
-  position:relative;
+  display:grid;grid-template-columns:1fr auto;gap:12px;
+  padding:12px 4px 12px 40px;
+  border-bottom:1px dashed rgba(255,159,7,.22);position:relative;
 }
-.page-row .badge{
-  border:1px solid rgba(255,74,43,.4);
-  background:rgba(255,74,43,.06);
-  padding:6px 4px;
-  text-align:center;
-  font-size:9px;letter-spacing:.16em;color:var(--red);
-  align-self:start;
-  font-family:'VT323',monospace;
+.page-row::before{
+  content:"▸";position:absolute;left:14px;top:12px;
+  color:var(--stampRed);font-family:'VT323',monospace;font-size:18px;
 }
-.page-row .badge b{display:block;font-size:14px;font-weight:normal;letter-spacing:.06em;line-height:1;}
-.page-row .info{min-width:0;}
 .page-row .name{
-  display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;
-  color:var(--red);letter-spacing:.22em;font-size:12px;margin-bottom:3px;
+  font-family:'Share Tech Mono',monospace;
+  color:var(--stampRedBright);letter-spacing:.22em;font-size:13px;
+  margin-bottom:4px;
 }
-.page-row .name .file{
-  font-family:'VT323',monospace;font-size:14px;color:var(--amberBright);letter-spacing:.06em;opacity:.9;
+.page-row .file{
+  font-family:'VT323',monospace;font-size:14px;color:var(--inkBright);
+  letter-spacing:.06em;padding:2px 8px;background:#0d0904;
+  border:1px solid rgba(255,159,7,.25);
+  align-self:start;justify-self:end;white-space:nowrap;
 }
-.page-row .desc{color:var(--amberBright);font-size:11px;letter-spacing:.1em;opacity:.88;line-height:1.55;}
-@media (max-width:520px){.page-row{grid-template-columns:52px 1fr;}}
+.page-row .desc{
+  font-family:'Special Elite','Share Tech Mono',monospace;
+  font-size:14px;color:var(--ink);opacity:.9;
+  grid-column:1/-1;padding-right:8px;
+}
 
-/* CALLOUT */
+.term-ex{
+  border:1px solid rgba(255,159,7,.4);
+  border-left:5px solid var(--stampRed);
+  background:
+    repeating-linear-gradient(180deg,rgba(255,159,7,.03) 0 2px,transparent 2px 4px),
+    #0a0603;
+  padding:14px 16px;font-family:'VT323',monospace;font-size:19px;
+  letter-spacing:.05em;color:var(--inkBright);line-height:1.35;
+  margin:14px 0;overflow-x:auto;white-space:pre;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.6);
+}
+.term-ex .p{color:var(--stampRed);}
+.term-ex .in{color:var(--inkBright);}
+.term-ex .ok{color:#8fff8a;}
+
 .callout{
-  margin:14px 0;
-  padding:12px 14px;
-  border:1px dashed rgba(255,201,7,.4);
-  background:rgba(255,159,7,.05);
-  color:var(--amberBright);
-  font-size:11px;
-  letter-spacing:.14em;
-  line-height:1.65;
-  position:relative;
+  margin:14px 0;padding:12px 14px 12px 60px;
+  border:1px solid rgba(255,159,7,.35);
+  background:rgba(255,159,7,.04);
+  color:var(--ink);
+  font-family:'Special Elite','Share Tech Mono',monospace;
+  font-size:14px;line-height:1.55;position:relative;
 }
 .callout::before{
-  content:"◈";
-  position:absolute;left:-10px;top:8px;
-  background:var(--bg);
-  color:var(--amber);
-  padding:0 4px;
-  font-size:12px;
+  content:"NOTE";position:absolute;left:8px;top:12px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:.24em;color:var(--stampRed);
+  border:1px solid var(--stampRed);padding:3px 6px;
+  transform:rotate(-4deg);background:rgba(201,59,26,.08);
 }
-.callout.red{border-color:rgba(255,74,43,.5);background:rgba(255,74,43,.06);color:var(--red);}
-.callout.red::before{color:var(--red);content:"⚠";}
-.callout b{color:var(--red);letter-spacing:.22em;font-size:10px;margin-right:6px;}
-.callout.red b{color:var(--amberBright);}
+.callout.warn{border-color:rgba(201,59,26,.55);background:rgba(201,59,26,.06);}
+.callout.warn::before{content:"WARN";color:var(--stampRedBright);border-color:var(--stampRedBright);}
+.callout.tip::before{content:"TIP";color:var(--seal);border-color:var(--seal);}
 
-/* TERMINAL EXAMPLE — receipt-strip */
-.term-ex{
-  border:1px solid rgba(255,159,7,.35);
-  background:
-    linear-gradient(180deg,#000,rgba(0,0,0,.85)),
-    repeating-linear-gradient(180deg,rgba(255,159,7,.06) 0 1px,transparent 1px 3px);
-  padding:14px 16px;
-  font-family:'VT323',monospace;
-  font-size:17px;
-  letter-spacing:.05em;
-  color:var(--amberBright);
-  line-height:1.5;
-  margin:14px 0;
-  overflow-x:auto;
-  white-space:pre;
-  position:relative;
-  box-shadow:inset 0 0 20px rgba(255,159,7,.08);
+.doc-foot{
+  margin-top:28px;padding:20px 0 4px;
+  border-top:2px solid var(--ink);
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;
 }
-.term-ex::before{
-  content:"◈ FR-77 · LIVE TRACE";
-  position:absolute;
-  top:-9px;left:14px;
-  background:var(--bg);
-  padding:0 8px;
-  font-family:'Share Tech Mono',monospace;
-  font-size:9px;letter-spacing:.28em;color:var(--red);
+.doc-foot .sign{
+  font-family:'Special Elite',cursive;font-size:22px;color:var(--inkBright);
+  border-bottom:1px solid var(--ink);padding-bottom:2px;max-width:220px;
+  letter-spacing:.02em;
 }
-.term-ex .p{color:var(--red);}
-.term-ex .in{color:var(--amber);}
-.term-ex .ok{color:var(--green);}
-@media (max-width:600px){.term-ex{font-size:14px;padding:12px;}}
+.doc-foot .sign-lbl{
+  font-family:'VT323',monospace;font-size:12px;color:var(--inkDim);
+  letter-spacing:.28em;margin-top:4px;
+}
+.doc-foot .seal{
+  width:96px;height:96px;border-radius:50%;
+  border:2px solid var(--seal);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--seal);font-family:'Share Tech Mono',monospace;
+  text-align:center;font-size:9px;letter-spacing:.22em;
+  transform:rotate(-8deg);
+  box-shadow:inset 0 0 12px rgba(217,123,26,.2);
+  position:relative;padding:6px;
+}
+.doc-foot .seal::before{
+  content:"";position:absolute;inset:6px;
+  border:1px dashed var(--seal);border-radius:50%;
+}
+.doc-foot .seal b{
+  font-size:11px;letter-spacing:.16em;color:var(--seal);
+  font-weight:normal;margin-top:2px;
+}
 
-/* COLOPHON / FOOTER */
-#colophon{
-  margin-top:26px;
-  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
-  padding:14px 16px;
-  border:2px solid rgba(255,159,7,.4);
-  background:linear-gradient(90deg,rgba(255,159,7,.06),rgba(255,74,43,.05));
+.nav-row{
+  margin-top:22px;display:flex;flex-wrap:wrap;gap:10px;
+  padding-top:14px;border-top:1px dashed rgba(255,159,7,.25);
 }
-#colophon .col-l{display:flex;align-items:center;gap:12px;}
-#colophon .col-mark{color:var(--red);font-size:22px;text-shadow:0 0 8px rgba(255,74,43,.4);}
-#colophon .col-line{color:var(--red);letter-spacing:.22em;font-size:11px;}
-#colophon .col-sub{color:var(--amberBright);letter-spacing:.2em;font-size:9px;opacity:.7;}
-#colophon .col-r{display:flex;gap:6px;flex-wrap:wrap;}
-.jbtn{
-  padding:8px 12px;
-  border:1px solid var(--amber);
-  color:var(--amber);
-  font-family:inherit;
-  cursor:pointer;
-  letter-spacing:.18em;
-  text-decoration:none;
-  font-size:11px;
-  min-height:38px;
+.btn{
+  padding:10px 16px;border:1px solid var(--ink);color:var(--ink);
+  font-family:'Share Tech Mono',monospace;text-decoration:none;
+  letter-spacing:.2em;font-size:12px;transition:.15s;
+  background:rgba(255,159,7,.04);min-height:42px;
   display:inline-flex;align-items:center;
-  background:transparent;
-  transition:.15s;
 }
-.jbtn:hover,.jbtn:focus{background:rgba(255,159,7,.15);color:var(--amberBright);outline:none;}
+.btn:hover,.btn:focus{
+  background:rgba(255,159,7,.15);color:var(--inkBright);
+  border-color:var(--inkBright);outline:none;
+}
+.btn .k{color:var(--stampRed);margin-right:8px;}
 
-/* MOBILE — spine becomes a top bar with horizontal scroll tabs */
-@media (max-width:720px){
-  .binder{grid-template-columns:1fr;}
-  #spine{
-    position:sticky;
-    top:0;
-    height:auto;
-    width:100%;
-    border-right:none;
-    border-bottom:2px solid rgba(255,159,7,.5);
-    flex-direction:row;
-    align-items:center;
-    padding:8px 10px;
-    gap:10px;
-    overflow:hidden;
+.pagefoot{
+  text-align:center;font-family:'VT323',monospace;
+  font-size:13px;letter-spacing:.28em;color:var(--inkDim);
+  margin:16px auto 22px;max-width:960px;padding:0 20px;
+}
+
+/* ============ MOBILE ============ */
+@media (max-width:760px){
+  .sheet{margin:8px;padding:22px 16px 26px 44px;max-width:none;}
+  .sheet::before{
+    width:30px;
+    background:
+      radial-gradient(circle at 15px 60px,   #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 220px,  #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 380px,  #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 540px,  #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 700px,  #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 860px,  #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1020px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1180px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1340px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1500px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1660px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1820px, #000 0 6px, transparent 7px),
+      radial-gradient(circle at 15px 1980px, #000 0 6px, transparent 7px),
+      linear-gradient(90deg,rgba(0,0,0,.35),transparent);
   }
-  .spine-title,.spine-sub,.spine-foot{display:none;}
-  .tabs{
-    flex-direction:row;
-    padding:0;
-    gap:6px;
-    overflow-x:auto;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-  }
-  .tabs::-webkit-scrollbar{display:none;}
-  .tab{
-    flex:0 0 auto;
-    min-width:66px;
-    min-height:44px;
-    padding:6px 10px;
-    font-size:9px;
-  }
-  .tab.on::after{display:none;}
-  #holes{display:none;}
-  .pages{padding:14px 12px;}
-  .sec-header .num{padding:10px;font-size:24px;min-width:56px;}
-  .sec-header .filing{display:none;}
-  .sec-header h2{font-size:13px;letter-spacing:.22em;}
-  .cover-body{grid-template-columns:1fr;padding:16px;}
-  .cover-rhs{justify-content:flex-start;}
-  .stamp{transform:rotate(-5deg);}
-  #cover{margin-bottom:14px;}
-  .sec-body{padding:14px 14px 16px;}
+  .sheet::after{left:44px;right:12px;}
+  body{font-size:14px;}
+  .doc-head{grid-template-columns:1fr;gap:12px;}
+  .doc-head h1{font-size:26px;letter-spacing:.1em;}
+  .doc-head .sub{font-size:13px;letter-spacing:.16em;}
+  .doc-head .meta-block{align-items:flex-start;font-size:12px;}
+  .stamp.public{position:relative;top:auto;right:auto;display:inline-block;margin:6px 0;transform:rotate(-4deg);}
+  .stamp.rev{top:18px;right:8px;font-size:9px;}
+
+  .tabs a{min-width:45%;font-size:11px;letter-spacing:.16em;padding:10px 10px;min-height:52px;}
+  .tabs a b{font-size:14px;}
+
+  section .chap .num{font-size:38px;padding:2px 8px;}
+  section .chap h2{font-size:17px;letter-spacing:.16em;}
+  section .chap .lede{font-size:13px;letter-spacing:.14em;}
+
+  .kv{grid-template-columns:100px 1fr;gap:8px;font-size:14px;}
+  .kv .k{font-size:10px;letter-spacing:.16em;}
+
+  .card-grid{grid-template-columns:1fr;}
+  .card .seq{font-size:16px;}
+
+  .page-row{padding-left:28px;grid-template-columns:1fr;}
+  .page-row .file{justify-self:start;margin-top:4px;}
+
+  .term-ex{font-size:15px;padding:10px 12px;}
+  .callout{padding-left:16px;padding-top:36px;}
+  .callout::before{top:6px;left:8px;}
+
+  .doc-foot{grid-template-columns:1fr;gap:14px;}
+  .doc-foot .seal{align-self:flex-start;}
+
+  .btn{font-size:11px;padding:9px 12px;letter-spacing:.14em;}
 }
 @media (max-width:400px){
-  body{font-size:13px;}
-  .cover-title{font-size:44px;}
-  .code-card .seq{font-size:16px;}
-}</style>
+  .sheet{padding:18px 12px 22px 34px;}
+  .sheet::before{width:22px;}
+  .tabs a{min-width:100%;border-right:none;border-bottom:1px dashed rgba(255,159,7,.2);}
+  .tabs a:last-child{border-bottom:none;}
+  section .chap{gap:10px;}
+  section .chap .num{font-size:30px;}
+}
+</style>
 </head>
 <body>
 
-<!-- CRT FX -->
-<div id="scanlines"></div>
-<div id="amber-tint"></div>
-<div id="vignette"></div>
-<div id="bg-grid"></div>
+<div class="sheet">
 
-<div class="binder">
+  <!-- HEADER -->
+  <header class="doc-head">
+    <span class="stamp public">// PUBLIC EDITION</span>
+    <span class="stamp rev">REV 4.02 · CTRL-DOC</span>
 
-  <!-- LEFT BINDER SPINE / TABS -->
-  <aside id="spine" aria-label="Chapter tabs">
-    <div class="spine-title">
-      <span>U</span><span>I</span><span>C</span>
-      <div class="spine-sub">OPS · MAN</div>
+    <div class="lockup">
+      <div class="kicker">U.I.C. · DOCUMENT CONTROL · CH.00</div>
+      <h1>OPERATOR'S MANUAL</h1>
+      <div class="sub">FR-77 TERMINAL SYSTEMS &nbsp;·&nbsp; PRINTED EDITION</div>
+      <div class="barcode" aria-hidden="true">
+        <span></span><span class="thin"></span><span class="thick"></span><span class="thin"></span>
+        <span></span><span></span><span class="thick"></span><span class="thin"></span>
+        <span></span><span class="thin"></span><span></span><span class="thick"></span>
+        <span></span><span></span><span class="thin"></span><span></span>
+        <span class="thick"></span><span></span><span class="thin"></span><span></span>
+        <span></span><span class="thin"></span><span class="thick"></span><span></span>
+        <span class="thin"></span><span></span><span></span><span class="thick"></span>
+      </div>
+      <div class="barcode-label">UIC-FR77-MAN-402 · 1989</div>
     </div>
-    <nav class="tabs">
-      <a href="#intro"    class="tab" data-n="01"><b>01</b>ABOUT</a>
-      <a href="#terminal" class="tab" data-n="02"><b>02</b>TERM</a>
-      <a href="#codes"    class="tab" data-n="03"><b>03</b>CODES</a>
-      <a href="#pages"    class="tab" data-n="04"><b>04</b>PAGES</a>
-      <a href="#bulletin" class="tab" data-n="05"><b>05</b>BOARD</a>
-      <a href="#tips"     class="tab" data-n="06"><b>06</b>FAULT</a>
-    </nav>
-    <div class="spine-foot">FR-77<br>REV 4.02</div>
-  </aside>
 
-  <!-- PUNCH HOLES -->
-  <div id="holes" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span><span></span>
-  </div>
+    <div class="meta-block">
+      <div class="row"><span class="lbl">FILE #</span><span>MAN-000-402</span></div>
+      <div class="row"><span class="lbl">SHEET</span><span>1 of 1</span></div>
+      <div class="row"><span class="lbl">CLASS</span><span>UNRESTRICTED</span></div>
+      <div class="row"><span class="lbl">ISSUED</span><span>1989.11.09</span></div>
+      <div class="row"><span class="lbl">ORIGIN</span><span>UIC INDUSTRIES · DOC CTRL</span></div>
+    </div>
+  </header>
 
-  <!-- MAIN CONTENT -->
-  <main class="pages">
+  <!-- TABS -->
+  <nav class="tabs" aria-label="Manual chapters">
+    <a href="#intro"><b>Ch. 01</b>ABOUT U.I.C.</a>
+    <a href="#terminal"><b>Ch. 02</b>TERMINAL 101</a>
+    <a href="#codes"><b>Ch. 03</b>ACCESS CODES</a>
+    <a href="#pages"><b>Ch. 04</b>PAGE INDEX</a>
+    <a href="#bulletin"><b>Ch. 05</b>BULLETIN</a>
+    <a href="#tips"><b>Ch. 06</b>TIPS &amp; FAULTS</a>
+  </nav>
 
-    <!-- COVER -->
-    <header id="cover">
-      <div class="cover-band"><span>DOCUMENT · OPERATOR'S MANUAL · PUBLIC EDITION</span><span>FILING · UIC-OM-4.02</span></div>
-      <div class="cover-body">
-        <div class="cover-lhs">
-          <div class="cover-eyebrow">// UNIVERSAL INTERSTELLAR COMPUTERS</div>
-          <h1 class="cover-title">
-            OPERATOR'S<br>
-            <span class="tt">MANUAL</span>
-          </h1>
-          <div class="cover-meta">
-            <span>REV 4.02</span>
-            <span>·</span>
-            <span>MODEL FR-77</span>
-            <span>·</span>
-            <span>1989</span>
-          </div>
-        </div>
-        <div class="cover-rhs">
-          <div class="stamp">
-            <div class="stamp-inner">
-              <div class="stamp-t">PUBLIC</div>
-              <div class="stamp-d">CLEARANCE · TIER · 0</div>
-              <div class="stamp-sig">◈ APPROVED · UIC OPS ◈</div>
-            </div>
-          </div>
-        </div>
+  <!-- 01 -->
+  <section id="intro">
+    <div class="chap">
+      <div class="num">01</div>
+      <div class="title">
+        <h2>UNIVERSAL INTERSTELLAR COMPUTERS</h2>
+        <div class="lede">FR-77 · Terminal Node Standard Issue · 1989</div>
       </div>
-      <div class="cover-bar">
-        <span class="dot"></span>
-        <span class="cover-run">READ IN ORDER · SEQUENCES ARE CASE-INSENSITIVE · KEEP THIS DOCUMENT WITH THE UNIT</span>
-        <span class="dot warn"></span>
+      <span class="docno">DOC.01</span>
+    </div>
+
+    <p>
+      <span class="rd">U.I.C.</span> — Universal Interstellar Computers — is the standard mainframe network deployed
+      across solar-system infrastructure. Every station, every rail, every hab-module runs on a U.I.C. node like the
+      one you are reading this manual on. If it has a screen and it hums, it is almost certainly U.I.C.
+    </p>
+
+    <p>
+      This unit is a <span class="amb">Model FR-77</span>. It runs UIC OS v1.0.4 with 64K core memory, RS-232 uplink,
+      and a cipher engine for secure link. When it boots it will run a power-on self-test and then hand you a prompt.
+      Everything after that prompt is yours to command.
+    </p>
+
+    <h3 class="sub">§ 01.1 — History in Brief</h3>
+    <p>
+      Humanity landed on the Moon in <span class="amb">1965</span>. The first woman on the Moon planted a flag; the
+      Soviets beat the United States there and the race never actually ended. Instead of packing up, both blocs raced
+      to build lunar bases, orbital stations, and outposts on Venus and Mars. This is the timeline you are living in.
+    </p>
+
+    <div class="kv"><span class="k">YEAR</span><span class="v">1989 · A.D.</span></div>
+    <div class="kv"><span class="k">LUNAR STA.</span><span class="v">Horizon (USA) · Armstrong (USA) · Zvezda (USSR) · Zvezda Mining</span></div>
+    <div class="kv"><span class="k">ORBITAL</span><span class="v">Salyut · Vaun Braun · Mars Orbital Habitation</span></div>
+    <div class="kv"><span class="k">VENUS</span><span class="v">Floating Islands (7 + partial launchpad) · Surface Hab · V.O.S.S.</span></div>
+    <div class="kv"><span class="k">MARS</span><span class="v">First Touch Station · US/USSR Collaborative Surface Station</span></div>
+    <div class="kv"><span class="k">EUROPA</span><span class="v">Clipper Orbital Station · Mass Driver Fabrication Station</span></div>
+
+    <h3 class="sub">§ 01.2 — What We're Building</h3>
+    <p>
+      The current flagship project is the <span class="rd">Venetian Mass Driver Rail</span> (V.M.D.R.) — a rail system
+      being fabricated at the Venus Surface Habitation Modules. Sister infrastructure at the Europa Mass Driver
+      Fabrication Station supports the Europa-to-Venus water pipeline that feeds the Venetian terra-forming project.
+      The long-range plan: three habitable planets. Earth. Mars. Venus.
+    </p>
+
+    <div class="callout">
+      This manual covers public-tier terminal operation only. Restricted-access sequences exist but are not documented
+      here and are not available to unauthenticated users.
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section id="terminal">
+    <div class="chap">
+      <div class="num">02</div>
+      <div class="title">
+        <h2>HOW TO USE THE TERMINAL</h2>
+        <div class="lede">Prompt · Sequence · Redirect</div>
       </div>
-    </header>
+      <span class="docno">DOC.02</span>
+    </div>
 
-    <!-- SECTIONS -->
-    <!-- SECTIONS_BLOCK -->
+    <p>
+      The U.I.C. terminal is a <span class="amb">sequential command</span> system. You do not type one long command.
+      You type a short keyword, press ENTER, and if it is the first step of a valid access sequence the terminal will
+      respond <span class="amb">STEP 1/N ACCEPTED</span> and wait for the next word.
+    </p>
 
-    <!-- FOOTER -->
-    <footer id="colophon">
-      <div class="col-l">
-        <div class="col-mark">◆</div>
+    <p>
+      Every access route has a fixed sequence of words. Complete all of them in order and the terminal will grant
+      access and redirect you to the requested page. Enter a wrong word at any point and the sequence
+      <span class="rd">RESETS</span> — you start over from step one.
+    </p>
+
+    <h3 class="sub">§ 02.1 — Example: Open the Users Directory</h3>
+<div class="term-ex"><span class="p">&gt;</span> <span class="in">init</span>
+STEP 1/3 ACCEPTED
+<span class="p">&gt;</span> <span class="in">access</span>
+STEP 2/3 ACCEPTED
+<span class="p">&gt;</span> <span class="in">grant</span>
+USERS <span class="ok">ACCESS GRANTED</span>
+REDIRECTING...</div>
+
+    <h3 class="sub">§ 02.2 — Status Line</h3>
+    <p>
+      Below the prompt is a status line: <span class="amb">SEQUENCE</span>, <span class="amb">STEP</span>,
+      <span class="amb">SECURE</span>. SEQUENCE shows which route you are currently walking; STEP shows how far you
+      are through it. If SEQUENCE reads <span class="amb">IDLE</span>, you are at step zero and any first-word will
+      begin a new route.
+    </p>
+
+    <h3 class="sub">§ 02.3 — Commands Are Case-Insensitive</h3>
+    <p>
+      <span class="amb">init</span>, <span class="amb">INIT</span> and <span class="amb">Init</span> all match. Spaces
+      at the front and end are trimmed. Only the first word on a line is read — do not chain commands together.
+    </p>
+
+    <div class="callout warn">
+      Unknown first words return <span class="amb">UNKNOWN COMMAND</span> and do not begin any sequence.
+      Wrong follow-up words trigger <span class="amb">INVALID SEQUENCE — RESET</span>.
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section id="codes">
+    <div class="chap">
+      <div class="num">03</div>
+      <div class="title">
+        <h2>PUBLIC ACCESS CODES</h2>
+        <div class="lede">Sequences by Route · Rev 4.02</div>
+      </div>
+      <span class="docno">DOC.03</span>
+    </div>
+
+    <p>
+      The following seven routes are cleared for all authenticated operators. Enter the words one at a time from the
+      main terminal prompt. Restricted-tier routes exist and are not listed here.
+    </p>
+
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="name">USERS</div>
+        <div class="file">◈ users.html</div>
+        <div class="seq">init <span class="arrow">→</span> access <span class="arrow">→</span> grant</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> personnel roster · operator directory</div>
+      </div>
+
+      <div class="card">
+        <div class="name">SPACECRAFT</div>
+        <div class="file">◈ ships.html</div>
+        <div class="seq">fleet <span class="arrow">→</span> engage <span class="arrow">→</span> authorize</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> vessel and vehicle catalogue</div>
+      </div>
+
+      <div class="card">
+        <div class="name">SUITS</div>
+        <div class="file">◈ suits.html</div>
+        <div class="seq">support <span class="arrow">→</span> 02 <span class="arrow">→</span> pressurize</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> EVA and pressure-suit index</div>
+      </div>
+
+      <div class="card">
+        <div class="name">MAP</div>
+        <div class="file">◈ solarmap.html</div>
+        <div class="seq">locate <span class="arrow">→</span> enhance <span class="arrow">→</span> identify</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> interactive solar-system map</div>
+      </div>
+
+      <div class="card">
+        <div class="name">DELTA · Δ</div>
+        <div class="file">◈ deltav.html</div>
+        <div class="seq">distance <span class="arrow">→</span> orbit <span class="arrow">→</span> burn</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> transfer planner &amp; Δv calculator</div>
+      </div>
+
+      <div class="card">
+        <div class="name">COMMUNICATIONS</div>
+        <div class="file">◈ communications.html</div>
+        <div class="seq">adjust <span class="arrow">→</span> radio <span class="arrow">→</span> mhz</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> radio traffic &amp; frequency tuner</div>
+      </div>
+
+      <div class="card">
+        <div class="name">SERVER ACCESS</div>
+        <div class="file">◈ remoteserver.html</div>
+        <div class="seq">system <span class="arrow">→</span> connect <span class="arrow">→</span> address</div>
+        <div class="desc"><span class="lbl">ROUTES TO:</span> remote node crawlspace &amp; file browser</div>
+      </div>
+
+      <div class="card">
+        <div class="name">BULLETIN</div>
+        <div class="file">◈ bulletin.html</div>
+        <div class="seq">— direct link only —</div>
+        <div class="desc"><span class="lbl">NOTE:</span> reached from home page navigation; no sequence required</div>
+      </div>
+
+    </div>
+
+    <div class="callout tip">
+      All access codes above are cleared for public use. Any codes not listed here are considered restricted
+      and will not be documented on this page. Do not attempt to guess them; unknown sequences simply return
+      <span class="amb">UNKNOWN COMMAND</span>.
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section id="pages">
+    <div class="chap">
+      <div class="num">04</div>
+      <div class="title">
+        <h2>PAGE INDEX</h2>
+        <div class="lede">Public Pages · FR-77 Systems Shell</div>
+      </div>
+      <span class="docno">DOC.04</span>
+    </div>
+
+    <div class="page-list">
+
+      <div class="page-row">
         <div>
-          <div class="col-line">END OF MANUAL · REV 4.02</div>
-          <div class="col-sub">(C) U.I.C. INDUSTRIES · PRINTED ON FR-77 NODES</div>
+          <div class="name">TERMINAL</div>
+          <div class="desc">The main entry point. Diagnostics self-test, then a prompt. All routes begin here.</div>
         </div>
+        <div class="file">terminal.html</div>
       </div>
-      <div class="col-r">
-        <a class="jbtn" href="index.html">◈ HOME</a>
-        <a class="jbtn" href="terminal.html">◈ TERMINAL</a>
-        <a class="jbtn" href="bulletin.html">◈ BULLETIN</a>
-      </div>
-    </footer>
 
-  </main>
+      <div class="page-row">
+        <div>
+          <div class="name">USERS</div>
+          <div class="desc">Personnel directory — active operators, assigned station, current post. Read-only.</div>
+        </div>
+        <div class="file">users.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">SPACECRAFT</div>
+          <div class="desc">Fleet catalogue: crewed vessels, transfer stages, landers, sled vehicles. Specs and status.</div>
+        </div>
+        <div class="file">ships.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">SUITS</div>
+          <div class="desc">EVA and surface-pressure suit index. Load-out per environment (LEO, Lunar, Venus, Europa).</div>
+        </div>
+        <div class="file">suits.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">SOLAR MAP</div>
+          <div class="desc">Interactive heliocentric map of stations, mass drivers, and orbital assets.</div>
+        </div>
+        <div class="file">solarmap.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">DELTA-V CALCULATOR</div>
+          <div class="desc">
+            Transfer planner. Pick a departure body/location (surface, LEO, cloud deck, etc.) and destination.
+            Choose a ship preset or enter engine parameters manually. Modes: COAST, HOHMANN, DIRECT. The 3D view
+            shows the trajectory, intercept point, and phase (parking → burn → transfer → capture → orbit).
+          </div>
+        </div>
+        <div class="file">deltav.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">COMMUNICATIONS</div>
+          <div class="desc">Radio channels, station-to-station comm log, frequency tuner. Live traffic feed.</div>
+        </div>
+        <div class="file">communications.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">SERVER ACCESS</div>
+          <div class="desc">Remote node crawlspace. File browser with per-file gating (locked, encrypted, corrupt tags).</div>
+        </div>
+        <div class="file">remoteserver.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">BULLETIN BOARD</div>
+          <div class="desc">Public postings and internal notices. See section 05 for full details.</div>
+        </div>
+        <div class="file">bulletin.html</div>
+      </div>
+
+      <div class="page-row">
+        <div>
+          <div class="name">MANUAL</div>
+          <div class="desc">This document.</div>
+        </div>
+        <div class="file">manuel.html</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section id="bulletin">
+    <div class="chap">
+      <div class="num">05</div>
+      <div class="title">
+        <h2>USING THE BULLETIN BOARD</h2>
+        <div class="lede">Public Postings · Internal Notices · Updated Periodically</div>
+      </div>
+      <span class="docno">DOC.05</span>
+    </div>
+
+    <p>
+      The Bulletin Board is where U.I.C. posts <span class="amb">public notices</span>, station memos, staffing
+      updates, project status blurbs, and general information. Think of it as the electronic corkboard for the
+      entire network. It is not a chat, it is not comms — it is one-way from operations to you.
+    </p>
+
+    <h3 class="sub">§ 05.1 — Layout</h3>
+    <div class="kv"><span class="k">LEFT</span><span class="v">Posted documents list — scrollable, tap or click a row to open.</span></div>
+    <div class="kv"><span class="k">RIGHT</span><span class="v">Viewer — the selected document's body, header meta and date.</span></div>
+    <div class="kv"><span class="k">BOTTOM</span><span class="v">Search bar — type keywords to filter the list.</span></div>
+
+    <h3 class="sub">§ 05.2 — Reading a Post</h3>
+    <p>
+      Tap or click any row in the left column to load it into the viewer. The viewer shows the post's meta block
+      (author, station, date, classification) followed by the body text. Posts marked with a
+      <span class="rd">🔒</span> icon are gated; you will be shown a password prompt instead of the body.
+      If you do not have the code, you do not have the code. Move on.
+    </p>
+
+    <h3 class="sub">§ 05.3 — Mobile</h3>
+    <p>
+      On phones the layout stacks — post list on top, viewer below. Tap a row to jump the viewer to it. Search
+      still works and is scoped to whatever is currently loaded. The board is entirely readable on a 320px screen.
+    </p>
+
+    <h3 class="sub">§ 05.4 — Posting</h3>
+    <p>
+      Standard operators cannot post to the bulletin. Posts are pushed from station ops; if you have information
+      to submit, route it through your station lead. The bulletin is read-only from any FR-77 node.
+    </p>
+
+    <div class="callout tip">
+      Posts are dated in the top-right of each row. Newest is at the top by default. Use the search bar
+      to filter by station name, project code, or author.
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section id="tips">
+    <div class="chap">
+      <div class="num">06</div>
+      <div class="title">
+        <h2>TIPS &amp; FAULT CODES</h2>
+        <div class="lede">Common Messages · First-Line Recovery</div>
+      </div>
+      <span class="docno">DOC.06</span>
+    </div>
+
+    <div class="kv"><span class="k">UNKNOWN CMD</span><span class="v">First word was not the start of any valid sequence. Check spelling. Retry.</span></div>
+    <div class="kv"><span class="k">INVALID SEQ</span><span class="v">You gave the wrong follow-up word. Sequence is dropped. Restart from step one.</span></div>
+    <div class="kv"><span class="k">STEP N/M OK</span><span class="v">Progress. Give the next word in the sequence.</span></div>
+    <div class="kv"><span class="k">ACCESS GRANT</span><span class="v">All steps correct. The page is loading. If the redirect stalls, retype the last word.</span></div>
+    <div class="kv"><span class="k">NET WARN</span><span class="v">Self-test flagged the Systems Network as degraded. Terminal still operates; expect slow page loads.</span></div>
+
+    <h3 class="sub">§ 06.1 — General Advice</h3>
+    <p>
+      • The terminal is <span class="amb">stateless</span> between refreshes — reload the page and any half-typed
+      sequence is dropped.<br>
+      • Do not paste long strings into the prompt. The terminal expects <span class="amb">one keyword per ENTER</span>.<br>
+      • If the CRT tilt makes you seasick on mobile, hold the device still — the tilt tracks touch position.<br>
+      • Every public page has a link back to the terminal or the home page in the footer.
+    </p>
+
+    <div class="callout warn">
+      This manual is public-tier. If you believe you should have restricted access and do not, your
+      clearance has not been provisioned. Contact your station's operations lead. Do not attempt to brute-force
+      unknown sequences — they will simply return UNKNOWN COMMAND and log the attempt to the network.
+    </div>
+
+    <div class="nav-row">
+      <a class="btn" href="index.html"><span class="k">◈</span>HOME</a>
+      <a class="btn" href="terminal.html"><span class="k">◈</span>TERMINAL</a>
+      <a class="btn" href="bulletin.html"><span class="k">◈</span>BULLETIN</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="doc-foot">
+    <div>
+      <div class="sign">A. R. Halvorsen</div>
+      <div class="sign-lbl">DIRECTOR · DOCUMENT CONTROL</div>
+    </div>
+    <div class="seal" aria-hidden="true">
+      UIC<br>
+      <b>APPROVED</b>
+      1989
+    </div>
+  </footer>
 
 </div>
 
+<div class="pagefoot">END OF MANUAL · REV 4.02 · (C) UIC INDUSTRIES · SHEET 1/1</div>
+
 <script>
 const secs = document.querySelectorAll("section[id]");
-const tocLinks = document.querySelectorAll(".tab");
+const tabs = document.querySelectorAll(".tabs a");
 const obs = new IntersectionObserver(entries=>{
   entries.forEach(en=>{
     if(en.isIntersecting){
-      tocLinks.forEach(a=>{
+      tabs.forEach(a=>{
         a.classList.toggle("on", a.getAttribute("href") === "#"+en.target.id);
       });
     }
   });
-},{ rootMargin:"-30% 0px -60% 0px" });
+},{ rootMargin:"-40% 0px -55% 0px" });
 secs.forEach(s=>obs.observe(s));
 
-tocLinks.forEach(a=>{
+tabs.forEach(a=>{
   a.addEventListener("click",e=>{
     const id = a.getAttribute("href").slice(1);
     const t = document.getElementById(id);
@@ -696,6 +916,7 @@ tocLinks.forEach(a=>{
   });
 });
 </script>
+
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
