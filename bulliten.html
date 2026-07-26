@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>U.I.C. // BULLETIN BOARD</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;min-height:100%;background:#000;overflow-x:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;padding:12px;}
+
+/* CRT overlays (lightweight; skipped on small screens for perf) */
+#scanlines{position:fixed;inset:0;pointer-events:none;z-index:1300;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.30) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.55) 90%);}
+#amber-tint{position:fixed;inset:0;pointer-events:none;z-index:1150;background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.06) 80%);mix-blend-mode:screen;}
+@media (max-width:600px){#scanlines{opacity:.6;}}
+
+.wrap{max-width:1200px;margin:0 auto;position:relative;z-index:2;}
+
+/* Header */
+#head{padding:14px 16px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+#head .brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+#head .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+#head .title{font-size:20px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 8px rgba(255,74,43,.5);}
+#head .sub{font-size:11px;letter-spacing:.22em;color:var(--amberBright);opacity:.75;}
+#head .meta{font-size:11px;letter-spacing:.22em;color:var(--amberBright);opacity:.7;}
+@media (max-width:600px){
+    #head .title{font-size:16px;letter-spacing:.2em;}
+    #head .sub{font-size:10px;letter-spacing:.18em;}
+    #head{padding:12px;}
+}
+
+/* Layout: side-by-side on desktop, stacked on mobile */
+.board{display:grid;grid-template-columns:320px 1fr;gap:14px;}
+@media (max-width:820px){.board{grid-template-columns:1fr;}}
+
+/* Panels */
+.panel{border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));padding:14px;position:relative;box-shadow:inset 0 0 24px rgba(255,159,7,.04);border-radius:4px;min-height:200px;}
+.panel::before{content:"";position:absolute;inset:6px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:2px;}
+.panel-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px dashed rgba(255,159,7,.3);position:relative;z-index:1;}
+.panel-head .tick{color:var(--red);}
+.panel-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:13px;text-shadow:0 0 4px rgba(255,159,7,.5);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.panel-head .badge{font-size:10px;letter-spacing:.2em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+
+/* Doc list */
+#doc-list{max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;position:relative;z-index:1;}
+#doc-list::-webkit-scrollbar{width:6px;}
+#doc-list::-webkit-scrollbar-thumb{background:rgba(255,159,7,.4);}
+.doc-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:6px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);cursor:pointer;font-size:12px;letter-spacing:.1em;gap:8px;transition:background .12s,border-color .12s,color .12s;min-height:44px;}
+.doc-row:hover,.doc-row:focus{background:rgba(255,159,7,.14);border-color:rgba(255,159,7,.55);color:var(--amberBright);outline:none;}
+.doc-row.active{background:rgba(255,74,43,.12);border-color:rgba(255,74,43,.5);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.doc-row .dname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-row .dico{color:var(--red);width:20px;text-align:center;flex-shrink:0;}
+.doc-row.locked .dname::after{content:" 🔒";font-size:11px;}
+.doc-row .ddate{font-size:9px;letter-spacing:.16em;color:var(--amberBright);opacity:.55;flex-shrink:0;}
+@media (max-width:820px){#doc-list{max-height:36vh;}}
+
+/* Viewer */
+#viewer-wrap{min-height:300px;position:relative;z-index:1;}
+.viewer{padding:14px 16px;border:1px solid rgba(255,159,7,.22);background:rgba(0,0,0,.45);font-size:14px;line-height:1.7;letter-spacing:.04em;white-space:pre-wrap;color:var(--amberBright);min-height:260px;font-family:'VT323',monospace;font-size:17px;overflow-x:auto;}
+.viewer.empty{display:flex;align-items:center;justify-content:center;color:var(--red);letter-spacing:.24em;opacity:.75;text-align:center;padding:40px 16px;font-family:'Share Tech Mono',monospace;font-size:12px;}
+.viewer h1,.viewer h2,.viewer h3{color:var(--red);letter-spacing:.24em;font-weight:400;margin:8px 0 6px;font-family:'Share Tech Mono',monospace;}
+.viewer .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px 14px;padding:8px 10px;margin-bottom:12px;border:1px dashed rgba(255,159,7,.25);background:rgba(0,0,0,.35);font-size:10px;letter-spacing:.16em;font-family:'Share Tech Mono',monospace;white-space:normal;}
+.viewer .meta > div{display:flex;flex-direction:column;gap:2px;}
+.viewer .meta .k{color:var(--red);letter-spacing:.22em;font-size:9px;}
+.viewer .meta .v{color:var(--amberBright);text-shadow:0 0 3px rgba(255,159,7,.4);}
+
+/* Password gate */
+.gate{padding:26px 18px;text-align:center;}
+.gate .icon{font-size:36px;color:var(--red);text-shadow:0 0 12px rgba(255,74,43,.5);margin-bottom:10px;}
+.gate .msg{font-size:12px;letter-spacing:.22em;color:var(--amberBright);margin-bottom:18px;font-family:'Share Tech Mono',monospace;}
+.gate input{font:inherit;padding:10px 12px;background:rgba(255,159,7,.06);border:1px solid rgba(255,74,43,.4);color:var(--amber);outline:none;letter-spacing:.14em;width:min(300px,80%);text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;}
+.gate input:focus{border-color:var(--red);background:rgba(255,74,43,.1);}
+.gate button{margin-top:10px;display:inline-block;font:inherit;padding:10px 16px;background:rgba(255,74,43,.1);border:1px solid rgba(255,74,43,.5);color:var(--red);letter-spacing:.22em;cursor:pointer;font-size:11px;font-family:'Share Tech Mono',monospace;min-height:44px;}
+.gate button:hover,.gate button:focus{background:rgba(255,74,43,.22);color:#ffd0c1;outline:none;}
+.gate .err{color:var(--red);font-size:11px;letter-spacing:.2em;margin-top:12px;min-height:1em;font-family:'Share Tech Mono',monospace;}
+
+/* Footer / filter */
+.footer{margin-top:12px;padding:10px 14px;border:1px dashed rgba(255,159,7,.25);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.75;font-family:'Share Tech Mono',monospace;}
+.footer .search{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;}
+.footer input{font:inherit;padding:8px 10px;background:rgba(255,159,7,.06);border:1px solid rgba(255,159,7,.3);color:var(--amber);outline:none;flex:1;letter-spacing:.12em;font-family:'Share Tech Mono',monospace;font-size:12px;min-height:36px;}
+.footer input:focus{border-color:var(--amber);}
+.footer .info{font-size:9px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <div id="head">
+        <div class="brand">
+            <span class="dot"></span>
+            <div>
+                <div class="title">// BULLETIN BOARD</div>
+                <div class="sub">U.I.C. PUBLIC POSTINGS · INTERNAL NOTICES · UPDATED PERIODICALLY</div>
+            </div>
+        </div>
+        <div class="meta" id="head-meta">-- DOCS</div>
+    </div>
+
+    <div class="board">
+
+        <div class="panel">
+            <div class="panel-head">
+                <span class="tick">◆</span>
+                <span class="ttl">POSTED DOCUMENTS</span>
+                <span class="badge" id="doc-count">-- POSTS</span>
+            </div>
+            <div id="doc-list"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <span class="tick">◆</span>
+                <span class="ttl" id="view-title">-- SELECT A DOCUMENT --</span>
+                <span class="badge" id="view-badge">--</span>
+            </div>
+            <div id="viewer-wrap">
+                <div class="viewer empty">// SELECT A DOCUMENT TO OPEN //</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <div class="search">
+            <span>FILTER ::</span>
+            <input id="search" placeholder="type to filter titles..." autocomplete="off"/>
+        </div>
+        <div class="info">BULLETIN BOARD v0.1 · U.I.C. NOTICEBOARD SYSTEM</div>
+    </div>
+
+</div>
+
+<div id="amber-tint"></div>
+<div id="scanlines"></div>
+<div id="vignette"></div>
+
+<script id="doc-defs">
+/* =====================================================================
+   BULLETIN BOARD :: DOCUMENT DEFINITIONS
+   ---------------------------------------------------------------------
+   To add or edit a document, add a new object to the DOCS array below.
+   Fields:
+       id       (string) short identifier — used internally
+       title    (string) shown in the list and viewer header
+       date     (string) posted date, cosmetic
+       author   (string) posted-by tag
+       tags     (array)  short tags shown in the meta strip
+       value    (number) 0 = OPEN         1 = PASSWORD REQUIRED
+       password (string) only used when value === 1 (case-insensitive)
+       body     (string) the document content (VT323 monospace, preserves
+                         line breaks). Use blank line for paragraph break.
+
+   To lock a document, set value:1 and pick your own password:
+       {id:'my-doc', value:1, password:'YOUR PASSWORD HERE', ...}
+   To leave a document open, set value:0 (password field ignored).
+===================================================================== */
+
+const DOCS = [
+
+    /* ---------- OPEN DOCUMENTS ---------- */
+
+    {
+        id:'welcome',
+        title:'WELCOME TO THE BULLETIN BOARD',
+        date:'1989.03.15',
+        author:'U.I.C. NOTICEBOARD ADMIN',
+        tags:['PUBLIC','ADMIN'],
+        value:0,
+        body:
+`WELCOME, OPERATOR.
+
+This is the U.I.C. Bulletin Board — a public and semi-public
+posting node maintained by Universal Interstellar Computers.
+
+Documents are posted here by U.I.C. staff, member agencies, and
+authorized civilian contributors. Content is updated periodically.
+
+Some notices are open to any operator. Others require an access
+key issued by the posting authority — those will prompt you for a
+passphrase when opened.
+
+Standard etiquette:
+    - Do not repost internal-only notices to open channels.
+    - Do not attempt brute-force on password-locked postings.
+    - Report broken links to noticeboard@uic.iron.
+
+--- U.I.C. Noticeboard Admin`
+    },
+
+    {
+        id:'relay-status',
+        title:'RELAY NETWORK STATUS — MARCH 1989',
+        date:'1989.03.14',
+        author:'U.I.C. RELAY OPS',
+        tags:['PUBLIC','TELECOM'],
+        value:0,
+        body:
+`U.I.C. RELAY CLUSTER STATUS — 1989.03.14
+========================================
+
+EARTH-SUN L4   :: 44/44 nominal
+EARTH-SUN L5   :: 43/44 nominal (1 in refurb)
+MARS-SUN L4    :: 41/44 nominal (3 rotating)
+MARS-SUN L5    :: 44/44 nominal
+VENUS-SUN L1   :: 40/42 nominal (2 attitude drift)
+VENUS-SUN L2   :: 42/42 nominal
+JUPITER-SUN L4 :: 15/17 nominal (2 offline)
+SATURN CLUSTER :: deployment in progress — DO NOT ROUTE
+
+Mean round-trip Earth<->Mars    :: 6.3 min
+Mean round-trip Earth<->Venus   :: 4.1 min
+Mean round-trip Earth<->Europa  :: 42 min (varies)
+
+Traffic advisories are pushed to your operator terminal
+automatically. Manual queries: dial 41 on any U.I.C. handset.
+
+- R. OKAFOR, L4 LEAD ENG.`
+    },
+
+    {
+        id:'horizon-tour',
+        title:'HORIZON BASE — PUBLIC TOUR SCHEDULE',
+        date:'1989.03.10',
+        author:'HORIZON BASE VISITOR OFFICE',
+        tags:['PUBLIC','LUNAR','TOURISM'],
+        value:0,
+        body:
+`HORIZON BASE — PUBLIC TOUR SCHEDULE
+===================================
+
+Horizon Base is the oldest continuously-operated U.S. lunar
+outpost. Originally commissioned in the 1960s, the base has
+grown module-by-module through the '70s and '80s. Each ring
+reflects the era it was built in.
+
+    - CORE RING (1960s) :: original habitat, on public tour
+    - RING B (1970s)    :: laboratory annex, engineer-guided
+    - RING C (1980s)    :: current-generation crew quarters
+    - RING D (1980s)    :: fabrication & storage, staff only
+
+Public tours depart on the hour, 09:00-15:00 local, every
+Tuesday and Saturday. Booking through any U.I.C. terminal or
+your U.S. Space Force liaison office.
+
+Notice: The corporate visitation lunar station (name pending)
+is scheduled to open its first floor in 1990.Q2 and will
+absorb general civilian tourism from Horizon.
+
+- HORIZON BASE VISITOR OFFICE`
+    },
+
+    {
+        id:'fiv-weather',
+        title:'FIV ATMOSPHERIC ADVISORY — CLOUD DECK',
+        date:'1989.03.13',
+        author:'FIV METEOROLOGICAL STATION',
+        tags:['PUBLIC','VENUS','WEATHER'],
+        value:0,
+        body:
+`FIV WEATHER — 1989.03.13
+========================
+
+CLOUD-DECK ALTITUDE (50-54 km) :: STABLE
+ZONAL WIND       :: 92 m/s westward (nominal)
+LOCAL TURBULENCE :: LIGHT
+ACID AEROSOL     :: 42 ppm (within Kretchet-MKV tolerance)
+
+Envelope pressure and internal temperature nominal across all
+seven main islands and the launch-pad island (FIV-8, partial).
+
+Rope tension monitors on all inter-island tethers report
+green with the following note:
+    ROPE 3<->4 :: SLACK, use ROPE 2<->4 as detour
+    ROPE 6<->7 :: full tension, cleared for capsule transit
+
+Reminder: do NOT clip in to a rope without confirming envelope
+drift with your local supervisor. Rope-transit capsules are
+rated for four (4) personnel max.
+
+- FIV METEOROLOGICAL STATION`
+    },
+
+    {
+        id:'mass-driver',
+        title:'VENETIAN MASS DRIVER — PUBLIC UPDATE',
+        date:'1989.03.11',
+        author:'DR. J. MANISTON, PI',
+        tags:['PUBLIC','VENUS','RESEARCH'],
+        value:0,
+        body:
+`VENETIAN MASS DRIVER PROJECT — UPDATE
+=====================================
+
+Lead PI :: DR. JAMES MANISTON, FIV-3
+Co-PI   :: [REDACTED]
+
+PHASE 1 (400 kg pod, sub-orbital) :: COMPLETE
+    Twelve successful test fires. Delta-v reproducible to
+    within 0.5% of predicted.
+
+PHASE 2 (2 t pod, circular Venusian orbit) :: 1989.Q3
+    Rail alignment finished on section 4. Sag under thermal
+    load within predicted envelope. Section 5 begins 1989.04.
+
+Long-term goal remains a bulk-lift infrastructure capable of
+supporting eventual Venusian terraforming — hoist atmospheric
+CO2 into space for chemical reduction, return the oxygen.
+
+Public inquiries: mass-driver@fiv3.uic
+
+- J. MANISTON`
+    },
+
+    {
+        id:'einstein-lecture',
+        title:'PUBLIC LECTURE SERIES — "A. EINSTEIN"',
+        date:'1989.03.09',
+        author:'ORBITAL RESEARCH FELLOWSHIP',
+        tags:['PUBLIC','LECTURE','RESEARCH'],
+        value:0,
+        body:
+`PUBLIC LECTURE SERIES
+=====================
+"On the Consistency of Physical Law Across the Solar System"
+
+Speaker :: A. EINSTEIN (RECONSTRUCTED CONSCIOUSNESS)
+When    :: 1989.03.28, 19:00 UTC
+Where   :: Von Braun Station, auditorium 2
+Relayed :: all U.I.C. TIER 2 subscribers, live feed
+
+The Orbital Research Fellowship is pleased to host the third
+public lecture given by the reconstructed consciousness of
+Prof. Einstein. Prof. Einstein continues to consult with the
+Fellowship on questions of general relativity, gravitation,
+and — recently — the ethical questions surrounding his own
+reconstruction.
+
+Ticketed seats are limited. Standing broadcast tickets are
+free to any U.I.C. subscriber.
+
+- ORBITAL RESEARCH FELLOWSHIP`
+    },
+
+    /* ---------- PASSWORD-LOCKED DOCUMENTS ---------- */
+
+    {
+        id:'europa-drill',
+        title:'EUROPA SITE 2 — DRILL LOG (INTERNAL)',
+        date:'1989.03.15',
+        author:'DR. P. SORENSON',
+        tags:['INTERNAL','EUROPA','RESEARCH'],
+        value:1,
+        password:'ICE CORE',
+        body:
+`EUROPA SITE 2 — DRILL LOG
+=========================
+
+Depth        :: 8.1 km (design 10 km)
+Ice temp     :: -142 C at head, -98 C at collar
+Return pulse :: 41 Hz, constant amplitude, no known source
+Aquatic layer:: 1.9 km more, estimated
+
+The pulse is not the drill motor (verified: stops don't stop it).
+It is not seismic elastic return (verified: shape wrong).
+It is not a U.I.C. relay bleed (verified: they see nothing).
+
+Crew EEG during shared rest shows phase-lag index 0.81 —
+enormously above any published baseline. Alignment is only
+present when all four crew rest in module A AND the 41 Hz
+pulse is being recorded at the drill.
+
+We are documenting only. We are not claiming anything.
+
+But: the pulse begins when we begin listening. And we listen,
+apparently, together.
+
+- P. SORENSON, LEAD`
+    },
+
+    {
+        id:'zvezda-orion',
+        title:'ZVEZDA-3 ORION CAMPAIGN — SEVER-4 (SEALED)',
+        date:'1989.03.14',
+        author:'POLK. K. STEIN',
+        tags:['INTERNAL','SOVIET','LUNAR'],
+        value:1,
+        password:'IRONBIRD',
+        body:
+`SEVER-4 CAMPAIGN — SEALED
+=========================
+
+Vessel      :: СЕВЕР-4 (Orion-class heavy pusher)
+Destination :: EUROPA SITE 1
+Launch      :: 1989.04.11, from Zvezda-3 far-side pad
+Payload     :: 41.4 t (see manifest annex A)
+
+Custody chain routes DIRECTLY from komandir's office; general
+staff channel is not to be copied. Uplink traffic to Europa
+Site 1 goes through U.I.C. TIER-4 only.
+
+Site 1 has again requested authorization to extend the drill
+past design depth. Request DENIED. If they hear the 41 Hz
+return pulse a fourth time, they are to shut down the drill
+and radiate the string for 24 h before restarting.
+
+I need a clean line to Maniston on FIV-3 before the launch
+window closes.
+
+- K. STEIN`
+    },
+
+    {
+        id:'internal-hr',
+        title:'ROTATION SCHEDULE — U.I.C. FIELD ENGINEERS',
+        date:'1989.03.12',
+        author:'U.I.C. HR (INTERNAL)',
+        tags:['INTERNAL','HR'],
+        value:1,
+        password:'HEAVISIDE',
+        body:
+`U.I.C. FIELD ENGINEER ROTATION — Q2 1989
+========================================
+
+CREW-01 (Earth-Sun L4) :: R. OKAFOR    :: rotate out 1989.05.01
+CREW-02 (Earth-Sun L5) :: P. LINDQVIST :: rotate out 1989.05.15
+CREW-07 (Mars-Sun L4)  :: D. AMARO     :: rotate out 1989.06.01
+CREW-11 (Venus-Sun L1) :: J. MANISTON  :: return to FIV-3
+                                          1989.04.10 (seconded)
+CREW-14 (Jupiter-Sun L4) :: S. AL-RASHID :: extended, no rotate
+
+Replacement candidates ranked and interviewed. Contact HR-3
+for the shortlist by 1989.04.01.
+
+Reminder: rotation-out physicals are mandatory. No exceptions.
+U.I.C. medical liability policy 8-B applies.
+
+- U.I.C. HR`
+    },
+
+    {
+        id:'crawlspace-access',
+        title:'CRAWLSPACE OPERATOR ACCESS — PROTOCOL 4',
+        date:'1989.03.08',
+        author:'U.I.C. SECURITY',
+        tags:['INTERNAL','SECURITY'],
+        value:1,
+        password:'PROTOCOL FOUR',
+        body:
+`CRAWLSPACE ACCESS PROTOCOL 4
+============================
+
+Operators connecting to CRAWLSPACE-mesh nodes are reminded that
+national clearance is enforced INDEPENDENTLY of U.I.C. clearance.
+
+    - U.I.C. clearance    :: gates access to relay resources
+    - National clearance  :: gates access to national nodes
+
+A profile with U.I.C. CLR 3 and NO national clearance may
+transit U.I.C. relays but will be REJECTED by USSF, ССКЛ, and
+CNSA nodes even if the traffic is authorized upstream.
+
+To request elevation, use the REQUEST CLR panel in the node
+session. Include the name of your sponsoring authority.
+
+Reminder: U.I.C. does not extend clearance overrides. Any
+"backdoor" credential offered to you outside official channels
+is not sanctioned by U.I.C. and should be reported.
+
+- U.I.C. SECURITY`
+    },
+
+    /* ---------- BLANK / USER-EDITABLE ---------- */
+
+    {
+        id:'blank',
+        title:'[UNTITLED — EDIT ME]',
+        date:'',
+        author:'',
+        tags:[],
+        value:0,
+        password:'',
+        body:
+``
+    },
+
+];
+</script>
+
+<script id="main-script">
+const $ = id => document.getElementById(id);
+
+const state = {
+    activeId: null,
+    filter: '',
+    unlocked: new Set(),
+};
+
+const list      = $('doc-list');
+const viewer    = $('viewer-wrap');
+const viewTitle = $('view-title');
+const viewBadge = $('view-badge');
+const search    = $('search');
+
+function refreshHeader(){
+    const total = DOCS.length;
+    $('doc-count').textContent = total + ' POSTS';
+    $('head-meta').textContent = total + ' DOCS · LAST SYNC 1989.03.15';
+}
+
+function iconFor(d){
+    if(d.value === 1) return '◈';
+    if(!d.body) return '□';
+    return '≡';
+}
+
+function renderList(){
+    const q = state.filter.trim().toLowerCase();
+    list.innerHTML = '';
+    let shown = 0;
+    DOCS.forEach(d=>{
+        if(q && !d.title.toLowerCase().includes(q) && !(d.tags||[]).join(' ').toLowerCase().includes(q)) return;
+        shown++;
+        const row = document.createElement('div');
+        row.className = 'doc-row' + (d.value===1?' locked':'') + (state.activeId===d.id?' active':'');
+        row.tabIndex = 0;
+        row.innerHTML = `
+            <span class="dico">${iconFor(d)}</span>
+            <span class="dname">${escapeHTML(d.title)}</span>
+            <span class="ddate">${escapeHTML(d.date||'--')}</span>
+        `;
+        row.addEventListener('click', ()=>openDoc(d.id));
+        row.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDoc(d.id); } });
+        list.appendChild(row);
+    });
+    if(!shown){
+        list.innerHTML = '<div style="padding:14px;font-size:11px;letter-spacing:.2em;color:var(--red);opacity:.75;text-align:center;font-family:\'Share Tech Mono\',monospace;">// NO POSTS MATCH FILTER //</div>';
+    }
+}
+
+function openDoc(id){
+    const d = DOCS.find(x=>x.id===id);
+    if(!d) return;
+    state.activeId = id;
+    document.querySelectorAll('.doc-row').forEach(r=>r.classList.remove('active'));
+    renderList();
+    viewTitle.textContent = d.title;
+    viewBadge.textContent = d.value===1 ? 'LOCKED' : (d.body ? 'OPEN' : 'BLANK');
+
+    if(d.value === 1 && !state.unlocked.has(d.id)){
+        renderGate(d);
+        return;
+    }
+    renderBody(d);
+}
+
+function renderBody(d){
+    const meta = `
+        <div class="meta">
+            <div><span class="k">POSTED</span><span class="v">${escapeHTML(d.date||'--')}</span></div>
+            <div><span class="k">AUTHOR</span><span class="v">${escapeHTML(d.author||'--')}</span></div>
+            <div><span class="k">TAGS</span><span class="v">${escapeHTML((d.tags||[]).join(' · ')||'--')}</span></div>
+            <div><span class="k">ACCESS</span><span class="v">${d.value===1?'RESTRICTED':'PUBLIC'}</span></div>
+        </div>
+    `;
+    const body = d.body && d.body.trim()
+        ? escapeHTML(d.body)
+        : '<span style="color:var(--red);opacity:.6;">// THIS DOCUMENT IS BLANK — EDIT `body` IN THE DOCS ARRAY //</span>';
+    viewer.innerHTML = `<div class="viewer">${meta}${body}</div>`;
+}
+
+function renderGate(d){
+    viewer.innerHTML = `
+        <div class="viewer" style="padding:0;">
+            <div class="gate">
+                <div class="icon">🔒</div>
+                <div class="msg">DOCUMENT IS PASSWORD LOCKED<br/>ENTER ACCESS KEY</div>
+                <div><input type="password" id="pw-in" placeholder="passphrase" autocomplete="off" inputmode="text"/></div>
+                <div><button id="pw-go">UNLOCK ▸</button></div>
+                <div class="err" id="pw-err"></div>
+            </div>
+        </div>
+    `;
+    const inp = $('pw-in');
+    const err = $('pw-err');
+    inp.focus();
+    function attempt(){
+        const v = (inp.value||'').trim();
+        if(v.toUpperCase() === (d.password||'').toUpperCase()){
+            state.unlocked.add(d.id);
+            renderBody(d);
+            viewBadge.textContent = 'UNLOCKED';
+        } else {
+            err.textContent = '△ INCORRECT KEY';
+            inp.value = '';
+            inp.focus();
+        }
+    }
+    $('pw-go').addEventListener('click', attempt);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') attempt(); });
+}
+
+function escapeHTML(s){
+    return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+}
+
+search.addEventListener('input', e=>{
+    state.filter = e.target.value || '';
+    renderList();
+});
+
+/* Boot */
+refreshHeader();
+renderList();
+</script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>
