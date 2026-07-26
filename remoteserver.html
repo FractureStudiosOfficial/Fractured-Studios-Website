@@ -230,6 +230,48 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
 .tag.nation-us{border-color:rgba(94,167,255,.55);color:#8fc0ff;text-shadow:0 0 4px rgba(94,167,255,.4);}
 .tag.nation-su{border-color:rgba(255,74,43,.55);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
 .tag.nation-cn{border-color:rgba(255,215,0,.55);color:#ffd54a;text-shadow:0 0 4px rgba(255,215,0,.4);}
+
+/* ==== MOBILE OVERHAUL ==== */
+@media(max-width:820px){
+    html,body{-webkit-text-size-adjust:100%;}
+    body{perspective:none;}
+    #bezel-label,#brand-led{display:none;}
+    #bezel{background:radial-gradient(ellipse at 30% 20%,#241a10 0%,#0a0705 60%,#000 100%);}
+    #screen-wrap{inset:4px;border-radius:14px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);}
+    #screen{filter:none;transform:none;}
+    #glare,#rgb-mask,#roll,#corners{display:none;}
+    #scanlines{opacity:.5;}
+    #vignette{background:radial-gradient(ellipse 110% 110% at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
+    #amber-tint{opacity:.6;}
+    #crt-container{padding:12px 10px 80px !important;}
+    #connect-inner,#login-inner{padding:22px 18px;width:96%;}
+    #node-header{padding:10px 12px;flex-wrap:wrap;gap:8px;}
+    #node-header .title{font-size:14px;letter-spacing:.18em;}
+    #node-header .sub{font-size:9px;letter-spacing:.14em;padding-left:6px;}
+    #node-body{grid-template-columns:1fr !important;gap:10px;}
+    .file-list,.viewer-wrap{max-height:none;}
+    .file-list{max-height:40vh;overflow-y:auto;}
+    .viewer-wrap{min-height:300px;}
+    .viewer-body{padding:12px;font-size:12px;line-height:1.55;}
+    .view-meta{grid-template-columns:1fr 1fr !important;gap:4px;font-size:10px;}
+    .file-row{padding:8px 10px;font-size:11px;}
+    .file-row .n{font-size:11px;}
+    .file-row .meta{font-size:9px;}
+    #os,#clock{bottom:50px;font-size:9px;letter-spacing:.14em;}
+    #terminal{padding:8px 10px;font-size:12px;}
+    #terminal .hint{display:none;}
+    #req-overlay .box,#frag-overlay .box{padding:18px;}
+    .gate-view input{width:90%;max-width:100%;}
+}
+@media(max-width:440px){
+    #screen-wrap{inset:3px;}
+    #node-header .title{font-size:12px;letter-spacing:.14em;}
+    #node-body{gap:8px;}
+    .file-list{max-height:34vh;}
+    .viewer-body{padding:10px;font-size:11px;}
+    .view-meta{grid-template-columns:1fr !important;}
+    #terminal{padding:6px 8px;font-size:11px;gap:6px;}
+}
 </style>
 </head>
 <body>
