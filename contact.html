@@ -3,237 +3,1248 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | Contact</title>
+<title>CONTACT // FRACTURED_STUDIOS</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow-y:auto;
-  perspective:1000px;
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --scanBlack:#0a0603;
 }
 
-/* CRT container */
-#crt-container {
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  align-items:center;
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+*{box-sizing:border-box;}
+
+html,body{
+    margin:0;
+    height:100%;
+    background:#000;
+    overflow:hidden;
 }
 
-/* Content sections */
-#contact-content {
-  width:80%;
-  margin-bottom:150px; /* space for terminal */
+body{
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    perspective:1400px;
 }
 
-.section {
-  background:rgba(0,0,0,.2);
-  border:1px solid rgba(255,159,7,.3);
-  padding:20px;
-  margin:20px 0;
-  border-radius:6px;
+/* =========================
+   CRT BEZEL (outer plastic case)
+========================= */
+#bezel{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
+    z-index:0;
 }
 
-.section h2 {
-  margin:0 0 10px 0;
-  color:#FF9F07;
+#bezel::before{
+    /* horizontal plastic seam */
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,.015) 0 1px,
+            transparent 1px 3px
+        );
+    pointer-events:none;
 }
 
-.section p {
-  margin:0 0 10px 0;
+#bezel-label{
+    position:fixed;
+    bottom:14px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:5;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:#7a5230;
+    text-shadow:0 1px 0 #000;
+    font-family:'VT323',monospace;
+    user-select:none;
 }
 
-.section input, .section textarea, .section button {
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:rgba(0,0,0,.15);
-  border:1px solid rgba(255,159,7,.3);
-  color:#FF9F07;
-  font-family:inherit;
-  border-radius:4px;
+#brand-led{
+    position:fixed;
+    bottom:16px;
+    left:calc(50% - 180px);
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 6px var(--amber), 0 0 12px #ff6a00;
+    animation:led-pulse 2.4s ease-in-out infinite;
+    z-index:5;
 }
 
-/* Terminal pinned to bottom */
-#terminal-box {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
+@keyframes led-pulse{
+    0%,100%{opacity:.55;}
+    50%{opacity:1;}
 }
 
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:150px;
-  max-height:250px;
-  overflow-y:auto;
+/* =========================
+   FISHEYE / CURVED SCREEN
+========================= */
+#screen-wrap{
+    position:fixed;
+    inset:22px;
+    border-radius:48px / 60px;
+    background:#050505;
+    box-shadow:
+        /* deep bezel rim */
+        0 0 0 4px #0a0605,
+        0 0 0 8px #1a0f07,
+        0 0 0 10px #2a1a0d,
+        0 0 40px rgba(0,0,0,.9) inset,
+        0 30px 60px rgba(0,0,0,.85);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    isolation:isolate;
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
+/* Fisheye scaling / warp fallback */
+#screen{
+    position:absolute;
+    inset:0;
+    filter:url(#fisheye);
+    transform:scale(1.02);
+    overflow:hidden;
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+#screen-scroll{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:none;
+}
+#screen-scroll::-webkit-scrollbar{display:none;}
+
+/* Curvature highlight — top-left "glare" bulge */
+#glare{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1200;
+    background:
+        radial-gradient(
+            ellipse 60% 45% at 28% 18%,
+            rgba(255,255,255,.14),
+            rgba(255,255,255,.03) 40%,
+            transparent 70%
+        ),
+        radial-gradient(
+            ellipse 40% 30% at 78% 82%,
+            rgba(255,159,7,.05),
+            transparent 70%
+        );
+    mix-blend-mode:screen;
 }
 
-/* OS version */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+/* Vignette — makes edges darker for the tube feel */
+#vignette{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1100;
+    background:radial-gradient(
+        ellipse 90% 90% at 50% 50%,
+        transparent 45%,
+        rgba(0,0,0,.35) 75%,
+        rgba(0,0,0,.9) 100%
+    );
 }
 
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 2px,
-    transparent 6px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
-}
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+/* Corner-darkening masks for the barrel corners */
+#corners{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1105;
+    background:
+        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
 }
 
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+/* =========================
+   MAIN CRT CONTAINER
+========================= */
+#crt-container{
+    padding:56px 64px 130px;
+    transform-style:preserve-3d;
+    transition:transform .1s ease-out;
+    min-height:100%;
+    position:relative;
+    z-index:2;
+    will-change:transform;
+}
+
+/* =========================
+   PANEL BASE (chunky retro frames)
+========================= */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.45);
+    background:
+        linear-gradient(180deg,
+            rgba(255,159,7,.05),
+            rgba(0,0,0,.35)
+        );
+    box-shadow:
+        inset 0 0 30px rgba(255,159,7,.06),
+        inset 0 0 2px rgba(255,200,90,.25),
+        0 0 30px rgba(255,159,7,.08);
+    border-radius:6px;
+}
+
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border:1px dashed rgba(255,159,7,.18);
+    pointer-events:none;
+    border-radius:3px;
+}
+
+/* Corner brackets */
+.panel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
+    opacity:.7;
+}
+
+/* =========================
+   NAVIGATION TOP BAR
+========================= */
+.nav-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 24px;
+    margin-bottom:24px;
+    gap:16px;
+    flex-wrap:wrap;
+}
+
+.nav-left{
+    font-family:'VT323', monospace;
+    font-size:20px;
+    letter-spacing:.2em;
+    color:var(--amberBright);
+    text-shadow:0 0 5px rgba(255,159,7,.6);
+}
+
+.nav-links{
+    display:flex;
+    gap:12px;
+}
+
+.nav-item{
+    font-family:'Share Tech Mono', monospace;
+    color:var(--amber);
+    text-decoration:none;
+    font-size:13px;
+    letter-spacing:.15em;
+    padding:6px 14px;
+    border:1px dashed transparent;
+    transition:all .2s ease;
+    cursor:pointer;
+    z-index:10;
+}
+
+.nav-item:hover{
+    color:var(--amberBright);
+    text-shadow:0 0 8px var(--amberBright);
+    border-color:rgba(255,159,7,.45);
+    background:rgba(255,159,7,.05);
+}
+
+.nav-item.active{
+    color:var(--scanBlack);
+    background:var(--amber);
+    border:1px solid var(--amberBright);
+    text-shadow:none;
+    box-shadow:0 0 10px rgba(255,159,7,.45);
+}
+
+/* =========================
+   HEADER MODULE
+========================= */
+.header{
+    padding:26px 28px;
+    margin-bottom:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.header-left h1{
+    margin:0 0 12px 0;
+    font-family:'VT323', monospace;
+    font-size:36px;
+    letter-spacing:.24em;
+    text-shadow:0 0 4px rgba(255,159,7,.7), 0 0 14px rgba(255,140,0,.35);
+}
+
+.header-left p{
+    margin:0;
+    opacity:.85;
+    letter-spacing:.14em;
+    font-size:13px;
+    text-shadow:0 0 3px rgba(255,159,7,.5);
+}
+
+.header-right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.header-right .tag{
+    font-size:11px;
+    letter-spacing:.2em;
+    padding:4px 10px;
+    border:1px solid rgba(255,159,7,.4);
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+
+.header-right .tag.blink{
+    animation:tag-blink 1.6s steps(2) infinite;
+}
+
+@keyframes tag-blink{
+    50%{opacity:.35;}
+}
+
+.ticker{
+    grid-column:1/-1;
+    margin-top:10px;
+    padding:8px 12px;
+    border:1px solid rgba(255,159,7,.22);
+    background:rgba(255,159,7,.04);
+    font-size:12px;
+    letter-spacing:.18em;
+    overflow:hidden;
+    white-space:nowrap;
+    position:relative;
+    width:100%;
+}
+
+.ticker-inner{
+    display:inline-block;
+    padding-left:100%;
+    animation:tick 32s linear infinite;
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+@keyframes tick{
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
+}
+
+/* =========================
+   CONTACT GRID LAYOUT (NEW two-column design)
+========================= */
+.contact-grid{
+    display:grid;
+    grid-template-columns:1.25fr 0.75fr;
+    gap:30px;
+    margin-bottom:30px;
+}
+
+.panel-content{
+    padding:24px;
+    position:relative;
+    height:100%;
+}
+
+.panel-header{
+    font-family:'VT323', monospace;
+    font-size:24px;
+    letter-spacing:.16em;
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:12px;
+    margin-bottom:20px;
+    color:var(--amberBright);
+    text-shadow:0 0 5px rgba(255,159,7,.5);
+}
+
+/* Form Styles */
+.form-group{
+    margin-bottom:20px;
+    position:relative;
+}
+
+.form-label{
+    display:block;
+    font-size:12px;
+    letter-spacing:.16em;
+    margin-bottom:8px;
+    color:var(--amberBright);
+    text-shadow:0 0 3px rgba(255,159,7,.4);
+}
+
+.form-control{
+    width:100%;
+    background:rgba(0,0,0,.6);
+    border:1px solid rgba(255,159,7,.3);
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    font-size:14px;
+    padding:11px 14px;
+    outline:none;
+    transition:all .2s ease;
+    border-radius:2px;
+    text-shadow:0 0 3px rgba(255,159,7,.4);
+    z-index:10;
+}
+
+.form-control:focus{
+    border-color:var(--amberBright);
+    box-shadow:0 0 10px rgba(255,159,7,.25);
+    background:rgba(255,159,7,.02);
+}
+
+.form-control::placeholder{
+    color:rgba(255,159,7,.25);
+    text-shadow:none;
+}
+
+textarea.form-control{
+    min-height:130px;
+    resize:none;
+}
+
+/* Submit Button */
+.btn-submit{
+    display:inline-block;
+    background:transparent;
+    border:1px solid var(--amber);
+    color:var(--amber);
+    padding:12px 26px;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:14px;
+    letter-spacing:.14em;
+    transition:all .2s ease;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+    position:relative;
+    border-radius:2px;
+    z-index:10;
+}
+
+.btn-submit::before{
+    content:"";
+    position:absolute;
+    inset:-3px;
+    border:1px solid rgba(255,159,7,.2);
+    pointer-events:none;
+}
+
+.btn-submit:hover{
+    background:rgba(255,159,7,.15);
+    box-shadow:0 0 15px rgba(255,159,7,.35);
+    color:var(--amberBright);
+    border-color:var(--amberBright);
+}
+
+.btn-submit:active{
+    transform:scale(0.97);
+}
+
+/* Console Printout Container */
+.form-console{
+    margin-top:20px;
+    padding:12px;
+    border:1px solid rgba(255,159,7,.2);
+    background:rgba(255,159,7,.03);
+    font-size:12px;
+    letter-spacing:.12em;
+    min-height:46px;
+    line-height:1.5;
+    transition:all .2s ease;
+}
+
+.form-console.error{
+    border-color:rgba(255,100,0,.6);
+    background:rgba(255,50,0,.06);
+    color:#ff6040;
+    text-shadow:0 0 4px rgba(255,100,0,.5);
+}
+
+.form-console.success{
+    border-color:var(--amber);
+    background:rgba(255,159,7,.08);
+    color:var(--amberBright);
+}
+
+/* Telemetry & Alternative Columns styling */
+.telemetry-row{
+    font-size:12px;
+    letter-spacing:.14em;
+    margin-bottom:12px;
+    line-height:1.6;
+}
+
+.telemetry-label{
+    color:var(--amberBright);
+    opacity:.85;
+}
+
+.telemetry-val{
+    float:right;
+    font-weight:bold;
+    text-shadow:0 0 3px rgba(255,159,7,.5);
+}
+
+.ascii-container{
+    padding:12px;
+    background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,159,7,.15);
+    margin-bottom:20px;
+    text-align:center;
+}
+
+pre.ascii-art{
+    margin:0;
+    font-family:monospace;
+    font-size:11px;
+    line-height:1.15;
+    color:var(--amber);
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+    display:inline-block;
+    text-align:left;
+}
+
+/* Social links list */
+.social-links{
+    list-style:none;
+    padding:0;
+    margin:15px 0 0 0;
+}
+
+.social-links li{
+    margin-bottom:10px;
+}
+
+.social-link{
+    color:var(--amber);
+    text-decoration:none;
+    transition:all .2s ease;
+    display:inline-block;
+    font-size:12px;
+    letter-spacing:.1em;
+    z-index:10;
+}
+
+.social-link:hover{
+    color:var(--amberBright);
+    text-shadow:0 0 6px var(--amberBright);
+    transform:translateX(5px);
+}
+
+/* Cursor Blink animation */
+.blink-cursor{
+    display:inline-block;
+    width:8px;
+    height:14px;
+    background:var(--amberBright);
+    animation:cursor-blink 1s steps(2) infinite;
+    vertical-align:middle;
+    margin-left:4px;
+}
+
+@keyframes cursor-blink{
+    50%{opacity:0;}
+}
+
+/* Flicker effect on specific labels/titles */
+@keyframes text-flicker{
+    0%,100%{opacity:1;text-shadow:0 0 4px rgba(255,159,7,.7), 0 0 12px rgba(255,140,0,.35);}
+    23%{opacity:1;}
+    25%{opacity:0.85;text-shadow:0 0 2px rgba(255,159,7,.4);}
+    26%{opacity:1;}
+    42%{opacity:1;}
+    44%{opacity:0.9;text-shadow:0 0 3px rgba(255,159,7,.5);}
+    46%{opacity:1;}
+}
+
+.flicker-text{
+    animation:text-flicker 6s infinite;
+}
+
+/* =========================
+   CRT OVERLAYS
+========================= */
+#scanlines,
+#amber-tint,
+#rgb-mask,
+#roll{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+#scanlines{
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,.35) 0px,
+        rgba(0,0,0,.35) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    animation:flicker .14s infinite;
+    z-index:1300;
+    mix-blend-mode:multiply;
+}
+
+#rgb-mask{
+    background:repeating-linear-gradient(
+        90deg,
+        rgba(255,0,0,.05) 0 1px,
+        rgba(0,255,0,.05) 1px 2px,
+        rgba(0,0,255,.05) 2px 3px
+    );
+    z-index:1250;
+    mix-blend-mode:overlay;
+    opacity:.6;
+}
+
+#roll{
+    background:linear-gradient(
+        180deg,
+        transparent 0%,
+        transparent 42%,
+        rgba(255,255,255,.06) 47%,
+        rgba(255,255,255,.10) 50%,
+        rgba(255,255,255,.06) 53%,
+        transparent 58%,
+        transparent 100%
+    );
+    z-index:1310;
+    mix-blend-mode:screen;
+    animation:roll 9s linear infinite;
+}
+
+@keyframes roll{
+    0%{transform:translateY(-100%);}
+    100%{transform:translateY(100%);}
+}
+
+@keyframes flicker{
+    0%{opacity:.55;}
+    47%{opacity:.5;}
+    50%{opacity:.85;}
+    53%{opacity:.5;}
+    100%{opacity:.55;}
+}
+
+#amber-tint{
+    background:
+        radial-gradient(ellipse at 50% 50%,
+            rgba(255,159,7,.05),
+            rgba(255,80,0,.08) 80%);
+    z-index:1150;
+    mix-blend-mode:screen;
+}
+
+#poweron{
+    position:absolute;
+    inset:0;
+    background:#fff;
+    z-index:2000;
+    pointer-events:none;
+    animation:poweron 1.6s ease-out forwards;
+}
+
+@keyframes poweron{
+    0%{opacity:0;}
+    5%{opacity:.9;}
+    10%{opacity:.15;}
+    20%{transform:scaleY(.005);opacity:1;background:#fff;}
+    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
+    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
+}
+
+/* =========================
+   SYS LABELS & CLOCK
+========================= */
+#os{
+    position:absolute;
+    bottom:68px;
+    right:22px;
+    font-size:12px;
+    opacity:.8;
+    z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+#clock{
+    position:absolute;
+    bottom:68px;
+    left:22px;
+    font-size:12px;
+    opacity:.8;
+    z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+/* =========================
+   KEYBOARD TERMINAL PROMPT (Syncs with games page)
+========================= */
+#terminal{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:14px 22px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    z-index:1003;
+    border-top:2px solid rgba(255,159,7,.35);
+    background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));
+    box-shadow:0 -10px 20px rgba(0,0,0,.35),inset 0 0 20px rgba(255,159,7,.06);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+
+#terminal .chev{
+    color:var(--amberBright);
+    animation:chev 1s steps(2) infinite;
+    text-shadow:0 0 6px rgba(255,159,7,.7);
+}
+
+@keyframes chev{50%{opacity:.3;}}
+
+#terminal input{
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font-family:inherit;
+    flex:1;
+    min-width:0;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    caret-color:var(--amberBright);
+}
+
+#terminal .hint{
+    font-size:11px;
+    letter-spacing:.2em;
+    opacity:.7;
+}
+
+/* =========================
+   RESPONSIVENESS (Exact match)
+========================= */
+@media(max-width:900px){
+    #crt-container{padding:30px 22px 120px;}
+    .contact-grid{grid-template-columns:1fr;gap:24px;}
+    #screen-wrap{inset:12px;border-radius:32px/40px;}
+    .nav-bar{padding:14px 18px;margin-bottom:20px;}
+    .header{padding:18px 20px;margin-bottom:24px;}
+}
+
+@media(max-width:500px){
+    body{font-size:14px;}
+    .header-left h1{font-size:24px;}
+    #terminal{padding:12px;}
+    #terminal .hint{display:none;}
+    .nav-left{display:none;}
+    .nav-bar{justify-content:center;}
+}
+
+/* ==== MOBILE SCREEN PERFORMANCE OVERHAUL ==== */
+@media(max-width:820px){
+    html,body{-webkit-text-size-adjust:100%;}
+    body{perspective:none;}
+    #bezel-label,#brand-led{display:none;}
+    #bezel{background:radial-gradient(ellipse at 30% 20%,#241a10 0%,#0a0705 60%,#000 100%);}
+    #screen-wrap{inset:6px;border-radius:16px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);}
+    #screen{filter:none;transform:none;}
+    #crt-container{padding:20px 14px 100px;transform:none !important;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
+<!-- Fisheye SVG filter — displacement scale set to 14 to maintain high FPS performance -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
 
-<div id="crt-container">
+<div id="bezel"></div>
 
-  <div id="contact-content">
-    <div class="section">
-      <h2>Contact Us</h2>
-      <p>Have questions or want to get in touch? Use the form below or reach out via our social channels.</p>
+<div id="screen-wrap">
+
+    <div id="screen">
+        <div id="screen-scroll">
+            <div id="crt-container">
+
+                <!-- Navigation Panel Bar -->
+                <div class="nav-bar panel">
+                    <div class="nav-left flicker-text">
+                        FRACTURED // NET_MENU_v1.0.4
+                    </div>
+                    <nav class="nav-links">
+                        <a href="index.html" class="nav-item">[ HOME ]</a>
+                        <a href="games.html" class="nav-item">[ GAMES ]</a>
+                        <a href="contact.html" class="nav-item active">[ CONTACT ]</a>
+                        <a href="blog.html" class="nav-item">[ BLOG ]</a>
+                    </nav>
+                </div>
+
+                <!-- Page Header Panel -->
+                <div class="header panel">
+                    <div class="header-left">
+                        <h1 class="flicker-text">CONTACT // FRACTURED_STUDIOS</h1>
+                        <p>> ESTABLISH PORT COM_07 CONNECTION PROTOCOL</p>
+                    </div>
+                    <div class="header-right">
+                        <span class="tag">PORT.07</span>
+                        <span class="tag blink">LIVE</span>
+                    </div>
+                    <div class="ticker">
+                        <span class="ticker-inner">// FRACTURED STUDIOS CONTACT LINK // CH.07 ONLINE // READY TO INGEST TRANSMISSIONS // SEND YOUR SIGNAL INPUTS BELOW //</span>
+                    </div>
+                </div>
+
+                <!-- Grid Layout (Two Column) -->
+                <div class="contact-grid">
+
+                    <!-- Left Column Panel: Contact Form -->
+                    <div class="panel" id="form-container">
+                        <div class="panel-content">
+                            <div class="panel-header">
+                                > ESTABLISH_CONNECTION...<span class="blink-cursor"></span>
+                            </div>
+                            
+                            <!-- 
+                              FORM CONFIGURATION NOTICE FOR DEVELOPERS:
+                              Sign up at formspree.io and replace the placeholder REPLACE_WITH_YOUR_ID 
+                              with your actual Formspree form ID to receive emails instantly!
+                            -->
+                            <form id="contact-form" action="https://formspree.io/f/REPLACE_WITH_YOUR_ID" method="POST">
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="callsign">> CALLSIGN:</label>
+                                    <input type="text" class="form-control" id="callsign" name="name" required placeholder="ENTER YOUR CALLSIGN / NAME..." autocomplete="off">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="return_signal">> RETURN_SIGNAL:</label>
+                                    <input type="email" class="form-control" id="return_signal" name="email" required placeholder="ENTER PROTOCOL ADDRESS / EMAIL..." autocomplete="off">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="subject">> SUBJECT:</label>
+                                    <input type="text" class="form-control" id="subject" name="subject" required placeholder="ENTER SIGNAL SUBJECT..." autocomplete="off">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="transmission">> TRANSMISSION:</label>
+                                    <textarea class="form-control" id="transmission" name="message" required placeholder="WRITE TRANSMISSION CONTENT PACKET..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn-submit">[ SEND_TRANSMISSION ]</button>
+                                
+                                <div class="form-console" id="form-console">
+                                    > AWAITING TRANSMISSION SPECIFICATIONS...
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column Panel: Telemetry & Alternative Info -->
+                    <div class="panel">
+                        <div class="panel-content">
+                            <div class="panel-header">
+                                [ NODE_RECEPTION ]
+                            </div>
+                            
+                            <!-- ASCII Antenna Grid -->
+                            <div class="ascii-container">
+                                <pre class="ascii-art">
+             .---------------------.
+            /      NODE_ANTENNA     \
+           |_________________________|
+           |     .-.   |   .-.       |
+           |    /   \  |  /   \      |
+           |   |     | | |     |     |
+           |    \   /  |  \   /      |
+           |     '-'   |   '-'       |
+           |       \   |   /         |
+           |        \  |  /          |
+           |         \ | /           |
+           |       ===:O:===         |
+           |          |              |
+           |         / \             |
+           |        /   \            |
+           |       /     \           |
+           |      /_______\          |
+           |_________________________|
+                                </pre>
+                            </div>
+                            
+                            <div class="panel-header" style="font-size: 18px; margin-top: 20px; border-bottom: 1px dashed rgba(255,159,7,.25);">
+                                [ TELEMETRY DATA ]
+                            </div>
+                            
+                            <div class="telemetry-row">
+                                <span class="telemetry-label">SYSTEM PORT:</span>
+                                <span class="telemetry-val">COM_07</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="telemetry-label">NODE ADDR:</span>
+                                <span class="telemetry-val">104.28.16.89</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="telemetry-label">ANTENNA GAIN:</span>
+                                <span class="telemetry-val">+24.08 dB</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="telemetry-label">SIGNAL VALUE:</span>
+                                <span class="telemetry-val">-78.14 dBm</span>
+                            </div>
+                            <div class="telemetry-row">
+                                <span class="telemetry-label">LINK STATUS:</span>
+                                <span class="telemetry-val" style="color:var(--amberBright);">LISTENING<span class="blink-cursor" style="height:10px; width:6px; margin-left:2px;"></span></span>
+                            </div>
+                            
+                            <div class="panel-header" style="font-size: 18px; margin-top: 20px; border-bottom: 1px dashed rgba(255,159,7,.25);">
+                                [ ALTERNATE PORT CHANNELS ]
+                            </div>
+                            
+                            <ul class="social-links">
+                                <li>
+                                    <a href="#" class="social-link" target="_blank">> DISCORD: discord.gg/fracturedstudios</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="social-link" target="_blank">> TWITTER: @FracturedStudios</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="social-link" target="_blank">> YOUTUBE: @FracturedStudiosYT</a>
+                                </li>
+                                <li>
+                                    <a href="/cdn-cgi/l/email-protection#d1a5a3b0bfa2bcb8a2a2b8bebf91b7a3b0b2a5a4a3b4b5a2a5a4b5b8bea2ffb2bebc" class="social-link">> EMAIL: <span class="__cf_email__" data-cfemail="daaea8bbb4a9b7b3a9a9b3b5b49abca8bbb9aeafa8bfbea9aeafbeb3b5a9f4b9b5b7">[email&#160;protected]</span></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-      <h2>Send a Message</h2>
-      <input type="text" placeholder="Your Name">
-      <input type="email" placeholder="Your Email">
-      <textarea rows="5" placeholder="Your Message"></textarea>
-      <button>Send Message [DOESNT WORK YET]</button>
+    <!-- CRT Overlays (sitting unwarped above the curved screen) -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="poweron"></div>
+
+    <div id="clock">SYS ::</div>
+    <div id="os">UIC OS v1.0.4</div>
+
+    <!-- Bottom Keyboard Terminal Command Prompter -->
+    <div id="terminal">
+        <span class="chev">&gt;</span>
+        <input id="cmd" placeholder="type command..." autocomplete="off">
+        <span class="hint">HOME • GAMES • CONTACT • BLOG</span>
     </div>
 
-    <div class="section">
-      <h2>Social Links</h2>
-      <p>All Fractured Studios Socials</p>
-      <p style="opacity:.6">| Twitter: @StudiosFracture</p>
-    </div>
-
-    <div class="section">
-      <h2>Additional Info</h2>
-      <p> W.I.P.</p>
-    </div>
-  </div>
-
-  <div id="terminal-box">
-    <div id="terminal"></div>
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off">
-    </div>
-    <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact
-    </p>
-  </div>
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
+<div id="bezel-label">FRACTURED • MODEL FR-77</div>
+<div id="brand-led"></div>
 
-<script>
-// ELEMENTS
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const container = document.getElementById("crt-container");
 const os = document.getElementById("os");
+const clock = document.getElementById("clock");
+const input = document.getElementById("cmd");
 
-// COMMAND LOGOS
-const commandLogos = {
-  about: "logo-about.png",
-  games: "logo-games.png",
-  contact: "logo-contact.png"
-};
+/* ===================================================
+   1. RETRO 8-BIT SOUND EFFECT GENERATOR (Web Audio API)
+=================================================== */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-let pendingCommand = null;
-
-// 3D tilt
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/400;
-  const y = (window.innerHeight/2 - e.clientY)/400;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
-
-// COMMAND HANDLER
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-
-  const value = input.value.toLowerCase().trim();
-  terminal.innerHTML += `&gt; ${value}<br>`;
-  input.value = "";
-
-  if (pendingCommand) {
-    if (value === "y") {
-      window.location = pendingCommand + ".html";
-    } else {
-      terminal.innerHTML += "Cancelled.<br>";
+function playTone(freq, type, duration) {
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = type || 'sine';
+        osc.frequency.value = freq;
+        
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {
+        // Safe catch if browser blocks or audio context is not active
     }
-    pendingCommand = null;
-    terminal.scrollTop = terminal.scrollHeight;
-    return;
-  }
+}
 
-  if (commandLogos[value]) {
-    pendingCommand = value;
-    terminal.innerHTML += "Confirm? (Y/N)<br>";
-  } else {
-    terminal.innerHTML += "Unknown command<br>";
-  }
-  terminal.scrollTop = terminal.scrollHeight;
+function playSuccessSound() {
+    playTone(440, 'sine', 0.1);
+    setTimeout(() => playTone(554, 'sine', 0.1), 100);
+    setTimeout(() => playTone(659, 'sine', 0.1), 200);
+    setTimeout(() => playTone(880, 'sine', 0.25), 300);
+}
+
+// Resume AudioContext on first page interaction (standard browser compliance)
+document.addEventListener("click", () => {
+    if(audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
 });
-</script>
 
+/* ===================================================
+   2. INTERACTIVE COMPONENT AUDIO BINDINGS
+=================================================== */
+const soundControls = document.querySelectorAll("#contact-form input, #contact-form textarea, #cmd");
+soundControls.forEach(ctrl => {
+    ctrl.addEventListener("focus", () => playTone(650, 'sine', 0.03));
+    ctrl.addEventListener("input", () => playTone(950, 'sine', 0.015));
+});
+
+const navLinks = document.querySelectorAll(".nav-item");
+navLinks.forEach(link => {
+    link.addEventListener("mouseenter", () => playTone(750, 'sine', 0.02));
+});
+
+/* ===================================================
+   3. CURSOR PARALLAX TILT EFFECT (rAF-throttled for performance)
+=================================================== */
+let tiltPending = false;
+let lastX = window.innerWidth/2;
+let lastY = window.innerHeight/2;
+
+function scheduleTilt(){
+    if(tiltPending) return;
+    tiltPending = true;
+    requestAnimationFrame(()=>{
+        const rx = (window.innerHeight/2 - lastY)/1200;
+        const ry = (window.innerWidth/2  - lastX)/1200;
+        container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        tiltPending = false;
+    });
+}
+
+function applyTilt(x, y){
+    lastX = x;
+    lastY = y;
+    scheduleTilt();
+}
+
+document.addEventListener("mousemove",(e)=>{
+    applyTilt(e.clientX, e.clientY);
+});
+document.addEventListener("touchmove",(e)=>{
+    const t = e.touches[0];
+    applyTilt(t.clientX, t.clientY);
+},{passive:true});
+
+/* ===================================================
+   4. SYSTEM CLOCK
+=================================================== */
+function tickClock(){
+    const d = new Date();
+    const pad = n => n.toString().padStart(2,"0");
+    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(tickClock,1000);
+tickClock();
+
+/* ===================================================
+   5. KEYBOARD COMMAND INTERPRETER (Bottom terminal sync)
+=================================================== */
+input.addEventListener("keydown", e => {
+    if(e.key === "Enter"){
+        const v = input.value.toLowerCase().trim();
+        if(v === "home") window.location = "index.html";
+        if(v === "games") window.location = "games.html";
+        if(v === "contact") window.location = "contact.html";
+        if(v === "blog") window.location = "blog.html";
+        input.value = "";
+    }
+});
+
+/* ===================================================
+   6. CONTACT FORM SUBMISSION & SUCCESS ANIMATION
+=================================================== */
+const form = document.getElementById("contact-form");
+const consoleElement = document.getElementById("form-console");
+
+form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    const nameInput = document.getElementById("callsign");
+    const emailInput = document.getElementById("return_signal");
+    const subjectInput = document.getElementById("subject");
+    const messageInput = document.getElementById("transmission");
+    
+    let errors = [];
+    if(!nameInput.value.trim()){
+        errors.push("CALLSIGN NAME REQUIREMENT VOID");
+    }
+    if(!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)){
+        errors.push("INVALID RETURN_SIGNAL ADDRESS");
+    }
+    if(!subjectInput.value.trim()){
+        errors.push("SUBJECT SIGNAL REQUIREMENT VOID");
+    }
+    if(!messageInput.value.trim()){
+        errors.push("TRANSMISSION PAYLOAD EMPTY");
+    }
+    
+    if(errors.length > 0){
+        // Play dual low error buzzer
+        playTone(130, 'sawtooth', 0.12);
+        setTimeout(() => playTone(130, 'sawtooth', 0.12), 150);
+        
+        consoleElement.className = "form-console error";
+        consoleElement.innerHTML = `> ERROR: ${errors[0]}<span class="blink-cursor"></span>`;
+        return;
+    }
+    
+    // Begin transmission loading sequence
+    consoleElement.className = "form-console success";
+    consoleElement.innerHTML = `> LINKING TO CHANNEL COM_07...<span class="blink-cursor"></span>`;
+    
+    const inputs = form.querySelectorAll("input, textarea, button");
+    inputs.forEach(el => el.disabled = true);
+    
+    const formspreeUrl = form.action;
+    const isPlaceholder = formspreeUrl.includes("REPLACE_WITH_YOUR_ID");
+    
+    const steps = [
+        "ENCRYPTING DATA TO AES-256-TUBE PROTOCOL...",
+        "STABILIZING SATELLITE INTERFACE...",
+        "BEAMING TRANSMISSION PACKETS TO PRIME-NODE...",
+        isPlaceholder ? "WARNING: PLACEHOLDER ID REGISTERED. RUNNING IN TEST MODE..." : "COMMITTING TRANSMISSION PACKETS TO MAIN_FRAME..."
+    ];
+    
+    let stepIndex = 0;
+    const interval = setInterval(() => {
+        if(stepIndex < steps.length) {
+            consoleElement.innerHTML = `> ${steps[stepIndex]}<span class="blink-cursor"></span>`;
+            playTone(850, 'sine', 0.025); // terminal typewriter blip
+            stepIndex++;
+        } else {
+            clearInterval(interval);
+            
+            if(isPlaceholder){
+                // Simulator success flow
+                setTimeout(() => {
+                    consoleElement.innerHTML = `> SIMULATION CONCLUDED SUCCESSFULLY.<br>> PROTOCOL CONFIRMED. TRANSMISSION CACHED IN SIMULATOR.<span class="blink-cursor"></span>`;
+                    playSuccessSound();
+                    
+                    setTimeout(() => {
+                        showSuccessScreen(nameInput.value, emailInput.value, subjectInput.value);
+                    }, 1000);
+                }, 500);
+            } else {
+                // Actual Formspree POST
+                fetch(formspreeUrl, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => {
+                    if(res.ok) {
+                        consoleElement.innerHTML = `> DATA DISPATCHED SECURELY PORT CLOSED.<br>> DISCONNECT COMPLETE.<span class="blink-cursor"></span>`;
+                        playSuccessSound();
+                        setTimeout(() => {
+                            showSuccessScreen(nameInput.value, emailInput.value, subjectInput.value);
+                        }, 1000);
+                    } else {
+                        throw new Error("TUBE ENVELOPE REJECTED");
+                    }
+                })
+                .catch(err => {
+                    playTone(130, 'sawtooth', 0.15);
+                    setTimeout(() => playTone(130, 'sawtooth', 0.15), 150);
+                    consoleElement.className = "form-console error";
+                    consoleElement.innerHTML = `> DISPATCH CRITICAL FAILURE: ${err.message || 'TIMEOUT'}. RE-OPEN CHANNEL AND RETRY.<span class="blink-cursor"></span>`;
+                    inputs.forEach(el => el.disabled = false);
+                });
+            }
+        }
+    }, 800);
+});
+
+function showSuccessScreen(name, email, subject) {
+    const container = document.getElementById("form-container");
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px 14px;">
+            <div style="font-family: 'VT323', monospace; font-size: 34px; color: var(--amberBright); margin-bottom: 22px; text-shadow: 0 0 6px var(--amberBright); letter-spacing: 0.12em;">
+                *** TRANSMISSION SUCCESSFUL CONFIRM ***
+            </div>
+            <div style="border: 1px dashed rgba(255,159,7,.3); padding: 22px; display: inline-block; text-align: left; background: rgba(255,159,7,.02); max-width: 100%; margin-bottom: 30px; font-size: 13px; line-height: 1.6; letter-spacing: 0.12em;">
+                <div style="margin-bottom: 10px;"><span style="color: var(--amberBright);">SENDER:</span> ${escapeHtml(name)}</div>
+                <div style="margin-bottom: 10px;"><span style="color: var(--amberBright);">SIGNAL ADDRESS:</span> ${escapeHtml(email)}</div>
+                <div style="margin-bottom: 10px;"><span style="color: var(--amberBright);">SUBJECT HEADER:</span> ${escapeHtml(subject)}</div>
+                <div style="margin-bottom: 10px;"><span style="color: var(--amberBright);">CIPHER ALGO:</span> TUBE-AES-256</div>
+                <div><span style="color: var(--amberBright);">LOG ARCHIVE:</span> STORAGE NODE COM_07</div>
+            </div>
+            <div>
+                <button class="btn-submit" onclick="resetForm()">[ RE-OPEN LINK CHANNEL ]</button>
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function resetForm() {
+    window.location.reload();
+}
+</script>
 </body>
 </html>
