@@ -3,237 +3,1055 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fractured Studios | About</title>
+<title>About // Fractured Studios</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#111;
-  color:#FF9F07;
-  font-family:'Share Tech Mono', monospace;
-  overflow-y:auto;
-  perspective:1000px;
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --scanBlack:#0a0603;
 }
 
-/* CRT container */
-#crt-container {
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  align-items:center;
-  padding:60px;
-  box-sizing:border-box;
-  transform-style:preserve-3d;
-  transition:transform .08s ease-out;
+*{box-sizing:border-box;}
+
+html,body{
+    margin:0;
+    height:100%;
+    background:#000;
+    overflow:hidden;
 }
 
-/* Content sections */
-#about-content {
-  width:80%;
-  margin-bottom:150px; /* space for terminal */
+body{
+    color:var(--amber);
+    font-family:'Share Tech Mono', monospace;
+    perspective:1400px;
 }
 
-.section {
-  background:rgba(0,0,0,.2);
-  border:1px solid rgba(255,159,7,.3);
-  padding:20px;
-  margin:20px 0;
-  border-radius:6px;
+/* =========================
+   CRT BEZEL
+========================= */
+#bezel{
+    position:fixed;
+    inset:0;
+    background:radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
+    z-index:0;
+}
+#bezel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
+    pointer-events:none;
+}
+#bezel-label{
+    position:fixed;
+    bottom:14px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:5;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:#7a5230;
+    text-shadow:0 1px 0 #000;
+    font-family:'VT323',monospace;
+    user-select:none;
+}
+#brand-led{
+    position:fixed;
+    bottom:16px;
+    left:calc(50% - 180px);
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
+    animation:led-pulse 2.4s ease-in-out infinite;
+    z-index:5;
+}
+@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+
+/* =========================
+   SCREEN & SCROLLBAR
+========================= */
+#screen-wrap{
+    position:fixed;
+    inset:22px;
+    border-radius:48px / 60px;
+    background:#050505;
+    box-shadow:
+        0 0 0 4px #0a0605,
+        0 0 0 8px #1a0f07,
+        0 0 0 10px #2a1a0d,
+        0 0 40px rgba(0,0,0,.9) inset,
+        0 30px 60px rgba(0,0,0,.85);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    isolation:isolate;
+}
+#screen{
+    position:absolute;
+    inset:0;
+    filter:url(#fisheye);
+    transform:scale(1.02);
+    overflow:hidden;
 }
 
-.section h2 {
-  margin:0 0 10px 0;
-  color:#FF9F07;
+#screen-scroll{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-color: var(--amberDim) var(--scanBlack);
+    scrollbar-width: thin;
+}
+#screen-scroll::-webkit-scrollbar{width:8px;height:8px;display:block;}
+#screen-scroll::-webkit-scrollbar-track{background:var(--scanBlack);border-left:1px solid rgba(255,159,7,.15);}
+#screen-scroll::-webkit-scrollbar-thumb{background:var(--amberDim);border:1px solid var(--amber);border-radius:2px;}
+#screen-scroll::-webkit-scrollbar-thumb:hover{background:var(--amber);box-shadow:0 0 10px var(--amberBright);}
+
+#glare{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1200;
+    background:
+        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
+        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
+    mix-blend-mode:screen;
+}
+#vignette{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1100;
+    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
+}
+#corners{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1105;
+    background:
+        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
+        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
 }
 
-.section p {
-  margin:0 0 10px 0;
+#crt-container{
+    padding:56px 64px 130px;
+    transform-style:preserve-3d;
+    transition:transform .1s ease-out;
+    min-height:100%;
+    position:relative;
+    z-index:2;
+    will-change:transform;
 }
 
-/* Images in sections */
-.section img {
-  max-width:100%;
-  border:1px solid rgba(255,159,7,.3);
-  margin-top:10px;
-  border-radius:4px;
+/* =========================
+   PANELS
+========================= */
+.panel{
+    position:relative;
+    border:2px solid rgba(255,159,7,.45);
+    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
+    box-shadow:
+        inset 0 0 30px rgba(255,159,7,.06),
+        inset 0 0 2px rgba(255,200,90,.25),
+        0 0 30px rgba(255,159,7,.08);
+    border-radius:6px;
+}
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border:1px dashed rgba(255,159,7,.18);
+    pointer-events:none;
+    border-radius:3px;
+}
+.panel::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
+    opacity:.7;
 }
 
-/* Terminal pinned to bottom */
-#terminal-box {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
+/* =========================
+   TOP NAV
+========================= */
+.nav-bar{
+    padding:14px 22px;
+    margin-bottom:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    letter-spacing:.15em;
+}
+.nav-brand{
+    color:var(--amberBright);
+    text-shadow:0 0 5px rgba(255,159,7,.6);
+}
+.nav-links{display:flex;gap:16px;}
+.nav-link{
+    color:var(--amberDim);
+    text-decoration:none;
+    padding:6px 12px;
+    border:1px solid transparent;
+    transition:all .2s ease;
+    text-shadow:0 0 2px rgba(255,159,7,.3);
+}
+.nav-link:hover{
+    color:var(--amberBright);
+    text-shadow:0 0 8px var(--amber);
+    border:1px solid var(--amber);
+    background:rgba(255,159,7,.08);
+}
+.nav-link.active{
+    color:var(--amberBright);
+    text-shadow:0 0 10px var(--amber);
+    border:1px dashed var(--amber);
+    background:rgba(255,159,7,.14);
 }
 
-#terminal {
-  background:rgba(0,0,0,.25);
-  padding:20px;
-  border:1px solid rgba(255,159,7,.2);
-  min-height:150px;
-  max-height:250px;
-  overflow-y:auto;
+/* =========================
+   HEADER
+========================= */
+.page-header{
+    padding:24px 28px;
+    margin-bottom:32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}
+.vt323-title{
+    font-family:'VT323',monospace;
+    font-size:40px;
+    margin:0 0 10px 0;
+    letter-spacing:.08em;
+    color:var(--amberBright);
+    text-shadow:0 0 6px var(--amber),0 0 15px rgba(255,140,0,.35);
+}
+.page-header .subtitle{
+    margin:0;
+    opacity:.85;
+    letter-spacing:.12em;
+    font-size:13px;
+    text-shadow:0 0 3px rgba(255,159,7,.5);
+    min-height:1.5em;
+}
+.page-header .header-right{display:flex;gap:10px;align-items:center;}
+.page-header .tag{
+    font-size:11px;
+    letter-spacing:.2em;
+    padding:4px 10px;
+    border:1px solid rgba(255,159,7,.4);
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+.page-header .tag.blink{animation:tag-blink 1.6s steps(2) infinite;}
+@keyframes tag-blink{50%{opacity:.35;}}
+
+.cursor{
+    animation:cursor-blink 1s step-end infinite;
+    color:var(--amberBright);
+    text-shadow:0 0 5px var(--amber);
+}
+@keyframes cursor-blink{from,to{opacity:0;}50%{opacity:1;}}
+
+/* =========================
+   LAYOUT: MAIN + SIDEBAR
+========================= */
+.about-layout{
+    display:grid;
+    grid-template-columns:2.1fr 1fr;
+    gap:28px;
+    align-items:start;
 }
 
-#prompt {
-  display:flex;
-  margin-top:10px;
+.about-main{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
 }
 
-#prompt input {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#FF9F07;
-  font-family:inherit;
-  flex:1;
+/* PROFILE / MISSION SECTION */
+.section{
+    padding:26px;
+}
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--amberDim);
+    border-bottom:1px dashed rgba(255,159,7,.2);
+    padding-bottom:10px;
+    margin-bottom:16px;
+}
+.section h2{
+    font-family:'VT323',monospace;
+    font-size:28px;
+    margin:0 0 14px 0;
+    letter-spacing:.08em;
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+.section p{
+    line-height:1.65;
+    margin:0 0 14px 0;
+    opacity:.92;
+    text-shadow:0 0 2px rgba(255,159,7,.4);
+    font-size:14px;
+}
+.section p:last-child{margin-bottom:0;}
+
+/* ASCII ART BLOCK */
+.ascii-block{
+    font-family:'VT323',monospace;
+    font-size:14px;
+    line-height:1.1;
+    letter-spacing:.05em;
+    color:var(--amber);
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+    padding:12px 8px;
+    margin:12px 0 16px;
+    border:1px dashed rgba(255,159,7,.25);
+    background:rgba(255,159,7,.03);
+    overflow-x:auto;
+    white-space:pre;
+    opacity:.9;
 }
 
-/* OS version */
-#os {
-  position:fixed;
-  bottom:10px;
-  right:15px;
-  font-size:12px;
-  opacity:.7;
+/* CREW GRID */
+.crew-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+    margin-top:8px;
+}
+.crew-card{
+    padding:16px;
+    border:1px solid rgba(255,159,7,.28);
+    background:rgba(255,159,7,.04);
+    position:relative;
+    transition:all .25s ease;
+}
+.crew-card:hover{
+    border-color:var(--amberBright);
+    box-shadow:inset 0 0 25px rgba(255,159,7,.12),0 0 15px rgba(255,159,7,.15);
+    transform:translateY(-2px);
+}
+.crew-avatar{
+    width:56px;
+    height:56px;
+    border:1px solid var(--amber);
+    background:
+        radial-gradient(circle at 50% 40%,rgba(255,159,7,.25),transparent 60%),
+        repeating-linear-gradient(0deg,rgba(255,159,7,.06) 0 1px,transparent 1px 3px);
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'VT323',monospace;
+    font-size:26px;
+    color:var(--amberBright);
+    text-shadow:0 0 6px var(--amber);
+}
+.crew-name{
+    font-family:'VT323',monospace;
+    font-size:20px;
+    color:var(--amberBright);
+    letter-spacing:.08em;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    margin-bottom:2px;
+}
+.crew-role{
+    font-size:10px;
+    letter-spacing:.18em;
+    color:var(--amberDim);
+    margin-bottom:10px;
+    text-transform:uppercase;
+}
+.crew-bio{
+    font-size:12px;
+    line-height:1.5;
+    opacity:.85;
+    margin:0;
+}
+.crew-bar{
+    height:4px;
+    margin-top:12px;
+    background:rgba(255,159,7,.12);
+    position:relative;
+    overflow:hidden;
+}
+.crew-bar::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg,var(--amber),var(--amberBright));
+    transform:translateX(-30%);
+    animation:bar-fill 3.2s ease-in-out infinite alternate;
+    box-shadow:0 0 6px rgba(255,159,7,.7);
+}
+.crew-card:nth-child(2) .crew-bar::before{animation-duration:2.4s;}
+.crew-card:nth-child(3) .crew-bar::before{animation-duration:4.1s;}
+@keyframes bar-fill{
+    0%{transform:translateX(-70%);}
+    100%{transform:translateX(0%);}
 }
 
-/* Scanlines */
-#scanlines {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.05) 0px,
-    rgba(255,255,255,.05) 2px,
-    transparent 2px,
-    transparent 6px
-  );
-  animation:flicker .12s infinite;
-  z-index:1001;
+/* TIMELINE */
+.timeline{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-top:6px;
+    padding-left:14px;
+    position:relative;
 }
-@keyframes flicker {
-  0%{opacity:.15}
-  50%{opacity:.07}
-  100%{opacity:.15}
+.timeline::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:6px;
+    bottom:6px;
+    width:1px;
+    background:linear-gradient(180deg,var(--amber),transparent 60%,var(--amberDim));
+    box-shadow:0 0 6px rgba(255,159,7,.4);
+}
+.tl-item{
+    position:relative;
+    padding:8px 12px 8px 20px;
+    border-left:1px dashed rgba(255,159,7,.18);
+}
+.tl-item::before{
+    content:"";
+    position:absolute;
+    left:-19px;
+    top:14px;
+    width:8px;height:8px;
+    background:var(--amber);
+    border:1px solid var(--amberBright);
+    box-shadow:0 0 6px var(--amber);
+    transform:rotate(45deg);
+}
+.tl-date{
+    font-family:'VT323',monospace;
+    font-size:18px;
+    color:var(--amberBright);
+    letter-spacing:.1em;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    margin-bottom:2px;
+}
+.tl-title{
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--amber);
+    margin-bottom:4px;
+}
+.tl-body{
+    font-size:12px;
+    line-height:1.55;
+    opacity:.85;
+    margin:0;
 }
 
-/* Amber tint overlay */
-#amber {
-  position:fixed;
-  inset:0;
-  background:rgba(255,159,7,.04);
-  pointer-events:none;
+/* =========================
+   RIGHT SIDEBAR
+========================= */
+.about-sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+.sidebar-widget{padding:20px;}
+.sidebar-widget .widget-header{
+    font-family:'VT323',monospace;
+    font-size:20px;
+    letter-spacing:.15em;
+    color:var(--amberBright);
+    border-bottom:1px solid rgba(255,159,7,.3);
+    padding-bottom:8px;
+    margin-bottom:14px;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+
+.stats-table{
+    width:100%;
+    font-size:12px;
+    letter-spacing:.1em;
+    border-collapse:collapse;
+}
+.stats-table td{padding:6px 0;}
+.stat-lbl{color:var(--amberDim);width:55%;}
+.stat-val{color:var(--amber);text-align:right;font-weight:bold;}
+
+.stack-list{
+    list-style:none;
+    padding:0;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.stack-list li{
+    font-size:12px;
+    letter-spacing:.12em;
+    padding:6px 10px;
+    border:1px solid rgba(255,159,7,.2);
+    background:rgba(255,159,7,.04);
+    display:flex;
+    justify-content:space-between;
+}
+.stack-list li .lvl{
+    color:var(--amberBright);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    font-size:10px;
+    letter-spacing:.2em;
+}
+
+.mission-list{
+    list-style:none;
+    padding:0;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    font-size:12px;
+    letter-spacing:.1em;
+}
+.mission-list li{
+    padding:6px 4px;
+    border-bottom:1px dashed rgba(255,159,7,.15);
+    display:flex;
+    gap:8px;
+    align-items:baseline;
+}
+.mission-list li:last-child{border-bottom:none;}
+.mission-list .mk{color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.6);}
+
+/* CTA / CONTACT */
+.cta-panel{
+    padding:24px;
+    margin-top:8px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+.cta-header{
+    font-family:'VT323',monospace;
+    font-size:24px;
+    letter-spacing:.15em;
+    color:var(--amberBright);
+    text-shadow:0 0 5px rgba(255,159,7,.7);
+}
+.cta-body{
+    font-size:13px;
+    line-height:1.6;
+    margin:0;
+    opacity:.9;
+}
+.cta-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.cta-btn{
+    background:transparent;
+    border:1px solid rgba(255,159,7,.4);
+    color:var(--amber);
+    padding:10px 18px;
+    font-family:inherit;
+    font-size:12px;
+    letter-spacing:.15em;
+    cursor:pointer;
+    text-decoration:none;
+    text-shadow:0 0 3px rgba(255,159,7,.5);
+    position:relative;
+    transition:all .2s ease;
+}
+.cta-btn.primary{
+    background:var(--amber);
+    color:#000;
+    font-weight:bold;
+    text-shadow:none;
+    border-color:var(--amber);
+}
+.cta-btn:hover{
+    background:rgba(255,159,7,.12);
+    border-color:var(--amberBright);
+    color:var(--amberBright);
+    box-shadow:0 0 12px rgba(255,159,7,.25);
+}
+.cta-btn.primary:hover{
+    background:var(--amberBright);
+    color:#000;
+    box-shadow:0 0 15px rgba(255,159,7,.5);
+}
+
+/* =========================
+   TERMINAL FOOTER BAR
+========================= */
+#terminal{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:14px 22px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    z-index:1003;
+    border-top:2px solid rgba(255,159,7,.35);
+    background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));
+    box-shadow:0 -10px 20px rgba(0,0,0,.35),inset 0 0 20px rgba(255,159,7,.06);
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+}
+#terminal .chev{
+    color:var(--amberBright);
+    animation:chev 1s steps(2) infinite;
+    text-shadow:0 0 6px rgba(255,159,7,.7);
+}
+@keyframes chev{50%{opacity:.3;}}
+#terminal input{
+    background:none;
+    border:none;
+    outline:none;
+    color:var(--amber);
+    font-family:inherit;
+    flex:1;
+    min-width:0;
+    text-shadow:0 0 4px rgba(255,159,7,.6);
+    caret-color:var(--amberBright);
+}
+#terminal .hint{
+    font-size:11px;
+    letter-spacing:.2em;
+    opacity:.7;
+}
+
+#os{
+    position:absolute;
+    bottom:68px;
+    right:22px;
+    font-size:12px;
+    opacity:.8;
+    z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+#clock{
+    position:absolute;
+    bottom:68px;
+    left:22px;
+    font-size:12px;
+    opacity:.8;
+    z-index:1004;
+    letter-spacing:.2em;
+    text-shadow:0 0 4px rgba(255,159,7,.5);
+}
+
+/* =========================
+   CRT FX
+========================= */
+#scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
+#scanlines{
+    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);
+    animation:flicker .14s infinite;
+    z-index:1300;
+    mix-blend-mode:multiply;
+}
+#rgb-mask{
+    background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);
+    z-index:1250;
+    mix-blend-mode:overlay;
+    opacity:.6;
+}
+#roll{
+    background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);
+    z-index:1310;
+    mix-blend-mode:screen;
+    animation:roll 9s linear infinite;
+}
+@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
+@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
+#amber-tint{
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);
+    z-index:1150;
+    mix-blend-mode:screen;
+}
+
+#poweron{
+    position:absolute;
+    inset:0;
+    background:#fff;
+    z-index:2000;
+    pointer-events:none;
+    animation:poweron 1.6s ease-out forwards;
+}
+@keyframes poweron{
+    0%{opacity:0;}
+    5%{opacity:.9;}
+    10%{opacity:.15;}
+    20%{transform:scaleY(.005);opacity:1;background:#fff;}
+    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
+    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
+}
+
+.text-flicker{animation:text-flicker 5s linear infinite;}
+@keyframes text-flicker{
+    0%,100%{text-shadow:0 0 4px rgba(255,159,7,.6);}
+    48%{text-shadow:0 0 4px rgba(255,159,7,.6);}
+    50%{text-shadow:0 0 8px rgba(255,159,7,.9),0 0 15px rgba(255,140,0,.4);}
+    52%{text-shadow:0 0 3px rgba(255,159,7,.4);}
+    54%{text-shadow:0 0 6px rgba(255,159,7,.7);}
+}
+
+/* =========================
+   MEDIA QUERIES
+========================= */
+@media(max-width:1024px){
+    #crt-container{padding:40px 32px 110px;}
+    .about-layout{grid-template-columns:1fr;gap:24px;}
+    .crew-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:768px){
+    #screen-wrap{inset:10px;border-radius:24px;}
+    #bezel-label,#brand-led{display:none;}
+    #crt-container{padding:24px 16px 100px;gap:20px;}
+    .nav-bar{flex-direction:column;gap:12px;align-items:flex-start;padding:12px 14px;}
+    .nav-links{width:100%;justify-content:space-between;}
+    .nav-link{padding:4px 6px;font-size:11px;letter-spacing:.1em;}
+    .page-header{padding:16px 18px;margin-bottom:20px;}
+    .vt323-title{font-size:28px;}
+    .crew-grid{grid-template-columns:1fr;}
+    .ascii-block{font-size:11px;}
+    #vignette{background:radial-gradient(ellipse 110% 110% at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
+    #amber-tint{opacity:.6;}
+    #poweron{display:none;}
+    #os,#clock{bottom:60px;font-size:9px;letter-spacing:.14em;}
+    #terminal{padding:10px 12px;font-size:12px;}
+    #terminal .hint{display:none;}
+}
+@media(max-width:440px){
+    #crt-container{padding:14px 8px 90px;}
+    .vt323-title{font-size:22px;}
+    .page-header .subtitle{font-size:11px;}
+    .section{padding:16px;}
+    .section h2{font-size:20px;}
+    .ascii-block{font-size:9px;}
+    #terminal{padding:8px 10px;font-size:11px;gap:6px;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="amber"></div>
-<div id="scanlines"></div>
+<!-- Fisheye SVG filter -->
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+            <feImage
+                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
+                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+            <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>
+</svg>
 
-<div id="crt-container">
+<div id="bezel"></div>
 
-  <div id="about-content">
-    <div class="section">
-      <h2>About Fractured Studios</h2>
-      <p>Welcome to Fractured Studios. This is the place where we experiment with retro-styled interfaces, immersive experiences, and innovative web design. Here you can customize this section with your project details, team, or story.</p>
-      <img src="team-placeholder.png" alt="Team Image">
+<div id="screen-wrap">
+
+    <div id="screen">
+        <div id="screen-scroll">
+            <div id="crt-container">
+
+                <!-- TOP NAV -->
+                <div class="nav-bar panel">
+                    <div class="nav-brand">FRACTURED_STUDIOS // SYS_SUB_NET</div>
+                    <div class="nav-links">
+                        <a href="index.html" class="nav-link">HOME</a>
+                        <a href="about.html" class="nav-link active">ABOUT</a>
+                        <a href="games.html" class="nav-link">GAMES</a>
+                        <a href="blog.html" class="nav-link">BLOG</a>
+                        <a href="contact.html" class="nav-link">CONTACT</a>
+                    </div>
+                </div>
+
+                <!-- PAGE HEADER -->
+                <div class="page-header panel">
+                    <div class="header-left">
+                        <h1 class="vt323-title text-flicker">ABOUT // FRACTURED_STUDIOS<span class="cursor">_</span></h1>
+                        <p class="subtitle" id="typing-subtitle"></p>
+                    </div>
+                    <div class="header-right">
+                        <span class="tag">DOSSIER.09</span>
+                        <span class="tag blink">DECLASSIFIED</span>
+                    </div>
+                </div>
+
+                <!-- MAIN LAYOUT -->
+                <div class="about-layout">
+
+                    <!-- LEFT: PROFILE, CREW, TIMELINE -->
+                    <div class="about-main">
+
+                        <!-- STUDIO PROFILE -->
+                        <div class="section panel">
+                            <div class="section-header">
+                                <span>FILE_ID // 001_STUDIO_PROFILE</span>
+                                <span>SEC_CLR_A</span>
+                            </div>
+                            <h2>&gt; WHO_WE_ARE</h2>
+
+<div class="ascii-block">   ______              __                        __
+  / ____/________ ____/ /___  __________  ____/ /
+ / /_  / ___/ __ `/ __  / __ \/ ___/ __ \/ __  /
+/ __/ / /  / /_/ / /_/ / /_/ / /  / /_/ / /_/ /
+\/    \/   \____/\____/\____/\/   \____/\____/  STUDIOS</div>
+
+                            <p>
+                                Fractured Studios is a three-person independent developer building narrative-driven, atmosphere-first games from a small workshop on the fringe of the subnet. We specialize in tactile retro-futures — heavy switches, glowing phosphor terminals, and the low mechanical hum of instruments that feel like they might actually stop working.
+                            </p>
+                            <p>
+                                Our flagship project, <span style="color:var(--amberBright);text-shadow:0 0 4px var(--amber);">THE IRON FRONTIER</span>, is a cold-war-era puzzle adventure set on the storm-locked surface of Venus. Two stranded cosmonauts. Deteriorating Soviet telemetry. A dense sulfuric atmosphere that eats radio signals for breakfast. Survival is a matter of typing the right command at the right moment.
+                            </p>
+                            <p>
+                                We ship slowly. We ship deliberately. We ship things worth waiting for.
+                            </p>
+                        </div>
+
+                        <!-- CREW -->
+                        <div class="section panel">
+                            <div class="section-header">
+                                <span>FILE_ID // 002_PERSONNEL_ROSTER</span>
+                                <span>ACTIVE: 03</span>
+                            </div>
+                            <h2>&gt; THE_CREW</h2>
+                            <p style="margin-bottom:18px;">Three operators. One channel. Zero corporate oversight.</p>
+
+                            <div class="crew-grid">
+                                <div class="crew-card">
+                                    <div class="crew-avatar">01</div>
+                                    <div class="crew-name">V. KIRIN</div>
+                                    <div class="crew-role">FOUNDER / DIRECTION</div>
+                                    <p class="crew-bio">Sets the compass. Writes the lore. Argues about which shade of amber is the correct shade of amber.</p>
+                                    <div class="crew-bar"></div>
+                                </div>
+                                <div class="crew-card">
+                                    <div class="crew-avatar">02</div>
+                                    <div class="crew-name">M. HELIOS</div>
+                                    <div class="crew-role">SYSTEMS / ENGINE</div>
+                                    <p class="crew-bio">Builds the guts. Custom Unreal branch, CRT shader pipeline, cockpit terminal logic. Speaks fluent HLSL.</p>
+                                    <div class="crew-bar"></div>
+                                </div>
+                                <div class="crew-card">
+                                    <div class="crew-avatar">03</div>
+                                    <div class="crew-name">S. VESPER</div>
+                                    <div class="crew-role">ART / AUDIO</div>
+                                    <p class="crew-bio">Draws the ruins. Records the wind. Turns silence into pressure. Owns three broken tape decks on purpose.</p>
+                                    <div class="crew-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TIMELINE -->
+                        <div class="section panel">
+                            <div class="section-header">
+                                <span>FILE_ID // 003_OPERATIONAL_HISTORY</span>
+                                <span>CHRONO_LOG</span>
+                            </div>
+                            <h2>&gt; TIMELINE</h2>
+
+                            <div class="timeline">
+                                <div class="tl-item">
+                                    <div class="tl-date">1987.03</div>
+                                    <div class="tl-title">STUDIO_INIT</div>
+                                    <p class="tl-body">Fractured Studios boots for the first time in a rented basement. Two folding chairs. One CRT. A single working coffee ration.</p>
+                                </div>
+                                <div class="tl-item">
+                                    <div class="tl-date">1988.08</div>
+                                    <div class="tl-title">FIRST_TRANSMISSION</div>
+                                    <p class="tl-body">Prototype short "SIGNAL_DECAY" released on the subnet. Wins nothing. Loved by seventeen strangers. Enough to keep going.</p>
+                                </div>
+                                <div class="tl-item">
+                                    <div class="tl-date">1989.10</div>
+                                    <div class="tl-title">PROJECT_IRONFRONTIER_BEGINS</div>
+                                    <p class="tl-body">Pre-production ends. Codebase forked. Cockpit console prototype boots. Grayboxing of Outpost Kedr starts.</p>
+                                </div>
+                                <div class="tl-item">
+                                    <div class="tl-date">1989.11</div>
+                                    <div class="tl-title">COMBAT_ALPHA</div>
+                                    <p class="tl-body">First hazard-defense playtest. Terminal-driven turret control system holds under fire. Playtesters report elevated pulse rates.</p>
+                                </div>
+                                <div class="tl-item">
+                                    <div class="tl-date">199X.??</div>
+                                    <div class="tl-title">IRON_FRONTIER // LAUNCH</div>
+                                    <p class="tl-body">Date classified. When the signal is clean, we press ENTER.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT: STATS / STACK / MISSION -->
+                    <div class="about-sidebar">
+
+                        <div class="sidebar-widget panel">
+                            <div class="widget-header text-flicker">&gt; STATS</div>
+                            <table class="stats-table">
+                                <tr><td class="stat-lbl">FOUNDED:</td><td class="stat-val">1987</td></tr>
+                                <tr><td class="stat-lbl">OPERATORS:</td><td class="stat-val">003</td></tr>
+                                <tr><td class="stat-lbl">PROJECTS_LIVE:</td><td class="stat-val">001</td></tr>
+                                <tr><td class="stat-lbl">SECTOR:</td><td class="stat-val">VENUS-IV</td></tr>
+                                <tr><td class="stat-lbl">STATUS:</td><td class="stat-val" style="color:var(--amberBright);text-shadow:0 0 5px var(--amber);">ONLINE</td></tr>
+                                <tr><td class="stat-lbl">CAFFEINE:</td><td class="stat-val">CRITICAL</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="sidebar-widget panel">
+                            <div class="widget-header text-flicker">&gt; STACK</div>
+                            <ul class="stack-list">
+                                <li><span>UNREAL_ENGINE</span><span class="lvl">PRIMARY</span></li>
+                                <li><span>HLSL / SHADERS</span><span class="lvl">HEAVY</span></li>
+                                <li><span>C++ / BLUEPRINT</span><span class="lvl">CORE</span></li>
+                                <li><span>REAPER + FMOD</span><span class="lvl">AUDIO</span></li>
+                                <li><span>ASEPRITE</span><span class="lvl">ART</span></li>
+                                <li><span>OBSIDIAN</span><span class="lvl">LORE</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="sidebar-widget panel">
+                            <div class="widget-header text-flicker">&gt; MISSION</div>
+                            <ul class="mission-list">
+                                <li><span class="mk">[01]</span> Build slow. Build heavy.</li>
+                                <li><span class="mk">[02]</span> Atmosphere before spectacle.</li>
+                                <li><span class="mk">[03]</span> Every switch must click.</li>
+                                <li><span class="mk">[04]</span> Silence is a mechanic.</li>
+                                <li><span class="mk">[05]</span> Ship it when it hums.</li>
+                            </ul>
+                        </div>
+
+                        <div class="cta-panel panel">
+                            <div class="cta-header">&gt; OPEN_CHANNEL</div>
+                            <p class="cta-body">
+                                Reach the studio. Read the latest transmissions. Watch the frontier boot up in real time.
+                            </p>
+                            <div class="cta-actions">
+                                <a href="contact.html" class="cta-btn primary">CONTACT_US</a>
+                                <a href="blog.html" class="cta-btn">READ_DEVLOGS</a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-      <h2>Our Mission</h2>
-      <p>We strive to create unique interactive experiences that combine classic visual aesthetics with modern functionality. Customize this section with your mission statement, goals, or philosophy.</p>
+    <!-- CRT FX -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+    <div id="poweron"></div>
+
+    <div id="clock">SYS :: --:--:--</div>
+    <div id="os">UIC OS v1.0.4</div>
+
+    <div id="terminal">
+        <span class="chev">&gt;</span>
+        <input id="cmd" placeholder="type command...">
+        <span class="hint">HOME • ABOUT • GAMES • BLOG • CONTACT</span>
     </div>
 
-    <div class="section">
-      <h2>History</h2>
-      <p>UIC Systems was founded to explore creative ways of merging retro design with modern technology. You can expand this section with timeline entries, milestones, or historical notes.</p>
-    </div>
-
-    <div class="section">
-      <h2>Gallery / Media</h2>
-      <p>Include screenshots, concept art, or other media here to showcase your work.</p>
-      <img src="placeholder-image.png" alt="Sample Media">
-    </div>
-
-    <div class="section">
-      <h2>Contact / Links</h2>
-      <p>Add links to social media, your website, or any other external resources here.</p>
-    </div>
-  </div>
-
-  <div id="terminal-box">
-    <div id="terminal"></div>
-    <div id="prompt">
-      <span>></span>
-      <input id="cmd" autocomplete="off">
-    </div>
-    <p style="margin-top:10px;opacity:.6">
-      Available terms: About, Games, Contact
-    </p>
-  </div>
 </div>
 
-<div id="os">UIC OS v1.0.4</div>
+<div id="bezel-label">FRACTURED • MODEL FR-77</div>
+<div id="brand-led"></div>
 
 <script>
-// ELEMENTS
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
 const container = document.getElementById("crt-container");
-const os = document.getElementById("os");
+const clock = document.getElementById("clock");
 
-// COMMAND LOGOS
-const commandLogos = {
-  about: "logo-about.png",
-  games: "logo-games.png",
-  contact: "logo-contact.png"
-};
+/* Screen tilt (rAF-throttled) */
+let tiltPending = false;
+let lastX = window.innerWidth/2;
+let lastY = window.innerHeight/2;
 
-let pendingCommand = null;
+function scheduleTilt(){
+    if(tiltPending) return;
+    tiltPending = true;
+    requestAnimationFrame(()=>{
+        const rx = (window.innerHeight/2 - lastY)/1200;
+        const ry = (window.innerWidth/2  - lastX)/1200;
+        container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        tiltPending = false;
+    });
+}
+function applyTilt(x,y){ lastX=x; lastY=y; scheduleTilt(); }
+document.addEventListener("mousemove",(e)=>applyTilt(e.clientX,e.clientY),{passive:true});
+document.addEventListener("touchmove",(e)=>{const t=e.touches[0];applyTilt(t.clientX,t.clientY);},{passive:true});
 
-// 3D tilt
-document.addEventListener("mousemove", e => {
-  const x = (window.innerWidth/2 - e.clientX)/400;
-  const y = (window.innerHeight/2 - e.clientY)/400;
-  container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  os.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-});
+/* Clock */
+function tickClock(){
+    const d = new Date();
+    const pad = n=>n.toString().padStart(2,"0");
+    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+setInterval(tickClock,1000);
+tickClock();
 
-// COMMAND HANDLER
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
-
-  const value = input.value.toLowerCase().trim();
-  terminal.innerHTML += `&gt; ${value}<br>`;
-  input.value = "";
-
-  if (pendingCommand) {
-    if (value === "y") {
-      window.location = pendingCommand + ".html";
-    } else {
-      terminal.innerHTML += "Cancelled.<br>";
+/* Terminal command line */
+const input = document.getElementById("cmd");
+input.addEventListener("keydown", e=>{
+    if(e.key === "Enter"){
+        const v = input.value.toLowerCase().trim();
+        if(v === "home") window.location = "index.html";
+        if(v === "about") window.location = "about.html";
+        if(v === "games") window.location = "games.html";
+        if(v === "contact") window.location = "contact.html";
+        if(v === "blog") window.location = "blog.html";
+        input.value = "";
     }
-    pendingCommand = null;
-    terminal.scrollTop = terminal.scrollHeight;
-    return;
-  }
-
-  if (commandLogos[value]) {
-    pendingCommand = value;
-    terminal.innerHTML += "Confirm? (Y/N)<br>";
-  } else {
-    terminal.innerHTML += "Unknown command<br>";
-  }
-  terminal.scrollTop = terminal.scrollHeight;
 });
+
+/* Typing subtitle */
+const textToType = "> SYSTEM: DECRYPTING PERSONNEL DOSSIERS...";
+const subtitleElem = document.getElementById("typing-subtitle");
+let charIndex = 0;
+function typeWriter(){
+    if(charIndex < textToType.length){
+        subtitleElem.textContent += textToType.charAt(charIndex);
+        charIndex++;
+        setTimeout(typeWriter, 40);
+    }
+}
+setTimeout(typeWriter, 1600);
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
