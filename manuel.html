@@ -48,12 +48,13 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
   position:absolute;inset:0;
   padding:22px 26px 78px;
   display:grid;
-  grid-template-rows:auto 1fr;
-  grid-template-columns:270px 1fr;
+  grid-template-rows:auto minmax(0,1fr);
+  grid-template-columns:270px minmax(0,1fr);
   gap:12px;
   z-index:2;
   transform-style:preserve-3d;
   transition:transform .1s ease-out;
+  min-height:0;
 }
 
 .panel{
@@ -919,6 +920,7 @@ setInterval(tickClock,1000);
 tickClock();
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
