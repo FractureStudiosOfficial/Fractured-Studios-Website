@@ -111,10 +111,730 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
 </style>
 </head>
 <body>
-<!-- Filled in by Edit -->
+
+<div id="bezel"></div>
+<div id="brand-led"></div>
+<div id="bezel-label">ROSCOSMOS &nbsp; MASS-DRIVER &nbsp; MODEL &Xi;-7 &nbsp; //&nbsp; VON BRAUN REC.MOD.4</div>
+
+<div id="screen-wrap">
+  <div id="screen">
+
+    <div id="stage">
+      <!-- Top HUD -->
+      <div class="hud">
+        <div class="brand">MASS&#8209;DRIVER<small>ROSCOSMOS TRAINING SIM &middot; VENUS LAUNCH CORRIDOR</small></div>
+        <div class="stats">
+          <div class="stat"><span class="k">SCORE</span><span class="v" id="s-score">000000</span></div>
+          <div class="stat"><span class="k">MULT</span><span class="v" id="s-mult">x1</span></div>
+          <div class="stat"><span class="k">CHAIN</span><span class="v" id="s-chain">00</span></div>
+          <div class="stat warn"><span class="k">STRIKES</span><span class="v" id="s-strikes">O O O</span></div>
+          <div class="stat"><span class="k">WAVE</span><span class="v" id="s-wave">01</span></div>
+        </div>
+      </div>
+
+      <!-- Playfield + side console -->
+      <div id="field-wrap">
+        <div id="field" class="panel"><canvas id="canvas"></canvas></div>
+        <div id="console" class="panel">
+          <h3>&#9670; CONTROL CONSOLE</h3>
+
+          <div class="gauge">
+            <div class="label"><span>TERRAFORM &Delta;</span><span class="v" id="g-terra">00%</span></div>
+            <div class="bar"><div class="fill green" id="g-terra-fill" style="width:0%"></div></div>
+          </div>
+          <div class="gauge">
+            <div class="label"><span>ACCELERATOR CHARGE</span><span class="v" id="g-charge">100%</span></div>
+            <div class="bar"><div class="fill" id="g-charge-fill" style="width:100%"></div></div>
+          </div>
+          <div class="gauge">
+            <div class="label"><span>LAUNCH WINDOW</span><span class="v" id="g-window">--</span></div>
+            <div class="bar"><div class="fill red" id="g-window-fill" style="width:0%"></div></div>
+          </div>
+
+          <div class="event-log" id="log"></div>
+
+          <div class="controls-hint">
+            <div><span class="k">&#9660;</span> <kbd>SPACE</kbd> / <kbd>&#9166;</kbd> FIRE ACCELERATOR</div>
+            <div><span class="k">&#9660;</span> <kbd>P</kbd> PAUSE &nbsp; <kbd>M</kbd> MUTE &nbsp; <kbd>R</kbd> RESET</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foot bar -->
+      <div id="foot-bar">
+        <a href="../index.html" class="tool-btn">&larr; RETURN TO REC.MODULE</a>
+        <button class="tool-btn" id="btn-mute">SOUND: ON</button>
+        <button class="tool-btn" id="btn-pause">PAUSE</button>
+        <span class="foot-note">&copy; 1987 ROSCOSMOS &middot; UNAUTHORIZED USE PROHIBITED &middot; PATENT SU 4429851</span>
+      </div>
+    </div>
+
+    <!-- Overlays -->
+    <div class="overlay" id="overlay-attract">
+      <div class="box">
+        <h1>MASS&#8209;DRIVER</h1>
+        <h2>&mdash; VENUS LAUNCH CORRIDOR SIMULATOR &mdash;</h2>
+        <p>Europa ice shipments arrive on a timed launch window.</p>
+        <p>Align <span style="color:var(--red)">ANGLE</span> &middot; <span style="color:var(--red)">PHASE</span> &middot; <span style="color:var(--red)">VELOCITY</span> into the GREEN band. Fire the accelerator.</p>
+        <p>Miss the window &rarr; payload burns up. THREE strikes ends the run.</p>
+        <div class="hs" id="hs-attract"></div>
+        <div class="cta">&#9654;&nbsp; PRESS &nbsp;<kbd style="border:1px solid var(--amber);padding:0 6px;">SPACE</kbd>&nbsp; TO INSERT COIN &nbsp;&#9664;</div>
+        <div class="footer-tag">&mdash;&nbsp;ROSCOSMOS&nbsp;&middot;&nbsp;VON&nbsp;BRAUN&nbsp;STATION&nbsp;REV&nbsp;3.14&nbsp;&mdash;</div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="overlay-pause">
+      <div class="box">
+        <h1>PAUSED</h1>
+        <h2>SYSTEM HALT &mdash; OPERATOR STANDBY</h2>
+        <p>Press <kbd style="border:1px solid var(--amber);padding:0 6px;">P</kbd> to resume the launch sequence.</p>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="overlay-over">
+      <div class="box">
+        <h1 style="color:var(--red)">GAME OVER</h1>
+        <h2 id="over-sub">CORRIDOR ABANDONED &mdash; PAYLOADS LOST</h2>
+        <p>FINAL SCORE: <span style="color:var(--amberBright);font-size:16px" id="over-score">000000</span></p>
+        <p>TERRAFORM CONTRIBUTION: <span style="color:var(--green)" id="over-terra">0%</span></p>
+        <div class="hs" id="hs-over"></div>
+        <div class="cta">PRESS &nbsp;<kbd style="border:1px solid var(--amber);padding:0 6px;">SPACE</kbd>&nbsp; TO RETRY</div>
+        <div class="footer-tag">&mdash;&nbsp;INCIDENT LOGGED TO ROSCOSMOS/VBS-4&nbsp;&mdash;</div>
+      </div>
+    </div>
+
+    <!-- CRT chrome -->
+    <div id="amber-tint"></div>
+    <div id="rgb-mask"></div>
+    <div id="scanlines"></div>
+    <div id="roll"></div>
+    <div id="corners"></div>
+    <div id="vignette"></div>
+    <div id="glare"></div>
+
+  </div>
+</div>
+
 <script>
-/* Filled in by Edit */
+/* ============================================================
+   MASS-DRIVER  —  in-universe arcade game
+   Diegetic: Roscosmos training simulator for Venus mass-driver
+   launch corridor.  Payloads from Europa; the controller aligns
+   ANGLE / PHASE / VELOCITY into the green window and fires.
+   ============================================================ */
+(() => {
+'use strict';
+
+// ---------- utilities ----------
+const $ = (id) => document.getElementById(id);
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const rand = (a,b)=>a+Math.random()*(b-a);
+const pad = (n,w)=>String(Math.floor(n)).padStart(w,'0');
+
+// ---------- audio (chiptune beep synth) ----------
+const Audio = (()=>{
+  let ctx=null, muted=false;
+  function ensure(){ if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+  function beep(freq=440,dur=.08,type='square',vol=.06,slide=0){
+    if(muted) return; ensure(); if(!ctx) return;
+    const t=ctx.currentTime;
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t);
+    if(slide){ o.frequency.exponentialRampToValueAtTime(Math.max(20,freq+slide),t+dur); }
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t+dur+.02);
+  }
+  function noise(dur=.14,vol=.05){
+    if(muted) return; ensure(); if(!ctx) return;
+    const t=ctx.currentTime;
+    const b=ctx.createBuffer(1, ctx.sampleRate*dur, ctx.sampleRate);
+    const d=b.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1 - i/d.length);
+    const s=ctx.createBufferSource(); s.buffer=b;
+    const g=ctx.createGain(); g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    s.connect(g); g.connect(ctx.destination);
+    s.start(t);
+  }
+  return {
+    fire(){ beep(660,.05,'square',.06,-260); beep(440,.06,'square',.05,-200); },
+    hit(){ beep(880,.06,'square',.07); beep(1320,.08,'square',.06); },
+    perfect(){ beep(880,.06,'square',.07); beep(1320,.06,'square',.06); beep(1760,.10,'square',.06); },
+    miss(){ noise(.20,.06); beep(180,.14,'sawtooth',.05,-100); },
+    tick(){ beep(1200,.015,'square',.02); },
+    coin(){ beep(988,.06,'square',.07); beep(1319,.08,'square',.06); beep(1568,.10,'square',.06); },
+    warn(){ beep(220,.09,'square',.05); beep(220,.09,'square',.05); },
+    over(){ beep(440,.12,'square',.07,-200); beep(330,.14,'square',.06,-160); beep(220,.20,'sawtooth',.05,-120); },
+    setMuted(m){ muted=!!m; },
+    resume(){ ensure(); if(ctx && ctx.state==='suspended') ctx.resume(); }
+  };
+})();
+
+// ---------- high-score table (localStorage) ----------
+const HS_KEY='massdriver.hs.v1';
+function loadHS(){
+  try{ const j=JSON.parse(localStorage.getItem(HS_KEY)||'[]'); if(Array.isArray(j)) return j; }catch(e){}
+  return [
+    {n:'YUR',s:48000},{n:'VAL',s:36500},{n:'SVE',s:24200},
+    {n:'GAG',s:18800},{n:'TER',s:12400},{n:'MIR',s:8000},
+    {n:'SOK',s:6000},{n:'OKB',s:4200},{n:'BUR',s:2500},{n:'ICE',s:1200}
+  ];
+}
+function saveHS(list){ try{ localStorage.setItem(HS_KEY, JSON.stringify(list.slice(0,10))); }catch(e){} }
+function submitHS(score){
+  const list=loadHS(); const n=(prompt('ENTER INITIALS (3 CHARS):','AAA')||'AAA').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3).padEnd(3,'A');
+  const entry={n,s:score,you:true};
+  list.push(entry); list.sort((a,b)=>b.s-a.s);
+  const out=list.slice(0,10); saveHS(out.map(e=>({n:e.n,s:e.s})));
+  return out;
+}
+function renderHS(elId, highlightScore=null){
+  const el=$(elId); if(!el) return;
+  const list=loadHS();
+  el.innerHTML = list.slice(0,8).map((e,i)=>{
+    const you = highlightScore!=null && e.s===highlightScore ? ' you':'';
+    return `<div class="row${you}"><span class="rank">${pad(i+1,2)}</span><span class="name">${e.n}</span><span class="sc">${pad(e.s,6)}</span></div>`;
+  }).join('');
+}
+
+// ---------- canvas setup ----------
+const cv=$('canvas'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){
+  const r=cv.getBoundingClientRect();
+  DPR=Math.min(2, window.devicePixelRatio||1);
+  cv.width=Math.max(320, Math.floor(r.width*DPR));
+  cv.height=Math.max(240, Math.floor(r.height*DPR));
+  W=cv.width; H=cv.height;
+  ctx.setTransform(1,0,0,1,0,0);
+}
+window.addEventListener('resize', resize);
+
+// ---------- game state ----------
+const STATE={ATTRACT:'attract', PLAY:'play', PAUSE:'pause', OVER:'over'};
+const S={
+  state:STATE.ATTRACT,
+  score:0, mult:1, chain:0, strikes:0, wave:1,
+  terra:0, charge:100,
+  windowRemaining:0, windowMax:0,   // per-payload timing
+  needles:null,                     // {angle,phase,velocity} each has pos/speed/dir/target lo/hi
+  payload:null,                     // current payload {arrived:t, dx, dy, alive}
+  starfield:[], particles:[], stars:[],
+  storms:[],
+  anomaly:null,                     // {type, until}
+  msg:'', msgUntil:0,
+  attractT:0,
+  paused:false,
+  lastFire:0,
+};
+
+// ---------- starfield / venus sky ----------
+function initStars(){
+  S.stars=[];
+  for(let i=0;i<80;i++) S.stars.push({x:Math.random(),y:Math.random()*.55, s:Math.random()*1.4+.3, tw:Math.random()*Math.PI*2});
+}
+
+// ---------- payload / wave ----------
+function newPayload(){
+  const w=S.wave;
+  // green-window widths shrink; needle speeds rise
+  const gw = clamp(0.28 - w*0.012, 0.10, 0.28);   // green band width
+  const spd = base => base + w*0.16;
+  S.needles = {
+    angle:    makeNeedle(spd(0.55), gw),
+    phase:    makeNeedle(spd(0.72), gw*0.92),
+    velocity: makeNeedle(spd(0.90), gw*0.85),
+  };
+  const wt = clamp(4.2 - w*0.20, 2.4, 4.2);
+  S.windowMax = wt; S.windowRemaining = wt;
+  S.payload = { alive:true, t:0, x:-0.2, y:0.22+Math.random()*0.08 };
+  S.msg = `INBOUND · EUROPA ICE PAYLOAD  BLOCK-${pad(1000+Math.floor(Math.random()*899),4)}`;
+  S.msgUntil = performance.now()+2200;
+  log(`> INBOUND PAYLOAD  BLOCK-${pad(1000+Math.floor(Math.random()*899),4)}`,'warn');
+  Audio.warn();
+  // maybe schedule an anomaly
+  if(Math.random()<0.20+w*0.02) scheduleAnomaly();
+}
+function makeNeedle(speed, greenW){
+  const center = 0.35 + Math.random()*0.30;
+  const lo = clamp(center-greenW/2, 0.05, 0.95-greenW);
+  const hi = lo + greenW;
+  return {
+    pos: Math.random(),
+    dir: Math.random()<.5?-1:1,
+    speed, greenLo:lo, greenHi:hi
+  };
+}
+function scheduleAnomaly(){
+  const kinds=[
+    {t:'DUST STORM',   fn:()=>{ // shift green windows
+      for(const k of ['angle','phase','velocity']){
+        const n=S.needles[k]; const w=n.greenHi-n.greenLo;
+        const c = clamp(rand(w/2+0.03, 1-w/2-0.03),0,1);
+        n.greenLo=c-w/2; n.greenHi=c+w/2;
+      }
+    }},
+    {t:'TURBULENCE',   fn:()=>{ // flip a random needle direction & double speed briefly
+      const key=['angle','phase','velocity'][Math.floor(Math.random()*3)];
+      S.needles[key].dir*=-1; S.needles[key].speed*=1.6;
+    }},
+    {t:'COIL JITTER',  fn:()=>{ // all needles jitter faster
+      for(const k of ['angle','phase','velocity']) S.needles[k].speed*=1.25;
+    }},
+  ];
+  const a = kinds[Math.floor(Math.random()*kinds.length)];
+  S.anomaly={ label:a.t, until: performance.now()+1800 };
+  a.fn();
+  log(`! ANOMALY DETECTED: ${a.label}`, 'err');
+  Audio.warn();
+}
+
+// ---------- fire / evaluate ----------
+function evaluate(){
+  const n=S.needles; if(!n||!S.payload||!S.payload.alive) return;
+  const inA = (n.angle.pos>=n.angle.greenLo && n.angle.pos<=n.angle.greenHi);
+  const inP = (n.phase.pos>=n.phase.greenLo && n.phase.pos<=n.phase.greenHi);
+  const inV = (n.velocity.pos>=n.velocity.greenLo && n.velocity.pos<=n.velocity.greenHi);
+  const good = [inA,inP,inV].filter(Boolean).length;
+
+  S.payload.alive=false;
+  S.lastFire = performance.now();
+  Audio.fire();
+
+  if(good===3){
+    S.chain++; S.mult = 1 + Math.floor(S.chain/3);
+    const pts = 300 * S.mult;
+    S.score += pts;
+    S.terra = clamp(S.terra + 3.5, 0, 100);
+    S.charge = clamp(S.charge + 12, 0, 100);
+    log(`+ PERFECT LOCK  +${pts}  x${S.mult}`,'ok');
+    Audio.perfect();
+    burst(0.6,'#8fff8a',40);
+    S.msg=`PERFECT LOCK · +${pts} · x${S.mult}`; S.msgUntil=performance.now()+1600;
+    nextPayloadSoon();
+  } else if(good===2){
+    S.chain++; S.mult = 1 + Math.floor(S.chain/3);
+    const pts = 120 * S.mult;
+    S.score += pts;
+    S.terra = clamp(S.terra + 1.5, 0, 100);
+    S.charge = clamp(S.charge + 6, 0, 100);
+    log(`+ PARTIAL CATCH  +${pts}`,'ok');
+    Audio.hit();
+    burst(0.6,'#ffd48a',20);
+    nextPayloadSoon();
+  } else if(good===1){
+    S.chain=0; S.mult=1;
+    const pts = 40;
+    S.score += pts;
+    log(`~ GLANCING HIT  +${pts}`,'warn');
+    Audio.hit();
+    burst(0.6,'#ff9f07',12);
+    nextPayloadSoon();
+  } else {
+    strike('MISFIRE · payload burned up');
+  }
+  if(S.terra>=100){
+    log('$$$ TERRAFORM MILESTONE  +5000','ok');
+    S.score+=5000; S.terra=0; S.wave++;
+    log(`>>> WAVE ${pad(S.wave,2)} · CORRIDOR TIGHTENING`,'warn');
+  }
+}
+function strike(reason){
+  S.strikes++; S.chain=0; S.mult=1;
+  S.charge = clamp(S.charge-18, 0, 100);
+  log(`X STRIKE ${S.strikes}/3 · ${reason}`,'err');
+  Audio.miss();
+  burst(0.7,'#ff4a2b',30);
+  if(S.strikes>=3){ gameOver(); }
+  else nextPayloadSoon();
+}
+function nextPayloadSoon(){
+  S.payload = null;
+  S.windowRemaining = 0;
+  setTimeout(()=>{ if(S.state===STATE.PLAY) newPayload(); }, 900);
+}
+
+// ---------- particles ----------
+function burst(x, color, n){
+  for(let i=0;i<n;i++){
+    S.particles.push({
+      x: x*W, y: H*0.62,
+      vx: (Math.random()*2-1)*W*0.0018,
+      vy: (Math.random()*2-1)*H*0.0018 - H*0.001,
+      life: 1, color,
+      size: Math.random()*2+1
+    });
+  }
+}
+
+// ---------- log ----------
+function log(text,cls){
+  const el=$('log'); const d=document.createElement('div');
+  d.className='ln'+(cls?' '+cls:''); d.textContent=text;
+  el.appendChild(d);
+  while(el.children.length>60) el.removeChild(el.firstChild);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ---------- game control ----------
+function startGame(){
+  S.state=STATE.PLAY;
+  S.score=0; S.mult=1; S.chain=0; S.strikes=0; S.wave=1;
+  S.terra=0; S.charge=100;
+  S.particles.length=0;
+  $('overlay-attract').classList.add('hidden');
+  $('overlay-over').classList.add('hidden');
+  $('overlay-pause').classList.add('hidden');
+  $('log').innerHTML='';
+  log('> SYSTEM ONLINE · VENUS CORRIDOR OPEN','ok');
+  log('> AWAITING TELEMETRY FROM EUROPA','warn');
+  Audio.resume(); Audio.coin();
+  newPayload();
+}
+function gameOver(){
+  S.state=STATE.OVER;
+  Audio.over();
+  log('=== CORRIDOR CLOSED ===','err');
+  $('over-score').textContent = pad(S.score,6);
+  $('over-terra').textContent = Math.floor(S.terra)+'%';
+  const list=submitHS(S.score);
+  renderHS('hs-over', S.score);
+  $('overlay-over').classList.remove('hidden');
+}
+function togglePause(){
+  if(S.state===STATE.PLAY){ S.state=STATE.PAUSE; $('overlay-pause').classList.remove('hidden'); }
+  else if(S.state===STATE.PAUSE){ S.state=STATE.PLAY; $('overlay-pause').classList.add('hidden'); }
+}
+function reset(){
+  S.state=STATE.ATTRACT; S.attractT=0;
+  $('overlay-attract').classList.remove('hidden');
+  $('overlay-over').classList.add('hidden');
+  $('overlay-pause').classList.add('hidden');
+  renderHS('hs-attract');
+}
+
+// ---------- input ----------
+window.addEventListener('keydown',(e)=>{
+  const k=e.key.toLowerCase();
+  if(k===' '||k==='enter'){
+    e.preventDefault();
+    if(S.state===STATE.ATTRACT || S.state===STATE.OVER){ startGame(); }
+    else if(S.state===STATE.PLAY){ evaluate(); }
+    else if(S.state===STATE.PAUSE){ togglePause(); }
+  } else if(k==='p'){ if(S.state===STATE.PLAY||S.state===STATE.PAUSE) togglePause(); }
+  else if(k==='m'){ toggleMute(); }
+  else if(k==='r'){ reset(); }
+});
+$('btn-pause').addEventListener('click',()=>{
+  if(S.state===STATE.ATTRACT||S.state===STATE.OVER) startGame();
+  else togglePause();
+});
+let muted=false;
+function toggleMute(){ muted=!muted; Audio.setMuted(muted); $('btn-mute').textContent = 'SOUND: '+(muted?'OFF':'ON'); }
+$('btn-mute').addEventListener('click', toggleMute);
+
+// click canvas to fire
+cv.addEventListener('pointerdown',()=>{
+  if(S.state===STATE.ATTRACT||S.state===STATE.OVER) startGame();
+  else if(S.state===STATE.PLAY) evaluate();
+});
+
+// ---------- update / render ----------
+let last=performance.now();
+function tick(now){
+  const dt = Math.min(0.05, (now-last)/1000); last=now;
+  update(dt, now);
+  render(now);
+  requestAnimationFrame(tick);
+}
+function update(dt, now){
+  if(S.state===STATE.ATTRACT){
+    S.attractT += dt;
+    return;
+  }
+  if(S.state!==STATE.PLAY) return;
+
+  // needles
+  const n=S.needles;
+  if(n){
+    for(const k of ['angle','phase','velocity']){
+      const nd=n[k];
+      nd.pos += nd.dir*nd.speed*dt;
+      if(nd.pos>1){ nd.pos=1; nd.dir=-1; }
+      if(nd.pos<0){ nd.pos=0; nd.dir= 1; }
+    }
+  }
+  // payload timer
+  if(S.payload && S.payload.alive){
+    S.windowRemaining -= dt;
+    S.payload.t += dt;
+    S.payload.x = clamp(-0.2 + S.payload.t*0.20, -0.2, 0.55);
+    // low-charge auto-drain
+    S.charge = clamp(S.charge - dt*1.2, 0, 100);
+    if(S.windowRemaining<=0){ strike('LAUNCH WINDOW EXPIRED'); }
+    else if(S.windowRemaining<1 && Math.random()<dt*4){ Audio.tick(); }
+  }
+  // anomaly clear
+  if(S.anomaly && now>S.anomaly.until){ S.anomaly=null; }
+
+  // particles
+  for(let i=S.particles.length-1;i>=0;i--){
+    const p=S.particles[i];
+    p.x+=p.vx*dt*60; p.y+=p.vy*dt*60;
+    p.vy += H*0.00006;
+    p.life -= dt*1.2;
+    if(p.life<=0) S.particles.splice(i,1);
+  }
+
+  // HUD DOM
+  $('s-score').textContent = pad(S.score,6);
+  $('s-mult').textContent  = 'x'+S.mult;
+  $('s-chain').textContent = pad(S.chain,2);
+  $('s-strikes').textContent = ['O O O','X O O','X X O','X X X'][clamp(S.strikes,0,3)];
+  $('s-wave').textContent = pad(S.wave,2);
+  $('g-terra').textContent = Math.floor(S.terra)+'%';
+  $('g-terra-fill').style.width = S.terra+'%';
+  $('g-charge').textContent = Math.floor(S.charge)+'%';
+  $('g-charge-fill').style.width = S.charge+'%';
+  const wp = S.windowMax>0 ? clamp(S.windowRemaining/S.windowMax,0,1)*100 : 0;
+  $('g-window').textContent = S.windowRemaining>0 ? S.windowRemaining.toFixed(1)+'s' : '--';
+  $('g-window-fill').style.width = wp+'%';
+}
+
+// ---------- rendering ----------
+function render(now){
+  if(cv.width!==cv.clientWidth*DPR || cv.height!==cv.clientHeight*DPR){ resize(); }
+  const w=W,h=H;
+  // sky / venus atmosphere
+  const g = ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#1a0508'); g.addColorStop(0.35,'#3a0e0a'); g.addColorStop(0.65,'#7a2c0a'); g.addColorStop(1,'#2a0703');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+
+  // stars
+  ctx.save();
+  for(const s of S.stars){
+    s.tw += 0.02;
+    const a = 0.4+0.5*Math.sin(s.tw);
+    ctx.globalAlpha = a*0.7;
+    ctx.fillStyle='#ffd48a';
+    ctx.fillRect(s.x*w, s.y*h, s.s*DPR, s.s*DPR);
+  }
+  ctx.restore();
+
+  // distant venus cloud strata (parallax)
+  ctx.save();
+  ctx.globalAlpha=0.35;
+  for(let i=0;i<6;i++){
+    const y = h*(0.30 + i*0.045);
+    const t = now*0.00003*(i+1);
+    ctx.fillStyle = i%2? 'rgba(255,120,50,.22)':'rgba(255,180,80,.14)';
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=8){
+      const yy = y + Math.sin((x*0.007) + t*10 + i)*4*DPR;
+      if(x===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy);
+    }
+    ctx.lineTo(w, y+30*DPR); ctx.lineTo(0, y+30*DPR);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+
+  // Floating island platform (bottom-left) — mass driver rail
+  drawPlatformAndRail(w,h,now);
+
+  // Payload (incoming ice block from Europa)
+  if(S.payload){
+    const px = S.payload.x*w + w*0.05;
+    const py = S.payload.y*h;
+    // trail
+    ctx.save();
+    ctx.globalAlpha=.5;
+    for(let i=0;i<8;i++){
+      ctx.fillStyle=`rgba(200,220,255,${.4-i*.045})`;
+      ctx.fillRect(px - i*10*DPR, py + i*1.5*DPR, 12*DPR, 8*DPR);
+    }
+    ctx.restore();
+    // ice block
+    ctx.fillStyle='#c6e6ff'; ctx.fillRect(px, py, 22*DPR, 14*DPR);
+    ctx.fillStyle='#8fbfe6'; ctx.fillRect(px, py+10*DPR, 22*DPR, 4*DPR);
+    ctx.fillStyle='#ffffff'; ctx.fillRect(px+2*DPR, py+2*DPR, 4*DPR, 3*DPR);
+    // label
+    ctx.fillStyle='rgba(255,220,180,.6)'; ctx.font=`${10*DPR}px "VT323",monospace`;
+    ctx.fillText('EUROPA-ICE', px, py-4*DPR);
+  }
+
+  // HUD gauges rendered on canvas (3 needles)
+  drawNeedles(w,h);
+
+  // Payload marker & big message
+  if(S.msg && performance.now()<S.msgUntil){
+    ctx.save();
+    ctx.font=`${18*DPR}px "VT323",monospace`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,74,43,.9)';
+    ctx.shadowColor='rgba(255,74,43,.6)'; ctx.shadowBlur=6*DPR;
+    ctx.fillText(S.msg, w/2, h*0.13);
+    ctx.restore();
+  }
+
+  // anomaly banner
+  if(S.anomaly){
+    ctx.save();
+    ctx.font=`${12*DPR}px "VT323",monospace`;
+    ctx.fillStyle = (Math.floor(now/120)%2) ? '#ff4a2b':'#ffb14a';
+    ctx.textAlign='center';
+    ctx.fillText('! '+S.anomaly.label+' !', w/2, h*0.20);
+    ctx.restore();
+  }
+
+  // Particles
+  for(const p of S.particles){
+    ctx.globalAlpha=clamp(p.life,0,1);
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x, p.y, p.size*DPR, p.size*DPR);
+  }
+  ctx.globalAlpha=1;
+
+  // Fire flash
+  if(now - S.lastFire < 120){
+    const k = 1 - (now-S.lastFire)/120;
+    ctx.fillStyle=`rgba(255,220,140,${k*0.25})`;
+    ctx.fillRect(0,0,w,h);
+  }
+
+  // Border tick marks
+  drawTicks(w,h);
+
+  if(S.state===STATE.ATTRACT){
+    drawAttract(now,w,h);
+  }
+}
+function drawTicks(w,h){
+  ctx.save();
+  ctx.strokeStyle='rgba(255,159,7,.30)';
+  ctx.lineWidth=1;
+  const step=24*DPR;
+  for(let x=0;x<w;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,6*DPR); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,h); ctx.lineTo(x,h-6*DPR); ctx.stroke(); }
+  for(let y=0;y<h;y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(6*DPR,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(w,y); ctx.lineTo(w-6*DPR,y); ctx.stroke(); }
+  ctx.restore();
+}
+function drawPlatformAndRail(w,h,now){
+  // Floating island silhouette
+  ctx.save();
+  const py = h*0.78;
+  ctx.fillStyle='#1a0a05';
+  ctx.beginPath();
+  ctx.moveTo(0, py);
+  ctx.lineTo(w*0.55, py);
+  ctx.lineTo(w*0.62, py+18*DPR);
+  ctx.lineTo(w*0.50, py+40*DPR);
+  ctx.lineTo(w*0.30, py+50*DPR);
+  ctx.lineTo(0, py+34*DPR);
+  ctx.closePath(); ctx.fill();
+
+  // rail
+  const rx0 = w*0.05, rx1 = w*0.62, ry = h*0.72;
+  ctx.strokeStyle='#ff9f07'; ctx.lineWidth=2*DPR;
+  ctx.beginPath(); ctx.moveTo(rx0, ry); ctx.lineTo(rx1, ry-14*DPR); ctx.stroke();
+  ctx.strokeStyle='rgba(255,159,7,.4)';
+  ctx.beginPath(); ctx.moveTo(rx0, ry+6*DPR); ctx.lineTo(rx1, ry-8*DPR); ctx.stroke();
+  // coils
+  for(let i=0;i<12;i++){
+    const t=i/11;
+    const x = rx0 + (rx1-rx0)*t;
+    const y = ry - t*14*DPR;
+    ctx.fillStyle= (S.state===STATE.PLAY && Math.floor(now/80+i)%3===0) ? '#ffc861':'#7a3a10';
+    ctx.fillRect(x-3*DPR, y-8*DPR, 6*DPR, 16*DPR);
+  }
+  // muzzle glow
+  const mg = ctx.createRadialGradient(rx1, ry-14*DPR, 0, rx1, ry-14*DPR, 40*DPR);
+  mg.addColorStop(0,'rgba(255,220,140,.7)'); mg.addColorStop(1,'rgba(255,220,140,0)');
+  ctx.fillStyle=mg; ctx.fillRect(rx1-40*DPR, ry-54*DPR, 80*DPR, 80*DPR);
+
+  // control tower
+  ctx.fillStyle='#2a1408'; ctx.fillRect(w*0.08, py-40*DPR, 12*DPR, 40*DPR);
+  ctx.fillStyle='#ff9f07'; ctx.fillRect(w*0.08+2*DPR, py-38*DPR, 8*DPR, 6*DPR);
+  ctx.restore();
+}
+function drawNeedles(w,h){
+  // Three horizontal gauges near bottom of canvas
+  const keys=['ANGLE','PHASE','VELOCITY'];
+  const names=['angle','phase','velocity'];
+  const gx = w*0.06, gy0 = h*0.84, gw = w*0.88, gh = 12*DPR;
+  const gap = 16*DPR;
+  ctx.save();
+  ctx.font=`${11*DPR}px "VT323",monospace`;
+  for(let i=0;i<3;i++){
+    const y = gy0 + i*(gh+gap);
+    const nd = S.needles ? S.needles[names[i]] : null;
+
+    // label
+    ctx.fillStyle='#ffc861'; ctx.textAlign='left';
+    ctx.fillText(keys[i], gx, y-3*DPR);
+    ctx.textAlign='right';
+    ctx.fillStyle='#ff9f07';
+    ctx.fillText(nd? (nd.pos>=nd.greenLo&&nd.pos<=nd.greenHi?'LOCK':'---'):'--', gx+gw, y-3*DPR);
+
+    // track
+    ctx.fillStyle='rgba(255,159,7,.08)';
+    ctx.fillRect(gx, y, gw, gh);
+    ctx.strokeStyle='rgba(255,159,7,.4)'; ctx.lineWidth=1;
+    ctx.strokeRect(gx+.5, y+.5, gw-1, gh-1);
+
+    // green window
+    if(nd){
+      const glx = gx + nd.greenLo*gw;
+      const gwd = (nd.greenHi-nd.greenLo)*gw;
+      const gg = ctx.createLinearGradient(glx, 0, glx+gwd, 0);
+      gg.addColorStop(0,'rgba(143,255,138,.55)');
+      gg.addColorStop(0.5,'rgba(143,255,138,.9)');
+      gg.addColorStop(1,'rgba(143,255,138,.55)');
+      ctx.fillStyle=gg;
+      ctx.fillRect(glx, y+1, gwd, gh-2);
+      // ticks in green window
+      ctx.fillStyle='rgba(0,0,0,.25)';
+      for(let t=0;t<gwd;t+=6*DPR){ ctx.fillRect(glx+t, y+2, 1*DPR, gh-4); }
+      // needle
+      const nx = gx + nd.pos*gw;
+      const inG = nd.pos>=nd.greenLo && nd.pos<=nd.greenHi;
+      ctx.fillStyle = inG ? '#ffffff' : '#ff4a2b';
+      ctx.fillRect(nx-2*DPR, y-3*DPR, 4*DPR, gh+6*DPR);
+      ctx.fillStyle = 'rgba(255,255,255,.7)';
+      ctx.fillRect(nx-1*DPR, y-1*DPR, 2*DPR, gh+2*DPR);
+    }
+    // tick marks
+    ctx.fillStyle='rgba(255,159,7,.5)';
+    for(let t=0;t<=10;t++){
+      const x = gx + (t/10)*gw;
+      ctx.fillRect(x, y+gh, 1, 3*DPR);
+    }
+  }
+  ctx.restore();
+}
+function drawAttract(now,w,h){
+  // extra pixel logo animation in the background
+  ctx.save();
+  ctx.globalAlpha = 0.4 + 0.2*Math.sin(now*0.003);
+  ctx.font=`${64*DPR}px "VT323",monospace`;
+  ctx.textAlign='center'; ctx.fillStyle='#ff4a2b';
+  ctx.shadowColor='rgba(255,74,43,.6)'; ctx.shadowBlur=12*DPR;
+  ctx.fillText('MASS-DRIVER', w/2, h*0.55);
+  ctx.restore();
+}
+
+// ---------- boot ----------
+window.addEventListener('load', ()=>{
+  resize(); initStars();
+  renderHS('hs-attract');
+  last=performance.now();
+  requestAnimationFrame(tick);
+});
+})();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
