@@ -2,600 +2,538 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U.I.C. // NAVAL ARCHIVE</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>U.I.C. // FLEET REGISTRY</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-
 <style>
 :root{
-    --amber:#FF9F07;
-    --amberBright:#FFC861;
-    --amberDim:#B36700;
-    --red:#ff4a2b;
-    --scanBlack:#0a0603;
+  --amber:#FF9F07;
+  --amberBright:#FFC861;
+  --amberDim:#B36700;
+  --red:#ff4a2b;
+  --green:#8fff8a;
+  --blue:#7fd6ff;
+  --paper:#ffcf88;
 }
-
-*{box-sizing:border-box;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;height:100%;background:#000;overflow:hidden;}
 body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400px;}
 
-/* ─── BEZEL ─── */
-#bezel{
-    position:fixed;inset:0;
-    background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);
-    z-index:0;
-}
-#bezel::before{
-    content:"";position:absolute;inset:0;
-    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
-    pointer-events:none;
-}
-#bezel-label{
-    position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
-    z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;
-    text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;
-}
-#brand-led{
-    position:fixed;bottom:16px;left:calc(50% - 180px);
-    width:6px;height:6px;border-radius:50%;
-    background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
-    animation:led-pulse 2.4s ease-in-out infinite;z-index:5;
-}
+/* BEZEL */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);z-index:0;}
+#bezel::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);pointer-events:none;}
+#bezel-label{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:5;letter-spacing:.35em;font-size:11px;color:#7a5230;text-shadow:0 1px 0 #000;font-family:'VT323',monospace;user-select:none;}
+#brand-led{position:fixed;bottom:16px;left:calc(50% - 180px);width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;animation:led-pulse 2.4s ease-in-out infinite;z-index:5;}
 @keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
 
-/* ─── SCREEN WRAP + FISHEYE ─── */
-#screen-wrap{
-    position:fixed;inset:22px;border-radius:48px/60px;background:#050505;
-    box-shadow:
-        0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,
-        0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);
-    overflow:hidden;transform-style:preserve-3d;isolation:isolate;
-}
-#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
+/* SCREEN */
+#screen-wrap{position:fixed;inset:22px;border-radius:48px/60px;background:#050505;
+  box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,
+    0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);
+  overflow:hidden;isolation:isolate;transform-style:preserve-3d;}
+#screen{position:absolute;inset:0;transform:scale(1.02);overflow:hidden;}
 
 /* CRT overlays */
-#glare{
-    position:absolute;inset:0;pointer-events:none;z-index:1200;
-    background:
-        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
-        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
-    mix-blend-mode:screen;
-}
-#vignette{
-    position:absolute;inset:0;pointer-events:none;z-index:1100;
-    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
-}
-#corners{
-    position:absolute;inset:0;pointer-events:none;z-index:1105;
-    background:
-        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
-}
+#glare{position:absolute;inset:0;pointer-events:none;z-index:1200;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);mix-blend-mode:screen;}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#corners{position:absolute;inset:0;pointer-events:none;z-index:1105;background:radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);}
 #scanlines,#amber-tint,#rgb-mask,#roll{position:absolute;inset:0;pointer-events:none;}
-#scanlines{
-    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);
-    animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;
-}
-#rgb-mask{
-    background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);
-    z-index:1250;mix-blend-mode:overlay;opacity:.6;
-}
-#roll{
-    background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);
-    z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;
-}
+#scanlines{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);animation:flicker .14s infinite;z-index:1300;mix-blend-mode:multiply;}
+#rgb-mask{background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);z-index:1250;mix-blend-mode:overlay;opacity:.55;}
+#roll{background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);z-index:1310;mix-blend-mode:screen;animation:roll 9s linear infinite;}
 @keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
 @keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
-#amber-tint{
-    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);
-    z-index:1150;mix-blend-mode:screen;
-}
-#poweron{
-    position:absolute;inset:0;background:#fff;z-index:2000;pointer-events:none;
-    animation:poweron 1.6s ease-out forwards;
-}
-@keyframes poweron{
-    0%{opacity:0;}5%{opacity:.9;}10%{opacity:.15;}
-    20%{transform:scaleY(.005);opacity:1;background:#fff;}
-    25%{transform:scaleY(1);opacity:.6;background:#ffb060;}
-    100%{transform:scaleY(1);opacity:0;background:#ffb060;}
-}
+#amber-tint{background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.03),rgba(255,80,0,.05) 80%);z-index:1150;mix-blend-mode:screen;}
 
-/* ─── PANEL BASE ─── */
-.panel{
-    position:relative;
-    border:2px solid rgba(255,159,7,.45);
-    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
-    box-shadow:
-        inset 0 0 30px rgba(255,159,7,.06),
-        inset 0 0 2px rgba(255,200,90,.25),
-        0 0 30px rgba(255,159,7,.08);
-    border-radius:6px;
-}
-.panel::before{
-    content:"";position:absolute;inset:8px;
-    border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;
-}
-.panel::after{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:
-        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
-    opacity:.7;
-}
-
-/* ─── MAIN CONTAINER ─── */
+/* MAIN GRID */
 #crt-container{
-    position:absolute;inset:0;
-    display:flex;align-items:stretch;justify-content:space-between;
-    padding:44px 56px 70px;gap:28px;
-    transform-style:preserve-3d;transition:transform .1s ease-out;
-    z-index:2;
+  position:absolute;inset:0;
+  padding:22px 26px 78px;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) 210px;
+  grid-template-columns:240px minmax(0,1fr) 300px;
+  gap:12px;z-index:2;
+  transform-style:preserve-3d;
+  transition:transform .1s ease-out;
+  min-height:0;
 }
 
-/* ─── LEFT — SHIP REGISTRY ─── */
-#registry-box{
-    width:58%;
-    display:flex;flex-direction:column;
-    padding:22px;
+.panel{
+  position:relative;
+  border:2px solid rgba(255,159,7,.45);
+  background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
+  box-shadow:inset 0 0 30px rgba(255,159,7,.06),inset 0 0 2px rgba(255,200,90,.25),0 0 30px rgba(255,159,7,.08);
+  border-radius:6px;
 }
-#registry-header{
-    display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid rgba(255,159,7,.3);
-    padding-bottom:10px;margin-bottom:16px;
+.panel::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:3px;z-index:0;}
+.panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
+  linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;opacity:.7;z-index:0;}
+.panel > *{position:relative;z-index:1;}
+
+/* HEADER */
+.hdr{
+  grid-column:1/-1;
+  padding:10px 18px;border:1px solid rgba(255,159,7,.4);
+  background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
 }
-#registry-header h1{
-    margin:0;font-size:20px;letter-spacing:.28em;
-    text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);
-}
-#registry-header .tag{
-    font-size:11px;color:var(--amberBright);letter-spacing:.2em;
-    padding:2px 8px;border:1px solid rgba(255,159,7,.4);
-    animation:tag-blink 1.8s steps(2) infinite;
-}
+.hdr .l{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hdr .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:led-pulse 1.6s ease-in-out infinite;}
+.hdr .ttl{font-size:15px;letter-spacing:.28em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.5);}
+.hdr .sub{font-size:10px;letter-spacing:.24em;color:var(--amberBright);padding-left:12px;border-left:1px dashed rgba(255,159,7,.3);opacity:.85;}
+.hdr .r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tag{font-size:10px;letter-spacing:.22em;padding:3px 8px;border:1px solid rgba(255,159,7,.4);color:var(--amberBright);}
+.tag.warn{border-color:rgba(255,74,43,.5);color:var(--red);animation:tag-blink 1.4s steps(2) infinite;}
+.tag.stamp{border-color:rgba(143,255,138,.4);color:var(--green);text-shadow:0 0 4px rgba(143,255,138,.35);}
 @keyframes tag-blink{50%{opacity:.35;}}
 
-/* Scrollable ship list */
-#ship-list{
-    flex:1;overflow-y:auto;scrollbar-width:none;
-    display:flex;flex-direction:column;gap:10px;
-    min-height:0;
-}
-#ship-list::-webkit-scrollbar{display:none;}
+/* RAIL */
+.rail{padding:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden;grid-row:2/4;grid-column:1;}
+.rail-head{display:flex;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.rail-head .tick{color:var(--red);}
+.rail-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:12px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;}
+.rail-head .bd{font-size:9px;letter-spacing:.22em;padding:2px 6px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
 
-/* ─── SHIP ENTRY ─── */
-.ship-entry{
-    position:relative;overflow:hidden;
-    padding:14px 18px;
-    border:1px solid rgba(255,159,7,.28);
-    background:linear-gradient(90deg,rgba(255,159,7,.04),rgba(0,0,0,.25));
-    display:flex;align-items:center;justify-content:space-between;gap:14px;
-    transition:.2s ease;cursor:default;
-}
-.ship-entry::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent,rgba(255,159,7,.06),transparent);
-    transform:translateX(-100%);transition:.55s ease;
-}
-.ship-entry:hover::before{transform:translateX(100%);}
-.ship-entry:hover{
-    background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(0,0,0,.35));
-    border-color:rgba(255,159,7,.5);
-    box-shadow:0 0 18px rgba(255,159,7,.08);
-}
-/* left bracket accent */
-.ship-entry::after{
-    content:"";position:absolute;left:0;top:0;bottom:0;
-    width:3px;
-    background:linear-gradient(180deg,transparent,var(--amber),transparent);
-    opacity:0;transition:.2s ease;
-}
-.ship-entry:hover::after{opacity:.7;}
+.ship-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;padding-right:4px;}
+.ship-list::-webkit-scrollbar{width:6px;}
+.ship-list::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
 
-.ship-left{display:flex;flex-direction:column;gap:4px;}
-.ship-designation{
-    font-size:11px;letter-spacing:.22em;opacity:.5;color:var(--amberBright);
+.ship-row{
+  display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;
+  padding:8px 10px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);
+  cursor:pointer;color:var(--amberBright);transition:.15s;font-size:11px;letter-spacing:.14em;text-align:left;font-family:inherit;
 }
-.ship-name{
-    font-size:16px;letter-spacing:.14em;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-.ship-meta{
-    font-size:11px;letter-spacing:.12em;opacity:.65;
-    display:flex;gap:14px;flex-wrap:wrap;margin-top:2px;
-}
-.ship-meta .sep{opacity:.35;}
+.ship-row .idx{font-family:'VT323',monospace;font-size:19px;color:var(--red);letter-spacing:.04em;text-shadow:0 0 6px rgba(255,74,43,.35);line-height:1;}
+.ship-row .rname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--amberBright);}
+.ship-row .rop{font-size:9px;letter-spacing:.16em;color:var(--red);opacity:.85;}
+.ship-row .st{width:8px;height:8px;border:1px solid rgba(255,159,7,.4);border-radius:50%;background:transparent;}
+.ship-row .st.ok{background:var(--green);box-shadow:0 0 6px var(--green);border-color:var(--green);}
+.ship-row .st.mth{background:var(--red);box-shadow:0 0 6px var(--red);border-color:var(--red);}
+.ship-row .st.arc{background:#7a5230;border-color:#7a5230;}
+.ship-row:hover{background:rgba(255,159,7,.1);border-color:rgba(255,159,7,.5);}
+.ship-row.on{background:rgba(255,74,43,.1);border-color:rgba(255,74,43,.55);color:var(--red);}
+.ship-row.on .rname{color:var(--red);}
 
-.ship-right{display:flex;align-items:center;gap:10px;}
-.ship-status{
-    font-size:10px;letter-spacing:.2em;padding:3px 8px;
-    border:1px solid rgba(255,159,7,.3);
-    color:var(--amberBright);opacity:.75;
-}
-.ship-status.active{
-    border-color:rgba(143,255,138,.4);color:#8fff8a;
-    text-shadow:0 0 5px rgba(143,255,138,.5);opacity:1;
-}
-.ship-status.decom{border-color:rgba(255,74,43,.35);color:#ff4a2b;opacity:.75;}
+.rail-foot{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,159,7,.25);display:flex;flex-direction:column;gap:4px;font-size:10px;letter-spacing:.14em;color:var(--amberBright);opacity:.8;}
+.lgd{display:flex;align-items:center;gap:8px;}
+.lg-dot{width:8px;height:8px;border-radius:50%;background:#333;}
+.lg-dot.ok{background:var(--green);box-shadow:0 0 5px var(--green);}
+.lg-dot.mth{background:var(--red);box-shadow:0 0 5px var(--red);}
+.lg-dot.arc{background:#7a5230;}
 
-.access-btn{
-    padding:8px 16px;
-    border:1px solid var(--amber);background:transparent;
-    color:var(--amber);font-family:inherit;letter-spacing:.14em;
-    cursor:pointer;font-size:12px;transition:.2s ease;
-    text-shadow:0 0 4px rgba(255,159,7,.5);position:relative;
+/* BLUEPRINT VIEWPORT */
+.blue{padding:0;display:flex;flex-direction:column;min-height:0;grid-row:2;grid-column:2;overflow:hidden;}
+.blue-head{
+  display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:stretch;
+  padding:8px 12px;border-bottom:1px dashed rgba(255,159,7,.28);
 }
-.access-btn::before{
-    content:"";position:absolute;inset:-3px;
-    border:1px solid rgba(255,159,7,.2);pointer-events:none;
+.stamp-block{
+  display:flex;flex-direction:column;gap:2px;font-size:10px;letter-spacing:.06em;
+  padding:4px 8px;border:1px solid rgba(255,159,7,.35);background:rgba(0,0,0,.45);font-family:'VT323',monospace;font-size:13px;
 }
-.access-btn:hover{
-    background:rgba(255,159,7,.14);
-    box-shadow:0 0 18px rgba(255,159,7,.25);
+.stamp-block .s-row{display:flex;gap:6px;}
+.stamp-block .k{color:var(--red);letter-spacing:.2em;font-size:9px;font-family:'Share Tech Mono',monospace;min-width:32px;}
+.stamp-block .v{color:var(--amberBright);}
+
+.title-block{display:flex;flex-direction:column;justify-content:center;padding:0 8px;border-left:1px dashed rgba(255,159,7,.25);border-right:1px dashed rgba(255,159,7,.25);}
+.title-block .tt-name{font-size:14px;letter-spacing:.24em;color:var(--red);text-shadow:0 0 6px rgba(255,74,43,.4);}
+.title-block .tt-sub{font-size:10px;letter-spacing:.2em;color:var(--amberBright);opacity:.85;margin-top:2px;}
+
+.view-tabs{display:flex;gap:3px;align-items:center;}
+.vtab{
+  padding:5px 8px;border:1px solid rgba(255,159,7,.4);background:rgba(255,159,7,.04);
+  font-family:inherit;color:var(--amberBright);cursor:pointer;font-size:10px;letter-spacing:.16em;
+  transition:.15s;
+}
+.vtab:hover{background:rgba(255,159,7,.15);}
+.vtab.on{background:rgba(255,74,43,.15);border-color:var(--red);color:var(--red);text-shadow:0 0 4px rgba(255,74,43,.4);}
+
+.blue-body{
+  position:relative;flex:1;min-height:0;
+  background:radial-gradient(ellipse at 50% 40%,rgba(255,159,7,.06),rgba(0,0,0,.55) 70%);
+  overflow:hidden;
+}
+.grid-bg{
+  position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background:
+    linear-gradient(0deg,transparent 0,transparent 39px,rgba(255,159,7,.18) 40px),
+    linear-gradient(90deg,transparent 0,transparent 39px,rgba(255,159,7,.18) 40px),
+    linear-gradient(0deg,transparent 0,transparent 7px,rgba(255,159,7,.05) 8px),
+    linear-gradient(90deg,transparent 0,transparent 7px,rgba(255,159,7,.05) 8px);
+  background-size:40px 40px,40px 40px,8px 8px,8px 8px;
+}
+#dwg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+#dwg .hull{fill:none;stroke:var(--amberBright);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(255,159,7,.5));}
+#dwg .fill{fill:rgba(255,159,7,.05);stroke:var(--amberBright);stroke-width:1.2;}
+#dwg .accent{fill:none;stroke:var(--red);stroke-width:1.2;}
+#dwg .accent-fill{fill:rgba(255,74,43,.12);stroke:var(--red);stroke-width:1.2;}
+#dwg .thin{fill:none;stroke:var(--amber);stroke-width:0.7;opacity:.75;}
+#dwg .win{fill:var(--green);opacity:.65;}
+#dwg .dim{stroke:var(--amber);stroke-width:0.8;opacity:.9;stroke-dasharray:4 3;}
+#dwg .dim-tick{stroke:var(--amber);stroke-width:1;}
+#dwg .dim-txt{fill:var(--amberBright);font-family:'VT323',monospace;font-size:12px;letter-spacing:.06em;}
+#dwg .cx{stroke:var(--red);stroke-width:.7;stroke-dasharray:6 3 1 3;opacity:.8;}
+#dwg .lbl{fill:var(--red);font-family:'VT323',monospace;font-size:13px;letter-spacing:.08em;}
+#dwg .cutaway{stroke-dasharray:2 2;}
+#dwg .flame{fill:url(#flame);opacity:.85;}
+#dwg .flame2{fill:url(#flame);opacity:.55;}
+#dwg .rev{stroke:var(--amber);stroke-width:.5;opacity:.35;}
+#dwg .plume{fill:var(--red);opacity:.4;}
+@keyframes dashmove{to{stroke-dashoffset:-40;}}
+#dwg .hull.trace{stroke-dasharray:800;stroke-dashoffset:800;animation:trace 1.4s ease-out forwards;}
+@keyframes trace{to{stroke-dashoffset:0;}}
+#dwg .blink{animation:blink 1.4s steps(2) infinite;}
+@keyframes blink{50%{opacity:.35;}}
+
+.callouts{position:absolute;inset:0;pointer-events:none;}
+.callout{
+  position:absolute;pointer-events:auto;
+  padding:4px 8px;font-size:10px;letter-spacing:.14em;
+  border:1px solid rgba(255,159,7,.4);background:rgba(0,0,0,.75);
+  color:var(--amberBright);white-space:nowrap;
+  transform:translate(-50%,-50%);
+  transition:.2s;
+}
+.callout .idx{color:var(--red);margin-right:6px;}
+.callout::before{
+  content:"";position:absolute;
+  background:var(--amber);
+}
+.callout.on{border-color:var(--red);color:var(--red);background:rgba(255,74,43,.15);text-shadow:0 0 4px rgba(255,74,43,.4);}
+.callout .line{position:absolute;background:var(--amber);height:1px;transform-origin:left center;opacity:.7;}
+
+.watermark{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-24deg);
+  font-family:'VT323',monospace;font-size:60px;letter-spacing:.3em;
+  color:rgba(255,74,43,.06);pointer-events:none;user-select:none;white-space:nowrap;
+}
+.draw-note{
+  position:absolute;bottom:6px;right:10px;
+  font-family:'VT323',monospace;font-size:11px;letter-spacing:.1em;
+  color:var(--amberBright);opacity:.65;
 }
 
-/* Registry footer note */
-#registry-note{
-    margin-top:12px;padding:10px 14px;
-    border:1px solid rgba(255,159,7,.15);
-    background:rgba(255,159,7,.03);
-    font-size:11px;letter-spacing:.14em;opacity:.55;
-    line-height:1.6;
+.blue-foot{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:6px 12px;border-top:1px dashed rgba(255,159,7,.28);
+  font-size:10px;letter-spacing:.14em;color:var(--amberBright);opacity:.85;
 }
+.dim-legend{display:flex;gap:16px;flex-wrap:wrap;}
+.dim-legend b{color:var(--red);margin-right:4px;}
+.revs .k{color:var(--red);letter-spacing:.2em;margin:0 3px 0 8px;}
 
-/* Prompt */
-#prompt{
-    display:flex;gap:10px;margin-top:12px;padding:10px 14px;
-    border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);
-    align-items:center;
+/* SPECS */
+.specs{padding:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden;grid-row:2/4;grid-column:3;}
+.spec-head{display:flex;align-items:center;gap:8px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px dashed rgba(255,159,7,.3);}
+.spec-head .tick{color:var(--red);}
+.spec-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:12px;text-shadow:0 0 4px rgba(255,159,7,.6);flex:1;}
+.spec-head .bd{font-size:9px;letter-spacing:.22em;padding:2px 6px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+.spec-body{flex:1;overflow-y:auto;min-height:0;padding-right:6px;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;}
+.spec-body::-webkit-scrollbar{width:6px;}
+.spec-body::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+
+.spec-body h3{
+  font-size:11px;letter-spacing:.28em;color:var(--red);margin:14px 0 6px;
+  padding-left:8px;border-left:2px solid var(--red);text-shadow:0 0 4px rgba(255,74,43,.35);
 }
-#prompt .chev{
-    color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.7);
-    animation:chev 1s steps(2) infinite;
+.spec-body h3:first-child{margin-top:0;}
+.spec-body .kv{
+  display:grid;grid-template-columns:88px 1fr;gap:6px;
+  padding:4px 6px;font-size:10px;letter-spacing:.1em;
+  border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);margin:3px 0;
 }
+.spec-body .kv .k{color:var(--red);letter-spacing:.18em;font-size:9px;}
+.spec-body .kv .v{color:var(--amberBright);}
+.spec-body .flavor{font-size:11px;line-height:1.5;letter-spacing:.06em;color:var(--amberBright);opacity:.94;text-shadow:0 0 2px rgba(255,159,7,.35);}
+.spec-body .flavor .rd{color:var(--red);}
+.spec-body .stamp-line{
+  display:flex;justify-content:space-between;gap:6px;margin:8px 0 4px;
+  font-size:10px;letter-spacing:.2em;color:var(--red);
+  padding:3px 6px;border:1px dashed rgba(255,74,43,.4);background:rgba(255,74,43,.04);
+}
+.spec-body .callout-list{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.spec-body .co-row{
+  display:grid;grid-template-columns:24px 1fr;gap:6px;padding:5px 7px;
+  border:1px solid rgba(255,159,7,.2);background:rgba(255,159,7,.03);
+  font-size:10px;letter-spacing:.08em;cursor:pointer;transition:.15s;
+}
+.spec-body .co-row:hover{background:rgba(255,159,7,.1);border-color:rgba(255,159,7,.5);}
+.spec-body .co-row .co-idx{color:var(--red);font-family:'VT323',monospace;font-size:14px;line-height:1;}
+.spec-body .co-row .co-name{color:var(--amberBright);}
+.spec-body .co-row.on{border-color:var(--red);background:rgba(255,74,43,.1);}
+
+.spec-foot{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(255,159,7,.25);}
+.mini-diag{
+  display:grid;grid-template-columns:60px 1fr;gap:8px;align-items:center;
+  padding:5px 6px;border:1px dashed rgba(255,159,7,.28);background:rgba(0,0,0,.35);
+  color:var(--amberBright);font-family:'VT323',monospace;font-size:11px;letter-spacing:.06em;
+}
+.mini-diag .k{color:var(--red);letter-spacing:.18em;font-size:9px;font-family:'Share Tech Mono',monospace;margin-right:4px;}
+
+/* LOG */
+.log{padding:10px 12px;grid-row:3;grid-column:2;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.log-head{display:flex;align-items:center;gap:8px;padding-bottom:6px;margin-bottom:8px;border-bottom:1px dashed rgba(255,159,7,.28);}
+.log-head .tick{color:var(--red);}
+.log-head .ttl{color:var(--amberBright);letter-spacing:.22em;font-size:11px;text-shadow:0 0 4px rgba(255,159,7,.6);}
+.log-body{display:grid;grid-template-columns:1fr 1fr 200px;gap:12px;flex:1;min-height:0;overflow:hidden;}
+.col-h{
+  font-size:10px;letter-spacing:.22em;color:var(--red);
+  padding-bottom:3px;margin-bottom:4px;border-bottom:1px dashed rgba(255,74,43,.3);
+}
+.log-list{
+  list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;
+  font-family:'VT323',monospace;font-size:14px;letter-spacing:.04em;line-height:1.4;
+  scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;
+}
+.log-list::-webkit-scrollbar{width:5px;}
+.log-list::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+.log-list li{color:var(--amberBright);padding:2px 0;border-bottom:1px dashed rgba(255,159,7,.1);}
+.log-list li .d{color:var(--red);margin-right:6px;}
+.log-list li .l{color:var(--green);}
+
+.disp{
+  overflow-y:auto;min-height:0;font-size:11px;letter-spacing:.08em;line-height:1.55;
+  color:var(--amberBright);padding-right:4px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;
+}
+.disp::-webkit-scrollbar{width:5px;}
+.disp::-webkit-scrollbar-thumb{background:rgba(255,159,7,.35);}
+.disp .rd{color:var(--red);}
+.disp .grn{color:var(--green);}
+.disp .kv2{display:grid;grid-template-columns:80px 1fr;gap:6px;padding:3px 5px;border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.03);margin:3px 0;font-size:10px;letter-spacing:.1em;}
+.disp .kv2 .k{color:var(--red);letter-spacing:.18em;font-size:9px;}
+.disp .kv2 .v{color:var(--amberBright);}
+
+/* CLAMP */
+.clamp{display:flex;flex-direction:column;gap:6px;height:100%;}
+.clamp-frame{position:relative;flex:1;min-height:60px;background:rgba(0,0,0,.4);border:1px dashed rgba(255,159,7,.28);overflow:hidden;}
+.clamp-hull{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:70px;height:24px;background:linear-gradient(180deg,var(--amberBright),var(--amber));border-radius:12px;box-shadow:0 0 8px rgba(255,159,7,.5);}
+.clamp-arm{position:absolute;top:50%;width:30px;height:6px;background:var(--red);box-shadow:0 0 6px rgba(255,74,43,.5);transition:.5s;transform:translateY(-50%);}
+.clamp-arm.l{left:20%;transform:translate(0,-50%);}
+.clamp-arm.r{right:20%;transform:translate(0,-50%);}
+.clamp-arm::before{content:"";position:absolute;right:-4px;top:-4px;width:8px;height:14px;background:var(--red);}
+.clamp-arm.r::before{right:auto;left:-4px;}
+.clamp-frame.releasing .clamp-arm.l{left:2%;}
+.clamp-frame.releasing .clamp-arm.r{right:2%;}
+.clamp-lbl{font-size:10px;letter-spacing:.14em;color:var(--amberBright);display:flex;flex-direction:column;gap:2px;}
+.clamp-lbl .k{color:var(--red);letter-spacing:.18em;font-size:9px;margin-right:4px;}
+
+/* TERMINAL BAR */
+#terminal{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:12px 20px;display:flex;gap:10px;align-items:center;
+  z-index:1003;border-top:2px solid rgba(255,159,7,.35);
+  background:linear-gradient(180deg,rgba(255,159,7,.06),rgba(0,0,0,.55));
+  flex-wrap:wrap;
+}
+#terminal .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
 @keyframes chev{50%{opacity:.3;}}
-#prompt input{
-    background:none;border:none;outline:none;color:var(--amber);
-    font:inherit;flex:1;text-shadow:0 0 4px rgba(255,159,7,.6);
-    caret-color:var(--amberBright);letter-spacing:.1em;
-}
-#available{
-    margin-top:10px;padding:10px 14px;
-    border:1px solid rgba(255,159,7,.18);background:rgba(255,159,7,.04);
-    opacity:.8;font-size:12px;letter-spacing:.12em;
-    display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
-}
-#available .k{color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.6);}
+#terminal .info{font-size:11px;letter-spacing:.2em;color:var(--amberBright);flex:1;min-width:0;}
+#terminal .info .k{color:var(--red);letter-spacing:.22em;margin-right:6px;}
+#terminal .info .pg{font-family:'VT323',monospace;font-size:16px;color:var(--amberBright);padding:0 6px;letter-spacing:.04em;}
+#terminal .btns{display:flex;gap:6px;flex-wrap:wrap;}
+.pnav{padding:6px 12px;border:1px solid var(--amber);color:var(--amber);background:transparent;font-family:inherit;cursor:pointer;letter-spacing:.16em;font-size:11px;text-decoration:none;transition:.15s;min-height:34px;display:inline-flex;align-items:center;gap:4px;}
+.pnav:hover,.pnav:focus{background:rgba(255,159,7,.15);color:var(--amberBright);outline:none;}
+.pnav[disabled]{opacity:.35;cursor:not-allowed;}
+.pnav.red{border-color:var(--red);color:var(--red);}
+.pnav.red:hover{background:rgba(255,74,43,.12);color:#ffd0c1;}
 
-/* ─── RIGHT — TELEMETRY PANEL ─── */
-#telem-box{
-    width:38%;
-    display:flex;flex-direction:column;
-    padding:22px;gap:16px;
-}
-#telem-header{
-    font-size:14px;letter-spacing:.3em;
-    padding-bottom:8px;border-bottom:1px solid rgba(255,159,7,.25);
-    display:flex;justify-content:space-between;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
+#os{position:absolute;bottom:60px;right:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
+#clock{position:absolute;bottom:60px;left:20px;font-size:10px;opacity:.7;z-index:1004;letter-spacing:.2em;}
 
-/* Reticle display frame */
-#telem-frame{
-    flex:1;position:relative;
-    display:flex;align-items:center;justify-content:center;
-    padding:20px;
-    background:
-        radial-gradient(circle at 50% 50%,rgba(255,159,7,.06),transparent 60%),
-        repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);
-    border:1px solid rgba(255,159,7,.22);overflow:hidden;
-    min-height:180px;
+/* MOBILE */
+@media(max-width:1024px){
+  #crt-container{grid-template-columns:200px minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;}
+  .rail{grid-column:1;grid-row:2/5;}
+  .blue{grid-column:2;grid-row:2;}
+  .specs{grid-column:2;grid-row:3;max-height:280px;}
+  .log{grid-column:2;grid-row:4;}
+  .log-body{grid-template-columns:1fr 1fr;}
+  .log-col:nth-child(3){display:none;}
 }
-#telem-frame::before{
-    content:"";position:absolute;inset:0;
-    background:
-        radial-gradient(circle,transparent 38%,rgba(255,159,7,.14) 38.5%,transparent 39.5%),
-        radial-gradient(circle,transparent 28%,rgba(255,159,7,.10) 28.5%,transparent 29.5%),
-        radial-gradient(circle,transparent 18%,rgba(255,159,7,.08) 18.5%,transparent 19.5%);
-    pointer-events:none;animation:reticle-spin 40s linear infinite;
-}
-#telem-frame::after{
-    content:"";position:absolute;inset:0;
-    background:
-        linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 50% 0/1px 100% no-repeat,
-        linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 0 50%/100% 1px no-repeat;
-    pointer-events:none;
-}
-@keyframes reticle-spin{to{transform:rotate(360deg);}}
-
-#telem-readout{
-    position:relative;z-index:2;text-align:center;
-    display:flex;flex-direction:column;gap:8px;align-items:center;
-}
-#telem-vessel-name{
-    font-family:'VT323',monospace;font-size:36px;letter-spacing:.18em;
-    color:var(--amberBright);
-    text-shadow:0 0 10px rgba(255,159,7,.7),0 0 24px rgba(255,140,0,.4);
-    animation:vessel-pulse 4s ease-in-out infinite;
-}
-@keyframes vessel-pulse{0%,100%{opacity:.85;}50%{opacity:1;}}
-#telem-vessel-type{font-size:11px;letter-spacing:.22em;opacity:.6;}
-#telem-vessel-origin{font-size:11px;letter-spacing:.2em;opacity:.55;color:var(--amberBright);}
-
-/* Stat tiles */
-#telem-stats{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-}
-.stat{
-    padding:8px 6px;border:1px solid rgba(255,159,7,.22);
-    background:rgba(255,159,7,.04);text-align:center;
-    font-size:10px;letter-spacing:.14em;position:relative;overflow:hidden;
-}
-.stat .val{
-    font-family:'VT323',monospace;font-size:20px;letter-spacing:.1em;
-    color:var(--amberBright);text-shadow:0 0 5px rgba(255,159,7,.6);
-    display:block;margin-bottom:2px;
-}
-.stat .bar{height:3px;margin-top:4px;background:rgba(255,159,7,.12);position:relative;overflow:hidden;}
-.stat .bar::before{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg,var(--amber),var(--amberBright));
-    animation:bar-fill 3.2s ease-in-out infinite alternate;
-    box-shadow:0 0 6px rgba(255,159,7,.7);
-}
-.stat:nth-child(2) .bar::before{animation-duration:2.4s;}
-.stat:nth-child(3) .bar::before{animation-duration:4.1s;}
-@keyframes bar-fill{0%{transform:translateX(-70%);}100%{transform:translateX(0%);}}
-
-/* Scrolling data feed */
-#telem-feed{
-    padding:10px 12px;border:1px solid rgba(255,159,7,.18);
-    background:rgba(0,0,0,.25);
-    font-size:11px;letter-spacing:.1em;line-height:1.7;
-    overflow:hidden;height:90px;position:relative;
-}
-#telem-feed::before{
-    content:"// LIVE FEED //";
-    position:absolute;top:6px;right:10px;
-    font-size:10px;letter-spacing:.2em;opacity:.4;
-}
-#feed-inner{position:absolute;width:calc(100% - 24px);}
-
-/* ─── OS / CLOCK ─── */
-#os{
-    position:absolute;bottom:16px;right:24px;font-size:12px;opacity:.8;
-    z-index:6;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-#clock{
-    position:absolute;bottom:16px;left:24px;font-size:12px;opacity:.8;
-    z-index:6;letter-spacing:.2em;text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-
-/* ─── RESPONSIVE ─── */
-@media(max-width:860px){
-    #crt-container{flex-direction:column;padding:24px 20px 60px;overflow-y:auto;}
-    #registry-box,#telem-box{width:100%;}
-    #screen-wrap{inset:10px;border-radius:32px/40px;}
-    #telem-frame{min-height:200px;}
+@media(max-width:760px){
+  html,body{overflow:auto;height:auto;min-height:100%;-webkit-text-size-adjust:100%;}
+  body{perspective:none;}
+  #bezel-label,#brand-led{display:none;}
+  #screen-wrap{position:relative;inset:auto;margin:6px;border-radius:14px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);min-height:calc(100vh - 12px);}
+  #screen{position:relative;inset:auto;transform:none;overflow:visible;}
+  #glare,#rgb-mask,#roll,#corners{display:none;}
+  #scanlines{opacity:.45;}
+  #amber-tint{opacity:.6;}
+  #crt-container{
+    position:relative;inset:auto;
+    grid-template-columns:1fr;grid-template-rows:auto auto auto auto auto;
+    padding:12px 10px 100px;gap:10px;min-height:calc(100vh - 20px);
+    transform:none !important;
+  }
+  .rail{grid-column:1;grid-row:2;padding:10px;}
+  .ship-list{flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:6px;padding:4px 2px 8px;flex:none;scroll-snap-type:x mandatory;}
+  .ship-row{min-width:170px;flex:0 0 auto;scroll-snap-align:start;}
+  .rail-foot{display:none;}
+  .blue{grid-column:1;grid-row:3;height:340px;}
+  .blue-head{grid-template-columns:1fr;gap:6px;}
+  .stamp-block{font-size:11px;}
+  .title-block{border:none;padding:0;}
+  .view-tabs{overflow-x:auto;}
+  .vtab{flex:0 0 auto;}
+  .specs{grid-column:1;grid-row:4;max-height:none;}
+  .log{grid-column:1;grid-row:5;}
+  .log-body{grid-template-columns:1fr;gap:8px;}
+  .log-col:nth-child(3){display:flex;flex-direction:column;}
+  .clamp-frame{min-height:80px;}
+  .hdr{padding:8px 12px;}
+  .hdr .ttl{font-size:13px;letter-spacing:.2em;}
+  .hdr .sub{font-size:9px;padding-left:8px;}
+  #terminal{padding:10px 12px;gap:6px;}
+  .pnav{font-size:10px;padding:6px 10px;letter-spacing:.12em;}
+  #os,#clock{bottom:76px;font-size:9px;letter-spacing:.14em;}
 }
 </style>
 </head>
-
 <body>
-
-<!-- Fisheye SVG filter -->
-<svg width="0" height="0" style="position:absolute">
-    <defs>
-        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
-            <feImage
-                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
-                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
-            <feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-    </defs>
-</svg>
 
 <div id="bezel"></div>
 
 <div id="screen-wrap">
-    <div id="screen">
-        <div id="crt-container">
+  <div id="screen">
 
-            <!-- ═══════════════ LEFT: SHIP REGISTRY ═══════════════ -->
-            <div id="registry-box" class="panel">
-                <div id="registry-header">
-                    <h1>U.I.C. NAVAL ARCHIVE</h1>
-                    <span class="tag">LIVE</span>
-                </div>
+    <div id="crt-container">
 
-                <div id="ship-list">
+      <!-- HEADER -->
+      <div class="hdr">
+        <div class="l">
+          <span class="dot"></span>
+          <span class="ttl">// FLEET REGISTRY</span>
+          <span class="sub">U.I.C. HANGAR OPS · SHEET 01/08 · REV 4.02</span>
+        </div>
+        <div class="r">
+          <span class="tag">SOL-v1</span>
+          <span class="tag stamp">CERTIFIED</span>
+          <span class="tag warn" id="year-tag">FY-1989</span>
+        </div>
+      </div>
 
-                    <div class="ship-entry" data-name="Soyuz" data-type="CREWED TRANSPORT" data-origin="USSR / RUSSIA" data-status="ACTIVE" data-crew="3" data-year="1966" data-href="soyuz.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-001 // SOYUZ CLASS</div>
-                            <div class="ship-name">Soyuz</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: USSR/RUSSIA</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 3</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1966–PRESENT</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status active">ACTIVE</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+      <!-- LEFT RAIL - ship selector -->
+      <aside class="rail panel" aria-label="Fleet index">
+        <div class="rail-head">
+          <span class="tick">◆</span>
+          <span class="ttl">HANGAR LIST</span>
+          <span class="bd" id="ship-count">08</span>
+        </div>
+        <div id="shipList" class="ship-list"></div>
+        <div class="rail-foot">
+          <div class="lgd"><span class="lg-dot ok"></span> OPERATIONAL</div>
+          <div class="lgd"><span class="lg-dot mth"></span> IN OVERHAUL</div>
+          <div class="lgd"><span class="lg-dot arc"></span> ARCHIVE</div>
+        </div>
+      </aside>
 
-                    <div class="ship-entry" data-name="Von Braun" data-type="DEEP SPACE CRUISER" data-origin="USA" data-status="ACTIVE" data-crew="12" data-year="1985" data-href="vonbraun.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-002 // VON BRAUN CLASS</div>
-                            <div class="ship-name">Von Braun</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: USA</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 12</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1985–PRESENT</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status active">ACTIVE</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+      <!-- CENTER - blueprint viewport -->
+      <section class="blue panel" aria-label="Blueprint viewport">
+        <div class="blue-head">
+          <div class="stamp-block">
+            <div class="s-row"><span class="k">DWG</span><span id="dwgId" class="v">TIF-SC-01</span></div>
+            <div class="s-row"><span class="k">SHT</span><span class="v">01 / 04</span></div>
+            <div class="s-row"><span class="k">SCL</span><span class="v" id="scaleLbl">1:120</span></div>
+          </div>
+          <div class="title-block">
+            <div class="tt-name" id="dwgName">SHIP NAME</div>
+            <div class="tt-sub"  id="dwgSub">CLASS · ROLE · OPERATOR</div>
+          </div>
+          <div class="view-tabs" role="tablist">
+            <button class="vtab on" data-v="port">PORT</button>
+            <button class="vtab"    data-v="top">TOP</button>
+            <button class="vtab"    data-v="bow">BOW</button>
+            <button class="vtab"    data-v="cut">CUTAWAY</button>
+          </div>
+        </div>
 
-                    <div class="ship-entry" data-name="Shenzhou" data-type="ORBITAL FERRY" data-origin="CHINA" data-status="ACTIVE" data-crew="3" data-year="1999" data-href="shenzhou.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-003 // SHENZHOU CLASS</div>
-                            <div class="ship-name">Shenzhou</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: CHINA</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 3</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1999–PRESENT</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status active">ACTIVE</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+        <div class="blue-body">
+          <div class="grid-bg"></div>
+          <svg id="dwg" viewBox="0 0 800 420" preserveAspectRatio="xMidYMid meet"></svg>
+          <div id="callouts" class="callouts"></div>
+          <div class="watermark" id="wm">FRACTURED — INTERNAL ONLY</div>
+          <div class="draw-note" id="drawNote">DRAWN BY U.I.C. AUTO-CAD · 1988.11.02 · REV D</div>
+        </div>
 
-                    <div class="ship-entry" data-name="Discovery One" data-type="LONG-RANGE EXPLORER" data-origin="USA" data-status="DECOM" data-crew="5" data-year="1974" data-href="discoveryone.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-004 // DISCOVERY CLASS</div>
-                            <div class="ship-name">Discovery One</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: USA</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 5</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1974–1992</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status decom">DECOM</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+        <div class="blue-foot">
+          <div class="dim-legend">
+            <span><b>◇</b> DIMENSIONS IN METRES</span>
+            <span><b>◇</b> MASSES IN METRIC TONNES</span>
+            <span><b>◇</b> ANGLES IN DEGREES</span>
+          </div>
+          <div class="revs">
+            <span class="k">REV</span> D · <span class="k">CHK</span> AUTO · <span class="k">APR</span> HANGAR-OPS
+          </div>
+        </div>
+      </section>
 
-                    <div class="ship-entry" data-name="ISS" data-type="ORBITAL PLATFORM" data-origin="INTERNATIONAL" data-status="ACTIVE" data-crew="7" data-year="1998" data-href="iss.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-005 // STATION CLASS</div>
-                            <div class="ship-name">ISS</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: INTERNATIONAL</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 7</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1998–PRESENT</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status active">ACTIVE</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+      <!-- RIGHT - specs sheet -->
+      <aside class="specs panel" aria-label="Spec sheet">
+        <div class="spec-head">
+          <span class="tick">◈</span>
+          <span class="ttl">DATA CARD</span>
+          <span class="bd">SPEC</span>
+        </div>
+        <div id="specsBody" class="spec-body"></div>
+        <div class="spec-foot">
+          <div class="mini-diag" aria-hidden="true">
+            <svg viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="1.4">
+              <rect x="2" y="2" width="56" height="36" rx="2"/>
+              <line x1="2" y1="12" x2="58" y2="12"/>
+              <text x="5" y="10" font-family="VT323" font-size="8" fill="currentColor" stroke="none">DATA CARD</text>
+              <line x1="6" y1="20" x2="30" y2="20"/>
+              <line x1="6" y1="26" x2="40" y2="26"/>
+              <line x1="6" y1="32" x2="22" y2="32"/>
+            </svg>
+            <div><span class="k">FORM</span> TIF-DC-04<br><span class="k">USE</span> INTERNAL</div>
+          </div>
+        </div>
+      </aside>
 
-                    <div class="ship-entry" data-name="Buran" data-type="ORBITAL SHUTTLE" data-origin="USSR" data-status="DECOM" data-crew="10" data-year="1988" data-href="buran.html">
-                        <div class="ship-left">
-                            <div class="ship-designation">REG-006 // BURAN CLASS</div>
-                            <div class="ship-name">Buran</div>
-                            <div class="ship-meta">
-                                <span>ORIGIN: USSR</span>
-                                <span class="sep">|</span>
-                                <span>CREW: 10</span>
-                                <span class="sep">|</span>
-                                <span>SERVICE: 1988–1993</span>
-                            </div>
-                        </div>
-                        <div class="ship-right">
-                            <div class="ship-status decom">DECOM</div>
-                            <button class="access-btn">ACCESS</button>
-                        </div>
-                    </div>
+      <!-- BOTTOM - service log + hangar status -->
+      <section class="log panel">
+        <div class="log-head">
+          <span class="tick">◇</span>
+          <span class="ttl">SERVICE LOG · HANGAR DISPOSITION</span>
+        </div>
+        <div class="log-body">
+          <div class="log-col">
+            <div class="col-h">RECENT ENTRIES</div>
+            <ul id="logList" class="log-list"></ul>
+          </div>
+          <div class="log-col">
+            <div class="col-h">CURRENT DISPOSITION</div>
+            <div id="disp" class="disp"></div>
+          </div>
+          <div class="log-col">
+            <div class="col-h">DOCKING CLAMP</div>
+            <div class="clamp">
+              <div class="clamp-frame">
+                <div class="clamp-arm l" id="clArmL"></div>
+                <div class="clamp-arm r" id="clArmR"></div>
+                <div class="clamp-hull"></div>
+              </div>
+              <div class="clamp-lbl">
+                <div><span class="k">CLAMP</span> <span id="clampState">ENGAGED</span></div>
+                <div><span class="k">UMBILICAL</span> <span id="umbState">CONNECTED</span></div>
+                <div><span class="k">FUEL LINE</span> <span id="fuelState">SEALED</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                </div><!-- /ship-list -->
+    </div>
 
-                <div id="registry-note">
-                    // NOTE: Some registry entries are partially corrupted or redacted. Clearance level 3+ required for full manifest access.
-                </div>
-
-                <div id="prompt">
-                    <span class="chev">&gt;</span>
-                    <input id="cmd" autocomplete="off" placeholder="ENTER COMMAND">
-                </div>
-                <div id="available">
-                    <span>AVAILABLE TERMS</span>
-                    <span>
-                        <span class="k">HOME</span> •
-                        <span class="k">SHIPS</span> •
-                        <span class="k">STATIONS</span> •
-                        <span class="k">ABOUT</span> •
-                        <span class="k">GAMES</span> •
-                        <span class="k">CONTACT</span>
-                    </span>
-                </div>
-            </div><!-- /registry-box -->
-
-            <!-- ═══════════════ RIGHT: TELEMETRY ═══════════════ -->
-            <div id="telem-box" class="panel">
-                <div id="telem-header">
-                    <span>// VESSEL TELEMETRY</span>
-                    <span id="signal-hz">60.00Hz</span>
-                </div>
-
-                <!-- Reticle frame with vessel readout -->
-                <div id="telem-frame">
-                    <div id="telem-readout">
-                        <div id="telem-vessel-name">— — —</div>
-                        <div id="telem-vessel-type">SELECT A VESSEL</div>
-                        <div id="telem-vessel-origin">// HOVER TO SCAN //</div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div id="telem-stats">
-                    <div class="stat">
-                        <span class="val" id="stat-crew">—</span>
-                        CREW CAP.
-                        <div class="bar"></div>
-                    </div>
-                    <div class="stat">
-                        <span class="val" id="stat-year">—</span>
-                        LAUNCH YR
-                        <div class="bar"></div>
-                    </div>
-                    <div class="stat">
-                        <span class="val" id="stat-status">—</span>
-                        STATUS
-                        <div class="bar"></div>
-                    </div>
-                </div>
-
-                <!-- Live feed -->
-                <div id="telem-feed">
-                    <div id="feed-inner"></div>
-                </div>
-
-            </div><!-- /telem-box -->
-
-        </div><!-- /crt-container -->
-    </div><!-- /screen -->
-
-    <!-- CRT overlays -->
+    <!-- CRT overlays (no fisheye — matches other UIC pages) -->
     <div id="amber-tint"></div>
     <div id="rgb-mask"></div>
     <div id="scanlines"></div>
@@ -603,113 +541,1186 @@ body{color:var(--amber);font-family:'Share Tech Mono',monospace;perspective:1400
     <div id="corners"></div>
     <div id="vignette"></div>
     <div id="glare"></div>
-    <div id="poweron"></div>
 
     <div id="clock">SYS ::</div>
     <div id="os">UIC OS v1.0.4</div>
+
+    <!-- BOTTOM NAV -->
+    <div id="terminal">
+      <span class="chev">&gt;</span>
+      <span class="info">
+        <span class="k">HULL</span><span class="pg" id="hullId">—</span>
+        &nbsp;·&nbsp;
+        <span class="k">MASS</span><span class="pg" id="massReadout">—</span>
+        &nbsp;·&nbsp;
+        <span class="k">STATUS</span><span class="pg" id="statusReadout">—</span>
+      </span>
+      <div class="btns">
+        <a class="pnav" href="terminal.html">◄ TERMINAL</a>
+        <button class="pnav" id="btnPrev">◄ PREV</button>
+        <button class="pnav red" id="btnNext">NEXT ►</button>
+        <a class="pnav" href="index.html">◈ HOME</a>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<div id="bezel-label">U.I.C. SYSTEMS • MODEL NR-88</div>
+<div id="bezel-label">U.I.C. • MODEL SOL-v1</div>
 <div id="brand-led"></div>
 
-<script>
-/* ─── CLOCK + HZ ─── */
-const clock = document.getElementById("clock");
-const hz    = document.getElementById("signal-hz");
-function tickClock(){
-    const d = new Date(), pad = n=>n.toString().padStart(2,"0");
-    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    hz.textContent = (59.90 + Math.random()*.2).toFixed(2)+"Hz";
-}
-setInterval(tickClock,1000);
-tickClock();
+<script id="ships-data">
+/* ============================================================
+   FLEET REGISTRY DATA — EDIT SHIPS HERE.
+   Each ship has:
+     id, name, class, role, operator, status ('ok'|'mth'|'arc'),
+     dwg (drawing prefix), year, dims{L,H,W}, mass, crew,
+     propellant, engines, thrust, isp, deltaV, launcher,
+     draw: { port:[shapes], top:[shapes], bow:[shapes], cut:[shapes] },
+        shape = {t:'path'|'rect'|'circle'|'poly'|'line', cls:'hull'|'fill'|'accent'|'accent-fill'|'thin'|'win'|'dim'|'lbl'|'cutaway', ...attrs}
+     callouts: [{id, part, note, x, y}] (0..1 in viewBox space)
+     flavor: prose blurb
+     dispo: docking bay/current status
+     log:  service log entries
+============================================================ */
 
-/* ─── CRT PARALLAX TILT ─── */
-const container = document.getElementById("crt-container");
-document.addEventListener("mousemove", e=>{
-    const x = (window.innerWidth/2  - e.clientX)/1200;
-    const y = (window.innerHeight/2 - e.clientY)/1200;
-    container.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-},{passive:true});
+const SHIPS = [
+  /* ---------- 01. VENETIAN MASS DRIVER CAPSULE ---------- */
+  {
+    id:"VMD",
+    name:"V.M.D.R. — VENUS MASS DRIVER CAPSULE",
+    cls:"CLASS-V RAIL CAPSULE",
+    role:"BULK LIFT · VENUS SURFACE → ORBIT",
+    operator:"USSR · VENERA SURFACE HAB.",
+    status:"ok",
+    dwg:"TIF-VMD-01",
+    year:1988,
+    dims:{L:14.2, H:3.8, W:3.8},
+    mass:"38.4 t (loaded) / 12.1 t (dry)",
+    crew:"UNMANNED · CARGO ONLY",
+    prop:"NONE — RAILGUN LAUNCH · ONBOARD RCS (N₂H₄)",
+    engines:"4× ATTITUDE THRUSTERS (12 kN ea)",
+    thrust:"MAG-RAIL PEAK 4.6 GN (0.4 s)",
+    isp:"— (impulse launch)",
+    dv:"2.8 km/s (post-launch trim only)",
+    launcher:"V.M.D.R. RAIL · APHRODITE PLATEAU",
+    flavor:"Bullet-shape ceramic-ablator capsule fired from the <span class='rd'>Venetian Mass Driver Rail</span> at the surface fab modules on Aphrodite Plateau. On rail exit it clears 11 km/s and burns off in the cloud deck before circularising at Venus orbit. Recovered by tugs from V.O.S.S. and the Floating Islands. Zero-crew — 30g launch profile.",
+    dispo:[
+      ["BAY","V.O.S.S. RECOVERY CRADLE 3"],
+      ["CYCLE","F-114 · 6 LAUNCHES REMAINING"],
+      ["ABLATOR","74% NOMINAL"],
+      ["NEXT","SHIP TO WATER FEEDSTOCK CACHE"],
+    ],
+    log:[
+      "88.11.02  RAIL SHOT F-108   OK",
+      "88.11.14  RAIL SHOT F-109   OK",
+      "88.12.02  RAIL SHOT F-110   ABL 3% LOSS",
+      "89.01.09  ABLATOR RECOAT    OK",
+      "89.02.11  RAIL SHOT F-111   OK",
+      "89.03.05  RAIL SHOT F-112   OK",
+      "89.04.20  RCS N2H4 REFILL   OK",
+      "89.05.14  RAIL SHOT F-113   OK",
+    ],
+    /* geometry (viewBox 0 0 800 420) */
+    draw:{
+      port:[
+        // trace-in hull (bullet capsule, nose right)
+        {t:"path",cls:"hull trace",d:"M 130 210 Q 130 145 250 135 L 640 135 Q 730 135 760 190 Q 730 245 640 245 L 250 245 Q 130 275 130 210 Z"},
+        // fins bottom
+        {t:"poly",cls:"accent-fill",p:"260,245 240,285 320,285 300,245"},
+        {t:"poly",cls:"accent-fill",p:"420,245 400,285 480,285 460,245"},
+        {t:"poly",cls:"accent-fill",p:"580,245 560,285 640,285 620,245"},
+        // ablator nose cap
+        {t:"path",cls:"accent",d:"M 720 152 Q 748 190 720 228"},
+        // rail sabot
+        {t:"rect",cls:"thin",x:145,y:255,w:120,h:14},
+        // window row
+        {t:"circle",cls:"win",cx:350,cy:190,r:3.5},
+        {t:"circle",cls:"win",cx:390,cy:190,r:3.5},
+        {t:"circle",cls:"win",cx:430,cy:190,r:3.5},
+        {t:"circle",cls:"win",cx:470,cy:190,r:3.5},
+        // rcs pods
+        {t:"rect",cls:"accent",x:250,y:120,w:12,h:16},
+        {t:"rect",cls:"accent",x:610,y:120,w:12,h:16},
+        // centerline
+        {t:"line",cls:"cx",x1:80,y1:190,x2:770,y2:190},
+        // dims
+        {t:"line",cls:"dim",x1:130,y1:340,x2:760,y2:340},
+        {t:"line",cls:"dim-tick",x1:130,y1:335,x2:130,y2:345},
+        {t:"line",cls:"dim-tick",x1:760,y1:335,x2:760,y2:345},
+        {t:"text",cls:"dim-txt",x:420,y:335,text:"14.20 m"},
+        {t:"line",cls:"dim",x1:790,y1:135,x2:790,y2:245},
+        {t:"line",cls:"dim-tick",x1:785,y1:135,x2:795,y2:135},
+        {t:"line",cls:"dim-tick",x1:785,y1:245,x2:795,y2:245},
+        {t:"text",cls:"dim-txt",x:770,y:195,text:"Ø 3.8"},
+        {t:"text",cls:"lbl",x:120,y:118,text:"V.M.D.R.-C  //  BULLET-04"},
+      ],
+      top:[
+        {t:"path",cls:"hull trace",d:"M 130 210 Q 130 155 240 145 L 640 145 Q 730 145 760 210 Q 730 275 640 275 L 240 275 Q 130 265 130 210 Z"},
+        {t:"poly",cls:"accent-fill",p:"270,275 240,320 310,320 290,275"},
+        {t:"poly",cls:"accent-fill",p:"590,275 570,320 640,320 610,275"},
+        {t:"poly",cls:"accent-fill",p:"270,145 240,100 310,100 290,145"},
+        {t:"poly",cls:"accent-fill",p:"590,145 570,100 640,100 610,145"},
+        {t:"line",cls:"cx",x1:60,y1:210,x2:770,y2:210},
+      ],
+      bow:[
+        {t:"circle",cls:"hull trace",cx:400,cy:210,r:130},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:110},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:90},
+        // fin cross
+        {t:"poly",cls:"accent-fill",p:"400,340 380,380 420,380"},
+        {t:"poly",cls:"accent-fill",p:"400,80  380,40  420,40"},
+        {t:"poly",cls:"accent-fill",p:"270,210 230,190 230,230"},
+        {t:"poly",cls:"accent-fill",p:"530,210 570,190 570,230"},
+        {t:"line",cls:"cx",x1:400,y1:60,x2:400,y2:360},
+        {t:"line",cls:"cx",x1:250,y1:210,x2:550,y2:210},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 130 210 Q 130 145 250 135 L 640 135 Q 730 135 760 190 Q 730 245 640 245 L 250 245 Q 130 275 130 210 Z"},
+        // cargo lattice
+        {t:"rect",cls:"thin cutaway",x:250,y:150,w:340,h:80},
+        {t:"line",cls:"thin cutaway",x1:290,y1:150,x2:290,y2:230},
+        {t:"line",cls:"thin cutaway",x1:340,y1:150,x2:340,y2:230},
+        {t:"line",cls:"thin cutaway",x1:390,y1:150,x2:390,y2:230},
+        {t:"line",cls:"thin cutaway",x1:440,y1:150,x2:440,y2:230},
+        {t:"line",cls:"thin cutaway",x1:490,y1:150,x2:490,y2:230},
+        {t:"line",cls:"thin cutaway",x1:540,y1:150,x2:540,y2:230},
+        // ablator forecap
+        {t:"path",cls:"accent-fill",d:"M 590 138 L 590 242 Q 730 245 760 190 Q 730 135 640 135 Z"},
+        // rcs tank
+        {t:"circle",cls:"accent-fill",cx:180,cy:190,r:18},
+        {t:"text",cls:"lbl",x:150,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"ABLATIVE NOSECAP",   note:"Ceramic ablator · rated 30g / 3400K", x:.86, y:.32},
+      {part:"CARGO BAY",          note:"Water · deuterium · surface-refined ore", x:.5, y:.28},
+      {part:"RCS QUAD",           note:"N₂H₄ hydrazine cold-gas trim", x:.31, y:.27},
+      {part:"STABILISER FINS",    note:"Ablator-tipped · retract post-atmos", x:.42, y:.72},
+      {part:"MAG-RAIL SABOT",     note:"Reusable sled · retained at rail", x:.22, y:.66},
+    ],
+  },
 
-/* ─── TELEMETRY HOVER ─── */
-const nameEl   = document.getElementById("telem-vessel-name");
-const typeEl   = document.getElementById("telem-vessel-type");
-const originEl = document.getElementById("telem-vessel-origin");
-const crewEl   = document.getElementById("stat-crew");
-const yearEl   = document.getElementById("stat-year");
-const statEl   = document.getElementById("stat-status");
+  /* ---------- 02. EUROPA MASS DRIVER CAPSULE ---------- */
+  {
+    id:"EMD",
+    name:"E.M.D. — EUROPA MASS DRIVER PROBE",
+    cls:"CLASS-V RAIL PROBE",
+    role:"WATER LIFT · EUROPA → SOLAR TRANSFER",
+    operator:"USA · EUROPA CLIPPER STATION",
+    status:"ok",
+    dwg:"TIF-EMD-01",
+    year:1989,
+    dims:{L:8.6, H:2.2, W:2.2},
+    mass:"9.4 t (loaded) / 3.1 t (dry)",
+    crew:"UNMANNED · WATER CANISTER",
+    prop:"H₂O SUBLIMATION TRIM · Xe ION",
+    engines:"1× ION MK-II · 2× SUBLIMATOR PORTS",
+    thrust:"92 mN (ion sustained)",
+    isp:"3100 s",
+    dv:"6.4 km/s (cruise budget)",
+    launcher:"E.M.D. RAIL · CLIPPER MASS-DRIVER FAB.",
+    flavor:"Slimmed cousin of the Venetian bullet, fired from the <span class='rd'>Europa Mass Driver Fabrication Station</span>. Rail-launched off Europa's low gravity, coasts inbound to Venus on a low-Δv solar transfer while an ion motor trims arrival. Its cargo — Europan water ice — feeds the Venetian terraforming pipeline. Every canister is a decade in the black.",
+    dispo:[
+      ["BAY","CLIPPER RAIL CHAMBER B"],
+      ["ROUND","F-041 · IN LOAD"],
+      ["CANISTER","4.2 t H₂O · SEALED"],
+      ["XENON","1.9 kg AT TANK"],
+    ],
+    log:[
+      "88.03.09  RAIL SHOT F-034   OK",
+      "88.07.02  RAIL SHOT F-035   OK",
+      "88.11.20  ION MK-II REFIT   OK",
+      "89.01.18  RAIL SHOT F-036   OK",
+      "89.04.02  RAIL SHOT F-037   OK",
+      "89.05.09  CANISTER SEAL Q/A OK",
+      "89.06.14  RAIL SHOT F-038   OK",
+      "89.08.02  CRUISE TRIM 041   AT LOAD",
+    ],
+    draw:{
+      port:[
+        {t:"path",cls:"hull trace",d:"M 140 210 Q 140 165 220 158 L 660 158 Q 720 158 750 210 Q 720 262 660 262 L 220 262 Q 140 255 140 210 Z"},
+        // canister ring
+        {t:"circle",cls:"accent",cx:350,cy:210,r:44},
+        {t:"circle",cls:"accent",cx:500,cy:210,r:44},
+        {t:"text",cls:"lbl",x:335,y:214,text:"H₂O"},
+        {t:"text",cls:"lbl",x:485,y:214,text:"H₂O"},
+        // ion drive
+        {t:"rect",cls:"accent-fill",x:140,y:198,w:22,h:24},
+        {t:"circle",cls:"accent",cx:130,cy:210,r:8},
+        // solar array booms
+        {t:"line",cls:"thin",x1:600,y1:158,x2:600,y2:70},
+        {t:"rect",cls:"fill",x:560,y:60,w:80,h:20},
+        {t:"line",cls:"thin",x1:600,y1:262,x2:600,y2:350},
+        {t:"rect",cls:"fill",x:560,y:350,w:80,h:20},
+        {t:"line",cls:"cx",x1:80,y1:210,x2:770,y2:210},
+        {t:"line",cls:"dim",x1:140,y1:340,x2:750,y2:340},
+        {t:"line",cls:"dim-tick",x1:140,y1:335,x2:140,y2:345},
+        {t:"line",cls:"dim-tick",x1:750,y1:335,x2:750,y2:345},
+        {t:"text",cls:"dim-txt",x:420,y:335,text:"8.60 m"},
+        {t:"text",cls:"lbl",x:130,y:120,text:"E.M.D. // PROBE 041"},
+      ],
+      top:[
+        {t:"path",cls:"hull trace",d:"M 140 210 Q 140 175 220 168 L 660 168 Q 720 168 750 210 Q 720 252 660 252 L 220 252 Q 140 245 140 210 Z"},
+        {t:"rect",cls:"fill",x:560,y:100,w:80,h:30},
+        {t:"rect",cls:"fill",x:560,y:290,w:80,h:30},
+        {t:"line",cls:"thin",x1:600,y1:130,x2:600,y2:170},
+        {t:"line",cls:"thin",x1:600,y1:252,x2:600,y2:290},
+        {t:"line",cls:"cx",x1:80,y1:210,x2:770,y2:210},
+      ],
+      bow:[
+        {t:"circle",cls:"hull trace",cx:400,cy:210,r:70},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:55},
+        {t:"rect",cls:"fill",x:180,y:200,w:140,h:20},
+        {t:"rect",cls:"fill",x:480,y:200,w:140,h:20},
+        {t:"line",cls:"cx",x1:400,y1:100,x2:400,y2:320},
+        {t:"line",cls:"cx",x1:150,y1:210,x2:650,y2:210},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 140 210 Q 140 165 220 158 L 660 158 Q 720 158 750 210 Q 720 262 660 262 L 220 262 Q 140 255 140 210 Z"},
+        // canister interior
+        {t:"circle",cls:"accent-fill",cx:350,cy:210,r:34},
+        {t:"circle",cls:"accent-fill",cx:500,cy:210,r:34},
+        {t:"line",cls:"thin cutaway",x1:320,y1:210,x2:380,y2:210},
+        {t:"line",cls:"thin cutaway",x1:470,y1:210,x2:530,y2:210},
+        // xenon tank
+        {t:"circle",cls:"accent",cx:220,cy:210,r:18},
+        {t:"text",cls:"lbl",x:205,y:214,text:"Xe"},
+        // ion grid
+        {t:"rect",cls:"thin cutaway",x:150,y:195,w:8,h:30},
+        {t:"text",cls:"lbl",x:130,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"WATER CANISTER A/B",note:"Europa ice · 2 × 2.1 t · vac-sealed",x:.44,y:.5},
+      {part:"ION DRIVE MK-II",   note:"Xe ion · 92 mN · Isp 3100 s",         x:.15,y:.5},
+      {part:"SOLAR BOOM",         note:"Panels folded during rail launch",   x:.75,y:.2},
+      {part:"XENON RESERVOIR",   note:"1.9 kg · 130 bar",                    x:.27,y:.5},
+    ],
+  },
 
-document.querySelectorAll(".ship-entry").forEach(entry=>{
-    entry.addEventListener("mouseenter", ()=>{
-        nameEl.textContent   = entry.dataset.name.toUpperCase();
-        typeEl.textContent   = entry.dataset.type;
-        originEl.textContent = "// " + entry.dataset.origin + " //";
-        crewEl.textContent   = entry.dataset.crew;
-        yearEl.textContent   = entry.dataset.year;
-        statEl.textContent   = entry.dataset.status;
-        statEl.style.color   = entry.dataset.status === "ACTIVE" ? "#8fff8a" : "#ff4a2b";
-    });
-    entry.addEventListener("mouseleave", ()=>{
-        nameEl.textContent   = "— — —";
-        typeEl.textContent   = "SELECT A VESSEL";
-        originEl.textContent = "// HOVER TO SCAN //";
-        crewEl.textContent   = "—";
-        yearEl.textContent   = "—";
-        statEl.textContent   = "—";
-        statEl.style.color   = "";
-    });
-    // ACCESS button navigation
-    entry.querySelector(".access-btn").addEventListener("click", ()=>{
-        window.location = entry.dataset.href;
-    });
-});
+  /* ---------- 03. SOYUZ-T CREW FERRY ---------- */
+  {
+    id:"SOY",
+    name:"SOYUZ-T · CREW FERRY",
+    cls:"7K-ST · CREWED TRANSFER CAPSULE",
+    role:"CREW ROTATION · SALYUT / ZVEZDA",
+    operator:"USSR · GLAVKOSMOS",
+    status:"ok",
+    dwg:"TIF-SOY-01",
+    year:1989,
+    dims:{L:7.5, H:2.72, W:2.72},
+    mass:"7.07 t",
+    crew:"3 · COSMONAUT",
+    prop:"UDMH + N₂O₄ (HYPERGOLIC)",
+    engines:"1× KTDU-80 · 300 kgf",
+    thrust:"2.94 kN",
+    isp:"305 s",
+    dv:"390 m/s (orbit-to-orbit)",
+    launcher:"SOYUZ-U ROCKET · BAIKONUR LC-1",
+    flavor:"Standard three-module crew ferry servicing <span class='rd'>Salyut</span> station and the <span class='rd'>Zvezda</span> lunar programme. Orbital module up front, descent module in the middle, service module at the tail with the KTDU engine and its hypergolic tank set. Every Soviet body in orbit rides one of these.",
+    dispo:[
+      ["BAY","SALYUT · AFT PORT"],
+      ["CREW","3 · MISSION SLT-14"],
+      ["DAYS","172 / 180"],
+      ["RETURN","89.09.02 (PLANNED)"],
+    ],
+    log:[
+      "88.10.04  LAUNCH SLT-11     OK",
+      "89.01.14  UNDOCK SLT-11     OK",
+      "89.01.14  ENTRY 6.4°        OK",
+      "89.03.20  LAUNCH SLT-12     OK",
+      "89.06.08  UNDOCK SLT-13     OK",
+      "89.07.11  LAUNCH SLT-14     OK",
+      "89.07.14  DOCK  SALYUT AFT  OK",
+      "89.08.02  KTDU BURN TRIM    OK",
+    ],
+    draw:{
+      port:[
+        // orbital sphere (nose)
+        {t:"circle",cls:"hull trace",cx:640,cy:210,r:50},
+        // descent module (frustum)
+        {t:"path",cls:"hull",d:"M 590 175 L 490 185 L 470 235 L 590 245 Z"},
+        // service module cylinder
+        {t:"rect",cls:"fill",x:290,y:180,w:180,h:60},
+        // engine bell
+        {t:"path",cls:"accent-fill",d:"M 290 200 L 250 190 L 240 230 L 290 220 Z"},
+        // solar panels
+        {t:"rect",cls:"fill",x:295,y:90,w:180,h:24},
+        {t:"line",cls:"thin",x1:325,y1:114,x2:325,y2:180},
+        {t:"line",cls:"thin",x1:445,y1:114,x2:445,y2:180},
+        {t:"rect",cls:"fill",x:295,y:306,w:180,h:24},
+        {t:"line",cls:"thin",x1:325,y1:240,x2:325,y2:306},
+        {t:"line",cls:"thin",x1:445,y1:240,x2:445,y2:306},
+        // window
+        {t:"circle",cls:"win",cx:640,cy:200,r:4},
+        {t:"circle",cls:"win",cx:660,cy:215,r:3},
+        // docking probe
+        {t:"line",cls:"accent",x1:690,y1:210,x2:730,y2:210},
+        {t:"rect",cls:"accent",x:730,y:205,w:20,h:10},
+        // centerline
+        {t:"line",cls:"cx",x1:230,y1:210,x2:760,y2:210},
+        // plume (arc when firing)
+        {t:"path",cls:"plume blink",d:"M 240 210 Q 200 200 170 210 Q 200 220 240 210 Z"},
+        // dims
+        {t:"line",cls:"dim",x1:230,y1:350,x2:760,y2:350},
+        {t:"line",cls:"dim-tick",x1:230,y1:345,x2:230,y2:355},
+        {t:"line",cls:"dim-tick",x1:760,y1:345,x2:760,y2:355},
+        {t:"text",cls:"dim-txt",x:475,y:345,text:"7.50 m"},
+        {t:"text",cls:"lbl",x:280,y:118,text:"SOYUZ-T // SLT-14"},
+      ],
+      top:[
+        {t:"circle",cls:"hull trace",cx:640,cy:210,r:50},
+        {t:"path",cls:"hull",d:"M 590 175 L 490 185 L 470 235 L 590 245 Z"},
+        {t:"rect",cls:"fill",x:290,y:190,w:180,h:40},
+        {t:"path",cls:"accent-fill",d:"M 290 200 L 250 195 L 240 225 L 290 220 Z"},
+        {t:"rect",cls:"fill",x:295,y:90,w:180,h:24},
+        {t:"rect",cls:"fill",x:295,y:306,w:180,h:24},
+        {t:"line",cls:"cx",x1:230,y1:210,x2:760,y2:210},
+      ],
+      bow:[
+        {t:"circle",cls:"hull trace",cx:400,cy:210,r:80},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:60},
+        {t:"circle",cls:"win",cx:400,cy:170,r:6},
+        {t:"circle",cls:"win",cx:400,cy:250,r:6},
+        {t:"rect",cls:"fill",x:180,y:200,w:130,h:20},
+        {t:"rect",cls:"fill",x:490,y:200,w:130,h:20},
+        {t:"line",cls:"cx",x1:400,y1:110,x2:400,y2:310},
+      ],
+      cut:[
+        {t:"circle",cls:"hull trace",cx:640,cy:210,r:50},
+        // 3 crew in descent module
+        {t:"circle",cls:"accent-fill",cx:540,cy:195,r:6},
+        {t:"circle",cls:"accent-fill",cx:540,cy:225,r:6},
+        {t:"circle",cls:"accent-fill",cx:565,cy:210,r:6},
+        {t:"path",cls:"hull",d:"M 590 175 L 490 185 L 470 235 L 590 245 Z"},
+        {t:"rect",cls:"fill",x:290,y:180,w:180,h:60},
+        // tank internals
+        {t:"circle",cls:"accent",cx:340,cy:210,r:18},
+        {t:"circle",cls:"accent",cx:400,cy:210,r:18},
+        {t:"text",cls:"lbl",x:325,y:214,text:"UDMH"},
+        {t:"text",cls:"lbl",x:388,y:214,text:"N2O4"},
+        {t:"path",cls:"accent-fill",d:"M 290 200 L 250 190 L 240 230 L 290 220 Z"},
+        {t:"text",cls:"lbl",x:250,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"ORBITAL MODULE",   note:"Living quarters · docking port fwd", x:.80,y:.5},
+      {part:"DESCENT MODULE",   note:"3-crew · re-entry only", x:.63,y:.5},
+      {part:"SERVICE MODULE",   note:"KTDU-80 · UDMH / N₂O₄", x:.45,y:.5},
+      {part:"SOLAR PANELS",      note:"2 · 10 m² · 700 W total", x:.48,y:.24},
+      {part:"KTDU ENGINE",       note:"2.94 kN · Isp 305 s",  x:.30,y:.5},
+    ],
+  },
 
-/* ─── LIVE DATA FEED ─── */
-const feedEl = document.getElementById("feed-inner");
-const feedLines = [
-    "TELEMETRY NOMINAL — ALL VESSELS REPORTING",
-    "REG-001 :: SOYUZ :: SIGNAL STRENGTH 98%",
-    "REG-002 :: VON BRAUN :: SIGNAL STRENGTH 94%",
-    "REG-003 :: SHENZHOU :: SIGNAL STRENGTH 97%",
-    "REG-004 :: DISCOVERY ONE :: ARCHIVED — NO SIGNAL",
-    "REG-005 :: ISS :: SIGNAL STRENGTH 99%",
-    "REG-006 :: BURAN :: ARCHIVED — NO SIGNAL",
-    "UPLINK STABLE :: U.I.C. GRID ONLINE",
-    "WARNING: REG-004 REGISTRY PARTIALLY REDACTED",
-    "CHANNEL 7 BROADCAST ACTIVE",
-    "SECURE TUNNEL ESTABLISHED",
-    "MANIFEST INTEGRITY: 83%",
+  /* ---------- 04. APOLLO CSM (BLOCK-III REFIT) ---------- */
+  {
+    id:"CSM",
+    name:"APOLLO CSM · BLOCK-III REFIT",
+    cls:"CREWED TRANSFER / LUNAR RETURN",
+    role:"CREW ROTATION · HORIZON / ARMSTRONG",
+    operator:"USA · N.A.S.A. / U.I.C.",
+    status:"ok",
+    dwg:"TIF-CSM-B3",
+    year:1987,
+    dims:{L:11.03, H:3.9, W:3.9},
+    mass:"30.3 t",
+    crew:"3 · ASTRONAUT",
+    prop:"AEROZINE-50 + N₂O₄",
+    engines:"1× AJ10-137 · 91.2 kN",
+    thrust:"91.2 kN",
+    isp:"314 s",
+    dv:"2.8 km/s (translunar + trim)",
+    launcher:"SATURN IB-U · KSC LC-34 REACTIVATED",
+    flavor:"American workhorse. Extended for Lunar rotation flights to <span class='rd'>New Horizon</span> and <span class='rd'>Armstrong</span> — additional cryogenic storage and revised RCS in the Block-III refit. When the Space Shuttle is grounded (it often is) the CSM still flies.",
+    dispo:[
+      ["BAY","VAUN BRAUN · PORT 2"],
+      ["CREW","3 · MISSION HZN-9"],
+      ["FUEL","64% AJ10 PROP"],
+      ["NEXT","T-11 UNDOCK · TLI BURN"],
+    ],
+    log:[
+      "88.05.09  LAUNCH HZN-6      OK",
+      "88.09.14  TLI BURN HZN-6    OK",
+      "88.09.17  LOI BURN HZN-6    OK",
+      "88.11.02  RETURN + ENTRY    OK",
+      "89.03.11  LAUNCH HZN-7      OK",
+      "89.04.20  RCS QUAD-B REFIT  OK",
+      "89.06.02  LAUNCH HZN-8      OK",
+      "89.07.30  DOCK VAUN BRAUN   OK",
+    ],
+    draw:{
+      port:[
+        // command module cone
+        {t:"path",cls:"hull trace",d:"M 610 185 L 660 155 L 720 190 L 720 230 L 660 265 L 610 235 Z"},
+        // service module cylinder
+        {t:"rect",cls:"fill",x:380,y:170,w:230,h:80},
+        // engine bell
+        {t:"path",cls:"accent-fill",d:"M 380 190 L 320 170 L 300 250 L 380 230 Z"},
+        // RCS quads
+        {t:"rect",cls:"accent",x:590,y:155,w:14,h:8},
+        {t:"rect",cls:"accent",x:590,y:257,w:14,h:8},
+        {t:"rect",cls:"accent",x:400,y:158,w:14,h:12},
+        {t:"rect",cls:"accent",x:400,y:250,w:14,h:12},
+        // hi-gain
+        {t:"line",cls:"thin",x1:600,y1:170,x2:600,y2:100},
+        {t:"circle",cls:"thin",cx:600,cy:95,r:16},
+        // window
+        {t:"circle",cls:"win",cx:685,cy:205,r:4},
+        {t:"circle",cls:"win",cx:685,cy:220,r:4},
+        // dock probe
+        {t:"line",cls:"accent",x1:660,y1:155,x2:660,y2:110},
+        {t:"rect",cls:"accent",x:652,y:100,w:16,h:14},
+        {t:"line",cls:"cx",x1:280,y1:210,x2:740,y2:210},
+        {t:"path",cls:"plume blink",d:"M 300 210 Q 250 195 210 210 Q 250 225 300 210 Z"},
+        {t:"line",cls:"dim",x1:280,y1:350,x2:720,y2:350},
+        {t:"line",cls:"dim-tick",x1:280,y1:345,x2:280,y2:355},
+        {t:"line",cls:"dim-tick",x1:720,y1:345,x2:720,y2:355},
+        {t:"text",cls:"dim-txt",x:445,y:345,text:"11.03 m"},
+        {t:"text",cls:"lbl",x:280,y:120,text:"APOLLO CSM // BLK-III"},
+      ],
+      top:[
+        {t:"circle",cls:"hull trace",cx:665,cy:210,r:55},
+        {t:"rect",cls:"fill",x:380,y:180,w:230,h:60},
+        {t:"path",cls:"accent-fill",d:"M 380 190 L 330 180 L 320 240 L 380 230 Z"},
+        {t:"line",cls:"cx",x1:280,y1:210,x2:740,y2:210},
+      ],
+      bow:[
+        {t:"path",cls:"hull trace",d:"M 400 130 L 500 220 L 400 290 L 300 220 Z"},
+        {t:"circle",cls:"win",cx:400,cy:190,r:5},
+        {t:"circle",cls:"win",cx:430,cy:220,r:5},
+        {t:"circle",cls:"win",cx:370,cy:220,r:5},
+        {t:"line",cls:"cx",x1:400,y1:100,x2:400,y2:320},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 610 185 L 660 155 L 720 190 L 720 230 L 660 265 L 610 235 Z"},
+        // 3 crew couches
+        {t:"rect",cls:"accent-fill",x:645,y:185,w:34,h:8},
+        {t:"rect",cls:"accent-fill",x:645,y:207,w:34,h:8},
+        {t:"rect",cls:"accent-fill",x:645,y:229,w:34,h:8},
+        {t:"rect",cls:"fill",x:380,y:170,w:230,h:80},
+        {t:"circle",cls:"accent",cx:440,cy:210,r:22},
+        {t:"circle",cls:"accent",cx:510,cy:210,r:22},
+        {t:"text",cls:"lbl",x:426,y:214,text:"AZ-50"},
+        {t:"text",cls:"lbl",x:496,y:214,text:"N2O4"},
+        {t:"path",cls:"accent-fill",d:"M 380 190 L 320 170 L 300 250 L 380 230 Z"},
+        {t:"text",cls:"lbl",x:260,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"COMMAND MODULE",   note:"Re-entry cone · ablative shield", x:.83,y:.5},
+      {part:"SERVICE MODULE",   note:"Fuel · RCS · fuel cells", x:.62,y:.5},
+      {part:"AJ10-137 ENGINE",  note:"91.2 kN · Isp 314 s · restartable", x:.42,y:.5},
+      {part:"HI-GAIN DISH",     note:"S-band comms · 210 W", x:.75,y:.25},
+      {part:"RCS QUADS",        note:"16 × 445 N thrusters", x:.52,y:.4},
+    ],
+  },
+
+  /* ---------- 05. LK-2 LUNAR LANDER ---------- */
+  {
+    id:"LK2",
+    name:"LK-2 · LUNAR LANDER (SOVIET)",
+    cls:"CREWED LUNAR DESCENT VEHICLE",
+    role:"SURFACE ROTATION · ZVEZDA / MINING",
+    operator:"USSR · O.K.B.-1 / U.I.C.",
+    status:"ok",
+    dwg:"TIF-LK-02",
+    year:1988,
+    dims:{L:5.2, H:5.2, W:4.0},
+    mass:"6.5 t",
+    crew:"2 · COSMONAUT",
+    prop:"UDMH + N₂O₄",
+    engines:"1× BLOCK-E · 20 kN · 1× RESERVE",
+    thrust:"20 kN (primary)",
+    isp:"315 s",
+    dv:"1.9 km/s (descent + ascent)",
+    launcher:"CARRIED · N1F THIRD STAGE",
+    flavor:"Two-cosmonaut lunar lander flying between the <span class='rd'>Zvezda</span> station and the surface mining outposts. Later than its abandoned 1960s prototype — a Block-E main engine with an independent Block-Д reserve, cross-fed tanks, and enough life-support for a 96-hour surface stay.",
+    dispo:[
+      ["BAY","ZVEZDA · DESCENT CRADLE 1"],
+      ["CREW","2 · MISSION ZVM-4"],
+      ["STAY","SURFACE 92 / 96 h"],
+      ["FUEL","57% UDMH · 61% N2O4"],
+    ],
+    log:[
+      "88.06.04  LAUNCH ZVM-1      OK",
+      "88.07.11  LK-2 DESCENT      OK",
+      "88.11.03  ASCENT + DOCK     OK",
+      "89.02.14  LAUNCH ZVM-2      OK",
+      "89.04.02  BLOCK-E OVERHAUL  OK",
+      "89.06.02  LAUNCH ZVM-3      OK",
+      "89.07.09  LK-2 DESCENT      OK",
+      "89.08.03  RESERVE TEST      OK",
+    ],
+    draw:{
+      port:[
+        // ascent stage - spherical cabin
+        {t:"circle",cls:"hull trace",cx:400,cy:170,r:60},
+        // descent stage skirt
+        {t:"path",cls:"fill",d:"M 300 220 L 260 300 L 540 300 L 500 220 Z"},
+        // engine skirt
+        {t:"path",cls:"accent-fill",d:"M 360 300 L 340 350 L 460 350 L 440 300 Z"},
+        // legs
+        {t:"line",cls:"accent",x1:260,y1:300,x2:200,y2:370},
+        {t:"line",cls:"accent",x1:540,y1:300,x2:600,y2:370},
+        {t:"line",cls:"accent",x1:340,y1:300,x2:310,y2:370},
+        {t:"line",cls:"accent",x1:460,y1:300,x2:490,y2:370},
+        {t:"rect",cls:"accent",x:180,y:365,w:40,h:8},
+        {t:"rect",cls:"accent",x:580,y:365,w:40,h:8},
+        {t:"rect",cls:"accent",x:290,y:365,w:40,h:8},
+        {t:"rect",cls:"accent",x:470,y:365,w:40,h:8},
+        // window
+        {t:"circle",cls:"win",cx:465,cy:155,r:5},
+        {t:"circle",cls:"win",cx:335,cy:155,r:5},
+        // hi-gain
+        {t:"line",cls:"thin",x1:400,y1:110,x2:400,y2:80},
+        {t:"circle",cls:"thin",cx:400,cy:70,r:12},
+        // docking probe
+        {t:"line",cls:"accent",x1:400,y1:110,x2:400,y2:60},
+        {t:"line",cls:"cx",x1:400,y1:60,x2:400,y2:390},
+        {t:"line",cls:"cx",x1:180,y1:210,x2:620,y2:210},
+        {t:"text",cls:"lbl",x:220,y:120,text:"LK-2 // ZVM-3"},
+      ],
+      top:[
+        {t:"circle",cls:"hull trace",cx:400,cy:210,r:70},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:50},
+        // legs cross
+        {t:"line",cls:"accent",x1:400,y1:210,x2:280,y2:100},
+        {t:"line",cls:"accent",x1:400,y1:210,x2:520,y2:100},
+        {t:"line",cls:"accent",x1:400,y1:210,x2:280,y2:320},
+        {t:"line",cls:"accent",x1:400,y1:210,x2:520,y2:320},
+        {t:"rect",cls:"accent",x:270,y:90,w:20,h:20},
+        {t:"rect",cls:"accent",x:510,y:90,w:20,h:20},
+        {t:"rect",cls:"accent",x:270,y:310,w:20,h:20},
+        {t:"rect",cls:"accent",x:510,y:310,w:20,h:20},
+        {t:"line",cls:"cx",x1:280,y1:210,x2:520,y2:210},
+        {t:"line",cls:"cx",x1:400,y1:90,x2:400,y2:330},
+      ],
+      bow:[
+        {t:"circle",cls:"hull trace",cx:400,cy:170,r:60},
+        {t:"path",cls:"fill",d:"M 300 220 L 260 300 L 540 300 L 500 220 Z"},
+        {t:"circle",cls:"win",cx:400,cy:160,r:6},
+        {t:"line",cls:"accent",x1:260,y1:300,x2:220,y2:360},
+        {t:"line",cls:"accent",x1:540,y1:300,x2:580,y2:360},
+        {t:"rect",cls:"accent",x:210,y:355,w:30,h:8},
+        {t:"rect",cls:"accent",x:560,y:355,w:30,h:8},
+        {t:"line",cls:"cx",x1:400,y1:100,x2:400,y2:370},
+      ],
+      cut:[
+        {t:"circle",cls:"hull trace",cx:400,cy:170,r:60},
+        // 2 crew
+        {t:"circle",cls:"accent-fill",cx:380,cy:170,r:8},
+        {t:"circle",cls:"accent-fill",cx:420,cy:170,r:8},
+        {t:"path",cls:"fill",d:"M 300 220 L 260 300 L 540 300 L 500 220 Z"},
+        {t:"circle",cls:"accent",cx:340,cy:270,r:18},
+        {t:"circle",cls:"accent",cx:400,cy:270,r:18},
+        {t:"circle",cls:"accent",cx:460,cy:270,r:18},
+        {t:"text",cls:"lbl",x:326,y:274,text:"UDMH"},
+        {t:"text",cls:"lbl",x:390,y:274,text:"OX"},
+        {t:"text",cls:"lbl",x:446,y:274,text:"UDMH"},
+        {t:"path",cls:"accent-fill",d:"M 360 300 L 340 350 L 460 350 L 440 300 Z"},
+        {t:"text",cls:"lbl",x:210,y:400,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"ASCENT CABIN",  note:"2-crew · pressurised sphere",  x:.5,y:.4},
+      {part:"BLOCK-E ENGINE",note:"20 kN · Isp 315 s",             x:.5,y:.78},
+      {part:"LANDING GEAR",  note:"4-leg · footpad · crush core", x:.29,y:.87},
+      {part:"HI-GAIN",       note:"S-band lander comms",           x:.5,y:.16},
+      {part:"RESERVE ENG.",  note:"Block-Д · abort / redundancy",  x:.68,y:.72},
+    ],
+  },
+
+  /* ---------- 06. SPACE SHUTTLE ORBITER ---------- */
+  {
+    id:"STS",
+    name:"SPACE SHUTTLE · ORBITER",
+    cls:"OV-104 CLASS · REUSABLE ORBITER",
+    role:"HEAVY CREW+CARGO · MARS TUG / LEO",
+    operator:"USA · N.A.S.A.",
+    status:"mth",
+    dwg:"TIF-STS-01",
+    year:1985,
+    dims:{L:37.24, H:17.25, W:23.79},
+    mass:"110 t (dry) · 2030 t (stack)",
+    crew:"UP TO 7",
+    prop:"LOX + LH2 (SSME) · SOLID (SRB)",
+    engines:"3× SSME · 2× SRB",
+    thrust:"6800 kN each SRB · 1860 kN SSME",
+    isp:"452 s (SSME) · 269 s (SRB)",
+    dv:"9.4 km/s (stack)",
+    launcher:"INTEGRATED · KSC LC-39A / 39B",
+    flavor:"American reusable orbiter, currently in Overhaul at KSC after tile-damage return from Mars-6. Twin solid boosters stage at T+2:00, orbiter continues to LEO. In the Iron Frontier fleet it doubles as a <span class='rd'>Mars Orbital Habitation</span> ferry when Saturn-derived heavy launchers are unavailable.",
+    dispo:[
+      ["BAY","KSC OPF-2 · TILE REWORK"],
+      ["CYCLE","STS-118 · RTF PENDING"],
+      ["TILE","93.4% NOMINAL"],
+      ["NEXT","OMS TEST FIRE"],
+    ],
+    log:[
+      "88.11.02  LAUNCH STS-115    OK",
+      "88.11.14  RETURN STS-115    OK",
+      "89.01.09  SSME-2 SWAP       OK",
+      "89.02.20  LAUNCH STS-116    OK",
+      "89.03.11  RETURN STS-116    TILE 42 LOSS",
+      "89.04.11  RTF-A INSPECTION  OK",
+      "89.05.30  LAUNCH STS-117    OK",
+      "89.07.14  RETURN STS-117    OMS ANOMALY",
+    ],
+    draw:{
+      port:[
+        // orbiter body
+        {t:"path",cls:"hull trace",d:"M 130 250 L 200 220 L 570 220 L 640 235 L 700 250 L 640 265 L 200 265 Z"},
+        // wing
+        {t:"path",cls:"accent-fill",d:"M 260 265 L 240 320 L 500 320 L 480 265 Z"},
+        // vertical stab
+        {t:"path",cls:"accent-fill",d:"M 175 220 L 165 160 L 210 160 L 220 220 Z"},
+        // cockpit windows
+        {t:"path",cls:"win",d:"M 600 235 L 640 235 L 640 250 L 610 250 Z"},
+        // ET (external tank) attached (dashed)
+        {t:"path",cls:"thin cutaway",d:"M 200 100 L 600 100 Q 650 100 660 130 L 660 200 Q 650 220 600 220 L 200 220 Q 150 220 140 180 L 140 140 Q 150 100 200 100 Z"},
+        // SRBs (dashed - attached)
+        {t:"rect",cls:"thin cutaway",x:150,y:60,w:520,h:30},
+        {t:"path",cls:"thin cutaway",d:"M 665 60 L 700 45 L 700 105 L 665 90 Z"},
+        // engines (3)
+        {t:"circle",cls:"accent",cx:170,cy:235,r:8},
+        {t:"circle",cls:"accent",cx:150,cy:250,r:8},
+        {t:"circle",cls:"accent",cx:170,cy:265,r:8},
+        {t:"path",cls:"plume blink",d:"M 130 250 Q 90 235 60 250 Q 90 265 130 250 Z"},
+        {t:"line",cls:"cx",x1:60,y1:250,x2:730,y2:250},
+        {t:"line",cls:"dim",x1:130,y1:390,x2:700,y2:390},
+        {t:"line",cls:"dim-tick",x1:130,y1:385,x2:130,y2:395},
+        {t:"line",cls:"dim-tick",x1:700,y1:385,x2:700,y2:395},
+        {t:"text",cls:"dim-txt",x:405,y:385,text:"37.24 m ORBITER"},
+        {t:"text",cls:"lbl",x:120,y:145,text:"[ET · JETTISON]"},
+        {t:"text",cls:"lbl",x:200,y:80,text:"[SRB · L / R]"},
+      ],
+      top:[
+        {t:"path",cls:"hull trace",d:"M 130 210 L 200 190 L 570 190 L 640 205 L 700 210 L 640 215 L 570 230 L 200 230 Z"},
+        {t:"path",cls:"accent-fill",d:"M 260 230 L 220 340 L 520 340 L 500 230 Z"},
+        {t:"path",cls:"accent-fill",d:"M 260 190 L 220 80 L 520 80 L 500 190 Z"},
+        {t:"line",cls:"cx",x1:60,y1:210,x2:730,y2:210},
+      ],
+      bow:[
+        {t:"path",cls:"hull trace",d:"M 400 130 L 490 220 L 400 260 L 310 220 Z"},
+        {t:"path",cls:"accent-fill",d:"M 150 260 L 310 220 L 400 260 L 490 220 L 650 260 L 650 300 L 400 320 L 150 300 Z"},
+        {t:"path",cls:"win",d:"M 380 180 L 420 180 L 420 200 L 380 200 Z"},
+        {t:"line",cls:"cx",x1:400,y1:80,x2:400,y2:340},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 130 250 L 200 220 L 570 220 L 640 235 L 700 250 L 640 265 L 200 265 Z"},
+        // payload bay
+        {t:"rect",cls:"thin cutaway",x:260,y:222,w:280,h:42},
+        {t:"line",cls:"thin cutaway",x1:280,y1:222,x2:280,y2:264},
+        {t:"line",cls:"thin cutaway",x1:320,y1:222,x2:320,y2:264},
+        {t:"line",cls:"thin cutaway",x1:360,y1:222,x2:360,y2:264},
+        {t:"line",cls:"thin cutaway",x1:400,y1:222,x2:400,y2:264},
+        {t:"line",cls:"thin cutaway",x1:440,y1:222,x2:440,y2:264},
+        {t:"line",cls:"thin cutaway",x1:480,y1:222,x2:480,y2:264},
+        {t:"line",cls:"thin cutaway",x1:520,y1:222,x2:520,y2:264},
+        // flight deck
+        {t:"rect",cls:"accent-fill",x:590,y:225,w:50,h:20},
+        {t:"circle",cls:"accent",cx:170,cy:250,r:12},
+        {t:"text",cls:"lbl",x:260,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"PAYLOAD BAY",   note:"18.3 × 4.6 m · 24.4 t to LEO", x:.5,y:.51},
+      {part:"SSME × 3",      note:"1860 kN each · Isp 452 s",    x:.19,y:.6},
+      {part:"S.R.B. × 2",    note:"Solid · 2 min · jettison T+2:00", x:.5,y:.19},
+      {part:"EXT. TANK",     note:"LOX + LH₂ · dropped pre-orbit", x:.5,y:.33},
+      {part:"FLIGHT DECK",   note:"Up to 7 crew · 2 pilots fwd",  x:.79,y:.55},
+    ],
+  },
+
+  /* ---------- 07. BURAN ORBITER ---------- */
+  {
+    id:"BRN",
+    name:"BURAN · ORBITER",
+    cls:"11F35 · REUSABLE ORBITER",
+    role:"HEAVY CREW+CARGO · SOVIET COUNTERPART",
+    operator:"USSR · GLAVKOSMOS",
+    status:"ok",
+    dwg:"TIF-BRN-01",
+    year:1988,
+    dims:{L:36.4, H:16.5, W:24.0},
+    mass:"105 t (dry)",
+    crew:"UP TO 10",
+    prop:"NONE ON ORBITER · ENERGIA LAUNCHER",
+    engines:"2× MANOEUVRE (88 kN ea) · RCS",
+    thrust:"176 kN combined",
+    isp:"362 s (manoeuvre)",
+    dv:"1.6 km/s (orbital)",
+    launcher:"ENERGIA (11K25) · BAIKONUR LC-110",
+    flavor:"Soviet reusable orbiter, in some ways stronger than its US counterpart — no main engines on the airframe, so its full payload budget is available to orbit. The <span class='rd'>Energia</span> core does the lifting, four strap-on Zenit boosters ring the stack. Currently the more reliable of the two heavy shuttles.",
+    dispo:[
+      ["BAY","LC-110 · ASSEMBLED"],
+      ["CYCLE","BRN-06 · GO"],
+      ["ROLLOUT","89.09.20 T-04:00"],
+      ["NEXT","SLED TO PAD"],
+    ],
+    log:[
+      "88.11.15  LAUNCH BRN-01     OK · UNMANNED",
+      "88.11.15  AUTO-LAND         OK · IN CROSS-WIND",
+      "89.02.20  LAUNCH BRN-02     OK",
+      "89.03.05  RETURN BRN-02     OK",
+      "89.05.14  LAUNCH BRN-03     OK",
+      "89.06.02  RETURN BRN-03     OK",
+      "89.07.30  ROLL-OUT BRN-06   OK",
+      "89.08.06  ENERGIA MATE      OK",
+    ],
+    draw:{
+      port:[
+        {t:"path",cls:"hull trace",d:"M 130 250 L 200 220 L 570 220 L 640 235 L 700 250 L 640 265 L 200 265 Z"},
+        {t:"path",cls:"accent-fill",d:"M 250 265 L 240 320 L 510 320 L 490 265 Z"},
+        {t:"path",cls:"accent-fill",d:"M 175 220 L 170 155 L 215 155 L 220 220 Z"},
+        {t:"path",cls:"win",d:"M 600 235 L 640 235 L 640 250 L 610 250 Z"},
+        // ENERGIA core dashed
+        {t:"path",cls:"thin cutaway",d:"M 190 90 L 610 90 Q 660 90 660 130 L 660 200 Q 660 220 610 220 L 190 220 Q 130 220 130 180 L 130 130 Q 130 90 190 90 Z"},
+        // 4 zenit strap-ons (2 visible profile)
+        {t:"rect",cls:"thin cutaway",x:190,y:35,w:440,h:38},
+        {t:"path",cls:"thin cutaway",d:"M 630 35 L 665 22 L 665 88 L 630 73 Z"},
+        // orbiter has NO main engines
+        {t:"path",cls:"plume blink",d:"M 130 250 Q 110 245 100 250 Q 110 255 130 250 Z"},
+        {t:"circle",cls:"accent",cx:150,cy:238,r:5},
+        {t:"circle",cls:"accent",cx:150,cy:262,r:5},
+        {t:"line",cls:"cx",x1:60,y1:250,x2:730,y2:250},
+        {t:"line",cls:"dim",x1:130,y1:390,x2:700,y2:390},
+        {t:"line",cls:"dim-tick",x1:130,y1:385,x2:130,y2:395},
+        {t:"line",cls:"dim-tick",x1:700,y1:385,x2:700,y2:395},
+        {t:"text",cls:"dim-txt",x:410,y:385,text:"36.40 m ORBITER"},
+        {t:"text",cls:"lbl",x:200,y:115,text:"[ENERGIA CORE]"},
+        {t:"text",cls:"lbl",x:200,y:55,text:"[4× ZENIT STRAP-ON]"},
+      ],
+      top:[
+        {t:"path",cls:"hull trace",d:"M 130 210 L 200 190 L 570 190 L 640 205 L 700 210 L 640 215 L 570 230 L 200 230 Z"},
+        {t:"path",cls:"accent-fill",d:"M 240 230 L 220 340 L 500 340 L 490 230 Z"},
+        {t:"path",cls:"accent-fill",d:"M 240 190 L 220 80 L 500 80 L 490 190 Z"},
+        {t:"line",cls:"cx",x1:60,y1:210,x2:730,y2:210},
+      ],
+      bow:[
+        {t:"path",cls:"hull trace",d:"M 400 130 L 500 220 L 400 260 L 300 220 Z"},
+        {t:"path",cls:"accent-fill",d:"M 130 260 L 300 220 L 400 260 L 500 220 L 670 260 L 670 300 L 400 320 L 130 300 Z"},
+        {t:"path",cls:"win",d:"M 380 180 L 420 180 L 420 200 L 380 200 Z"},
+        {t:"line",cls:"cx",x1:400,y1:80,x2:400,y2:340},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 130 250 L 200 220 L 570 220 L 640 235 L 700 250 L 640 265 L 200 265 Z"},
+        {t:"rect",cls:"thin cutaway",x:240,y:222,w:310,h:42},
+        {t:"line",cls:"thin cutaway",x1:280,y1:222,x2:280,y2:264},
+        {t:"line",cls:"thin cutaway",x1:320,y1:222,x2:320,y2:264},
+        {t:"line",cls:"thin cutaway",x1:360,y1:222,x2:360,y2:264},
+        {t:"line",cls:"thin cutaway",x1:400,y1:222,x2:400,y2:264},
+        {t:"line",cls:"thin cutaway",x1:440,y1:222,x2:440,y2:264},
+        {t:"line",cls:"thin cutaway",x1:480,y1:222,x2:480,y2:264},
+        {t:"line",cls:"thin cutaway",x1:520,y1:222,x2:520,y2:264},
+        {t:"rect",cls:"accent-fill",x:590,y:225,w:50,h:20},
+        {t:"circle",cls:"accent",cx:150,cy:245,r:6},
+        {t:"circle",cls:"accent",cx:150,cy:255,r:6},
+        {t:"text",cls:"lbl",x:260,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"PAYLOAD BAY",note:"18.55 × 4.7 m · 30 t to LEO",x:.5,y:.51},
+      {part:"NO MAIN ENG.",note:"Manoeuvre only · Energia lifts",x:.19,y:.6},
+      {part:"ENERGIA CORE",note:"4× RD-0120 · LH2/LOX",x:.5,y:.36},
+      {part:"ZENIT × 4",   note:"RD-170 · kerolox strap-ons",x:.5,y:.15},
+      {part:"FLIGHT DECK", note:"10-crew provision",x:.79,y:.55},
+    ],
+  },
+
+  /* ---------- 08. ORION NUCLEAR PULSE VESSEL ---------- */
+  {
+    id:"ORN",
+    name:"ORION · NUCLEAR PULSE VESSEL",
+    cls:"P.P.D. CRAFT · TREATY-EXEMPT",
+    role:"OUTER SYSTEM HEAVY LIFT · EUROPA RUN",
+    operator:"U.I.C. JOINT PROGRAMME",
+    status:"arc",
+    dwg:"TIF-ORN-01",
+    year:1984,
+    dims:{L:85.0, H:44.0, W:44.0},
+    mass:"4020 t (loaded)",
+    crew:"30 · MULTI-YEAR",
+    prop:"NUCLEAR PULSE UNITS (SHAPED FISSION)",
+    engines:"1× PUSHER PLATE · SHOCK ABSORBER STACK",
+    thrust:"~ 3 GN peak per pulse",
+    isp:"6000 s (effective)",
+    dv:"11 km/s + (mission-configurable)",
+    launcher:"CHEMICAL SUB-STAGE TO LEO · IGNITE ABOVE 200 km",
+    flavor:"Archived-status pulse-drive vessel from the joint outer-system effort. Never flown crewed in-atmosphere — chemical stack boosts to 200 km before first pulse. When active, it flew the <span class='rd'>Europa</span> supply runs before the Mass Driver programme replaced it. Currently mothballed in geocentric high orbit. Do not attempt to reactivate without programme clearance.",
+    dispo:[
+      ["BAY","GEO PARK ORBIT · 42 164 km"],
+      ["STATE","MOTHBALLED · SEALED"],
+      ["PULSE UNITS","1140 REMAINING"],
+      ["LAST CREW","N/A · REMOTE HOLD"],
+    ],
+    log:[
+      "84.09.02  IOC · CREWED       OK",
+      "85.02.14  EUROPA-1 OUTBOUND  OK",
+      "85.11.02  EUROPA-1 INBOUND   OK",
+      "86.06.20  EUROPA-2 OUTBOUND  OK",
+      "87.01.02  EUROPA-2 INBOUND   OK",
+      "87.08.14  PROG. STAND-DOWN   OK",
+      "88.03.02  PARK GEO           OK",
+      "89.02.20  SEAL INSPECTION    OK",
+    ],
+    draw:{
+      port:[
+        // pusher plate
+        {t:"path",cls:"hull trace",d:"M 120 130 L 180 120 L 200 300 L 120 290 Z"},
+        // shock stack rings
+        {t:"circle",cls:"accent",cx:220,cy:170,r:10},
+        {t:"circle",cls:"accent",cx:220,cy:210,r:10},
+        {t:"circle",cls:"accent",cx:220,cy:250,r:10},
+        {t:"circle",cls:"accent",cx:260,cy:170,r:10},
+        {t:"circle",cls:"accent",cx:260,cy:210,r:10},
+        {t:"circle",cls:"accent",cx:260,cy:250,r:10},
+        // hab drum
+        {t:"rect",cls:"fill",x:300,y:150,w:280,h:120},
+        // hab rings
+        {t:"line",cls:"thin",x1:340,y1:150,x2:340,y2:270},
+        {t:"line",cls:"thin",x1:400,y1:150,x2:400,y2:270},
+        {t:"line",cls:"thin",x1:460,y1:150,x2:460,y2:270},
+        {t:"line",cls:"thin",x1:520,y1:150,x2:520,y2:270},
+        {t:"circle",cls:"win",cx:360,cy:180,r:3},
+        {t:"circle",cls:"win",cx:420,cy:180,r:3},
+        {t:"circle",cls:"win",cx:480,cy:180,r:3},
+        {t:"circle",cls:"win",cx:540,cy:180,r:3},
+        {t:"circle",cls:"win",cx:360,cy:240,r:3},
+        {t:"circle",cls:"win",cx:420,cy:240,r:3},
+        {t:"circle",cls:"win",cx:480,cy:240,r:3},
+        {t:"circle",cls:"win",cx:540,cy:240,r:3},
+        // command cone
+        {t:"path",cls:"accent-fill",d:"M 580 165 L 670 200 L 670 220 L 580 255 Z"},
+        {t:"circle",cls:"win",cx:640,cy:210,r:5},
+        // pulse trail
+        {t:"path",cls:"plume blink",d:"M 120 210 Q 60 190 30 210 Q 60 230 120 210 Z"},
+        {t:"circle",cls:"flame blink",cx:80,cy:210,r:20},
+        {t:"line",cls:"cx",x1:20,y1:210,x2:700,y2:210},
+        {t:"line",cls:"dim",x1:120,y1:370,x2:670,y2:370},
+        {t:"line",cls:"dim-tick",x1:120,y1:365,x2:120,y2:375},
+        {t:"line",cls:"dim-tick",x1:670,y1:365,x2:670,y2:375},
+        {t:"text",cls:"dim-txt",x:390,y:365,text:"85.0 m"},
+        {t:"text",cls:"lbl",x:120,y:105,text:"ORION // PPD-01"},
+      ],
+      top:[
+        {t:"circle",cls:"hull trace",cx:150,cy:210,r:55},
+        {t:"rect",cls:"fill",x:200,y:170,w:280,h:80},
+        {t:"path",cls:"accent-fill",d:"M 480 170 L 580 210 L 480 250 Z"},
+        {t:"line",cls:"cx",x1:80,y1:210,x2:600,y2:210},
+      ],
+      bow:[
+        {t:"circle",cls:"hull trace",cx:400,cy:210,r:110},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:90},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:70},
+        {t:"circle",cls:"thin",cx:400,cy:210,r:50},
+        {t:"circle",cls:"win",cx:400,cy:210,r:8},
+        {t:"line",cls:"cx",x1:400,y1:100,x2:400,y2:320},
+      ],
+      cut:[
+        {t:"path",cls:"hull trace",d:"M 120 130 L 180 120 L 200 300 L 120 290 Z"},
+        {t:"rect",cls:"fill",x:300,y:150,w:280,h:120},
+        // pulse unit magazine
+        {t:"rect",cls:"accent-fill",x:220,y:190,w:60,h:40},
+        {t:"line",cls:"thin cutaway",x1:230,y1:190,x2:230,y2:230},
+        {t:"line",cls:"thin cutaway",x1:240,y1:190,x2:240,y2:230},
+        {t:"line",cls:"thin cutaway",x1:250,y1:190,x2:250,y2:230},
+        {t:"line",cls:"thin cutaway",x1:260,y1:190,x2:260,y2:230},
+        {t:"line",cls:"thin cutaway",x1:270,y1:190,x2:270,y2:230},
+        {t:"text",cls:"lbl",x:225,y:180,text:"PULSE UNITS"},
+        // crew decks
+        {t:"line",cls:"thin cutaway",x1:300,y1:180,x2:580,y2:180},
+        {t:"line",cls:"thin cutaway",x1:300,y1:210,x2:580,y2:210},
+        {t:"line",cls:"thin cutaway",x1:300,y1:240,x2:580,y2:240},
+        {t:"path",cls:"accent-fill",d:"M 580 165 L 670 200 L 670 220 L 580 255 Z"},
+        {t:"text",cls:"lbl",x:230,y:340,text:"— CUTAWAY —"},
+      ],
+    },
+    callouts:[
+      {part:"PUSHER PLATE", note:"Ablative-coated · shaped detonation face",x:.18,y:.5},
+      {part:"SHOCK STACK",  note:"3-stage absorber · dampens pulse to 3g",x:.30,y:.5},
+      {part:"HAB DRUM",     note:"30 crew · 6 pressurised decks",x:.53,y:.5},
+      {part:"COMMAND CONE", note:"CIC + navigation",x:.78,y:.5},
+      {part:"PULSE MAG.",   note:"1140 units aboard · shielded",x:.30,y:.85},
+    ],
+  },
 ];
-let feedIdx = 0;
-function pushFeed(){
-    const line = document.createElement("div");
-    line.textContent = feedLines[feedIdx % feedLines.length];
-    line.style.opacity = "0";
-    feedEl.appendChild(line);
-    feedIdx++;
-    setTimeout(()=>line.style.cssText += ";opacity:1;transition:opacity .4s;", 50);
-    // keep only last 6 lines
-    while(feedEl.children.length > 6){
-        feedEl.removeChild(feedEl.firstChild);
-    }
-}
-pushFeed();
-setInterval(pushFeed, 2200);
+</script>
+<script id="ships-runtime">
+/* ============================================================
+   RUNTIME — do not touch unless you know what you're doing.
+   Adds ships to the list, draws SVG for the current view,
+   updates specs / log / disposition / clamp animation.
+============================================================ */
+(function(){
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const list  = document.getElementById("shipList");
+  const dwg   = document.getElementById("dwg");
+  const cont  = document.getElementById("callouts");
+  const specs = document.getElementById("specsBody");
+  const logs  = document.getElementById("logList");
+  const disp  = document.getElementById("disp");
+  const dwgId = document.getElementById("dwgId");
+  const dwgN  = document.getElementById("dwgName");
+  const dwgS  = document.getElementById("dwgSub");
+  const hullId= document.getElementById("hullId");
+  const massR = document.getElementById("massReadout");
+  const stR   = document.getElementById("statusReadout");
+  const scaleLbl = document.getElementById("scaleLbl");
+  const wm    = document.getElementById("wm");
+  const btnPrev = document.getElementById("btnPrev");
+  const btnNext = document.getElementById("btnNext");
+  const shipCount = document.getElementById("ship-count");
+  const yearTag   = document.getElementById("year-tag");
 
-/* ─── TERMINAL COMMAND ─── */
-const input = document.getElementById("cmd");
-input.addEventListener("keydown", e=>{
-    if(e.key !== "Enter") return;
-    const cmd = input.value.toLowerCase().trim();
-    input.value = "";
-    const routes = {
-        home:"index.html", ships:"ships.html", stations:"stations.html",
-        about:"about.html", games:"games.html", contact:"contact.html"
-    };
-    if(routes[cmd]) window.location = routes[cmd];
-});
+  const clampFrame = document.querySelector(".clamp-frame");
+  const clampState = document.getElementById("clampState");
+  const umbState   = document.getElementById("umbState");
+  const fuelState  = document.getElementById("fuelState");
+
+  let curShip = 0, curView = "port";
+
+  /* Populate ship list */
+  shipCount.textContent = String(SHIPS.length).padStart(2,"0");
+  SHIPS.forEach((s,i)=>{
+    const b = document.createElement("button");
+    b.className = "ship-row" + (i===0?" on":"");
+    b.dataset.idx = i;
+    b.innerHTML = `<span class="idx">${String(i+1).padStart(2,"0")}</span>
+                   <span class="rname">${s.name.split("·")[0].trim()}<br><span class="rop">${s.operator}</span></span>
+                   <span class="st ${s.status}"></span>`;
+    b.addEventListener("click", ()=>selectShip(i));
+    list.appendChild(b);
+  });
+
+  /* SVG builder */
+  function mk(tag, cls, attrs, text){
+    const el = document.createElementNS(SVG_NS, tag);
+    if(cls) el.setAttribute("class", cls);
+    for(const k in attrs){ el.setAttribute(k, attrs[k]); }
+    if(text!=null) el.textContent = text;
+    return el;
+  }
+  function drawShape(sh){
+    switch(sh.t){
+      case "path":   return mk("path",   sh.cls, {d:sh.d});
+      case "rect":   return mk("rect",   sh.cls, {x:sh.x,y:sh.y,width:sh.w,height:sh.h,rx:sh.rx||0,ry:sh.ry||0});
+      case "circle": return mk("circle", sh.cls, {cx:sh.cx,cy:sh.cy,r:sh.r});
+      case "poly":   return mk("polygon",sh.cls, {points:sh.p});
+      case "line":   return mk("line",   sh.cls, {x1:sh.x1,y1:sh.y1,x2:sh.x2,y2:sh.y2});
+      case "text":   return mk("text",   sh.cls, {x:sh.x,y:sh.y}, sh.text);
+    }
+    return null;
+  }
+
+  function renderView(){
+    const s = SHIPS[curShip];
+    // shared defs (flame gradient, plate revolutions)
+    dwg.innerHTML = "";
+    const defs = mk("defs","",{});
+    defs.innerHTML = `
+      <radialGradient id="flame" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FFC861" stop-opacity="1"/>
+        <stop offset="60%" stop-color="#FF9F07" stop-opacity=".6"/>
+        <stop offset="100%" stop-color="#FF4A2B" stop-opacity="0"/>
+      </radialGradient>
+    `;
+    dwg.appendChild(defs);
+
+    // border ticks/rulers around the drawing frame
+    const border = mk("g","",{});
+    // ruler ticks along bottom
+    for(let x=40;x<=760;x+=20){
+      const h = (x%80===0)?10:5;
+      border.appendChild(mk("line","thin",{x1:x,y1:410,x2:x,y2:410-h}));
+    }
+    for(let y=40;y<=380;y+=20){
+      const h = (y%80===0)?10:5;
+      border.appendChild(mk("line","thin",{x1:20,y1:y,x2:20+h,y2:y}));
+    }
+    dwg.appendChild(border);
+
+    const shapes = s.draw[curView] || [];
+    shapes.forEach(sh => {
+      const el = drawShape(sh);
+      if(el) dwg.appendChild(el);
+    });
+
+    /* callouts (only on port view, else hide) */
+    cont.innerHTML = "";
+    if(curView === "port"){
+      s.callouts.forEach((c,i)=>{
+        const el = document.createElement("div");
+        el.className = "callout";
+        el.dataset.idx = i;
+        el.style.left = (c.x*100)+"%";
+        el.style.top  = (c.y*100)+"%";
+        el.innerHTML = `<span class="idx">${String(i+1).padStart(2,"0")}</span>${c.part}`;
+        el.addEventListener("mouseenter",()=>highlight(i,true));
+        el.addEventListener("mouseleave",()=>highlight(i,false));
+        cont.appendChild(el);
+      });
+    }
+  }
+
+  function highlight(idx, on){
+    document.querySelectorAll(".callout").forEach(c=>{
+      c.classList.toggle("on", +c.dataset.idx===idx && on);
+    });
+    document.querySelectorAll(".co-row").forEach(r=>{
+      r.classList.toggle("on", +r.dataset.idx===idx && on);
+    });
+  }
+
+  function renderSpecs(){
+    const s = SHIPS[curShip];
+    specs.innerHTML = `
+      <div class="stamp-line"><span>DWG ${s.dwg}</span><span>REV D</span></div>
+      <p class="flavor">${s.flavor}</p>
+
+      <h3>DIMENSIONS</h3>
+      <div class="kv"><span class="k">LENGTH</span><span class="v">${s.dims.L} m</span></div>
+      <div class="kv"><span class="k">HEIGHT</span><span class="v">${s.dims.H} m</span></div>
+      <div class="kv"><span class="k">WIDTH</span> <span class="v">${s.dims.W} m</span></div>
+      <div class="kv"><span class="k">MASS</span>  <span class="v">${s.mass}</span></div>
+      <div class="kv"><span class="k">CREW</span>  <span class="v">${s.crew}</span></div>
+
+      <h3>PROPULSION</h3>
+      <div class="kv"><span class="k">PROP.</span> <span class="v">${s.prop}</span></div>
+      <div class="kv"><span class="k">ENGINE</span><span class="v">${s.engines}</span></div>
+      <div class="kv"><span class="k">THRUST</span><span class="v">${s.thrust}</span></div>
+      <div class="kv"><span class="k">ISP</span>   <span class="v">${s.isp}</span></div>
+      <div class="kv"><span class="k">Δv</span>    <span class="v">${s.dv}</span></div>
+      <div class="kv"><span class="k">LAUNCH</span><span class="v">${s.launcher}</span></div>
+
+      <h3>CALLOUTS</h3>
+      <div class="callout-list">
+        ${s.callouts.map((c,i)=>`
+          <div class="co-row" data-idx="${i}">
+            <span class="co-idx">${String(i+1).padStart(2,"0")}</span>
+            <span class="co-name"><b style="color:var(--red)">${c.part}</b><br>${c.note}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    specs.querySelectorAll(".co-row").forEach(r=>{
+      r.addEventListener("mouseenter",()=>highlight(+r.dataset.idx,true));
+      r.addEventListener("mouseleave",()=>highlight(+r.dataset.idx,false));
+    });
+  }
+
+  function renderLog(){
+    const s = SHIPS[curShip];
+    logs.innerHTML = s.log.map(l=>{
+      const parts = l.split(/\s{2,}/);
+      const date  = parts[0]||"";
+      const evt   = parts[1]||"";
+      const st    = parts[2]||"";
+      return `<li><span class="d">${date}</span>${evt} <span class="l">${st}</span></li>`;
+    }).join("");
+    disp.innerHTML = s.dispo.map(([k,v])=>`
+      <div class="kv2"><span class="k">${k}</span><span class="v">${v}</span></div>
+    `).join("");
+  }
+
+  function renderHead(){
+    const s = SHIPS[curShip];
+    dwgId.textContent = s.dwg;
+    dwgN.textContent  = s.name;
+    dwgS.textContent  = `${s.cls}  ·  ${s.role}  ·  ${s.operator}`;
+    hullId.textContent = s.id;
+    massR.textContent  = s.mass.split("·")[0].trim();
+    stR.textContent    = s.status==="ok"?"OPERATIONAL":s.status==="mth"?"IN OVERHAUL":"ARCHIVE";
+    stR.style.color    = s.status==="ok"?"var(--green)":s.status==="mth"?"var(--red)":"#c48c4d";
+    // scale changes vaguely by ship size
+    const scl = s.dims.L>50?"1:480":s.dims.L>20?"1:200":"1:80";
+    scaleLbl.textContent = scl;
+    wm.textContent = "FRACTURED — INTERNAL ONLY";
+    yearTag.textContent = `FY-${s.year}`;
+    // clamp animation reflects docked / mothballed
+    if(s.status==="ok"){
+      clampFrame.classList.remove("releasing");
+      clampState.textContent = "ENGAGED"; clampState.style.color="var(--green)";
+      umbState.textContent = "CONNECTED";
+      fuelState.textContent = "SEALED";
+    } else if(s.status==="mth"){
+      clampFrame.classList.add("releasing");
+      clampState.textContent = "RELEASED"; clampState.style.color="var(--red)";
+      umbState.textContent = "DISCONNECTED";
+      fuelState.textContent = "PURGE";
+    } else {
+      clampFrame.classList.add("releasing");
+      clampState.textContent = "PARK"; clampState.style.color="var(--amberBright)";
+      umbState.textContent = "N/A";
+      fuelState.textContent = "SAFED";
+    }
+  }
+
+  function selectShip(i){
+    curShip = Math.max(0, Math.min(SHIPS.length-1, i));
+    document.querySelectorAll(".ship-row").forEach(r=>r.classList.toggle("on", +r.dataset.idx===curShip));
+    // reset to port when switching
+    curView = "port";
+    document.querySelectorAll(".vtab").forEach(v=>v.classList.toggle("on", v.dataset.v==="port"));
+    renderHead(); renderView(); renderSpecs(); renderLog();
+    specs.scrollTop = 0;
+    // scroll active row into view on mobile horizontal list
+    const active = document.querySelectorAll(".ship-row")[curShip];
+    if(active && active.scrollIntoView){ active.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"}); }
+  }
+
+  /* View tab switching */
+  document.querySelectorAll(".vtab").forEach(v=>{
+    v.addEventListener("click", ()=>{
+      curView = v.dataset.v;
+      document.querySelectorAll(".vtab").forEach(x=>x.classList.toggle("on", x===v));
+      renderView();
+    });
+  });
+
+  btnPrev.addEventListener("click", ()=>selectShip(curShip-1));
+  btnNext.addEventListener("click", ()=>selectShip(curShip+1));
+
+  document.addEventListener("keydown", e=>{
+    if(e.target.matches("input,textarea,button")) return;
+    if(e.key==="ArrowLeft"  || e.key==="PageUp"  ){ e.preventDefault(); selectShip(curShip-1); }
+    if(e.key==="ArrowRight" || e.key==="PageDown"){ e.preventDefault(); selectShip(curShip+1); }
+    if(e.key==="1"){ document.querySelector('.vtab[data-v="port"]').click(); }
+    if(e.key==="2"){ document.querySelector('.vtab[data-v="top"]').click(); }
+    if(e.key==="3"){ document.querySelector('.vtab[data-v="bow"]').click(); }
+    if(e.key==="4"){ document.querySelector('.vtab[data-v="cut"]').click(); }
+  });
+
+  /* Tilt (matches other UIC pages) */
+  const container = document.getElementById("crt-container");
+  let tiltPending = false, lastX = window.innerWidth/2, lastY = window.innerHeight/2;
+  function scheduleTilt(){
+    if(tiltPending) return; tiltPending = true;
+    requestAnimationFrame(()=>{
+      const rx = (window.innerHeight/2 - lastY)/1400;
+      const ry = (window.innerWidth/2  - lastX)/1400;
+      container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      tiltPending = false;
+    });
+  }
+  document.addEventListener("mousemove",e=>{lastX=e.clientX;lastY=e.clientY;scheduleTilt();},{passive:true});
+  document.addEventListener("touchmove",e=>{const t=e.touches[0];lastX=t.clientX;lastY=t.clientY;scheduleTilt();},{passive:true});
+
+  /* Clock */
+  const clock = document.getElementById("clock");
+  function tick(){
+    const d = new Date();
+    const p = n=>String(n).padStart(2,"0");
+    clock.textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+  setInterval(tick,1000); tick();
+
+  /* Boot */
+  selectShip(0);
+})();
 </script>
 
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
