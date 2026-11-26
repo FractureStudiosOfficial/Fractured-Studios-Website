@@ -3,1303 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UIC Terminal Access</title>
-
+<title>U.I.C. // Universal Interstellar Computers</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-
 <style>
 :root{
-    --amber:#ff9f07;
-    --amberBright:#ffc861;
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
     --amberDim:#B36700;
-
-    /* ADJUSTABLE CRT SETTINGS */
-    --scanline-opacity:.22;
-    --flicker-min:.08;
-    --flicker-max:.15;
+    --red:#ff4a2b;
+    --green:#8fff8a;
 }
-
 *{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--amberBright);outline-offset:2px;}
 
-html,body{
-    margin:0;
-    height:100%;
-    background:#000;
-    overflow:hidden;
-}
+/* BEZEL */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);}
+#bezel-label{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:13px;letter-spacing:.35em;color:#7a5230;z-index:5;white-space:nowrap;}
+#screen-wrap{position:fixed;inset:22px 22px 28px;border-radius:48px/60px;background:#050505;overflow:hidden;isolation:isolate;
+    box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
 
-body{
-    color:var(--amber);
-    font-family:'Share Tech Mono', monospace;
-    perspective:1400px;
-}
+/* CRT OVERLAYS */
+.fx{position:absolute;inset:0;pointer-events:none;}
+#amber-tint{z-index:1150;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);}
+#scanlines{z-index:1300;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0 1px,transparent 1px 3px);animation:flicker .14s infinite;}
+#vignette{z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#glare{z-index:1200;mix-blend-mode:screen;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.12),transparent 70%);}
+#poweron{z-index:2000;background:#fff;animation:poweron 1.6s ease-out forwards;}
+@keyframes flicker{0%{opacity:.55}47%{opacity:.5}50%{opacity:.85}53%{opacity:.5}100%{opacity:.55}}
+@keyframes poweron{0%{opacity:0}5%{opacity:.9}10%{opacity:.15}20%{transform:scaleY(.005);opacity:1}25%{transform:scaleY(1);opacity:.6;background:#ffb060}100%{transform:scaleY(1);opacity:0;background:#ffb060}}
 
-/* =========================
-   CRT BEZEL
-========================= */
-#bezel{
-    position:fixed;
-    inset:0;
-    background:radial-gradient(ellipse at 30% 20%, #3a2a1a 0%, #1a120a 40%, #0a0705 70%, #000 100%);
-    z-index:0;
-}
-#bezel::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);
-    pointer-events:none;
-}
-#bezel-label{
-    position:fixed;
-    bottom:14px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:5;
-    letter-spacing:.35em;
-    font-size:11px;
-    color:#7a5230;
-    text-shadow:0 1px 0 #000;
-    font-family:'VT323',monospace;
-    user-select:none;
-}
-#brand-led{
-    position:fixed;
-    bottom:16px;
-    left:calc(50% - 180px);
-    width:6px;height:6px;
-    border-radius:50%;
-    background:var(--amber);
-    box-shadow:0 0 6px var(--amber),0 0 12px #ff6a00;
-    animation:led-pulse 2.4s ease-in-out infinite;
-    z-index:5;
-}
-@keyframes led-pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+/* LAYOUT */
+#ui{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:40px 56px 44px;display:grid;grid-template-rows:auto minmax(min-content,1fr) auto;gap:16px;z-index:2;}
+.panel{position:relative;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));border-radius:4px;padding:16px;box-shadow:inset 0 0 24px rgba(255,159,7,.05);min-height:0;}
+.panel::before{content:"";position:absolute;inset:6px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:2px;}
+.ph{display:flex;align-items:center;gap:10px;padding-bottom:9px;margin-bottom:12px;border-bottom:1px dashed rgba(255,159,7,.3);position:relative;z-index:1;}
+.ph .tick{color:var(--red);}
+.ph .ttl{flex:1;color:var(--amberBright);font-size:13px;letter-spacing:.22em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.ph .badge{font-size:10px;letter-spacing:.2em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+.glow{text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);}
 
-/* =========================
-   SCREEN + FISHEYE
-========================= */
-#screen-wrap{
-    position:fixed;
-    inset:22px;
-    border-radius:48px / 60px;
-    background:#050505;
-    box-shadow:
-        0 0 0 4px #0a0605,
-        0 0 0 8px #1a0f07,
-        0 0 0 10px #2a1a0d,
-        0 0 40px rgba(0,0,0,.9) inset,
-        0 30px 60px rgba(0,0,0,.85);
-    overflow:hidden;
-    transform-style:preserve-3d;
-    isolation:isolate;
-}
+/* TOP BAR */
+#top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));}
+#top .l{display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.24em;color:var(--amberBright);}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{50%{opacity:.4}}
+#top .r{font-size:11px;letter-spacing:.2em;opacity:.8;display:flex;gap:18px;}
 
-#screen{
-    position:absolute;
-    inset:0;
-    filter:url(#fisheye);
-    transform:scale(1.02);
-    overflow:hidden;
-}
+/* MAIN */
+#main{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+#hero{display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;min-height:420px;}
+#hero-body{position:relative;z-index:1;flex:1;display:flex;align-items:center;gap:28px;min-height:0;}
+#mark{width:min(200px,28%);flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,159,7,.55)) drop-shadow(0 0 18px rgba(255,140,0,.3));}
+#hero-body>div{min-width:0;}
+#mark .orb{transform-origin:100px 100px;}
+#mark .o1{animation:spin 38s linear infinite;}
+#mark .o2{animation:spin 24s linear infinite reverse;}
+#mark .o3{animation:spin 56s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#wordmark{font-family:'VT323',monospace;font-size:clamp(56px,6.4vw,118px);line-height:.82;letter-spacing:.08em;color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.8),0 0 22px rgba(255,120,0,.5);}
+#wordmark small{display:block;margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:clamp(11px,1.2vw,15px);letter-spacing:.22em;line-height:1.5;color:var(--amber);text-shadow:0 0 4px rgba(255,159,7,.6);}
+#motto{margin-top:12px;font-size:13px;letter-spacing:.12em;line-height:1.6;color:var(--amberDim);max-width:46ch;}
+#hero-foot{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat{border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.04);padding:8px 6px;text-align:center;font-size:11px;letter-spacing:.14em;}
+.stat b{display:block;font-weight:400;color:var(--green);margin-top:3px;}
+.stat b.w{color:var(--red);}
 
-/* Overlays */
-#glare{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1200;
-    background:
-        radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.14),rgba(255,255,255,.03) 40%,transparent 70%),
-        radial-gradient(ellipse 40% 30% at 78% 82%,rgba(255,159,7,.05),transparent 70%);
-    mix-blend-mode:screen;
-}
-#vignette{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1100;
-    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);
-}
-#corners{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:1105;
-    background:
-        radial-gradient(circle at 0% 0%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 100% 0%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 0% 100%,rgba(0,0,0,.85) 0,transparent 22%),
-        radial-gradient(circle at 100% 100%,rgba(0,0,0,.85) 0,transparent 22%);
-}
+/* DIRECTORY */
+#side{display:grid;grid-template-rows:auto minmax(230px,1fr);gap:16px;}
+#dir{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;z-index:1;}
+.row{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"i n" ". d";column-gap:8px;row-gap:1px;align-items:center;padding:7px 10px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);font-size:12px;letter-spacing:.12em;cursor:pointer;transition:background .12s,border-color .12s,color .12s;}
+.row .ico{grid-area:i;color:var(--red);}
+.row .nm{grid-area:n;}
+.row .ds{grid-area:d;font-size:10px;opacity:.6;letter-spacing:.1em;}
+.row:hover,.row:focus-visible{background:rgba(255,159,7,.14);border-color:rgba(255,159,7,.55);color:var(--amberBright);}
+.row.lock{opacity:.75;}
+.row.lock .nm::after{content:" [LOCKED]";color:var(--red);font-size:10px;}
+.row.deny{animation:deny .5s steps(2);border-color:var(--red);color:var(--red);}
+@keyframes deny{50%{background:rgba(255,74,43,.25)}}
 
-/* =========================
-   STARTUP SCREEN — Self-test / warm-up sequence
-========================= */
-#startup{
-    position:absolute;
-    inset:0;
-    background:#000;
-    z-index:5000;
-    overflow:hidden;
-}
+/* TERMINAL */
+#tbox{display:flex;flex-direction:column;}
+#log{flex:1;min-height:110px;overflow-y:auto;position:relative;z-index:1;font-size:13px;line-height:1.5;padding:10px;border:1px solid rgba(255,159,7,.28);scrollbar-width:none;
+    background:repeating-linear-gradient(180deg,rgba(255,159,7,.02) 0 2px,transparent 2px 3px);text-shadow:0 0 3px rgba(255,159,7,.7);}
+#log::-webkit-scrollbar{display:none;}
+#log .err{color:var(--red);} #log .ok{color:var(--green);} #log .dim{opacity:.6;}
+#prompt{position:relative;z-index:1;display:flex;gap:10px;align-items:center;margin-top:10px;padding:9px 12px;border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);}
+#prompt .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+@keyframes chev{50%{opacity:.3}}
+#cmd{flex:1;background:none;border:none;outline:none;color:var(--amber);font:inherit;caret-color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.6);}
 
-/* Tube warm-up: vertical line → horizontal line → full picture */
-#tube-warmup{
-    position:absolute;
-    inset:0;
-    z-index:2;
-    pointer-events:none;
-}
-#tube-warmup .vline{
-    position:absolute;
-    left:50%;top:0;
-    width:2px;height:100%;
-    background:var(--amberBright);
-    box-shadow:0 0 20px var(--amber),0 0 60px rgba(255,159,7,.7);
-    transform:translateX(-50%) scaleY(0);
-    transform-origin:center;
-    animation:vline 0.5s ease forwards;
-}
-#tube-warmup .hline{
-    position:absolute;
-    top:50%;left:0;
-    height:2px;width:100%;
-    background:var(--amberBright);
-    box-shadow:0 0 20px var(--amber),0 0 60px rgba(255,159,7,.7);
-    transform:translateY(-50%) scaleX(0);
-    transform-origin:center;
-    animation:hline 0.4s ease .5s forwards;
-}
-#tube-warmup .bloom{
-    position:absolute;
-    inset:0;
-    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.35),transparent 60%);
-    opacity:0;
-    animation:bloom 0.5s ease .9s forwards;
-}
-@keyframes vline{
-    0%{transform:translateX(-50%) scaleY(0);}
-    100%{transform:translateX(-50%) scaleY(1);}
-}
-@keyframes hline{
-    0%{transform:translateY(-50%) scaleX(0);opacity:1;}
-    80%{transform:translateY(-50%) scaleX(1);opacity:.9;}
-    100%{transform:translateY(-50%) scaleX(1);opacity:0;}
-}
-@keyframes bloom{
-    0%{opacity:0;}
-    50%{opacity:1;}
-    100%{opacity:0;}
-}
-/* Fade the whole warmup layer out after it plays */
-#tube-warmup{animation:warmupFade .4s ease 1.3s forwards;}
-@keyframes warmupFade{to{opacity:0;visibility:hidden;}}
+/* TICKER */
+#ticker{min-height:34px;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);padding:7px 12px;font-size:12px;letter-spacing:.14em;overflow:hidden;}
+#ticker .tag{flex-shrink:0;color:var(--red);border:1px solid rgba(255,74,43,.45);padding:2px 8px;font-size:10px;}
+#ticker .track{flex:1;overflow:hidden;white-space:nowrap;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);}
+#ticker .run{display:inline-block;padding-left:100%;animation:run 60s linear infinite;}
+@keyframes run{to{transform:translateX(-100%)}}
+#ticker .run span{margin-right:70px;}
+#os{position:absolute;bottom:10px;right:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
+#clock{position:absolute;bottom:10px;left:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
 
-/* Top status bar during self-test */
-#selftest-topbar{
-    position:absolute;
-    top:0;left:0;right:0;
-    padding:12px 26px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size:12px;
-    letter-spacing:.28em;
-    color:var(--amberBright);
-    border-bottom:1px solid rgba(255,159,7,.35);
-    background:rgba(255,159,7,.04);
-    z-index:3;
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-    opacity:0;
-    animation:fadeIn .3s ease 1.5s forwards;
-}
-#selftest-topbar .dot{
-    display:inline-block;
-    width:8px;height:8px;
-    background:var(--amber);
-    border-radius:50%;
-    box-shadow:0 0 8px var(--amber);
-    margin-right:8px;
-    animation:tag-blink 1.2s steps(2) infinite;
-    vertical-align:middle;
-}
-@keyframes tag-blink{50%{opacity:.3;}}
-@keyframes fadeIn{to{opacity:1;}}
-
-/* Main self-test panel */
-#selftest-panel{
-    position:absolute;
-    inset:70px 40px 50px 40px;
-    z-index:3;
-    display:grid;
-    grid-template-columns:1.4fr 1fr;
-    gap:24px;
-    padding:24px;
-    opacity:0;
-    animation:fadeIn .3s ease 1.6s forwards;
-    border:1px solid rgba(255,159,7,.28);
-    background:
-        repeating-linear-gradient(180deg,rgba(255,159,7,.02) 0 2px,transparent 2px 3px),
-        linear-gradient(180deg,rgba(255,159,7,.03),rgba(0,0,0,.35));
-    box-shadow:
-        inset 0 0 30px rgba(255,159,7,.06),
-        inset 0 0 2px rgba(255,200,90,.25);
-}
-
-#selftest-panel::before,
-#selftest-panel::after{
-    content:"";
-    position:absolute;
-    width:20px;height:20px;
-    border:2px solid var(--amberBright);
-    filter:drop-shadow(0 0 4px rgba(255,159,7,.7));
-    pointer-events:none;
-}
-#selftest-panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none;}
-#selftest-panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none;}
-
-/* Left column — log */
-.st-col{display:flex;flex-direction:column;min-height:0;}
-
-.st-heading{
-    font-size:12px;
-    letter-spacing:.32em;
-    color:var(--amberBright);
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-    margin-bottom:12px;
-    padding-bottom:6px;
-    border-bottom:1px dashed rgba(255,159,7,.3);
-    display:flex;
-    justify-content:space-between;
-}
-
-#selftest-log{
-    flex:1;
-    min-height:0;
-    overflow:hidden;
-    font-size:14px;
-    line-height:1.6;
-    text-shadow:0 0 3px rgba(255,159,7,.6);
-}
-#selftest-log .line{opacity:0;animation:logIn .3s ease forwards;}
-#selftest-log .line .k{color:var(--amberBright);}
-#selftest-log .line .ok{color:#8fff8a;text-shadow:0 0 4px #4dff4d;}
-#selftest-log .line .warn{color:#ff6a00;text-shadow:0 0 4px #ff6a00;}
-
-@keyframes logIn{
-    0%{opacity:0;transform:translateX(-6px);}
-    100%{opacity:1;transform:translateX(0);}
-}
-
-/* Right column — gauges, sig-test bars */
-#selftest-gauges{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.gauge{
-    padding:10px 12px;
-    border:1px solid rgba(255,159,7,.28);
-    background:rgba(255,159,7,.04);
-    font-size:12px;
-    letter-spacing:.18em;
-    position:relative;
-}
-.gauge b{
-    display:block;
-    color:var(--amberBright);
-    font-weight:normal;
-    font-size:10px;
-    letter-spacing:.28em;
-    margin-bottom:6px;
-    opacity:.9;
-}
-.gauge .track{
-    height:6px;
-    background:rgba(255,159,7,.12);
-    border:1px solid rgba(255,159,7,.2);
-    overflow:hidden;
-    position:relative;
-}
-.gauge .fill{
-    position:absolute;
-    inset:0;
-    background:linear-gradient(90deg,var(--amber),var(--amberBright));
-    box-shadow:0 0 8px rgba(255,159,7,.8);
-    transform:translateX(-100%);
-    animation:gaugeFill 2.2s ease forwards;
-}
-.gauge:nth-child(2) .fill{animation-duration:1.6s;animation-delay:.2s;}
-.gauge:nth-child(3) .fill{animation-duration:2.4s;animation-delay:.4s;}
-.gauge:nth-child(4) .fill{animation-duration:1.9s;animation-delay:.6s;}
-
-@keyframes gaugeFill{
-    0%{transform:translateX(-100%);}
-    100%{transform:translateX(var(--stop,-8%));}
-}
-
-/* SMPTE-style color bar signal test */
-#sig-test{
-    margin-top:6px;
-    height:32px;
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    border:1px solid rgba(255,159,7,.28);
-    overflow:hidden;
-    box-shadow:inset 0 0 8px rgba(0,0,0,.4);
-}
-#sig-test div{filter:brightness(.85);}
-#sig-test div:nth-child(1){background:#c0c0c0;}
-#sig-test div:nth-child(2){background:#c0c000;}
-#sig-test div:nth-child(3){background:#00c0c0;}
-#sig-test div:nth-child(4){background:#00c000;}
-#sig-test div:nth-child(5){background:#c000c0;}
-#sig-test div:nth-child(6){background:#c00000;}
-#sig-test div:nth-child(7){background:#0000c0;}
-
-/* Bottom command line — appears while log is finishing */
-#selftest-bottom{
-    position:absolute;
-    bottom:14px;
-    left:40px;right:40px;
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    letter-spacing:.28em;
-    color:var(--amberBright);
-    opacity:.75;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-    z-index:3;
-    opacity:0;
-    animation:fadeIn .3s ease 1.9s forwards;
-}
-
-/* Crest reveal — replaces old U.I.C. title */
-#crest{
-    position:absolute;
-    inset:0;
-    z-index:4;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .4s ease;
-}
-#crest.show{opacity:1;}
-
-#crest .ring{
-    width:min(420px,60vw);
-    height:min(420px,60vw);
-    border:2px solid var(--amber);
-    border-radius:50%;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:
-        radial-gradient(circle at 50% 50%,
-            #000 0%,
-            #000 62%,
-            rgba(0,0,0,.9) 78%,
-            rgba(0,0,0,0) 100%);
-    box-shadow:
-        0 0 40px rgba(255,159,7,.4),
-        inset 0 0 40px rgba(255,159,7,.15);
-    animation:crestPulse 2.4s ease-in-out infinite;
-}
-#crest .ring::before{
-    content:"";
-    position:absolute;
-    inset:14px;
-    border:1px dashed rgba(255,159,7,.5);
-    border-radius:50%;
-    animation:ringSpin 12s linear infinite;
-}
-#crest .ring::after{
-    content:"";
-    position:absolute;
-    inset:34px;
-    border:1px solid rgba(255,159,7,.28);
-    border-radius:50%;
-}
-@keyframes crestPulse{
-    0%,100%{box-shadow:0 0 40px rgba(255,159,7,.4),inset 0 0 40px rgba(255,159,7,.15);}
-    50%{box-shadow:0 0 80px rgba(255,159,7,.7),inset 0 0 60px rgba(255,159,7,.3);}
-}
-@keyframes ringSpin{to{transform:rotate(360deg);}}
-
-#crest .inner{
-    position:relative;
-    z-index:2;
-}
-#startup-title{
-    font-size:clamp(2rem,5vw,4rem);
-    letter-spacing:.4em;
-    text-shadow:
-        0 0 20px var(--amber),
-        0 0 40px rgba(255,159,7,.5);
-    transition:opacity .3s ease;
-}
-#startup-sub{
-    margin-top:14px;
-    letter-spacing:.28em;
-    opacity:.9;
-    font-size:12px;
-    text-shadow:0 0 6px rgba(255,159,7,.5);
-    transition:opacity .3s ease;
-}
-
-/* Corner brackets around the crest */
-#crest .bracket{
-    position:absolute;
-    width:36px;height:36px;
-    border-color:var(--amberBright);
-    border-style:solid;
-    filter:drop-shadow(0 0 6px rgba(255,159,7,.7));
-}
-#crest .bracket.b1{top:5%;left:5%;border-width:3px 0 0 3px;}
-#crest .bracket.b2{top:5%;right:5%;border-width:3px 3px 0 0;}
-#crest .bracket.b3{bottom:5%;left:5%;border-width:0 0 3px 3px;}
-#crest .bracket.b4{bottom:5%;right:5%;border-width:0 3px 3px 0;}
-
-#welcome{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    opacity:0;
-    font-size:clamp(2rem,5vw,3rem);
-    letter-spacing:.4em;
-    text-shadow:
-        0 0 20px var(--amber),
-        0 0 40px rgba(255,159,7,.6);
-    transition:opacity .5s ease;
-    z-index:6;
-    pointer-events:none;
-}
-
-@media(max-width:700px){
-    #selftest-panel{
-        grid-template-columns:1fr;
-        inset:60px 20px 40px 20px;
-        padding:16px;
-    }
-    #selftest-topbar,
-    #selftest-bottom{padding:10px 16px;font-size:10px;letter-spacing:.2em;}
-    #selftest-bottom{left:20px;right:20px;}
-}
-
-/* =========================
-   TERMINAL
-========================= */
-#crt-container{
-    display:none;
-    position:absolute;
-    inset:0;
-    padding:56px 60px 110px;
-    transform-style:preserve-3d;
-    transition:transform .1s ease-out;
-    will-change:transform;
-    z-index:2;
-}
-
-#terminal-frame{
-    height:100%;
-    padding:22px;
-    position:relative;
-    border:2px solid rgba(255,159,7,.45);
-    background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.35));
-    box-shadow:
-        inset 0 0 30px rgba(255,159,7,.06),
-        inset 0 0 2px rgba(255,200,90,.25),
-        0 0 30px rgba(255,159,7,.08);
-    border-radius:6px;
-}
-
-#terminal-frame::before{
-    content:"";
-    position:absolute;
-    inset:8px;
-    border:1px dashed rgba(255,159,7,.18);
-    pointer-events:none;
-    border-radius:3px;
-}
-
-/* Corner brackets */
-#terminal-frame::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background:
-        linear-gradient(#FF9F07,#FF9F07) 0 0/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 0/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 0/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 0/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 100%/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 0 100%/2px 14px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 100%/14px 2px no-repeat,
-        linear-gradient(#FF9F07,#FF9F07) 100% 100%/2px 14px no-repeat;
-    opacity:.7;
-}
-
-#terminal-header{
-    border-bottom:1px solid rgba(255,159,7,.3);
-    padding-bottom:12px;
-    margin-bottom:14px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-}
-
-#terminal-title{
-    font-size:24px;
-    letter-spacing:.24em;
-    text-shadow:
-        0 0 4px rgba(255,159,7,.7),
-        0 0 14px rgba(255,140,0,.35);
-}
-
-#terminal-tags{
-    display:flex;
-    gap:8px;
-}
-#terminal-tags .tag{
-    font-size:11px;
-    letter-spacing:.22em;
-    padding:3px 9px;
-    border:1px solid rgba(255,159,7,.4);
-    color:var(--amberBright);
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-}
-#terminal-tags .tag.blink{animation:tag-blink 1.6s steps(2) infinite;}
-
-#terminal-wrapper{
-    position:relative;
-    height:calc(100% - 168px);
-    border:1px solid rgba(255,159,7,.28);
-    overflow:hidden;
-    background:
-        repeating-linear-gradient(180deg,rgba(255,159,7,.02) 0 2px,transparent 2px 3px),
-        linear-gradient(180deg,rgba(255,159,7,.04),rgba(0,0,0,.25));
-}
-
-#terminal{
-    position:absolute;
-    inset:0;
-    overflow-y:auto;
-    padding:20px 38px 20px 20px;
-    scrollbar-width:none;
-    text-shadow:
-        0 0 3px rgba(255,159,7,.7),
-        0 0 8px rgba(255,120,0,.35);
-    line-height:1.5;
-}
-#terminal::-webkit-scrollbar{display:none;}
-
-/* Scrollbar — kept, retuned */
-#scrollbar-track{
-    position:absolute;
-    top:0;
-    right:0;
-    width:18px;
-    height:100%;
-    background:
-        linear-gradient(
-            to right,
-            rgba(255,159,7,.03),
-            rgba(255,159,7,.14),
-            rgba(255,159,7,.03)
-        );
-    border-left:1px solid rgba(255,159,7,.2);
-    box-shadow:inset 0 0 8px rgba(255,159,7,.1);
-}
-
-#scrollbar-thumb{
-    position:absolute;
-    top:0;
-    left:2px;
-    width:14px;
-    min-height:50px;
-    cursor:pointer;
-    border-radius:2px;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            rgba(255,240,200,.5) 0px,
-            rgba(255,240,200,.5) 2px,
-            transparent 2px,
-            transparent 6px
-        ),
-        linear-gradient(to bottom,#ffbf4d 0%,#ff9f07 100%);
-    border:1px solid rgba(255,210,120,.35);
-    box-shadow:
-        0 0 10px rgba(255,159,7,.4),
-        inset 0 0 4px rgba(255,255,255,.18);
-}
-
-/* Prompt */
-#prompt{
-    display:flex;
-    gap:10px;
-    margin-top:14px;
-    padding:10px 12px;
-    border:1px solid rgba(255,159,7,.3);
-    background:rgba(255,159,7,.05);
-    align-items:center;
-}
-#prompt .chev{
-    color:var(--amberBright);
-    text-shadow:0 0 6px rgba(255,159,7,.7);
-    animation:chev 1s steps(2) infinite;
-}
-@keyframes chev{50%{opacity:.3;}}
-
-#cmd{
-    flex:1;
-    background:none;
-    border:none;
-    outline:none;
-    color:var(--amber);
-    font:inherit;
-    text-shadow:0 0 4px rgba(255,159,7,.6);
-    caret-color:var(--amberBright);
-}
-
-/* Status line beneath prompt */
-#status-line{
-    margin-top:8px;
-    padding:8px 12px;
-    border:1px solid rgba(255,159,7,.22);
-    background:rgba(255,159,7,.04);
-    font-size:12px;
-    letter-spacing:.18em;
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap:wrap;
-    opacity:.85;
-}
-#status-line .k{
-    color:var(--amberBright);
-    text-shadow:0 0 5px rgba(255,159,7,.6);
-}
-
-.cursor{animation:blink 1s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
-
-/* =========================
-   OS + CLOCK
-========================= */
-#os{
-    position:absolute;
-    bottom:16px;
-    right:24px;
-    font-size:12px;
-    opacity:.8;
-    z-index:1004;
-    letter-spacing:.2em;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-#clock{
-    position:absolute;
-    bottom:16px;
-    left:24px;
-    font-size:12px;
-    opacity:.8;
-    z-index:1004;
-    letter-spacing:.2em;
-    text-shadow:0 0 4px rgba(255,159,7,.5);
-}
-
-/* =========================
-   CRT FX
-========================= */
-#scanlines,#amber-tint,#rgb-mask,#roll{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-}
-#scanlines{
-    background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0px,rgba(0,0,0,.35) 1px,transparent 1px,transparent 3px);
-    animation:flicker .14s infinite;
-    z-index:1300;
-    mix-blend-mode:multiply;
-}
-#rgb-mask{
-    background:repeating-linear-gradient(90deg,rgba(255,0,0,.05) 0 1px,rgba(0,255,0,.05) 1px 2px,rgba(0,0,255,.05) 2px 3px);
-    z-index:1250;
-    mix-blend-mode:overlay;
-    opacity:.6;
-}
-#roll{
-    background:linear-gradient(180deg,transparent 0%,transparent 42%,rgba(255,255,255,.06) 47%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 53%,transparent 58%,transparent 100%);
-    z-index:1310;
-    mix-blend-mode:screen;
-    animation:roll 9s linear infinite;
-}
-@keyframes roll{0%{transform:translateY(-100%);}100%{transform:translateY(100%);}}
-@keyframes flicker{0%{opacity:.55;}47%{opacity:.5;}50%{opacity:.85;}53%{opacity:.5;}100%{opacity:.55;}}
-#amber-tint{
-    background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);
-    z-index:1150;
-    mix-blend-mode:screen;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
+/* RESPONSIVE */
 @media(max-width:900px){
-    #crt-container{padding:30px 20px 90px;}
-    #screen-wrap{inset:12px;border-radius:32px/40px;}
-    #terminal-title{font-size:18px;letter-spacing:.18em;}
-    #startup-title{font-size:3.2rem;}
+    html,body{overflow:auto;}
+    #screen-wrap{inset:10px;border-radius:30px/38px;}
+    #screen{filter:none;transform:none;overflow-y:auto;}
+    #ui{position:relative;overflow:visible;min-height:100%;padding:22px 16px 40px;grid-template-rows:auto auto auto;}
+    #main{grid-template-columns:1fr;}
+    #hero-body{flex-direction:column;align-items:flex-start;gap:16px;}
+    #mark{width:150px;}
+    #log{min-height:160px;}
+    #top .r{display:none;}
+    #os,#clock,#bezel-label{display:none;}
 }
-@media(max-width:500px){
-    #terminal-frame{padding:14px;}
-    #prompt{padding:8px;}
-    #startup-panel{width:88vw;height:60vh;}
-    #welcome{font-size:2rem;}
-}
-
-/* ==== MOBILE OVERHAUL ==== */
-@media(max-width:820px){
-    html,body{overflow:hidden;height:100%;-webkit-text-size-adjust:100%;}
-    body{perspective:none;}
-    #bezel-label,#brand-led{display:none;}
-    #bezel{background:radial-gradient(ellipse at 30% 20%,#241a10 0%,#0a0705 60%,#000 100%);}
-    #screen-wrap{inset:6px;border-radius:16px;box-shadow:0 0 0 2px #0a0605,0 0 0 3px #1a0f07,0 0 20px rgba(0,0,0,.7);}
-    #screen{filter:none;transform:none;}
-    #crt-container{padding:14px 12px 80px;}
-    #terminal-frame{height:100%;padding:12px;}
-    #terminal-header{padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap;}
-    #terminal-title{font-size:15px;letter-spacing:.14em;}
-    #terminal-tags{gap:6px;}
-    #terminal-tags .tag{font-size:9px;padding:2px 6px;letter-spacing:.16em;}
-    #terminal-wrapper{height:calc(100% - 180px);}
-    #terminal{padding:12px 22px 12px 12px;font-size:13px;}
-    #scrollbar-track{width:12px;}
-    #scrollbar-thumb{width:8px;}
-    #prompt{padding:8px 10px;font-size:13px;}
-    #status-line{font-size:10px;letter-spacing:.14em;padding:6px 8px;gap:8px;}
-    #glare,#rgb-mask,#roll,#corners{display:none;}
-    #scanlines{opacity:.45;}
-    #vignette{background:radial-gradient(ellipse 110% 110% at 50% 50%,transparent 60%,rgba(0,0,0,.6) 100%);}
-    #amber-tint{opacity:.6;}
-    #os,#clock{bottom:10px;font-size:10px;letter-spacing:.14em;}
-    #selftest-panel{grid-template-columns:1fr;inset:56px 12px 40px 12px;padding:14px;gap:12px;}
-    #selftest-log{font-size:11px;line-height:1.5;}
-    .gauge{padding:8px 10px;font-size:11px;letter-spacing:.14em;}
-    #sig-test{height:24px;}
-    #crest .ring{width:min(280px,70vw);height:min(280px,70vw);}
-    #startup-title{font-size:clamp(1.4rem,7vw,2.4rem);letter-spacing:.28em;}
-    #startup-sub{font-size:10px;letter-spacing:.2em;}
-    #welcome{font-size:clamp(1.4rem,6vw,2rem);letter-spacing:.28em;}
-    #selftest-bottom{font-size:9px;letter-spacing:.16em;flex-wrap:wrap;gap:4px;}
-}
-@media(max-width:440px){
-    #screen-wrap{inset:4px;}
-    #crt-container{padding:10px 8px 80px;}
-    #terminal-frame{padding:10px;}
-    #terminal-header{gap:8px;}
-    #terminal-title{font-size:13px;letter-spacing:.1em;}
-    #status-line{flex-direction:column;align-items:flex-start;gap:2px;}
-    #os,#clock{font-size:9px;}
-}
+@media(max-height:760px) and (min-width:901px){#motto{display:none;}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;}#poweron{display:none;}}
 </style>
 </head>
 <body>
 
-<!-- Fisheye SVG filter -->
-<svg width="0" height="0" style="position:absolute">
-    <defs>
-        <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
-            <feImage
-                href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>"
-                result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
-            <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-    </defs>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+        <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>" result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
 </svg>
 
-<audio id="startupSound" src="startup-placeholder.mp3"></audio>
-<audio id="typeSound" src="typing-placeholder.mp3"></audio>
-
 <div id="bezel"></div>
+<div id="bezel-label">U.I.C. // MODEL SOL-v1</div>
 
 <div id="screen-wrap">
+<div id="screen">
+<div id="ui">
 
-    <div id="screen">
+    <header id="top">
+        <div class="l"><span class="dot"></span><span>U.I.C. PUBLIC GATEWAY</span></div>
+        <div class="r"><span>NODE: PRIME</span><span>UPLINK: NOMINAL</span><span id="hz">60.00Hz</span></div>
+    </header>
 
-        <!-- STARTUP SCREEN — diagnostics self-test sequence -->
-        <div id="startup">
+    <main id="main">
 
-            <!-- Tube warm-up: vertical line → horizontal line → bloom -->
-            <div id="tube-warmup">
-                <div class="vline"></div>
-                <div class="hline"></div>
-                <div class="bloom"></div>
-            </div>
-
-            <!-- Top status bar -->
-            <div id="selftest-topbar">
-                <span><span class="dot"></span>U.I.C. POWER-ON SELF-TEST</span>
-                <span>MODEL SOL-v1 // NODE PRIME</span>
-                <span id="selftest-clock">--:--:--</span>
-            </div>
-
-            <!-- Diagnostics panel -->
-            <div id="selftest-panel">
-
-                <div class="st-col">
-                    <div class="st-heading"><span>// BOOT LOG</span><span>RS-232</span></div>
-                    <div id="selftest-log"></div>
-                </div>
-
-                <div class="st-col">
-                    <div class="st-heading"><span>// SUBSYSTEMS</span><span>DIAG</span></div>
-                    <div id="selftest-gauges">
-                        <div class="gauge">
-                            <b>CORE</b>MEMORY BANK 0-3
-                            <div class="track"><div class="fill" style="--stop:-4%"></div></div>
-                        </div>
-                        <div class="gauge">
-                            <b>UPLINK</b>DEEP-SPACE ARRAY
-                            <div class="track"><div class="fill" style="--stop:-18%"></div></div>
-                        </div>
-                        <div class="gauge">
-                            <b>CRYO</b>COOLANT LOOP
-                            <div class="track"><div class="fill" style="--stop:-12%"></div></div>
-                        </div>
-                        <div class="gauge">
-                            <b>SEC</b>CIPHER ENGINE
-                            <div class="track"><div class="fill" style="--stop:-8%"></div></div>
-                        </div>
-                    </div>
-                    <div style="margin-top:10px;font-size:10px;letter-spacing:.28em;color:var(--amberBright);opacity:.8;">// SIGNAL TEST</div>
-                    <div id="sig-test">
-                        <div></div><div></div><div></div><div></div><div></div><div></div><div></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div id="selftest-bottom">
-                <span>[F1] BYPASS &nbsp;•&nbsp; [F4] DIAG &nbsp;•&nbsp; [ANY KEY] SKIP</span>
-                <span>REV 4.02 // (C) UIC INDUSTRIES</span>
-            </div>
-
-            <!-- Crest reveal (replaces U.I.C. text panel) -->
-            <div id="crest">
-                <div class="bracket b1"></div>
-                <div class="bracket b2"></div>
-                <div class="bracket b3"></div>
-                <div class="bracket b4"></div>
-
-                <div class="ring">
-                    <div class="inner">
-                        <div id="startup-title">U.I.C.</div>
-                        <div id="startup-sub">UNIVERSAL INTERSTELLAR COMPUTERS</div>
-                    </div>
+        <section id="hero" class="panel">
+            <div class="ph"><span class="tick">◆</span><span class="ttl">WELCOME</span><span class="badge">PUBLIC</span></div>
+            <div id="hero-body">
+                <svg id="mark" viewBox="0 0 200 200" aria-hidden="true">
+                    <g fill="none" stroke="#FF9F07" stroke-width="1.5">
+                        <circle cx="100" cy="100" r="92" opacity=".35"/>
+                        <g class="orb o1"><ellipse cx="100" cy="100" rx="86" ry="32" transform="rotate(-24 100 100)"/><circle cx="182" cy="76" r="5" fill="#FFC861"/></g>
+                        <g class="orb o2"><ellipse cx="100" cy="100" rx="70" ry="24" transform="rotate(38 100 100)" opacity=".7"/><circle cx="46" cy="132" r="4" fill="#FF9F07"/></g>
+                        <g class="orb o3"><circle cx="100" cy="100" r="58" stroke-dasharray="2 7" opacity=".6"/><circle cx="100" cy="42" r="3" fill="#ff4a2b" stroke="none"/></g>
+                    </g>
+                    <text x="100" y="124" text-anchor="middle" font-family="VT323,monospace" font-size="84" fill="#FFC861">U</text>
+                </svg>
+                <div>
+                    <div id="wordmark">U.I.C.<small>UNIVERSAL INTERSTELLAR COMPUTERS</small></div>
+                    <div id="motto">Computing for every world we reach. Systems, navigation and communications for the outer settlements.</div>
                 </div>
             </div>
-
-            <div id="welcome">WELCOME</div>
-        </div>
-
-        <!-- TERMINAL -->
-        <div id="crt-container">
-            <div id="terminal-frame">
-
-                <div id="terminal-header">
-                    <div id="terminal-title"></div>
-                    <div id="terminal-tags">
-                        <span class="tag">CH.03</span>
-                        <span class="tag blink">REC</span>
-                    </div>
-                </div>
-
-                <div id="terminal-wrapper">
-                    <div id="terminal"></div>
-
-                    <div id="scrollbar-track">
-                        <div id="scrollbar-thumb"></div>
-                    </div>
-                </div>
-
-                <div id="prompt">
-                    <span class="chev">&gt;</span>
-                    <input id="cmd" disabled autocomplete="off">
-                </div>
-
-                <div id="status-line">
-                    <span><span class="k">SEQUENCE</span> :: <span id="seq-state">IDLE</span></span>
-                    <span><span class="k">STEP</span> :: <span id="step-state">--/--</span></span>
-                    <span><span class="k">SECURE</span> :: LINK OK</span>
-                </div>
-
+            <div id="hero-foot">
+                <div class="stat">NETWORK<b>ONLINE</b></div>
+                <div class="stat">RELAY 07<b class="w">DEGRADED</b></div>
+                <div class="stat">PUBLIC ACCESS<b>OPEN</b></div>
             </div>
-        </div>
+        </section>
 
-    </div>
+        <aside id="side">
+            <section class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl">SERVICES</span><span class="badge">6</span></div>
+                <nav id="dir">
+                    <a class="row" href="institution.html"><span class="ico">&gt;</span><span class="nm">INSTITUTION</span><span class="ds">ABOUT U.I.C.</span></a>
+                    <a class="row" href="dashboard.html"><span class="ico">&gt;</span><span class="nm">USER DASHBOARD</span><span class="ds">ACCOUNT</span></a>
+                    <a class="row" href="messages.html"><span class="ico">&gt;</span><span class="nm">MESSAGES</span><span class="ds">INBOX</span></a>
+                    <a class="row" href="email.html"><span class="ico">&gt;</span><span class="nm">E-MAIL</span><span class="ds">MAIL</span></a>
+                    <a class="row" href="bulletin.html"><span class="ico">&gt;</span><span class="nm">BULLETIN</span><span class="ds">NOTICES</span></a>
+                    <a class="row" href="blogs.html"><span class="ico">&gt;</span><span class="nm">BLOGS</span><span class="ds">POSTS</span></a>
+                </nav>
+            </section>
 
-    <!-- CRT overlays (unwarped, above the fisheye) -->
-    <div id="amber-tint"></div>
-    <div id="rgb-mask"></div>
-    <div id="scanlines"></div>
-    <div id="roll"></div>
-    <div id="corners"></div>
-    <div id="vignette"></div>
-    <div id="glare"></div>
+            <section id="tbox" class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl">COMMAND LINE</span><span class="badge">TYPE HELP</span></div>
+                <div id="log" aria-live="polite"></div>
+                <div id="prompt"><span class="chev">&gt;</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Command line" disabled></div>
+            </section>
+        </aside>
 
-    <div id="clock">SYS ::</div>
-    <div id="os">UIC OS v1.0.4</div>
+    </main>
+
+    <footer id="ticker">
+        <span class="tag">NOTICE</span>
+        <div class="track"><div class="run">
+            <span>RELAY 07 RUNNING AT REDUCED CAPACITY. EXPECT DELAYS ON OUTER-SYSTEM TRAFFIC.</span>
+            <span>ALL STAFF: REAUTHENTICATE TERMINAL CREDENTIALS BEFORE THE NEXT CYCLE.</span>
+            <span>UNAUTHORISED ACCESS TO USER ACCOUNTS IS LOGGED.</span>
+        </div></div>
+    </footer>
 
 </div>
+</div>
 
-<div id="bezel-label">U.I.C. • MODEL SOL-v1</div>
-<div id="brand-led"></div>
+<div class="fx" id="amber-tint"></div>
+<div class="fx" id="scanlines"></div>
+<div class="fx" id="vignette"></div>
+<div class="fx" id="glare"></div>
+<div class="fx" id="poweron"></div>
+<div id="clock">SYS ::</div>
+<div id="os">UIC OS v1.0.4</div>
+</div>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
-const UIC_DISPLAY_TIME = 4000; // how long UIC stays before WELCOME
-
-/* =========================
-   ELEMENTS
-========================= */
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
-const title = document.getElementById("terminal-title");
-const container = document.getElementById("crt-container");
+const log = document.getElementById("log");
+const cmd = document.getElementById("cmd");
 const clock = document.getElementById("clock");
-const seqState = document.getElementById("seq-state");
-const stepState = document.getElementById("step-state");
+const hz = document.getElementById("hz");
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
-const startupSound = document.getElementById("startupSound");
-const typeSound = document.getElementById("typeSound");
-
-/* =========================
-   COMMAND DATABASE
-========================= */
-const commands = {
-    users:{
-        sequence:["init","access","grant"],
-        page:"users.html"
-    },
-    classified:{
-        sequence:["uic","access","enter","useroverride"],
-        page:"RESTRICTEDACCESS.html"
-    },
-    Spacecraft:{
-        sequence:["fleet","engage","authorize"],
-        page:"folder_ships/ships.html"
-    },
-    Suits:{
-        sequence:["support","02","pressurize"],
-        page:"folder_suits/suits.html"
-    },
-    Map:{
-        sequence:["solarmap","enter"],
-        page:"maps/solarmap.html"
-    },
-        DelataΔ:{
-        sequence:["distance","orbit","burn"],
-        page:"deltav.html"
-    },
-        Communications:{
-        sequence:["adjust","radio","mhz"],
-        page:"communications.html"
-    },
-            ServerAccess:{
-        sequence:["system","connect","address"],
-        page:"remoteserver.html"
-    },
-         BulletinBoard:{
-        sequence:["bulletin","enter"],
-        page:"bulletin.html"
-    },
-       Manuel:{
-        sequence:["manuel","enter"],
-        page:"manuel.html"
-    },
-      arcade:{
-        sequence:["arcade","enter"],
-        page:"arcade.html"
-    }
+/* ---- ARG HOOKS: edit these ---------------------------------
+   PAGES: words a visitor can type to jump to a page.
+   CODES: secret phrases that unlock pages. Add your own puzzle
+   answers here, e.g.  "kestrel-9": "RESTRICTEDACCESS.html"
+-------------------------------------------------------------- */
+const PAGES = {
+    institution: "institution.html",
+    dashboard: "dashboard.html",
+    messages: "messages.html",
+    email: "email.html",
+    "e-mail": "email.html",
+    bulletin: "bulletin.html",
+    blogs: "blogs.html",
+    blog: "blogs.html",
+    /* hidden commands (not listed in the menu) */
+    terminal: "terminal.html",
+    map: "maps/solarmap.html"
+};
+const CODES = {
+    // "your-secret-phrase": "hidden-page.html"
 };
 
-let activeCommand = null;
-let stepIndex = 0;
-let busy = false;
-
-/* =========================
-   HELPERS
-========================= */
-function updateStatus(){
-    if(activeCommand){
-        seqState.textContent = activeCommand.toUpperCase();
-        stepState.textContent = `${stepIndex}/${commands[activeCommand].sequence.length}`;
-    }else{
-        seqState.textContent = "IDLE";
-        stepState.textContent = "--/--";
-    }
+function print(text, cls = "") {
+    const d = document.createElement("div");
+    if (cls) d.className = cls;
+    d.textContent = text;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
 }
 
-/* =========================
-   TYPE FUNCTIONS
-========================= */
-async function typeLine(text,speed=18){
-    const div = document.createElement("div");
-    terminal.appendChild(div);
-
-    for(let char of text){
-        div.textContent += char;
-
-        if(typeSound.src){
-            typeSound.currentTime = 0;
-            typeSound.play().catch(()=>{});
-        }
-
-        terminal.scrollTop = terminal.scrollHeight;
-        await new Promise(r=>setTimeout(r,speed));
-    }
-}
-
-async function typeTitle(text){
-    title.textContent = "";
-    for(let char of text){
-        title.textContent += char;
-        await new Promise(r=>setTimeout(r,35));
-    }
-}
-
-/* =========================
-   STARTUP SEQUENCE — self-test + crest reveal
-========================= */
-const selftestLines = [
-    ["CPU","6502 @ 1.023 MHz .............. ","OK"],
-    ["RAM","64K CORE MEMORY ............... ","OK"],
-    ["ROM","MONITOR v4.02 ................. ","OK"],
-    ["IO ","SERIAL CH-A/B ................. ","OK"],
-    ["NET","UIC Systems Network Health ............. ","WARN"],
-    ["SEC","E-V-M Network Connection .................. ","Secure"],
-    ["ENV","CRYO LOOP 273K ................ ","OK"],
-    ["SYS","POWER-ON SELF-TEST COMPLETE ... ","OK"],
-];
-
-async function runSelfTestLog(){
-    const log = document.getElementById("selftest-log");
-    for(let i=0;i<selftestLines.length;i++){
-        const [tag,body,status] = selftestLines[i];
-        const line = document.createElement("div");
-        line.className = "line";
-        line.style.animationDelay = (i*0.11)+"s";
-        line.innerHTML = `<span class="k">[${tag}]</span> ${body}<span class="${status==='OK'?'ok':'warn'}">[${status}]</span>`;
-        log.appendChild(line);
-    }
-}
-
-function tickSelftestClock(){
-    const el = document.getElementById("selftest-clock");
-    if(!el) return;
-    const d = new Date();
-    const pad = n=>n.toString().padStart(2,"0");
-    el.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-
-async function startupSequence(){
-
-    startupSound.play().catch(()=>{});
-
-    /* start clock in the top bar */
-    const clockInt = setInterval(tickSelftestClock,1000);
-    tickSelftestClock();
-
-    /* run boot log */
-    runSelfTestLog();
-
-    /* keep total dwell time honoring UIC_DISPLAY_TIME */
-    const preRevealDwell = Math.max(0, UIC_DISPLAY_TIME - 800);
-    await new Promise(r=>setTimeout(r,preRevealDwell));
-
-    /* fade out diagnostics elements */
-    const fadeTargets = ["selftest-topbar","selftest-panel","selftest-bottom"];
-    fadeTargets.forEach(id=>{
-        const el = document.getElementById(id);
-        if(el){ el.style.transition="opacity .5s ease"; el.style.opacity="0"; }
-    });
-
-    await new Promise(r=>setTimeout(r,550));
-
-    /* show pulsing crest */
-    document.getElementById("crest").classList.add("show");
-
-    await new Promise(r=>setTimeout(r,1400));
-
-    /* dim crest text, reveal WELCOME */
-    document.getElementById("startup-title").style.opacity="0";
-    document.getElementById("startup-sub").style.opacity="0";
-
-    const welcome = document.getElementById("welcome");
-    welcome.style.opacity="1";
-
-    await new Promise(r=>setTimeout(r,1500));
-
-    clearInterval(clockInt);
-
-    document.getElementById("startup").style.opacity="0";
-    document.getElementById("startup").style.transition="opacity .5s ease";
-
-    await new Promise(r=>setTimeout(r,500));
-
-    document.getElementById("startup").remove();
-
-    container.style.display="block";
-
-    await typeTitle("U.I.C. SYSTEMS TERMINAL ACCESS");
-
-    const bootLines = [
-        "Initializing U.I.C. Mainframe...",
-        "Loading Security Protocols...",
-        "Authenticating Terminal Node...",
-        "Verifying User Clearance...",
-        "System Online",
-        "---------------------------",
-        "",
-        "SYSTEM READY.",
-        "If you require help, type 'manuel', then 'enter'"
+async function boot() {
+    const lines = [
+        ["U.I.C. public gateway v1.0.4", ""],
+        ["Linking to node PRIME ...... OK", "ok"],
+        ["Relay 07 ................... DEGRADED", "err"],
+        ["Type HELP for commands.", "dim"]
     ];
-
-    for(const line of bootLines){
-        await typeLine(line);
-    }
-
-    input.disabled = false;
-    input.focus();
-    updateStatus();
+    for (const [t, c] of lines) { print(t, c); await wait(220 + Math.random() * 260); }
+    cmd.disabled = false;
+    if (matchMedia("(min-width:901px)").matches) cmd.focus();
 }
 
-/* =========================
-   COMMAND HANDLER (unchanged logic)
-========================= */
-input.addEventListener("keydown", async (e)=>{
-    if(e.key !== "Enter" || busy) return;
+cmd.addEventListener("keydown", async e => {
+    if (e.key !== "Enter") return;
+    const raw = cmd.value.trim();
+    const v = raw.toLowerCase();
+    cmd.value = "";
+    if (!v) return;
+    print("> " + raw);
 
-    e.preventDefault();
-
-    const value = input.value.trim().toLowerCase();
-    if(!value) return;
-
-    busy = true;
-    input.value = "";
-
-    await typeLine("> " + value,10);
-
-    if(!activeCommand){
-
-        let found = false;
-
-        for(const key in commands){
-            if(value === commands[key].sequence[0]){
-                activeCommand = key;
-                stepIndex = 1;
-                await typeLine(`STEP 1/${commands[key].sequence.length} ACCEPTED`);
-                found = true;
-                break;
-            }
-        }
-
-        if(!found){
-            await typeLine("UNKNOWN COMMAND");
-        }
-
-    }else{
-
-        const cmd = commands[activeCommand];
-
-        if(value === cmd.sequence[stepIndex]){
-
-            stepIndex++;
-
-            if(stepIndex >= cmd.sequence.length){
-
-                await typeLine(`${activeCommand.toUpperCase()} ACCESS GRANTED`);
-                await typeLine("REDIRECTING...");
-
-                setTimeout(()=>{
-                    window.location.href = cmd.page;
-                },700);
-
-                activeCommand = null;
-                stepIndex = 0;
-
-            }else{
-                await typeLine(`STEP ${stepIndex}/${cmd.sequence.length} ACCEPTED`);
-            }
-
-        }else{
-            await typeLine("INVALID SEQUENCE — RESET");
-            activeCommand = null;
-            stepIndex = 0;
-        }
+    if (v === "help") {
+        print("COMMANDS: INSTITUTION  DASHBOARD  MESSAGES  EMAIL  BULLETIN  BLOGS  STATUS  CLEAR");
+        print("Sign in from USER DASHBOARD.", "dim");
+    } else if (v === "status") {
+        print("Network ...... ONLINE", "ok");
+        print("Relay 07 ..... DEGRADED", "err");
+        print("Public access  OPEN", "ok");
+    } else if (v === "clear") {
+        log.innerHTML = "";
+    } else if (PAGES[v]) {
+        print("Opening " + v + " ...", "ok"); await wait(500); location.href = PAGES[v];
+    } else if (CODES[v]) {
+        print("Credential accepted.", "ok"); await wait(600); location.href = CODES[v];
+    } else {
+        print("Unknown command: " + raw, "err");
     }
-
-    updateStatus();
-    busy = false;
-    input.focus();
 });
 
-/* =========================
-   TILT (rAF-throttled — avoids fisheye re-rasterization flicker)
-========================= */
-let tiltPending = false;
-let lastX = window.innerWidth/2;
-let lastY = window.innerHeight/2;
+/* Locked rows (add data-deny="NAME" to any .row div to lock it) */
+document.querySelectorAll("[data-deny]").forEach(el => {
+    const fire = () => {
+        print("> open " + el.dataset.deny.toLowerCase());
+        print("ACCESS DENIED. Staff credentials required.", "err");
+        el.classList.remove("deny"); void el.offsetWidth; el.classList.add("deny");
+    };
+    el.addEventListener("click", fire);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fire(); } });
+});
 
-function scheduleTilt(){
-    if(tiltPending) return;
-    tiltPending = true;
-    requestAnimationFrame(()=>{
-        const rx = (window.innerHeight/2 - lastY)/1400;
-        const ry = (window.innerWidth/2  - lastX)/1400;
-        container.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-        tiltPending = false;
-    });
+/* Clock + signal */
+function tick() {
+    const d = new Date(), p = n => String(n).padStart(2, "0");
+    clock.textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    hz.textContent = (59.9 + Math.random() * 0.2).toFixed(2) + "Hz";
 }
-function applyTilt(x,y){ lastX=x; lastY=y; scheduleTilt(); }
+setInterval(tick, 1000); tick();
 
-document.addEventListener("mousemove",(e)=>{ applyTilt(e.clientX,e.clientY); },{passive:true});
-document.addEventListener("touchmove",(e)=>{
-    const t=e.touches[0];
-    applyTilt(t.clientX,t.clientY);
-},{passive:true});
-
-/* Clock */
-function tickClock(){
-    const d = new Date();
-    const pad = n=>n.toString().padStart(2,"0");
-    clock.textContent = `SYS :: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-setInterval(tickClock,1000);
-tickClock();
-
-/* =========================
-   INIT
-========================= */
-startupSequence();
+boot();
 </script>
-
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1}' crossorigin="anonymous"></script>
 </body>
 </html>
