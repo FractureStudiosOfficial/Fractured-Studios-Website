@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. // Institution Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--amberBright);outline-offset:2px;}
+
+/* BEZEL */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);}
+#bezel-label{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:13px;letter-spacing:.35em;color:#7a5230;z-index:5;white-space:nowrap;}
+#screen-wrap{position:fixed;inset:22px 22px 28px;border-radius:48px/60px;background:#050505;overflow:hidden;isolation:isolate;
+    box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
+
+/* CRT OVERLAYS */
+.fx{position:absolute;inset:0;pointer-events:none;}
+#amber-tint{z-index:1150;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);}
+#scanlines{z-index:1300;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0 1px,transparent 1px 3px);animation:flicker .14s infinite;}
+#vignette{z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#glare{z-index:1200;mix-blend-mode:screen;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.12),transparent 70%);}
+#poweron{z-index:2000;background:#fff;animation:poweron 1.6s ease-out forwards;}
+@keyframes flicker{0%{opacity:.55}47%{opacity:.5}50%{opacity:.85}53%{opacity:.5}100%{opacity:.55}}
+@keyframes poweron{0%{opacity:0}5%{opacity:.9}10%{opacity:.15}20%{transform:scaleY(.005);opacity:1}25%{transform:scaleY(1);opacity:.6;background:#ffb060}100%{transform:scaleY(1);opacity:0;background:#ffb060}}
+
+/* LAYOUT */
+#ui{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:40px 56px 44px;display:grid;grid-template-rows:auto minmax(min-content,1fr) auto;gap:16px;z-index:2;}
+.panel{position:relative;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));border-radius:4px;padding:16px;box-shadow:inset 0 0 24px rgba(255,159,7,.05);min-height:0;}
+.panel::before{content:"";position:absolute;inset:6px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:2px;}
+.ph{display:flex;align-items:center;gap:10px;padding-bottom:9px;margin-bottom:12px;border-bottom:1px dashed rgba(255,159,7,.3);position:relative;z-index:1;}
+.ph .tick{color:var(--red);}
+.ph .ttl{flex:1;color:var(--amberBright);font-size:13px;letter-spacing:.22em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.ph .badge{font-size:10px;letter-spacing:.2em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+.glow{text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);}
+
+/* TOP BAR */
+#top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));}
+#top .l{display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.24em;color:var(--amberBright);}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{50%{opacity:.4}}
+#top .r{font-size:11px;letter-spacing:.2em;opacity:.8;display:flex;gap:18px;}
+
+
+/* MAIN */
+#main{display:grid;grid-template-columns:1fr 1.1fr;gap:16px;}
+#top a.back{border:1px solid rgba(255,159,7,.4);padding:4px 12px;font-size:11px;letter-spacing:.2em;color:var(--amberBright);}
+#top a.back:hover,#top a.back:focus-visible{background:rgba(255,159,7,.14);}
+
+/* INSTITUTION LIST */
+#list{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1;}
+.inst{display:grid;grid-template-columns:1fr;gap:4px;padding:10px 14px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);cursor:pointer;transition:background .12s,border-color .12s;}
+.inst .code{font-family:'VT323',monospace;font-size:38px;line-height:1;letter-spacing:.06em;color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.6);}
+.inst .nm{font-size:12px;letter-spacing:.14em;}
+.inst .rg{font-size:10px;letter-spacing:.14em;opacity:.6;margin-top:3px;}
+.inst:hover,.inst:focus-visible{background:rgba(255,159,7,.12);border-color:rgba(255,159,7,.55);}
+.inst.active{background:rgba(255,74,43,.12);border-color:rgba(255,74,43,.55);}
+.inst.active .code{color:var(--red);text-shadow:0 0 8px rgba(255,74,43,.55);}
+
+/* TARGET DATA */
+#target{display:flex;flex-direction:column;overflow:hidden;min-height:400px;}
+#reticle{position:relative;z-index:1;flex:1;min-height:150px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,159,7,.22);overflow:hidden;
+    background:radial-gradient(circle,rgba(255,159,7,.07),transparent 62%),repeating-linear-gradient(0deg,rgba(255,159,7,.03) 0 1px,transparent 1px 4px);}
+#reticle::before{content:"";position:absolute;inset:0;pointer-events:none;animation:spin 40s linear infinite;
+    background:radial-gradient(circle,transparent 38%,rgba(255,159,7,.16) 38.5%,transparent 39.5%),radial-gradient(circle,transparent 27%,rgba(255,159,7,.11) 27.5%,transparent 28.5%),radial-gradient(circle,transparent 17%,rgba(255,159,7,.08) 17.5%,transparent 18.5%);}
+#reticle::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 50% 0/1px 100% no-repeat,linear-gradient(rgba(255,159,7,.18),rgba(255,159,7,.18)) 0 50%/100% 1px no-repeat;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#t-code{position:relative;z-index:2;font-family:'VT323',monospace;font-size:clamp(64px,8vw,120px);line-height:1;letter-spacing:.08em;color:var(--amberBright);text-shadow:0 0 6px rgba(255,159,7,.8),0 0 22px rgba(255,120,0,.5);}
+#t-rows{position:relative;z-index:1;margin-top:12px;}
+.gr{display:flex;justify-content:space-between;gap:14px;padding:6px 2px;border-bottom:1px dashed rgba(255,159,7,.2);font-size:12px;letter-spacing:.12em;}
+.gr .k{color:var(--amberBright);opacity:.8;}
+.gr .v{text-align:right;}
+.gr .v.ok{color:var(--green);} .gr .v.w{color:var(--red);}
+#t-note{position:relative;z-index:1;margin:10px 0;font-size:12px;line-height:1.6;letter-spacing:.08em;color:var(--amberDim);min-height:3.2em;}
+#connect{position:relative;z-index:1;display:block;text-align:center;padding:11px;border:2px solid rgba(255,159,7,.55);background:rgba(255,159,7,.08);color:var(--amberBright);font-size:13px;letter-spacing:.3em;text-shadow:0 0 5px rgba(255,159,7,.6);}
+#connect:hover,#connect:focus-visible{background:rgba(255,159,7,.2);}
+
+/* HINTS */
+#hints{display:flex;gap:22px;flex-wrap:wrap;align-items:center;border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);padding:8px 14px;font-size:11px;letter-spacing:.16em;}
+#hints .key{color:var(--amberBright);border:1px solid rgba(255,159,7,.4);padding:1px 6px;margin-right:6px;}
+#os{position:absolute;bottom:10px;right:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
+#clock{position:absolute;bottom:10px;left:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
+
+@media(max-width:900px){
+    html,body{overflow:auto;}
+    #screen-wrap{inset:10px;border-radius:30px/38px;}
+    #screen{filter:none;transform:none;overflow-y:auto;}
+    #ui{position:relative;overflow:visible;min-height:100%;padding:22px 16px 40px;grid-template-rows:auto auto auto;}
+    #main{grid-template-columns:1fr;}
+    #target{min-height:0;}
+    #top .r,#os,#clock,#bezel-label,#hints .desk{display:none;}
+}
+@media(max-height:760px) and (min-width:901px){.inst{padding:5px 14px;gap:1px;}.inst .code{font-size:30px;}#ui{padding-top:34px;padding-bottom:36px;gap:12px;}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;}#poweron{display:none;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+        <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>" result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+</svg>
+
+<div id="bezel"></div>
+<div id="bezel-label">U.I.C. // INSTITUTION ACCESS</div>
+
+<div id="screen-wrap">
+<div id="screen">
+<div id="ui">
+
+    <header id="top">
+        <div class="l"><span class="dot"></span><span>U.I.C. // INSTITUTION ACCESS</span></div>
+        <div class="r"><span>NODE: PRIME</span><span id="hz">60.00Hz</span></div>
+        <a class="back" href="uic-home.html">FRONT PAGE</a>
+    </header>
+
+    <main id="main">
+        <section class="panel">
+            <div class="ph"><span class="tick">◆</span><span class="ttl">SELECT INSTITUTION</span><span class="badge">4</span></div>
+            <div id="list" role="listbox" aria-label="Institutions"></div>
+        </section>
+
+        <section id="target" class="panel">
+            <div class="ph"><span class="tick">◆</span><span class="ttl">TARGET DATA</span><span class="badge" id="t-badge">--</span></div>
+            <div id="reticle"><div id="t-code">--</div></div>
+            <div id="t-rows"></div>
+            <div id="t-note"></div>
+            <a id="connect" href="#">CONNECT</a>
+        </section>
+    </main>
+
+    <footer id="hints">
+        <span><span class="key">UP</span><span class="key">DOWN</span>SELECT</span>
+        <span><span class="key">ENTER</span>CONNECT</span>
+        <span class="desk"><span class="key">ESC</span>FRONT PAGE</span>
+    </footer>
+
+</div>
+</div>
+
+<div class="fx" id="amber-tint"></div>
+<div class="fx" id="scanlines"></div>
+<div class="fx" id="vignette"></div>
+<div class="fx" id="glare"></div>
+<div class="fx" id="poweron"></div>
+<div id="clock">SYS ::</div>
+<div id="os">UIC OS v1.0.4</div>
+</div>
+
+<script>
+/* ---- EDIT HERE: institutions, their pages and readout text ---- */
+const INSTITUTIONS = [
+    { code:"NASA", name:"NATIONAL AERONAUTICS AND SPACE ADMINISTRATION", region:"UNITED STATES", page:"nasa.html",
+      link:["ONLINE","ok"], access:"PUBLIC", note:"United States civil space agency. Mission archives, flight records and partner services." },
+    { code:"ROSKOSMOS", name:"STATE SPACE CORPORATION ROSKOSMOS", region:"RUSSIA", page:"roskosmos.html",
+      link:["ONLINE","ok"], access:"PUBLIC", note:"Russian state space corporation. Launch manifests, orbital stations and partner services." },
+    { code:"CNSA", name:"CHINA NATIONAL SPACE ADMINISTRATION", region:"CHINA", page:"cnsa.html",
+      link:["ONLINE","ok"], access:"PUBLIC", note:"Chinese national space agency. Programme records, launch schedules and partner services." },
+    { code:"TERMINAL", name:"U.I.C. TERMINAL", region:"U.I.C. INTERNAL", page:"terminal.html",
+      link:["ONLINE","ok"], access:"CREDENTIALS REQUIRED", note:"Direct access to the U.I.C. mainframe. Authorised users only." }
+];
+
+const list = document.getElementById("list");
+const rows = document.getElementById("t-rows");
+const connect = document.getElementById("connect");
+let sel = 0;
+
+INSTITUTIONS.forEach((it, i) => {
+    const d = document.createElement("div");
+    d.className = "inst"; d.tabIndex = 0; d.setAttribute("role", "option");
+    d.innerHTML = `<div class="code"></div><div><div class="nm"></div><div class="rg"></div></div>`;
+    d.querySelector(".code").textContent = it.code;
+    d.querySelector(".nm").textContent = it.name;
+    d.querySelector(".rg").textContent = it.region;
+    d.addEventListener("click", () => select(i));
+    d.addEventListener("focus", () => select(i));
+    d.addEventListener("dblclick", () => location.href = it.page);
+    list.appendChild(d);
+});
+
+function select(i) {
+    sel = i;
+    const it = INSTITUTIONS[i];
+    [...list.children].forEach((c, n) => { c.classList.toggle("active", n === i); c.setAttribute("aria-selected", n === i); });
+    document.getElementById("t-code").textContent = it.code;
+    document.getElementById("t-badge").textContent = it.region;
+    document.getElementById("t-note").textContent = it.note;
+    rows.innerHTML = "";
+    [["FULL NAME", it.name], ["REGION", it.region], ["LINK", it.link[0], it.link[1]], ["ACCESS", it.access]].forEach(([k, v, c]) => {
+        const r = document.createElement("div"); r.className = "gr";
+        r.innerHTML = `<span class="k"></span><span class="v ${c || ""}"></span>`;
+        r.children[0].textContent = k; r.children[1].textContent = v;
+        rows.appendChild(r);
+    });
+    connect.href = it.page;
+    connect.textContent = "CONNECT TO " + it.code;
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); select((sel + 1) % INSTITUTIONS.length); list.children[sel].focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); select((sel - 1 + INSTITUTIONS.length) % INSTITUTIONS.length); list.children[sel].focus(); }
+    else if (e.key === "Enter" && document.activeElement.closest("#list")) location.href = INSTITUTIONS[sel].page;
+    else if (e.key === "Escape") location.href = "uic-home.html";
+});
+
+const clock = document.getElementById("clock"), hz = document.getElementById("hz");
+function tick() {
+    const d = new Date(), p = n => String(n).padStart(2, "0");
+    clock.textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    hz.textContent = (59.9 + Math.random() * 0.2).toFixed(2) + "Hz";
+}
+setInterval(tick, 1000); tick();
+select(0);
+</script>
+</body>
+</html>
