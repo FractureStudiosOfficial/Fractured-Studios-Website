@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.I.C. // NASA Mission Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+    --amber:#FF9F07;
+    --amberBright:#FFC861;
+    --amberDim:#B36700;
+    --red:#ff4a2b;
+    --green:#8fff8a;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;}
+body{color:var(--amber);font-family:'Share Tech Mono',monospace;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--amberBright);outline-offset:2px;}
+
+/* BEZEL */
+#bezel{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3a2a1a 0%,#1a120a 40%,#0a0705 70%,#000 100%);}
+#bezel-label{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:13px;letter-spacing:.35em;color:#7a5230;z-index:5;white-space:nowrap;}
+#screen-wrap{position:fixed;inset:22px 22px 28px;border-radius:48px/60px;background:#050505;overflow:hidden;isolation:isolate;
+    box-shadow:0 0 0 4px #0a0605,0 0 0 8px #1a0f07,0 0 0 10px #2a1a0d,0 0 40px rgba(0,0,0,.9) inset,0 30px 60px rgba(0,0,0,.85);}
+#screen{position:absolute;inset:0;filter:url(#fisheye);transform:scale(1.02);}
+
+/* CRT OVERLAYS */
+.fx{position:absolute;inset:0;pointer-events:none;}
+#amber-tint{z-index:1150;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 50%,rgba(255,159,7,.05),rgba(255,80,0,.08) 80%);}
+#scanlines{z-index:1300;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.35) 0 1px,transparent 1px 3px);animation:flicker .14s infinite;}
+#vignette{z-index:1100;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 45%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.9) 100%);}
+#glare{z-index:1200;mix-blend-mode:screen;background:radial-gradient(ellipse 60% 45% at 28% 18%,rgba(255,255,255,.12),transparent 70%);}
+#poweron{z-index:2000;background:#fff;animation:poweron 1.6s ease-out forwards;}
+@keyframes flicker{0%{opacity:.55}47%{opacity:.5}50%{opacity:.85}53%{opacity:.5}100%{opacity:.55}}
+@keyframes poweron{0%{opacity:0}5%{opacity:.9}10%{opacity:.15}20%{transform:scaleY(.005);opacity:1}25%{transform:scaleY(1);opacity:.6;background:#ffb060}100%{transform:scaleY(1);opacity:0;background:#ffb060}}
+
+/* LAYOUT */
+#ui{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:40px 56px 44px;display:grid;grid-template-rows:auto minmax(min-content,1fr) auto;gap:16px;z-index:2;}
+.panel{position:relative;border:2px solid rgba(255,159,7,.45);background:linear-gradient(180deg,rgba(255,159,7,.05),rgba(0,0,0,.4));border-radius:4px;padding:16px;box-shadow:inset 0 0 24px rgba(255,159,7,.05);min-height:0;}
+.panel::before{content:"";position:absolute;inset:6px;border:1px dashed rgba(255,159,7,.18);pointer-events:none;border-radius:2px;}
+.ph{display:flex;align-items:center;gap:10px;padding-bottom:9px;margin-bottom:12px;border-bottom:1px dashed rgba(255,159,7,.3);position:relative;z-index:1;}
+.ph .tick{color:var(--red);}
+.ph .ttl{flex:1;color:var(--amberBright);font-size:13px;letter-spacing:.22em;text-shadow:0 0 4px rgba(255,159,7,.5);}
+.ph .badge{font-size:10px;letter-spacing:.2em;padding:3px 8px;border:1px solid rgba(255,74,43,.4);color:var(--red);}
+.glow{text-shadow:0 0 4px rgba(255,159,7,.6),0 0 12px rgba(255,140,0,.35);}
+
+/* TOP BAR */
+#top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border:2px solid rgba(255,159,7,.5);background:linear-gradient(90deg,rgba(255,159,7,.08),rgba(255,74,43,.06));}
+#top .l{display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.24em;color:var(--amberBright);}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{50%{opacity:.4}}
+#top .r{font-size:11px;letter-spacing:.2em;opacity:.8;display:flex;gap:18px;}
+
+
+/* PAGE */
+#ui{overflow:hidden;}
+#main{display:grid;grid-template-columns:290px 1fr;gap:16px;min-height:0;}
+#top a.back{border:1px solid rgba(255,159,7,.4);padding:4px 12px;font-size:11px;letter-spacing:.2em;color:var(--amberBright);}
+#top a.back:hover,#top a.back:focus-visible{background:rgba(255,159,7,.14);}
+#left{display:grid;grid-template-rows:1fr auto;gap:16px;min-height:0;}
+#left .panel,#right .panel{min-height:0;}
+#mods{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1;}
+.mod{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.03);font-size:12px;letter-spacing:.12em;cursor:pointer;transition:background .12s,border-color .12s;}
+.mod .ico{color:var(--red);width:14px;}
+.mod .nm{flex:1;}
+.mod .ds{display:none;}
+.mod:hover,.mod:focus-visible{background:rgba(255,159,7,.14);border-color:rgba(255,159,7,.55);color:var(--amberBright);}
+.mod.active{background:rgba(255,74,43,.12);border-color:rgba(255,74,43,.5);color:var(--red);}
+.mod.lock .nm::after{content:" [LOCKED]";font-size:10px;color:var(--red);}
+.mod.lock.open .nm::after{content:" [OPEN]";color:var(--green);}
+#op .gr{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px dashed rgba(255,159,7,.2);font-size:11px;letter-spacing:.12em;position:relative;z-index:1;}
+#op .gr .k{color:var(--amberBright);opacity:.8;}
+#op .gr .v.ok{color:var(--green);}
+#right{display:grid;grid-template-rows:1fr clamp(200px,31vh,300px);gap:16px;min-height:0;}
+#view{position:relative;z-index:1;height:calc(100% - 44px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,159,7,.4) transparent;padding-right:4px;}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.sum .stat{border:1px solid rgba(255,159,7,.22);background:rgba(255,159,7,.04);padding:8px 6px;text-align:center;font-size:11px;letter-spacing:.14em;}
+.sum .stat b{display:block;font-family:'VT323',monospace;font-weight:400;font-size:30px;line-height:1;color:var(--amberBright);margin-top:3px;}
+table{width:100%;border-collapse:collapse;font-size:12px;letter-spacing:.08em;}
+th{text-align:left;font-weight:400;color:var(--amberBright);opacity:.8;padding:6px 8px;border-bottom:1px solid rgba(255,159,7,.35);font-size:11px;letter-spacing:.16em;}
+td{padding:8px;border-bottom:1px dashed rgba(255,159,7,.18);vertical-align:top;}
+tr:hover td{background:rgba(255,159,7,.06);}
+.ok{color:var(--green);} .w{color:var(--red);} .dim{opacity:.6;}
+.note{margin:12px 0 0;font-size:12px;line-height:1.6;letter-spacing:.06em;color:var(--amberDim);}
+.meter{display:inline-block;width:80px;height:6px;background:rgba(255,159,7,.14);vertical-align:middle;margin-right:6px;}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--amberBright));box-shadow:0 0 5px rgba(255,159,7,.6);}
+.meter.low i{background:var(--red);box-shadow:0 0 5px rgba(255,74,43,.6);}
+.lockbox{border:1px dashed rgba(255,74,43,.5);padding:22px;text-align:center;color:var(--red);letter-spacing:.14em;line-height:1.8;font-size:13px;}
+.lockbox small{display:block;color:var(--amber);opacity:.75;letter-spacing:.1em;}
+#tbox{display:flex;flex-direction:column;}
+#log{flex:1;min-height:0;overflow-y:auto;position:relative;z-index:1;font-size:13px;line-height:1.5;padding:8px 10px;border:1px solid rgba(255,159,7,.28);scrollbar-width:none;background:repeating-linear-gradient(180deg,rgba(255,159,7,.02) 0 2px,transparent 2px 3px);text-shadow:0 0 3px rgba(255,159,7,.7);}
+#log::-webkit-scrollbar{display:none;}
+#log .err{color:var(--red);} #log .ok{color:var(--green);} #log .dim{opacity:.6;}
+#prompt{position:relative;z-index:1;display:flex;gap:10px;align-items:center;margin-top:8px;padding:8px 12px;border:1px solid rgba(255,159,7,.28);background:rgba(255,159,7,.04);}
+#prompt .chev{color:var(--amberBright);animation:chev 1s steps(2) infinite;}
+@keyframes chev{50%{opacity:.3}}
+#cmd{flex:1;background:none;border:none;outline:none;color:var(--amber);font:inherit;caret-color:var(--amberBright);text-shadow:0 0 4px rgba(255,159,7,.6);}
+#os{position:absolute;bottom:10px;right:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
+#clock{position:absolute;bottom:10px;left:26px;font-size:11px;letter-spacing:.2em;opacity:.75;z-index:6;}
+@media(max-height:740px) and (min-width:901px){#right{grid-template-rows:1fr 150px;}#tbox .ph{display:none;}#tbox{padding:10px;}#ui{padding-top:34px;padding-bottom:36px;gap:12px;}.mod{padding:6px 12px;}.sum{display:none;}}
+@media(max-width:900px){
+    html,body{overflow:auto;}
+    #screen-wrap{inset:10px;border-radius:30px/38px;}
+    #screen{filter:none;transform:none;overflow-y:auto;}
+    #ui{position:relative;overflow:visible;min-height:100%;padding:22px 16px 40px;grid-template-rows:auto auto;}
+    #main,#right,#left{grid-template-columns:1fr;grid-template-rows:auto;display:flex;flex-direction:column;}
+    #view{height:auto;max-height:60vh;}
+    #tbox{height:240px;}
+    table{font-size:11px;} th:nth-child(n+4),td:nth-child(n+4){display:none;}
+    #top .r,#os,#clock,#bezel-label{display:none;}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;}#poweron{display:none;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="fisheye" x="-5%" y="-5%" width="110%" height="110%">
+        <feImage href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><defs><radialGradient id='g' cx='50%25' cy='50%25' r='50%25'><stop offset='0%25' stop-color='rgb(128,128,128)'/><stop offset='60%25' stop-color='rgb(160,160,128)'/><stop offset='100%25' stop-color='rgb(210,210,128)'/></radialGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>" result="map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none"/>
+        <feDisplacementMap in="SourceGraphic" in2="map" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+</svg>
+
+<div id="bezel"></div>
+<div id="bezel-label">U.I.C. // NASA MISSION SERVICES</div>
+
+<div id="screen-wrap">
+<div id="screen">
+<div id="ui">
+
+    <header id="top">
+        <div class="l"><span class="dot"></span><span>U.I.C. // NASA MISSION SERVICES</span></div>
+        <div class="r"><span>NODE: HOUSTON</span><span id="hz">60.00Hz</span></div>
+        <a class="back" href="institution.html">INSTITUTION</a>
+    </header>
+
+    <main id="main">
+        <aside id="left">
+            <section class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl">MODULES</span><span class="badge">6</span></div>
+                <nav id="mods"></nav>
+            </section>
+            <section id="op" class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl">OPERATOR</span></div>
+                <div class="gr"><span class="k">USER</span><span class="v" id="op-user">GUEST</span></div>
+                <div class="gr"><span class="k">CLEARANCE</span><span class="v" id="op-lvl">0</span></div>
+                <div class="gr"><span class="k">LINK</span><span class="v ok">HOUSTON</span></div>
+            </section>
+        </aside>
+
+        <div id="right">
+            <section class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl" id="v-title">--</span><span class="badge" id="v-badge">--</span></div>
+                <div id="view"></div>
+            </section>
+            <section id="tbox" class="panel">
+                <div class="ph"><span class="tick">◆</span><span class="ttl">COMMAND LINE</span><span class="badge">TYPE HELP</span></div>
+                <div id="log" aria-live="polite"></div>
+                <div id="prompt"><span class="chev">&gt;</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Command line" disabled></div>
+            </section>
+        </div>
+    </main>
+
+</div>
+</div>
+
+<div class="fx" id="amber-tint"></div>
+<div class="fx" id="scanlines"></div>
+<div class="fx" id="vignette"></div>
+<div class="fx" id="glare"></div>
+<div class="fx" id="poweron"></div>
+<div id="clock">SYS ::</div>
+<div id="os">UIC OS v1.0.4</div>
+</div>
+
+<script>
+/* =====================================================================
+   EDIT HERE. All names, missions and numbers are placeholders.
+   USERS: credentials that unlock PERSONNEL RECORDS (login <id> <pass>).
+===================================================================== */
+const USERS = {
+    "avoss": { pass: "kestrel", name: "CDR A. VOSS", level: 2 }
+};
+
+const bar = (n, low) => `<span class="meter ${low ? "low" : ""}"><i style="width:${n}%"></i></span>${n}%`;
+const st = s => `<span class="${/NOMINAL|ACTIVE|READY|ON ORBIT|OK/.test(s) ? "ok" : /DEGRADED|NO CARRIER|OVERDUE|SERVICE|FAULT/.test(s) ? "w" : "dim"}">${s}</span>`;
+const table = (head, rows) => `<table><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const sum = a => `<div class="sum">${a.map(([k, v]) => `<div class="stat">${k}<b>${v}</b></div>`).join("")}</div>`;
+
+const MODULES = {
+    mission: { label: "MISSION STATUS", ico: ">", desc: "LIVE", badge: "5 ACTIVE", html: () =>
+        sum([["ACTIVE MISSIONS", "05"], ["CREW IN ORBIT", "06"], ["ANOMALIES", "01"]]) +
+        table(["ID", "MISSION", "PHASE", "STATUS"], [
+            ["KST-03", "KESTREL-3 / Lunar Gateway resupply", "TRANSIT", st("NOMINAL")],
+            ["HLX-12", "HELIOS-12 / Solar observatory", "ON ORBIT", st("NOMINAL")],
+            ["SBL-02", "SABLE-2 / Outer-system probe", "CRUISE", st("NOMINAL")],
+            ["PAL-41", "PALISADE STATION / Expedition 41", "CREWED", st("NOMINAL")],
+            ["RLY-07", "RELAY 07 / Deep-space array", "OPERATIONS", st("DEGRADED")]
+        ]) + `<p class="note">RLY-07: reduced capacity since the last service window. Outer-system traffic is queued. Cause under review.</p>` },
+
+    crew: { label: "CREW ROSTER", ico: ">", desc: "ASTRONAUT OFFICE", badge: "6 LISTED", html: () =>
+        table(["NAME", "ROLE", "ASSIGNMENT", "STATUS"], [
+            ["CDR A. VOSS", "Commander", "PALISADE EXP-41", st("ON ORBIT")],
+            ["J. OKAFOR", "Pilot", "PALISADE EXP-41", st("ON ORBIT")],
+            ["L. HALVORSEN", "Flight Engineer", "PALISADE EXP-41", st("ON ORBIT")],
+            ["R. TANAKA-REYES", "Mission Specialist", "KESTREL-3", "IN TRANSIT"],
+            ["D. IBRAHIM", "Mission Specialist", "SABLE-2 CAPCOM", st("READY")],
+            ["M. LINDQVIST", "Candidate", "TRAINING / HOUSTON", "ACTIVE"]
+        ]) + `<p class="note">Crew names are placeholders. Replace them with your own characters.</p>` },
+
+    schedule: { label: "FLIGHT SCHEDULE", ico: ">", desc: "MANIFEST", badge: "NEXT 20 DAYS", html: () =>
+        table(["T-MINUS", "EVENT", "ASSET", "STATUS"], [
+            ["T-02 DAYS", "Lunar orbit insertion burn", "KESTREL-3", st("READY")],
+            ["T-06 DAYS", "EVA-114, solar array repair", "PALISADE", st("READY")],
+            ["T-11 DAYS", "Trajectory correction maneuver", "SABLE-2", st("NOMINAL")],
+            ["T-14 DAYS", "Crew rotation handover", "PALISADE", "PLANNED"],
+            ["OVERDUE", "Array service window", "RELAY 07", st("OVERDUE")]
+        ]) },
+
+    eva: { label: "SUIT AND EVA", ico: ">", desc: "SUIT UNITS", badge: "4 UNITS", html: () =>
+        table(["UNIT", "OXYGEN", "POWER", "STATUS"], [
+            ["EMU-07", bar(98), bar(91), st("READY")],
+            ["EMU-09", bar(95), bar(88), st("READY")],
+            ["EMU-11", bar(41, true), bar(72), st("SERVICE")],
+            ["EMU-14", bar(100), bar(100), st("READY")]
+        ]) + `<p class="note">EMU-11 is held for a leak check before EVA-114. Cleared units only.</p>` },
+
+    comms: { label: "COMMS LOOPS", ico: ">", desc: "VOICE", badge: "5 LOOPS", html: () =>
+        table(["LOOP", "CHANNEL", "STATE"], [
+            ["FLIGHT", "Loop 1", st("ACTIVE")],
+            ["CAPCOM", "Loop 2", st("ACTIVE")],
+            ["PALISADE AIR-GROUND", "Loop 4", st("ACTIVE")],
+            ["SABLE-2 TELEMETRY", "Loop 6", "MONITOR ONLY"],
+            ["RELAY 07 TELEMETRY", "Loop 9", st("NO CARRIER")]
+        ]) + `<p class="note">Voice loops are not available from this terminal. Use the Communications page to adjust radio.</p>` },
+
+    records: { label: "PERSONNEL RECORDS", ico: "#", desc: "RESTRICTED", badge: "LEVEL 2", lock: 2, html: () =>
+        table(["FILE", "SUBJECT", "ACCESS", "NOTE"], [
+            ["PR-0041", "PALISADE EXP-41 crew medical", "LVL 2", "Cleared"],
+            ["PR-0057", "RELAY 07 maintenance log", "LVL 2", st("FAULT")],
+            ["PR-0063", "EVA-114 risk review", "LVL 2", "Open"]
+        ]) + `<p class="note">Placeholder file list. Put your ARG clues here.</p>`,
+        locked: () => `<div class="lockbox">PERSONNEL RECORDS<small>Clearance level 2 required.</small><small>Type  login &lt;id&gt; &lt;passcode&gt;  in the command line.</small></div>` }
+};
+
+const level = () => state.user ? USERS[state.user].level : 0;
+const state = { user: null, current: null };
+const mods = document.getElementById("mods");
+const view = document.getElementById("view");
+const log = document.getElementById("log");
+const cmd = document.getElementById("cmd");
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+Object.entries(MODULES).forEach(([key, m]) => {
+    const d = document.createElement("div");
+    d.className = "mod" + (m.lock ? " lock" : ""); d.tabIndex = 0; d.dataset.key = key; d.setAttribute("role", "button");
+    d.innerHTML = `<span class="ico"></span><span class="nm"></span><span class="ds"></span>`;
+    d.children[0].textContent = m.ico; d.children[1].textContent = m.label; d.children[2].textContent = m.desc;
+    d.addEventListener("click", () => openMod(key));
+    d.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openMod(key); } });
+    mods.appendChild(d);
+});
+
+function openMod(key) {
+    const m = MODULES[key];
+    state.current = key;
+    document.querySelectorAll(".mod").forEach(el => el.classList.toggle("active", el.dataset.key === key));
+    document.getElementById("v-title").textContent = m.label;
+    document.getElementById("v-badge").textContent = m.badge;
+    const locked = m.lock && level() < m.lock;
+    view.innerHTML = locked ? m.locked() : m.html();
+    view.scrollTop = 0;
+    if (locked) print("ACCESS DENIED: " + m.label + " needs clearance " + m.lock + ".", "err");
+}
+
+function refreshOp() {
+    document.getElementById("op-user").textContent = state.user ? USERS[state.user].name : "GUEST";
+    document.getElementById("op-lvl").textContent = level();
+    document.querySelectorAll(".mod.lock").forEach(el => el.classList.toggle("open", level() >= MODULES[el.dataset.key].lock));
+}
+
+function print(t, c = "") {
+    const d = document.createElement("div"); if (c) d.className = c; d.textContent = t;
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+}
+
+const ALIASES = { missions: "mission", status: "mission", astronauts: "crew", roster: "crew", manifest: "schedule", flights: "schedule", suit: "eva", suits: "eva", radio: "comms", loops: "comms", personnel: "records" };
+
+cmd.addEventListener("keydown", async e => {
+    if (e.key !== "Enter") return;
+    const raw = cmd.value.trim(); cmd.value = "";
+    if (!raw) return;
+    print("> " + (/^login\s/i.test(raw) ? "login " + raw.split(/\s+/)[1] + " ******" : raw));
+    const [c, ...args] = raw.toLowerCase().split(/\s+/);
+    const key = MODULES[c] ? c : ALIASES[c];
+
+    if (c === "help") {
+        print("MODULES: MISSION  CREW  SCHEDULE  EVA  COMMS  RECORDS");
+        print("OTHER:   LOGIN <id> <pass>  LOGOUT  WHOAMI  CLEAR  BACK", "dim");
+    } else if (key) {
+        openMod(key);
+    } else if (c === "login") {
+        const u = USERS[args[0]];
+        if (u && u.pass === args[1]) { state.user = args[0]; print("Welcome, " + u.name + ". Clearance " + u.level + ".", "ok"); refreshOp(); if (state.current) openMod(state.current); }
+        else print("Login failed. Check the id and passcode.", "err");
+    } else if (c === "logout") {
+        state.user = null; refreshOp(); print("Signed out.", "ok"); if (state.current) openMod(state.current);
+    } else if (c === "whoami") {
+        print(state.user ? USERS[state.user].name + " / clearance " + level() : "GUEST / clearance 0");
+    } else if (c === "clear") {
+        log.innerHTML = "";
+    } else if (c === "back" || c === "exit") {
+        print("Returning to institution list ...", "ok"); await wait(500); location.href = "institution.html";
+    } else {
+        print("Unknown command: " + raw, "err");
+    }
+});
+
+const clock = document.getElementById("clock"), hz = document.getElementById("hz");
+function tick() {
+    const d = new Date(), p = n => String(n).padStart(2, "0");
+    clock.textContent = `SYS :: ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    hz.textContent = (59.9 + Math.random() * 0.2).toFixed(2) + "Hz";
+}
+setInterval(tick, 1000); tick();
+
+(async function boot() {
+    openMod("mission"); refreshOp();
+    for (const [t, c] of [["N.A.S.A. mission services, Houston node", ""], ["Link to U.I.C. network ...... OK", "ok"], ["Type HELP for commands.", "dim"]]) { print(t, c); await wait(240); }
+    cmd.disabled = false;
+    if (matchMedia("(min-width:901px)").matches) cmd.focus();
+})();
+</script>
+</body>
+</html>
